@@ -17,8 +17,8 @@ variable "AWS_SECRET_KEY" {
   description = "The AWS secret access key that Packer will use."
 
   validation {
-    condition     = length(var.AWS_SECRET_KEY) == 40 && can(regex("^[0-9a-zA-Z/+]{40}$", var.AWS_SECRET_KEY, ))
-    error_message = "The AWS secret access key value is invalid. It should be a 40-character string consisting of alphanumeric characters"
+    condition     = length(var.AWS_SECRET_KEY) == 40 && can(regex("^[0-9a-zA-Z]{40}$", var.AWS_SECRET_KEY, ))
+    error_message = "The AWS secret access key value is invalid. It should be a 40-character string consisting of alphanumeric characters."
   }
 }
 
@@ -67,7 +67,7 @@ variable "AWS_INSTANCE_TYPE" {
 
   validation {
     condition     = var.AWS_INSTANCE_TYPE != null
-    error_message = "Please provide a valid AWS instance type (i.e 't2.micro')"
+    error_message = "Please provide a valid AWS instance type (i.e 't2.micro')."
   }
 }
 
