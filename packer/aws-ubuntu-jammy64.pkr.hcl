@@ -8,9 +8,9 @@ packer {
 }
 
 source "amazon-ebs" "ubuntu" {
-  access_key = var.AWS_ACCESS_KEY
-  secret_key = var.AWS_SECRET_KEY
-  profile = var.AWS_IAM_PROFILE
+  access_key    = var.AWS_ACCESS_KEY
+  secret_key    = var.AWS_SECRET_KEY
+  profile       = var.AWS_IAM_PROFILE
   ami_name      = var.AWS_AMI_NAME
   instance_type = var.AWS_INSTANCE_TYPE
   region        = var.AWS_REGION
@@ -31,9 +31,18 @@ source "amazon-ebs" "ubuntu" {
 
 build {
   name = "cloud_dev"
+
   sources = [
     "source.amazon-ebs.ubuntu"
   ]
+
+  provisioner "shell" {
+    script = "./scripts/update_and_upgrade.sh"
+  }
+
+  provisioner "shell" {
+    script = "./scripts/install_ansible.sh"
+  }
 }
 
 
