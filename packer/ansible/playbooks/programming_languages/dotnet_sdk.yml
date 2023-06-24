@@ -1,0 +1,43 @@
+- name: Dotnet
+  hosts: all
+  become: true
+  pre_tasks:
+    - name: Get info about git installation
+      ansible.builtin.stat:
+        path: /usr/bin/git
+      register: git_bin
+    - name: Add Git repository
+      ansible.builtin.apt_repository:
+        repo: ppa:git-core/ppa
+      when: not git_bin.stat.exists
+    - name: Install git
+      ansible.builtin.apt:
+        name: git
+        update_cache: yes
+      when: not git_bin.stat.exists
+  tasks:
+    - name: Install dotnet sdk
+      ansible.builtin.apt:
+        name: "{{ item }}"
+        update_cache: yes
+      loop:
+      # Feel free to add additional sdks. This may or may not be present depending
+      # on your distro
+        - dotnet-sdk-7.0
+  post_tasks:
+    - name: Enable tab autocompletion
+      ansible.builtin.blockinfile:
+        path: /home/vagrant/.bashrc
+        block: |
+          # bash parameter completion for the dotnet CLI
+          function _dotnet_bash_complete()
+          {
+            local cur="${COMP_WORDS[COMP_CWORD]}" IFS=$'\n'
+            local candidates
+
+            read -d '' -ra candidates < <(dotnet complete --position "${COMP_POINT}" "${COMP_LINE}" 2>/dev/null)
+
+            read -d '' -ra COMPREPLY < <(compgen -W "${candidates[*]:-}" -- "$cur")
+          }
+
+          complete -f -F _dotnet_bash_complete dotnet

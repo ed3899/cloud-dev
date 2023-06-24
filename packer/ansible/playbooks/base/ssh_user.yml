@@ -1,0 +1,25 @@
+- name: SSH user
+  hosts: localhost
+  become: true
+
+  vars_files:
+    - "../../vars/main.yml"
+
+  vars:
+    new_user: "{{ user.name }}"
+    user_home: "/home/{{ new_user }}"
+
+  tasks:
+    - name: Create new user
+      ansible.builtin.user:
+        name: "{{ new_user }}"
+        home: "{{ user_home }}"
+        generate_ssh_key: yes
+        ssh_key_bits: 4096
+        ssh_key_file: .ssh/id_rsa     
+
+    - name: Add authorized keys
+      ansible.posix.authorized_key:
+        user: "{{ new_user }}"
+        key: "{{ lookup('file', {{ user_home }}/.ssh/id_rsa.pub) }}"
+        exclusive: true

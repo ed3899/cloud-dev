@@ -43,6 +43,20 @@ build {
   provisioner "shell" {
     script = "./scripts/install_ansible.sh"
   }
+
+  provisioner "ansible-local" {
+    playbook_dir    = "./ansible"
+    staging_directory = "/tmp/ansible"
+    clean_staging_directory = true
+    playbook_file = "./ansible/playbooks/main.yml"
+    extra_arguments = ["--tags", "always"]
+  }
+
+  provisioner "file" {
+    source = ""
+    destination = ""
+    direction = "download"
+  }
 }
 
 

@@ -1,0 +1,57 @@
+- name: AWS CLI
+  hosts: all
+  vars_files:
+    - "../../secrets/main.yml"
+  become: true
+  tasks:
+    - name: Get /usr/local/aws-cli stats
+      ansible.builtin.stat:
+        path: /usr/local/aws-cli
+      register: aws_cli_dir
+    - name: Make sure AWS dependencies are present
+      ansible.builtin.apt:
+        name: "{{ item }}"
+      loop:
+        - groff
+        - less
+        - unzip
+    - name: Download AWS Cli
+      ansible.builtin.shell: |
+        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+      args:
+        chdir: /downloads
+        creates: awscliv2.zip
+    - name: Install AWS Cli
+      ansible.builtin.shell: unzip -u awscliv2.zip && ./aws/install
+      args:
+        chdir: /downloads
+        creates: /downloads/aws/install
+      when: not aws_cli_dir.stat.exists
+      register: awscli_installed
+    - name: Ensure AWS credentials are present
+      ansible.builtin.lineinfile:
+        path: /home/vagrant/.aws/credentials
+        create: true
+        owner: vagrant
+        group: vagrant
+        mode: "0666"
+        line: "{{ item }}"
+      loop:
+        - "[default]"
+        - "aws_access_key_id={{ aws.access_key_id }}"
+        - "aws_secret_access_key={{ aws.secret_access_key }}"
+      no_log: true
+      when: awscli_installed is succeeded
+    - name: Ensure AWS config is present
+      ansible.builtin.lineinfile:
+        path: /home/vagrant/.aws/config
+        create: true
+        owner: vagrant
+        group: vagrant
+        mode: "0666"
+        line: "{{ item }}"
+      loop:
+        - "[default]"
+        - "region={{ aws.region }}"
+        - "output={{ aws.output }}"
+      when: awscli_installed is succeeded

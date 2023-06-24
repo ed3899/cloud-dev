@@ -1,0 +1,55 @@
+- name: Docker
+  hosts: all
+  become: true
+  debugger: on_failed
+  vars_files:
+    - ../../vars/main.yml
+  vars:
+    keyring_file: /etc/apt/trusted.gpg.d/docker.gpg
+  pre_tasks:
+    - name: Install Docker dependencies
+      ansible.builtin.apt:
+        name: "{{ item }}"
+        update_cache: yes
+      loop:
+        - curl
+        - ca-certificates
+        - gnupg
+    - name: Add Docker's GPG apt key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        keyring: "{{ keyring_file }}"
+    - name: Debug message
+      ansible.builtin.debug:
+        msg: "{{ [ansible_architecture] | map('extract', deb_architecture) | first }}"
+    - name: Add Docker repo to apt (Ubuntu Jammy)
+      ansible.builtin.apt_repository:
+        repo: "deb [arch={{ [ansible_architecture] | map('extract', deb_architecture) | first }} signed-by={{ keyring_file }}] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+      when: ansible_distribution == "Ubuntu"
+  tasks:
+    - name: Install Docker components
+      ansible.builtin.apt:
+        name: "{{ item }}"
+      loop:
+        - docker-ce
+        - docker-ce-cli
+        - containerd.io
+        - docker-buildx-plugin
+        - docker-compose-plugin
+    - name: Ensure Docker group exists
+      user:
+        name: vagrant
+        groups: docker
+        append: yes
+  post_tasks:
+    - name: Ensure docker is active
+      ansible.builtin.service:
+        name: docker
+        state: started
+        enabled: yes
+  handlers:
+    - name: Restart Docker in case of changes
+      ansible.builtin.service:
+        name: docker
+        state: restarted
+        enabled: yes

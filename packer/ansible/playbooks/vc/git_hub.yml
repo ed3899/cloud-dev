@@ -1,0 +1,31 @@
+- name: GitHub
+  hosts: all
+  vars_files:
+    - "../../secrets/main.yml"
+  become: true
+  tasks:
+    - name: Generate key pair
+      community.crypto.openssh_keypair:
+        path: /home/vagrant/.ssh/github
+        type: ed25519
+        owner: vagrant
+      register: github_ssh_key_pair
+    - name: Add public key to GitHub
+      community.general.github_key:
+        name: access_key_for_local_vagrant_dev
+        token: "{{ github.tokens.personal_access_token_classic }}"
+        pubkey: "{{ github_ssh_key_pair.public_key }}"
+      register: github_pubkey_added
+      when: github_ssh_key_pair is succeeded
+    - name: Authorize GitHub public key
+      ansible.posix.authorized_key:
+        user: vagrant
+        key: "{{ lookup('file', '/home/vagrant/.ssh/github.pub') }}"
+      when: github_pubkey_added is succeeded
+    - name: Add host to ssh_config
+      community.general.ssh_config:
+        host: github.com
+        hostname: github.com
+        user: vagrant
+        identity_file: "{{ github_ssh_key_pair.filename }}"
+      when: github_pubkey_added is succeeded

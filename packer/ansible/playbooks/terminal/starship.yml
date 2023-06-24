@@ -1,0 +1,16 @@
+- name: Starship
+  hosts: all
+  become: true
+  tasks:
+    - name: Ensure FiraCode package is present
+      ansible.builtin.apt:
+        name: fonts-firacode
+        update_cache: yes
+    - name: Ensure starship brew is present
+      become: false
+      community.general.homebrew:
+        name: starship
+    - name: Ensure starship script is present on .profile
+      ansible.builtin.lineinfile:
+        path: /home/vagrant/.profile
+        line: eval "$(starship init bash)"

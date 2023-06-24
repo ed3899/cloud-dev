@@ -1,0 +1,86 @@
+#! Base
+- name: Base
+  ansible.builtin.import_playbook: playbooks/base/main.yml
+  tags:
+  - always
+## Cloud providers
+- name: AWS
+  ansible.builtin.import_playbook: playbooks/cloud_providers/aws_cli.yml
+  tags:
+  - aws
+# ## Containerization
+# - name: Docker
+#   ansible.builtin.import_playbook: ./containerization/docker.yml
+#   tags:
+#   - docker
+# ## Dbs
+# - name: MySQL
+#   ansible.builtin.import_playbook: ./dbs/mysql.yml
+#   tags:
+#   - mysql
+# - name: PostgreSQL 15
+#   ansible.builtin.import_playbook: ./dbs/postgreSQL/15/install.yml
+#   tags:
+#   - pg-15
+# ## IaC
+# - name: Pulumi
+#   ansible.builtin.import_playbook: ./iac/pulumi.yml
+#   tags:
+#   - pulumi
+# ## Orchestration
+# - name: Helm
+#   ansible.builtin.import_playbook: ./orchestration/helm.yml
+#   tags:
+#   - helm
+# - name: Kubectl
+#   ansible.builtin.import_playbook: ./orchestration/kubectl.yml
+#   tags:
+#   - kubectl
+# - name: Kind
+#   ansible.builtin.import_playbook: ./orchestration/kind.yml
+#   tags:
+#   - kind
+# - name: Minikube
+#   ansible.builtin.import_playbook: ./orchestration/minikube.yml
+#   tags:
+#   - minikube
+# ## Programming languages
+# - name: Dotnet SDK
+#   ansible.builtin.import_playbook: ./programming_languages/dotnet_sdk.yml
+#   tags:
+#   - dotnet_sdk
+# - name: Go
+#   ansible.builtin.import_playbook: ./programming_languages/go.yml
+#   tags:
+#   - go
+# - name: NodeJS
+#   ansible.builtin.import_playbook: ./programming_languages/node_js.yml
+#   tags:
+#   - node_js
+# - name: Python Anaconda
+#   ansible.builtin.import_playbook: ./programming_languages/python_anaconda.yml
+#   tags:
+#   - python_anaconda
+# - name: Rust
+#   ansible.builtin.import_playbook: ./programming_languages/rust.yml
+#   tags:
+#   - rust
+# ## Terminal
+# - name: Starship
+#   ansible.builtin.import_playbook: ./terminal/starship.yml
+#   tags:
+#   - starship
+# ## UI
+# - name: Git
+#   ansible.builtin.import_playbook: ./ui/gui.yml
+#   tags:
+#   - gui
+# ## Vc
+# - name: Git
+#   ansible.builtin.import_playbook: ./vc/git.yml
+#   tags:
+#   - git
+# - name: GitHub
+#   ansible.builtin.import_playbook: ./vc/git_hub.yml
+#   tags:
+#   - github

@@ -1,0 +1,16 @@
+- name: Kubectl
+  hosts: all
+  become: true
+  tasks:
+    - name: Install kubectl
+      community.general.snap:
+        name:
+          - kubectl
+        classic: true
+    - name: Add kubectl autocompletion to bash
+      ansible.builtin.shell: |
+        kubectl completion bash | sudo tee kubectl > /dev/null
+        chmod a+r kubectl
+      args:
+        creates: /etc/bash_completion.d/kubectl
+        chdir: /etc/bash_completion.d

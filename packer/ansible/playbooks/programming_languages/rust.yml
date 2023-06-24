@@ -1,0 +1,24 @@
+- name: Rust
+  hosts: all
+  become: true
+  become_user: vagrant
+  pre_tasks:
+    - name: Get stats of rust bin
+      ansible.builtin.stat:
+        path: /home/vagrant/.cargo/bin
+      register: rustbin_dir
+    - name: Install rustup-init
+      community.general.homebrew:
+        name: rustup-init
+      register: rustupinit_installed
+  tasks:
+    - name: Install rust and components
+      ansible.builtin.shell: rustup-init -y --profile complete
+      when: not rustbin_dir.stat.exists and rustupinit_installed is succeeded
+  post_tasks:
+    - name: Install dependencies for debugging
+      become: true
+      become_user: root
+      ansible.builtin.apt:
+        name: gdb
+        update_cache: yes

@@ -1,0 +1,33 @@
+- name: Go
+  hosts: all
+  become: true
+  pre_tasks:
+  # We need git to manage multiple go versions
+  # https://go.dev/doc/manage-install#installing-multiple
+  # You may also refer to this thread on how to alias multiple
+  # go versions
+  # https://stackoverflow.com/a/68087898/11941146
+    - name: Get info about git installation
+      ansible.builtin.stat:
+        path: /usr/bin/git
+      register: git_bin
+    - name: Add Git repository
+      ansible.builtin.apt_repository:
+        repo: ppa:git-core/ppa
+      when: not git_bin.stat.exists
+    - name: Install git
+      ansible.builtin.apt:
+        name: git
+        update_cache: yes
+      when: not git_bin.stat.exists
+  tasks:
+    - name: Install go
+      community.general.snap:
+        name: go
+        classic: true
+    - name: Set go bin path
+      ansible.builtin.lineinfile:
+        path: /home/vagrant/.profile
+        backup: true
+        create: true
+        line: export PATH=$PATH:/home/vagrant/go/bin

@@ -1,0 +1,8 @@
+user:
+  name: YOUR_SSH_USERNAME
+git:
+  username: GIT_USERNAME
+  email: EMAIL_TO_ASSOCIATE_WITH_GIT_COMMITS
+deb_architecture:
+  aarch64: arm64
+  x86_64: amd64

@@ -1,0 +1,19 @@
+- name: Homebrew
+  hosts: all
+  become: true
+  tasks:
+    - name: Install homebrew
+      become: false
+      ansible.builtin.shell: |
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+      args:
+        creates: /home/linuxbrew
+    - name: Ensure homebrew path is added to .profile
+      ansible.builtin.lineinfile:
+        path: /home/vagrant/.profile
+        line: eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+    - name: Add gcc brew
+      become: false
+      community.general.homebrew:
+        path: /home/linuxbrew/.linuxbrew/bin
+        name: gcc

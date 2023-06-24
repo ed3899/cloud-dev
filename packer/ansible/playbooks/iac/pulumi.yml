@@ -1,0 +1,23 @@
+- name: Pulumi
+  hosts: all
+  pre_tasks:
+    - name: Download pulumi cli
+      ansible.builtin.shell:
+        chdir: /downloads
+        cmd: curl -fsSL https://get.pulumi.com --output pulumi-cli.sh
+        creates: pulumi-cli.sh
+    - name: Allow executable file
+      become: true
+      ansible.builtin.file:
+        path: /downloads/pulumi-cli.sh
+        owner: root
+        group: vagrant
+        mode: '0770'
+  tasks:
+    - name: Install pulumi cli
+      become: true
+      become_user: vagrant
+      ansible.builtin.shell:
+        chdir: /downloads
+        cmd: ./pulumi-cli.sh
+        creates: /home/vagrant/.pulumi/bin/pulumi

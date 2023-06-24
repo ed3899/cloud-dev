@@ -1,0 +1,6 @@
+- name: Kind
+  hosts: all
+  tasks:
+    - name: Install kind
+      community.general.homebrew:
+        name: kind
