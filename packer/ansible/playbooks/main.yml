@@ -4,10 +4,10 @@
   tags:
   - always
 ## Cloud providers
-- name: AWS
-  ansible.builtin.import_playbook: playbooks/cloud_providers/aws_cli.yml
-  tags:
-  - aws
+# - name: AWS
+#   ansible.builtin.import_playbook: playbooks/cloud_providers/aws_cli.yml
+#   tags:
+#   - aws
 # ## Containerization
 # - name: Docker
 #   ansible.builtin.import_playbook: ./containerization/docker.yml

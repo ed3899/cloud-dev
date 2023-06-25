@@ -1,0 +1,38 @@
+- name: User
+  hosts: localhost
+  become: true
+
+  vars_files:
+    - "../../vars/main.yml"
+
+  vars:
+    user: "{{ instance.user.name }}"
+    home: "/{{ instance.user.home }}/{{ user }}"
+    ssh_keyname: "{{ instance.ssh.key_name }}"
+    ansible_staging_directory: "{{ instance.ansible.staging_directory }}"
+    public_directory: "{{ instance.public_directory }}"
+    ssh_key_file_path: "{{ public_directory + '/' + ssh_keyname }}"
+
+  tasks:
+    - name: Create user
+      ansible.builtin.user:
+        name: "{{ user }}"
+        append: yes
+        groups: sudo
+        home: "{{ home }}"
+        generate_ssh_key: yes
+        ssh_key_bits: 4096
+        ssh_key_file: "{{ ssh_key_file_path }}"
+      register: create_user_output
+
+  post_tasks:
+    - name: Add authorized keys
+      ansible.posix.authorized_key:
+        user: "{{ user }}"
+        key: "{{ create_user_output.ssh_public_key }}"
+        exclusive: true
+
+    - name: Allow private key to be removable and downloadable
+      ansible.builtin.file:
+        path: "{{ ssh_key_file_path }}"
+        mode: "0777"

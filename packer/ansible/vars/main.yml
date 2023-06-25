@@ -1,8 +1,20 @@
-user:
-  name: YOUR_SSH_USERNAME
+instance:
+  user:
+    name: "{{ AWS_EC2_INSTANCE_USERNAME }}"
+    home: "{{ AWS_EC2_INSTANCE_USERNAME_HOME }}"
+
+  ssh:
+    key_name: "{{ AWS_EC2_INSTANCE_SSH_KEY_NAME }}"
+
+  ansible:
+    staging_directory: "{{ AWS_EC2_ANSIBLE_STAGING_DIRECTORY_INTERNAL }}"
+
+  public_directory: "{{ AWS_EC2_PUBLIC_DIRECTORY_INTERNAL }}"
+
 git:
   username: GIT_USERNAME
   email: EMAIL_TO_ASSOCIATE_WITH_GIT_COMMITS
+
 deb_architecture:
   aarch64: arm64
   x86_64: amd64

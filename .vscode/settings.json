@@ -1,5 +1,9 @@
 {
   "yaml.schemas": {
-    "https://raw.githubusercontent.com/ansible/ansible-lint/main/src/ansiblelint/schemas/ansible.json#/$defs/playbook": "file:///d%3A/Documents/DevEnvironments/Cloud/Jammy64/packer/ansible/playbooks/base/ssh_user.yml"
-  }
+    "https://raw.githubusercontent.com/ansible/ansible-lint/main/src/ansiblelint/schemas/ansible.json#/$defs/playbook": [
+      "file:///d%3A/Documents/DevEnvironments/Cloud/Jammy64/packer/ansible/playbooks/base/ssh_user.yml",
+      "file:///d%3A/Documents/DevEnvironments/Cloud/Jammy64/packer/ansible/playbooks/base/user.yml"
+    ]
+  },
+  "todo-tree.tree.showBadges": true
 }

@@ -5,8 +5,13 @@ variable "AWS_ACCESS_KEY" {
   description = "The AWS access key ID that Packer will use."
 
   validation {
-    condition     = length(var.AWS_ACCESS_KEY) == 20 && can(regex("^AKI[0-9A-Z]{17}$", var.AWS_ACCESS_KEY))
-    error_message = "The AWS access key value is invalid. It should be a 20-character string starting with 'AKI' followed by 17 alphanumeric characters."
+    condition     = length(var.AWS_ACCESS_KEY) == 20
+    error_message = "The AWS access key should be a 20-character string."
+  }
+
+  validation {
+    condition     = can(regex("^AKI[0-9A-Z]{17}$", var.AWS_ACCESS_KEY))
+    error_message = "The AWS access key value should start with 'AKI' followed by 17 alphanumeric characters."
   }
 }
 
@@ -17,8 +22,13 @@ variable "AWS_SECRET_KEY" {
   description = "The AWS secret access key that Packer will use."
 
   validation {
-    condition     = length(var.AWS_SECRET_KEY) == 40 && can(regex("^[0-9a-zA-Z]{40}$", var.AWS_SECRET_KEY, ))
-    error_message = "The AWS secret access key value is invalid. It should be a 40-character string consisting of alphanumeric characters."
+    condition     = length(var.AWS_SECRET_KEY) == 40
+    error_message = "The AWS secret access key should be a 40-character string."
+  }
+
+  validation {
+    condition     = can(regex("^[0-9a-zA-Z]{40}$", var.AWS_SECRET_KEY, ))
+    error_message = "The AWS secret access key should consist only of alphanumeric characters."
   }
 }
 
@@ -34,24 +44,22 @@ variable "AWS_IAM_PROFILE" {
   }
 }
 
-variable "AWS_USER_ID" {
-  type        = string
-  default     = null
+variable "AWS_USER_IDS" {
+  type        = list(string)
   sensitive   = true
-  description = "The AWS User ID that Packer will use."
+  default     = null
+  description = "The AWS user ids that can access the instance"
 
   validation {
-    condition     = can(regex("[0-9A-Z]{0,64}$", var.AWS_USER_ID))
-    error_message = "The AWS User ID value is invalid. It should be a string consisting of alphanumeric characters."
+    condition     = length(var.AWS_USER_IDS) > 0
+    error_message = "The AWS user ids array must not be empty."
   }
 }
 
 variable "AWS_AMI_NAME" {
   type        = string
   default     = null
-  sensitive   = true
   description = "The name of the Amazon Machine Image (AMI) that Packer will use."
-
 
   validation {
     condition     = length(var.AWS_AMI_NAME) > 0 && length(var.AWS_AMI_NAME) < 129
@@ -62,7 +70,6 @@ variable "AWS_AMI_NAME" {
 variable "AWS_INSTANCE_TYPE" {
   type        = string
   default     = null
-  sensitive   = true
   description = "The instance type of the EC2 instance that Packer will create"
 
   validation {
@@ -74,7 +81,6 @@ variable "AWS_INSTANCE_TYPE" {
 variable "AWS_REGION" {
   type        = string
   default     = null
-  sensitive   = true
   description = "The AWS region where Packer will create the resources"
 
   validation {
@@ -84,14 +90,122 @@ variable "AWS_REGION" {
   }
 }
 
-variable "AWS_INSTANCE_SSH_USERNAME" {
+variable "AWS_EC2_INSTANCE_USERNAME" {
   type        = string
   default     = null
-  sensitive   = true
-  description = "The SSH username for the EC2 instance that Packer will create"
+  description = "The username for the EC2 instance you will use to ssh into the machine."
 
   validation {
-    condition     = can(regex("^[a-zA-Z_][a-zA-Z0-9_-]{0,30}[a-zA-Z0-9_]$", var.AWS_INSTANCE_SSH_USERNAME))
-    error_message = "Invalid AWS instance SSH username. Must start with a letter or underscore and contain only alphanumeric characters, hyphens or underscores."
+    condition = length(var.AWS_EC2_INSTANCE_USERNAME) > 0
+    error_message = "Please provide a username for the EC2 instance."
+  }
+
+  validation {
+    condition     = length(regexall("^[a-zA-Z_][a-zA-Z0-9_]+$", var.AWS_EC2_INSTANCE_USERNAME)) > 0
+    error_message = "The username must contain only alphanumeric characters and '_' (underscore)."
+  }
+}
+
+variable "AWS_EC2_INSTANCE_USERNAME_HOME" {
+  type        = string
+  default     = null
+  description = "The home directory of the EC2 instance user"
+
+  validation {
+    condition     = length(var.AWS_EC2_INSTANCE_USERNAME_HOME) > 0
+    error_message = "The home directory cannot be an empty string."
+  }
+
+  validation {
+    condition     = can(regex("^([a-zA-Z0-9]+)$", var.AWS_EC2_INSTANCE_USERNAME_HOME))
+    error_message = "The home directory can only contain alphanumeric characters."
+  }
+}
+
+variable "AWS_EC2_INSTANCE_SSH_KEY_NAME" {
+  type        = string
+  default     = null
+  description = "The SSH key name. The private key will be downloaded to the root directory of this project."
+
+  validation {
+    condition     = length(var.AWS_EC2_INSTANCE_SSH_KEY_NAME) > 0
+    error_message = "SSH key name cannot be empty."
+  }
+}
+
+variable "AWS_EC2_SSH_USERNAME" {
+  type        = string
+  default     = null
+  description = "The SSH username used to initially log into the machine and provision it. This usually changes depending on the public AMI used to build yours"
+
+  validation {
+    condition     = length(var.AWS_EC2_SSH_USERNAME) > 0
+    error_message = "The SSH username must not be empty."
+  }
+}
+
+variable "AWS_EC2_AMI_NAME_FILTER" {
+  type        = string
+  default     = null
+  description = "The AMI name that will be used to look for a public AMIs on AWS to build on top of (i.e ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-20230516)"
+
+  validation {
+    condition     = length(var.AWS_EC2_AMI_NAME_FILTER) > 0
+    error_message = "The AMI name filter must not be empty."
+  }
+}
+
+variable "AWS_EC2_AMI_ROOT_DEVICE_TYPE" {
+  type        = string
+  default     = null
+  description = "The AMI root device type that will be used to filter out public AMIs on AWS"
+
+  validation {
+    condition     = length(var.AWS_EC2_AMI_ROOT_DEVICE_TYPE) > 0
+    error_message = "The AMI root device type must not be empty."
+  }
+}
+
+variable "AWS_EC2_AMI_VIRTUALIZATION_TYPE" {
+  type        = string
+  default     = null
+  description = "The AMI virtualization type that will be used to filter out public AMIs on AWS"
+
+  validation {
+    condition     = length(var.AWS_EC2_AMI_VIRTUALIZATION_TYPE) > 0
+    error_message = "The AMI virtualization type must not be empty."
+  }
+}
+
+variable "AWS_EC2_AMI_OWNERS" {
+  type        = list(string)
+  default     = null
+  description = "The AMI virtualization type that will be used to filter out public AMIs on AWS"
+
+  validation {
+    condition     = length(var.AWS_EC2_AMI_OWNERS) > 0
+    error_message = "The AMI owners array must not be empty."
+  }
+}
+
+variable "AWS_EC2_ANSIBLE_STAGING_DIRECTORY_INTERNAL" {
+  type        = string
+  default     = "/tmp/ansible"
+  description = "The directory where ansible files will be uploaded. Packer requires write permissions in this directory."
+
+  validation {
+    condition     = can(regex("^/.*", var.AWS_EC2_ANSIBLE_STAGING_DIRECTORY_INTERNAL))
+    error_message = "The ansible staging directory must contain an absolute path starting with '/'."
+  }
+}
+
+variable "AWS_EC2_PUBLIC_DIRECTORY_INTERNAL" {
+  type        = string
+  default     = "/public"
+  description = "The directory where the ssh keys are placed to be downloaded from the local machine. This directory is removed after provisioning"
+
+  validation {
+    condition     = substr(var.AWS_EC2_PUBLIC_DIRECTORY_INTERNAL, 0, 1) == "/"
+    error_message = "The public directory must start with a forward slash (/)."
   }
 }

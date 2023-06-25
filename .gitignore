@@ -19,3 +19,7 @@ secrets/
 *.box
 
 .env
+
+ssh_key
+
+.vscode

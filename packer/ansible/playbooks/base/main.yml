@@ -2,7 +2,7 @@
 #   ansible.builtin.import_playbook: ./python_for_ansible.yml
 
 - name: SSH user
-  ansible.builtin.import_playbook: ./ssh_user.yml
+  ansible.builtin.import_playbook: ./user.yml
 
 # - name: Linux aliases
 #   ansible.builtin.import_playbook: ./linux_aliases.yml
