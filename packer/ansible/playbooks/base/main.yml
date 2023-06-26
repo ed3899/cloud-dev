@@ -4,8 +4,8 @@
 - name: SSH user
   ansible.builtin.import_playbook: ./user.yml
 
-# - name: Linux aliases
-#   ansible.builtin.import_playbook: ./linux_aliases.yml
+- name: Linux aliases
+  ansible.builtin.import_playbook: ./linux_aliases.yml
 
 # - name: Common utilities
 #   ansible.builtin.import_playbook: ./common_utilities.yml
