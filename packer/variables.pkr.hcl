@@ -96,7 +96,7 @@ variable "AWS_EC2_INSTANCE_USERNAME" {
   description = "The username for the EC2 instance you will use to ssh into the machine."
 
   validation {
-    condition = length(var.AWS_EC2_INSTANCE_USERNAME) > 0
+    condition     = length(var.AWS_EC2_INSTANCE_USERNAME) > 0
     error_message = "Please provide a username for the EC2 instance."
   }
 
@@ -207,5 +207,27 @@ variable "AWS_EC2_PUBLIC_DIRECTORY_INTERNAL" {
   validation {
     condition     = substr(var.AWS_EC2_PUBLIC_DIRECTORY_INTERNAL, 0, 1) == "/"
     error_message = "The public directory must start with a forward slash (/)."
+  }
+}
+
+variable "GIT_USERNAME" {
+  type        = string
+  default     = null
+  description = "The git username that will be associated with your commits."
+
+  validation {
+    condition     = length(var.GIT_USERNAME) <= 20
+    error_message = "Git username must be less than or equal to 20 characters long."
+  }
+}
+
+variable "GIT_EMAIL" {
+  type        = string
+  default     = null
+  description = "The git email that will be associated with your commits."
+
+  validation {
+    condition     = can(regex("^\\S+@\\S+\\.\\S+$", var.GIT_EMAIL))
+    error_message = "Git email must be a valid email address."
   }
 }

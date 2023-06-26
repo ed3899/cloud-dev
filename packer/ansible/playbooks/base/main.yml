@@ -10,5 +10,6 @@
 - name: Common utilities
   ansible.builtin.import_playbook: ./common_utilities.yml
 
-# - name: Homebrew
-#   ansible.builtin.import_playbook: ./homebrew.yml
+- name: Git
+  ansible.builtin.import_playbook: ./git.yml
+

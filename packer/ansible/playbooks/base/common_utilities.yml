@@ -1,4 +1,4 @@
-- name: Common utilities
+- name: Common dependencies
   hosts: localhost
   become: true
   
@@ -9,9 +9,7 @@
         update_cache: yes
       loop:
         - net-tools
-        - build-essential
-        - procps
-        - file
+        - snapd
         - bash-completion
         - tree
         - netcat

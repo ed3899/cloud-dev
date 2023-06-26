@@ -17,6 +17,9 @@ locals {
 
   AWS_EC2_ANSIBLE_STAGING_DIRECTORY_INTERNAL = trimspace(var.AWS_EC2_ANSIBLE_STAGING_DIRECTORY_INTERNAL)
   AWS_EC2_PUBLIC_DIRECTORY_INTERNAL          = trimspace(var.AWS_EC2_PUBLIC_DIRECTORY_INTERNAL)
+
+  GIT_USERNAME = trimspace(var.GIT_USERNAME)
+  GIT_EMAIL = trimspace(var.GIT_EMAIL)
 }
 
 packer {
@@ -99,6 +102,12 @@ build {
       "AWS_EC2_INSTANCE_USERNAME_HOME=${local.AWS_EC2_INSTANCE_USERNAME_HOME}",
       "--extra-vars",
       "AWS_EC2_INSTANCE_SSH_KEY_NAME=${local.AWS_EC2_INSTANCE_SSH_KEY_NAME}",
+      "--extra-vars",
+      "AWS_EC2_SSH_USERNAME=${local.AWS_EC2_SSH_USERNAME}",
+      "--extra-vars",
+      "GIT_USERNAME=${local.GIT_USERNAME}",
+      "--extra-vars",
+      "GIT_EMAIL=${local.GIT_EMAIL}"
     ]
   }
 
