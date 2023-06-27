@@ -8,11 +8,11 @@
   ansible.builtin.import_playbook: playbooks/cloud_providers/aws_cli.yml
   tags:
   - aws
-# ## Containerization
-# - name: Docker
-#   ansible.builtin.import_playbook: ./containerization/docker.yml
-#   tags:
-#   - docker
+## Containerization
+- name: Docker
+  ansible.builtin.import_playbook: playbooks/containerization/docker.yml
+  tags:
+  - docker
 # ## Dbs
 # - name: MySQL
 #   ansible.builtin.import_playbook: ./dbs/mysql.yml
