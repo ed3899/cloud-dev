@@ -1,3 +1,4 @@
+# TODO set optional values
 variable "AWS_ACCESS_KEY" {
   type        = string
   default     = null
@@ -229,5 +230,16 @@ variable "GIT_EMAIL" {
   validation {
     condition     = can(regex("^\\S+@\\S+\\.\\S+$", var.GIT_EMAIL))
     error_message = "Git email must be a valid email address."
+  }
+}
+
+variable "ANSIBLE_TAGS" {
+  type        = list(string)
+  default     = null
+  description = "The ansible tags that will be used to install playbooks."
+
+  validation {
+    condition     = length(var.ANSIBLE_TAGS) > 0
+    error_message = "The variable must contain at least one tag and no more than 10 tags."
   }
 }

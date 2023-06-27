@@ -13,3 +13,5 @@
         - bash-completion
         - tree
         - netcat
+        - less
+        - groff

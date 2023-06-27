@@ -1,3 +1,4 @@
+# TODO ensure whitespace is being escaped
 locals {
   AWS_ACCESS_KEY                  = trimspace(var.AWS_ACCESS_KEY)
   AWS_SECRET_KEY                  = trimspace(var.AWS_SECRET_KEY)
@@ -9,17 +10,19 @@ locals {
   AWS_EC2_AMI_VIRTUALIZATION_TYPE = trimspace(var.AWS_EC2_AMI_VIRTUALIZATION_TYPE)
   AWS_EC2_AMI_OWNERS              = distinct(var.AWS_EC2_AMI_OWNERS)
   AWS_USER_IDS                    = distinct(var.AWS_USER_IDS)
-  AWS_AMI_NAME                    = trimspace(var.AWS_AMI_NAME)
+  AWS_AMI_NAME                    = lower(trimspace(regex_replace(var.AWS_AMI_NAME, "\\s+", "-")))
   AWS_EC2_SSH_USERNAME            = trimspace(var.AWS_EC2_SSH_USERNAME)
-  AWS_EC2_INSTANCE_USERNAME       = trimspace(var.AWS_EC2_INSTANCE_USERNAME)
+  AWS_EC2_INSTANCE_USERNAME       = lower(trimspace(regex_replace(var.AWS_EC2_INSTANCE_USERNAME, "\\s+", "-")))
   AWS_EC2_INSTANCE_USERNAME_HOME  = trimspace(var.AWS_EC2_INSTANCE_USERNAME_HOME)
-  AWS_EC2_INSTANCE_SSH_KEY_NAME   = trimspace(var.AWS_EC2_INSTANCE_SSH_KEY_NAME)
+  AWS_EC2_INSTANCE_SSH_KEY_NAME   = lower(trimspace(regex_replace(var.AWS_EC2_INSTANCE_SSH_KEY_NAME, "\\s+", "-")))
 
   AWS_EC2_ANSIBLE_STAGING_DIRECTORY_INTERNAL = trimspace(var.AWS_EC2_ANSIBLE_STAGING_DIRECTORY_INTERNAL)
   AWS_EC2_PUBLIC_DIRECTORY_INTERNAL          = trimspace(var.AWS_EC2_PUBLIC_DIRECTORY_INTERNAL)
 
-  GIT_USERNAME = trimspace(var.GIT_USERNAME)
-  GIT_EMAIL = trimspace(var.GIT_EMAIL)
+  GIT_USERNAME = lower(trimspace(regex_replace(var.GIT_USERNAME, "\\s+", "-")))
+  GIT_EMAIL    = trimspace(var.GIT_EMAIL)
+
+  ANSIBLE_TAGS = join(",", distinct(var.ANSIBLE_TAGS))
 }
 
 packer {
@@ -50,8 +53,9 @@ source "amazon-ebs" "ubuntu" {
     owners      = local.AWS_EC2_AMI_OWNERS
   }
 
-  ami_users = local.AWS_USER_IDS
-  
+  temporary_security_group_source_public_ip = true
+  ami_users                                 = local.AWS_USER_IDS
+
   tags = {
     Environment        = "development"
     Builder            = "packer"
@@ -91,7 +95,7 @@ build {
     playbook_file           = "./ansible/playbooks/main.yml"
     extra_arguments = [
       "--tags",
-      "always",
+      "${local.ANSIBLE_TAGS}",
       "--extra-vars",
       "AWS_EC2_ANSIBLE_STAGING_DIRECTORY_INTERNAL=${local.AWS_EC2_ANSIBLE_STAGING_DIRECTORY_INTERNAL}",
       "--extra-vars",
@@ -107,7 +111,13 @@ build {
       "--extra-vars",
       "GIT_USERNAME=${local.GIT_USERNAME}",
       "--extra-vars",
-      "GIT_EMAIL=${local.GIT_EMAIL}"
+      "GIT_EMAIL=${local.GIT_EMAIL}",
+      "--extra-vars",
+      "AWS_ACCESS_KEY=${local.AWS_ACCESS_KEY}",
+      "--extra-vars",
+      "AWS_SECRET_KEY=${local.AWS_SECRET_KEY}",
+      "--extra-vars",
+      "AWS_REGION=${local.AWS_REGION}"
     ]
   }
 
