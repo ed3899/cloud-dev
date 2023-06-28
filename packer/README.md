@@ -1,5 +1,44 @@
 # TODO improve for readability
 
+# Tags
+Add tags to your environment file located at the root folder. Each tag represents a tool.
+
+For example:
+
+```
+# .env
+ANSIBLE_TAGS = ["aws","node_js","docker"]
+```
+
+Tools listed in the section below.
+
+Some tools may have specific requirements (i.e cpus, RAM, disk space). Please consult their respective documentation before building an AMI.
+## Cloud providers
+### AWS
+Add `aws` to tags.
+
+Ensure the following are present at the environment file:
+```
+AWS_ACCESS_KEY = "<FILL_WITH_CUSTOM_VALUE>"
+AWS_SECRET_KEY = "<FILL_WITH_CUSTOM_VALUE>"
+AWS_REGION = "<FILL_WITH_CUSTOM_VALUE>"
+AWS_EC2_INSTANCE_USERNAME = "<FILL_WITH_CUSTOM_VALUE>"
+AWS_EC2_INSTANCE_USERNAME_HOME = "<FILL_WITH_CUSTOM_VALUE>"
+```
+## Containerization
+### Docker
+Add `docker` to tags.
+## IaC
+### Pulumi
+Add `pulumi` to tags.
+## Orchestration
+### Helm
+Add `helm` to tags
+### Minikube
+Add `docker` and `minikube` to tags.
+
+The order matters as `docker` is a dependency.
+
 # Recommended base images
 Although you could technically pick any image available so far on AWS, some of them may need aditional
 considerations.

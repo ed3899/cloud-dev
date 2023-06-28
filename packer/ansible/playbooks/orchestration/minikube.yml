@@ -1,18 +1,25 @@
 - name: Minikube
-  hosts: all
+  hosts: localhost
   become: true
-  tasks:
-    - name: Get stats of /usr/local/bin/minikube
-      ansible.builtin.stat:
-        path: /usr/local/bin/minikube
-      register: minikube_dir
+
+  vars_files:
+    - ../../vars/main.yml
+
+  vars:
+    arch: "{{ [ansible_architecture] | map('extract', deb_architecture) | first }}"
+    minikube_release: "minikube-linux-{{ arch }}"
+    minikube_link: "https://storage.googleapis.com/minikube/releases/latest/{{ minikube_release }}"
+    minikube_install_path: /usr/local/bin/minikube
+    public_directory: "{{ instance.public_directory }}"
+
+  pre_tasks:
     - name: Download minikube binary
-      ansible.builtin.shell: curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+      ansible.builtin.shell: "curl -LO {{ minikube_link }}"
       args:
-        creates: /downloads/minikube-linux-amd64
-        chdir: /downloads
+        chdir: "{{ public_directory }}"
+
+  tasks:
     - name: Install minukube
-      ansible.builtin.shell: install minikube-linux-amd64 /usr/local/bin/minikube
+      ansible.builtin.shell: "install minikube-linux-amd64 {{ minikube_install_path }}"
       args:
-        chdir: /downloads
-      when: not minikube_dir.stat.exists
+        chdir: "{{ public_directory }}"
