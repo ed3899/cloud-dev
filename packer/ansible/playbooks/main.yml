@@ -27,10 +27,6 @@
 #   ansible.builtin.import_playbook: ./orchestration/kubectl.yml
 #   tags:
 #   - kubectl
-# - name: Kind
-#   ansible.builtin.import_playbook: ./orchestration/kind.yml
-#   tags:
-#   - kind
 - name: Minikube
   ansible.builtin.import_playbook: playbooks/orchestration/minikube.yml
   tags:
