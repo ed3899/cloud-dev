@@ -1,33 +1,27 @@
 - name: Dotnet
-  hosts: all
+  hosts: localhost
   become: true
-  pre_tasks:
-    - name: Get info about git installation
-      ansible.builtin.stat:
-        path: /usr/bin/git
-      register: git_bin
-    - name: Add Git repository
-      ansible.builtin.apt_repository:
-        repo: ppa:git-core/ppa
-      when: not git_bin.stat.exists
-    - name: Install git
-      ansible.builtin.apt:
-        name: git
-        update_cache: yes
-      when: not git_bin.stat.exists
+
+  vars_files:
+   - ../../vars/main.yml
+  vars:
+    user: "{{ instance.user.name }}"
+    home: "/{{ instance.user.home }}/{{ user }}"
+  # We need git to manage multiple go versions.
+  # So it is important to consider this when removing git from the 
+  # base playbook.
   tasks:
     - name: Install dotnet sdk
       ansible.builtin.apt:
-        name: "{{ item }}"
-        update_cache: yes
-      loop:
-      # Feel free to add additional sdks. This may or may not be present depending
-      # on your distro
-        - dotnet-sdk-7.0
+        name: dotnet-sdk-7.0
+        update_cache: true
+
   post_tasks:
     - name: Enable tab autocompletion
       ansible.builtin.blockinfile:
-        path: /home/vagrant/.bashrc
+        path: "{{ home }}/.bashrc"
+        backup: true
+        create: true
         block: |
           # bash parameter completion for the dotnet CLI
           function _dotnet_bash_complete()
