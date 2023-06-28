@@ -1,5 +1,5 @@
 - name: Helm
-  hosts: all
+  hosts: localhost
   become: true
   tasks:
     - name: Install Helm

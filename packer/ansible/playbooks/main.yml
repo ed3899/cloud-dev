@@ -18,11 +18,11 @@
   ansible.builtin.import_playbook: playbooks/iac/pulumi.yml
   tags:
   - pulumi
-# ## Orchestration
-# - name: Helm
-#   ansible.builtin.import_playbook: ./orchestration/helm.yml
-#   tags:
-#   - helm
+## Orchestration
+- name: Helm
+  ansible.builtin.import_playbook: playbooks/orchestration/helm.yml
+  tags:
+  - helm
 # - name: Kubectl
 #   ansible.builtin.import_playbook: ./orchestration/kubectl.yml
 #   tags:
