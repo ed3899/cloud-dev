@@ -36,10 +36,10 @@
 #   ansible.builtin.import_playbook: ./programming_languages/dotnet_sdk.yml
 #   tags:
 #   - dotnet_sdk
-# - name: Go
-#   ansible.builtin.import_playbook: ./programming_languages/go.yml
-#   tags:
-#   - go
+- name: Go
+  ansible.builtin.import_playbook: playbooks/programming_languages/go.yml
+  tags:
+  - go
 - name: NodeJS
   ansible.builtin.import_playbook: playbooks/programming_languages/node_js.yml
   tags:
