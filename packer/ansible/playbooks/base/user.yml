@@ -12,7 +12,7 @@
     ansible_staging_directory: "{{ instance.ansible.staging_directory }}"
     public_directory: "{{ instance.public_directory }}"
     ssh_key_file_path: "{{ public_directory + '/' + ssh_keyname }}"
-
+# TODO add user password
   tasks:
     - name: Create user
       ansible.builtin.user:

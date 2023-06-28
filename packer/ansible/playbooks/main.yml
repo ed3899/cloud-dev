@@ -3,7 +3,7 @@
   ansible.builtin.import_playbook: playbooks/base/main.yml
   tags:
   - always
-# Cloud providers
+## Cloud providers
 - name: AWS
   ansible.builtin.import_playbook: playbooks/cloud_providers/aws_cli.yml
   tags:
@@ -13,20 +13,11 @@
   ansible.builtin.import_playbook: playbooks/containerization/docker.yml
   tags:
   - docker
-# ## Dbs
-# - name: MySQL
-#   ansible.builtin.import_playbook: ./dbs/mysql.yml
-#   tags:
-#   - mysql
-# - name: PostgreSQL 15
-#   ansible.builtin.import_playbook: ./dbs/postgreSQL/15/install.yml
-#   tags:
-#   - pg-15
-# ## IaC
-# - name: Pulumi
-#   ansible.builtin.import_playbook: ./iac/pulumi.yml
-#   tags:
-#   - pulumi
+## IaC
+- name: Pulumi
+  ansible.builtin.import_playbook: playbooks/iac/pulumi.yml
+  tags:
+  - pulumi
 # ## Orchestration
 # - name: Helm
 #   ansible.builtin.import_playbook: ./orchestration/helm.yml
@@ -70,16 +61,7 @@
 #   ansible.builtin.import_playbook: ./terminal/starship.yml
 #   tags:
 #   - starship
-# ## UI
-# - name: Git
-#   ansible.builtin.import_playbook: ./ui/gui.yml
-#   tags:
-#   - gui
 # ## Vc
-# - name: Git
-#   ansible.builtin.import_playbook: ./vc/git.yml
-#   tags:
-#   - git
 # - name: GitHub
 #   ansible.builtin.import_playbook: ./vc/git_hub.yml
 #   tags:
