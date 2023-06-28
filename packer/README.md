@@ -38,8 +38,11 @@ Add `helm` to tags.
 Add `kubectl` to tags.
 ### Minikube
 Add `docker` and `minikube` to tags.
-
 The order matters as `docker` is a dependency.
+## Programming languages
+### Node.js
+Add `node_js` to tags.
+It uses [nvm](https://github.com/nvm-sh/nvm) to manage multiple node versions.
 
 # Recommended base images
 Although you could technically pick any image available so far on AWS, some of them may need aditional

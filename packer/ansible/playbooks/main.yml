@@ -31,7 +31,7 @@
   ansible.builtin.import_playbook: playbooks/orchestration/minikube.yml
   tags:
   - minikube
-# ## Programming languages
+## Programming languages
 # - name: Dotnet SDK
 #   ansible.builtin.import_playbook: ./programming_languages/dotnet_sdk.yml
 #   tags:
@@ -40,10 +40,10 @@
 #   ansible.builtin.import_playbook: ./programming_languages/go.yml
 #   tags:
 #   - go
-# - name: NodeJS
-#   ansible.builtin.import_playbook: ./programming_languages/node_js.yml
-#   tags:
-#   - node_js
+- name: NodeJS
+  ansible.builtin.import_playbook: playbooks/programming_languages/node_js.yml
+  tags:
+  - node_js
 # - name: Python Anaconda
 #   ansible.builtin.import_playbook: ./programming_languages/python_anaconda.yml
 #   tags:

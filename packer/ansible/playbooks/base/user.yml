@@ -23,6 +23,7 @@
         generate_ssh_key: yes
         ssh_key_bits: 4096
         ssh_key_file: "{{ ssh_key_file_path }}"
+        shell: /bin/bash
       register: create_user_output
 
   post_tasks:
