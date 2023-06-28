@@ -23,10 +23,10 @@
   ansible.builtin.import_playbook: playbooks/orchestration/helm.yml
   tags:
   - helm
-# - name: Kubectl
-#   ansible.builtin.import_playbook: ./orchestration/kubectl.yml
-#   tags:
-#   - kubectl
+- name: Kubectl
+  ansible.builtin.import_playbook: playbooks/orchestration/kubectl.yml
+  tags:
+  - kubectl
 - name: Minikube
   ansible.builtin.import_playbook: playbooks/orchestration/minikube.yml
   tags:

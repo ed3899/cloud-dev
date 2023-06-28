@@ -33,7 +33,9 @@ Add `docker` to tags.
 Add `pulumi` to tags.
 ## Orchestration
 ### Helm
-Add `helm` to tags
+Add `helm` to tags.
+### Kubectl
+Add `kubectl` to tags.
 ### Minikube
 Add `docker` and `minikube` to tags.
 
