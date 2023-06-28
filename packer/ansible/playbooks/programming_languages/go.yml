@@ -1,33 +1,27 @@
 - name: Go
-  hosts: all
+  hosts: localhost
   become: true
-  pre_tasks:
-  # We need git to manage multiple go versions
-  # https://go.dev/doc/manage-install#installing-multiple
-  # You may also refer to this thread on how to alias multiple
-  # go versions
-  # https://stackoverflow.com/a/68087898/11941146
-    - name: Get info about git installation
-      ansible.builtin.stat:
-        path: /usr/bin/git
-      register: git_bin
-    - name: Add Git repository
-      ansible.builtin.apt_repository:
-        repo: ppa:git-core/ppa
-      when: not git_bin.stat.exists
-    - name: Install git
-      ansible.builtin.apt:
-        name: git
-        update_cache: yes
-      when: not git_bin.stat.exists
+
+  vars_files:
+    - ../../vars/main.yml
+
+  vars:
+    user: "{{ instance.user.name }}"
+    home: "/{{ instance.user.home }}/{{ user }}"
+
+  # We need git to manage multiple go versions.
+  # So it is important to consider this when removing git from the 
+  # base playbook.
   tasks:
-    - name: Install go
+    - name: Install Go
       community.general.snap:
         name: go
         classic: true
-    - name: Set go bin path
+  
+  post_tasks:
+    - name: Add Go to path
       ansible.builtin.lineinfile:
-        path: /home/vagrant/.profile
+        path: "{{ home }}/.profile"
         backup: true
         create: true
-        line: export PATH=$PATH:/home/vagrant/go/bin
+        line: "export PATH=$PATH:{{ home }}/go/bin"

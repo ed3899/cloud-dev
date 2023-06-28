@@ -40,6 +40,9 @@ Add `kubectl` to tags.
 Add `docker` and `minikube` to tags.
 The order matters as `docker` is a dependency.
 ## Programming languages
+### Go
+Add `go` to tags.
+To manage multiple Go versions, please refer to this [thread](https://go.dev/doc/manage-install#installing-multiple) and this [one](https://stackoverflow.com/a/68087898/11941146). The latter shows how to alias multiple Go versions.
 ### Node.js
 Add `node_js` to tags.
 It uses [nvm](https://github.com/nvm-sh/nvm) to manage multiple node versions.
