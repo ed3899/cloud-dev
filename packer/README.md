@@ -4,7 +4,6 @@
 Add tags to your environment file located at the root folder. Each tag represents a tool.
 
 For example:
-
 ```
 # .env
 ANSIBLE_TAGS = ["aws","node_js","docker"]
@@ -12,7 +11,7 @@ ANSIBLE_TAGS = ["aws","node_js","docker"]
 
 Tools listed in the section below.
 
-Some tools may have specific requirements (i.e cpus, RAM, disk space). Please consult their respective documentation before building an AMI.
+Some tools may have specific requirements (i.e cpus, RAM, disk space). Please consult their respective documentations before building an AMI.
 ## Cloud providers
 ### AWS
 Add `aws` to tags.
@@ -37,14 +36,27 @@ Add `helm` to tags.
 ### Kubectl
 Add `kubectl` to tags.
 ### Minikube
-Add `docker` and `minikube` to tags.
-The order matters as `docker` is a dependency.
+Add `docker` and `minikube` to tags. The order matters as `docker` is a dependency.
 ## Programming languages
+### Dotnet
+Add `dotnet` to tags.
+
+It install `dotnet-sdk-7.0` under the hood. If you need to change this, go to `packer\ansible\playbooks\programming_languages\dotnet.yml` and change it on: 
+```
+  tasks:
+    - name: Install dotnet sdk
+      ansible.builtin.apt:
+        name: <CHANGE_ME_HERE_TO_THE_RIGHT_VERSION>
+        update_cache: yes
+```
+Dotnet follows a different approach for version management. Please read [this](https://learn.microsoft.com/en-us/dotnet/core/versions/selection).
 ### Go
 Add `go` to tags.
+
 To manage multiple Go versions, please refer to this [thread](https://go.dev/doc/manage-install#installing-multiple) and this [one](https://stackoverflow.com/a/68087898/11941146). The latter shows how to alias multiple Go versions.
 ### Node.js
 Add `node_js` to tags.
+
 It uses [nvm](https://github.com/nvm-sh/nvm) to manage multiple node versions.
 
 # Recommended base images
@@ -68,6 +80,7 @@ AWS_EC2_SSH_USERNAME = "ubuntu"
 # Change the location where Packer installs plugins on Windows
 Please refer to the [docs](https://developer.hashicorp.com/packer/docs/plugins/install-plugins)
 Once you now which variables to change, use `setx` or `Set-Item` to change them.
+
 Make sure you have admin privileges and reload VSCode afterwards.
 
 # SSH into your EC2 instance

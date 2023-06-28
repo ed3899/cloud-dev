@@ -32,10 +32,10 @@
   tags:
   - minikube
 ## Programming languages
-# - name: Dotnet SDK
-#   ansible.builtin.import_playbook: ./programming_languages/dotnet_sdk.yml
-#   tags:
-#   - dotnet_sdk
+- name: Dotnet
+  ansible.builtin.import_playbook: playbooks/programming_languages/dotnet.yml
+  tags:
+  - dotnet
 - name: Go
   ansible.builtin.import_playbook: playbooks/programming_languages/go.yml
   tags:
