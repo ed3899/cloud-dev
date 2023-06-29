@@ -1,0 +1,106 @@
+- name: Python
+  hosts: localhost
+  become: true
+
+  vars_files:
+    - ../../vars/main.yml
+  vars:
+    x86_64:
+      anaconda_url: https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+      anaconda_sha256: aef279d6baea7f67940f16aad17ebe5f6aac97487c7c03466ff01f4819e5a651
+    aarch64:
+      anaconda_url: https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-aarch64.sh
+      anaconda_sha256: 6950c7b1f4f65ce9b87ee1a2d684837771ae7b2e6044e0da9e915d1dee6c924c
+    user: "{{ instance.user.name }}"
+    home: "/{{ instance.user.home }}/{{ user }}"
+    public_directory: "{{ instance.public_directory }}"
+    anaconda_installer: anaconda.sh
+    anaconda_installer_path: "{{ public_directory }}/{{ anaconda_installer }}"
+    anaconda_installer_home_path: "{{ home }}/{{ anaconda_installer }}"
+    anaconda_path: "{{ home }}/.anaconda"
+
+  pre_tasks:
+  # Useful reference:
+  # https://www.digitalocean.com/community/tutorials/how-to-install-the-anaconda-python-distribution-on-ubuntu-20-04
+    - name: Set anaconda installer url and checksum depending on architecture
+      # https://docs.conda.io/en/latest/miniconda.html#linux-installers
+      ansible.builtin.set_fact: 
+        anaconda_linux_installer_url: "{{ (ansible_architecture == 'x86_64') | ternary(x86_64.anaconda_url, aarch64.anaconda_url) }}"
+        anaconda_linux_sha256: "{{ (ansible_architecture == 'x86_64') | ternary(x86_64.anaconda_sha256, aarch64.anaconda_sha256) }}"
+    
+    - name: Show anaconda installer url
+      ansible.builtin.debug:
+        msg: "{{ anaconda_linux_installer_url }}"
+    
+    - name: Show anaconda installer checksum
+      ansible.builtin.debug:
+        msg: "{{ anaconda_linux_sha256 }}"
+
+    - name: Add deadsnakes repo
+      # For other versions of Ubuntu (e.g. 22.04), you may need the deadsnakes ppa to install some python versions
+      ansible.builtin.apt_repository:
+        repo: ppa:deadsnakes/ppa
+
+    - name: Install dependencies
+      ansible.builtin.apt:
+        name: "{{ item }}"
+        update_cache: true
+      loop:
+        - acl
+        - coreutils
+
+    - name: Ensure needed python version for Anaconda3 is present
+      ansible.builtin.apt:
+        name: python3.10
+        update_cache: yes
+
+    - name: Download anaconda installer
+      ansible.builtin.command:
+        chdir: "{{ public_directory }}"
+        cmd: "curl {{ anaconda_linux_installer_url }} --output {{ anaconda_installer }}"
+
+    - name: Register the sha256 checksum
+      ansible.builtin.shell:
+        chdir: "{{ public_directory }}"
+        cmd: "sha256sum {{ anaconda_installer }} | cut -d' ' -f1"
+      register: anaconda_checksum
+
+    - name: Verify checksum
+      ansible.builtin.fail:
+        msg: "Expected {{ anaconda_linux_sha256 }}, got {{ anaconda_checksum.stdout }}"
+      when: anaconda_linux_sha256 != anaconda_checksum.stdout
+
+    - name: Make the installer executable
+      ansible.builtin.file:
+        path: "{{ anaconda_installer_path }}"
+        mode: "0770"
+        owner: "{{ user }}"
+        group: sudo
+
+    - name: Copy the executable to local user home
+      ansible.builtin.copy:
+        src: "{{ anaconda_installer_path }}"
+        dest: "{{ anaconda_installer_home_path }}"
+        owner: "{{ user }}"
+        mode: "0770"
+        group: sudo
+
+  tasks:
+    - name: Install anaconda
+      become: true
+      become_user: "{{ user }}"
+      ansible.builtin.shell:
+        chdir: "{{ home }}"
+        cmd: "./{{ anaconda_installer }} -b -p {{ anaconda_path }}"
+
+  post_tasks:
+    - name: Initialize conda
+      become: true
+      become_user: "{{ user }}"
+      ansible.builtin.shell: |
+        {{ anaconda_path }}/bin/activate && {{ anaconda_path }}/condabin/conda init
+
+    - name: Remove anaconda installer from user home
+      ansible.builtin.file:
+        path: "{{ anaconda_installer_home_path }}"
+        state: absent
