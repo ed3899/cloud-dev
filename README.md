@@ -85,6 +85,11 @@ As well as:
     update_cache: yes
 ```
 The reason we picked *miniconda* is because we make the assumption you would want to avoid paying for extra storage from the very beginning. Installing anaconda requires at least *3gb* of storage which would require us to deploy an *AMI* with a bigger volume. The decision then relies on you if want additional storage.
+## Terminal
+### Starship
+Add `starship` to your tags.
+
+For more information consult its [docs](https://starship.rs/).
 
 # Q&A
 ## What are the recommended Ubuntu images?
