@@ -1,31 +1,48 @@
 - name: GitHub
-  hosts: all
-  vars_files:
-    - "../../secrets/main.yml"
+  hosts: localhost
   become: true
-  tasks:
+
+  vars_files:
+    - ../../vars/main.yml
+  vars:
+    user: "{{ instance.user.name }}"
+    home: "/{{ instance.user.home }}/{{ user }}"
+    ssh_keys_dir: "{{ home }}/.ssh"
+    github_patc: "{{ github.personal_access_token_classic }}"
+
+  pre_tasks:
+    - name: Install dependency
+      ansible.builtin.apt:
+        name: openssh-client
+        update_cache: true
+
     - name: Generate key pair
       community.crypto.openssh_keypair:
-        path: /home/vagrant/.ssh/github
+        path: "{{ ssh_keys_dir }}/github"
         type: ed25519
-        owner: vagrant
+        owner: "{{ user }}"
+        mode: "0700"
       register: github_ssh_key_pair
-    - name: Add public key to GitHub
+
+  tasks:
+    - name: Add public key
       community.general.github_key:
-        name: access_key_for_local_vagrant_dev
-        token: "{{ github.tokens.personal_access_token_classic }}"
+        name: "packer_cloud-dev_key"
+        token: "{{ github_patc }}"
         pubkey: "{{ github_ssh_key_pair.public_key }}"
       register: github_pubkey_added
       when: github_ssh_key_pair is succeeded
-    - name: Authorize GitHub public key
+
+    - name: Authorize public key
       ansible.posix.authorized_key:
-        user: vagrant
-        key: "{{ lookup('file', '/home/vagrant/.ssh/github.pub') }}"
+        user: "{{ user }}"
+        key: "{{ lookup('file', '{{ ssh_keys_dir }}/github.pub') }}"
       when: github_pubkey_added is succeeded
-    - name: Add host to ssh_config
+
+    - name: Add host to ssh config
       community.general.ssh_config:
         host: github.com
         hostname: github.com
-        user: vagrant
+        user: "{{ user }}"
         identity_file: "{{ github_ssh_key_pair.filename }}"
       when: github_pubkey_added is succeeded

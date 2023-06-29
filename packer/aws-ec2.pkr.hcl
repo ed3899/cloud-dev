@@ -23,6 +23,7 @@ locals {
   GIT_EMAIL    = trimspace(var.GIT_EMAIL)
 
   ANSIBLE_TAGS = join(",", distinct(var.ANSIBLE_TAGS))
+  GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC = trimspace(var.GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC)
 }
 
 packer {
@@ -117,7 +118,9 @@ build {
       "--extra-vars",
       "AWS_SECRET_KEY=${local.AWS_SECRET_KEY}",
       "--extra-vars",
-      "AWS_REGION=${local.AWS_REGION}"
+      "AWS_REGION=${local.AWS_REGION}",
+      "--extra-vars",
+      "GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC=${local.GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC}"
     ]
   }
 
