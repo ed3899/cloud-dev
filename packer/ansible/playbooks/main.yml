@@ -52,11 +52,11 @@
   ansible.builtin.import_playbook: playbooks/programming_languages/rust.yml
   tags:
   - rust
-# ## Terminal
-# - name: Starship
-#   ansible.builtin.import_playbook: ./terminal/starship.yml
-#   tags:
-#   - starship
+## Terminal
+- name: Starship
+  ansible.builtin.import_playbook: playbooks/terminal/starship.yml
+  tags:
+  - starship
 # ## Vc
 # - name: GitHub
 #   ansible.builtin.import_playbook: ./vc/git_hub.yml
