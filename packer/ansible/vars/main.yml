@@ -19,6 +19,9 @@ aws:
   secret_key: "{{ AWS_SECRET_KEY }}"
   region: "{{ AWS_REGION }}"
 
+github:
+  personal_access_token_classic: "{{ GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC }}"
+
 git:
   username: "{{ GIT_USERNAME }}"
   email: "{{ GIT_EMAIL }}"

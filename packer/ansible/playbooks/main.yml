@@ -57,8 +57,8 @@
   ansible.builtin.import_playbook: playbooks/terminal/starship.yml
   tags:
   - starship
-# ## Vc
-# - name: GitHub
-#   ansible.builtin.import_playbook: ./vc/git_hub.yml
-#   tags:
-#   - github
+## Vc
+- name: GitHub
+  ansible.builtin.import_playbook: playbooks/vc/git_hub.yml
+  tags:
+  - github

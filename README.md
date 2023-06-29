@@ -90,6 +90,25 @@ The reason we picked *miniconda* is because we make the assumption you would wan
 Add `starship` to your tags.
 
 For more information consult its [docs](https://starship.rs/).
+## Version control
+### GitHub
+Add `github` to your tags.
+
+Add the following to your environment file.
+```
+#.env
+GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC = "<CUSTOM_VALUE>"
+```
+Make sure you give the right permissions to the token (i.e "repo", "admin:public_key" are the minimum). For more granular control consult the [docs](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token).
+
+You can test your connection with:
+```
+ssh -T git@github.com
+```
+Type `yes`, click enter and you should get a message like the following:
+```
+Hi <YOUR_GITHUB_USER>! You've successfully authenticated, but GitHub does not provide shell access.
+```
 
 # Q&A
 ## What are the recommended Ubuntu images?
