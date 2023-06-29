@@ -44,10 +44,10 @@
   ansible.builtin.import_playbook: playbooks/programming_languages/node_js.yml
   tags:
   - node_js
-# - name: Python Anaconda
-#   ansible.builtin.import_playbook: ./programming_languages/python_anaconda.yml
-#   tags:
-#   - python_anaconda
+- name: Python
+  ansible.builtin.import_playbook: playbooks/programming_languages/python.yml
+  tags:
+  - python
 # - name: Rust
 #   ansible.builtin.import_playbook: ./programming_languages/rust.yml
 #   tags:
