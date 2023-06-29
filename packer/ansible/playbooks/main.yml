@@ -48,10 +48,10 @@
   ansible.builtin.import_playbook: playbooks/programming_languages/python.yml
   tags:
   - python
-# - name: Rust
-#   ansible.builtin.import_playbook: ./programming_languages/rust.yml
-#   tags:
-#   - rust
+- name: Rust
+  ansible.builtin.import_playbook: playbooks/programming_languages/rust.yml
+  tags:
+  - rust
 # ## Terminal
 # - name: Starship
 #   ansible.builtin.import_playbook: ./terminal/starship.yml
