@@ -36,7 +36,7 @@
     - name: Authorize public key
       ansible.posix.authorized_key:
         user: "{{ user }}"
-        key: "{{ lookup('file', '{{ ssh_keys_dir }}/github.pub') }}"
+        key: "{{ github_ssh_key_pair.public_key }}"
       when: github_pubkey_added is succeeded
 
     - name: Add host to ssh config
