@@ -25,7 +25,7 @@ AWS_EC2_INSTANCE_USERNAME_PASSWORD = "test12345"
 AWS_EC2_INSTANCE_SSH_KEY_NAME = "ssh_key"
 GIT_USERNAME = "<CUSTOM_VALUE>"
 GIT_EMAIL = "<CUSTOM_VALUE>
-ANSIBLE_TAGS = ["<CUSTOM_VALUE>"]
+ANSIBLE_TAGS = ["<CUSTOM_VALUE>"] # The tools you would like to install. Go to [tags](#tags)
 ```
 Some values were prefilled to give you an example. Feel free to replace those as well.
 
