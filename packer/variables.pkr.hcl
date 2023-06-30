@@ -1,4 +1,3 @@
-# TODO set optional values
 variable "AWS_ACCESS_KEY" {
   type        = string
   default     = null
@@ -59,7 +58,7 @@ variable "AWS_USER_IDS" {
 
 variable "AWS_AMI_NAME" {
   type        = string
-  default     = null
+  default     = "cloud_dev"
   description = "The name of the Amazon Machine Image (AMI) that Packer will use."
 
   validation {
@@ -70,7 +69,7 @@ variable "AWS_AMI_NAME" {
 
 variable "AWS_INSTANCE_TYPE" {
   type        = string
-  default     = null
+  default     = "t2.micro"
   description = "The instance type of the EC2 instance that Packer will create"
 
   validation {
@@ -81,7 +80,7 @@ variable "AWS_INSTANCE_TYPE" {
 
 variable "AWS_REGION" {
   type        = string
-  default     = null
+  default     = "us-west-2"
   description = "The AWS region where Packer will create the resources"
 
   validation {
@@ -93,7 +92,7 @@ variable "AWS_REGION" {
 
 variable "AWS_EC2_INSTANCE_USERNAME" {
   type        = string
-  default     = null
+  default     = "dev"
   description = "The username for the EC2 instance you will use to ssh into the machine."
 
   validation {
@@ -107,9 +106,21 @@ variable "AWS_EC2_INSTANCE_USERNAME" {
   }
 }
 
+variable "AWS_EC2_INSTANCE_USERNAME_PASSWORD" {
+  type        = string
+  default     = "test123"
+  description = "The password for the EC2 instance user."
+  sensitive   = true
+
+  validation {
+    condition     = length(var.AWS_EC2_INSTANCE_USERNAME_PASSWORD) >= 8 && length(var.AWS_EC2_INSTANCE_USERNAME_PASSWORD) <= 20
+    error_message = "The password must be between 8 and 20 characters long without spaces around."
+  }
+}
+
 variable "AWS_EC2_INSTANCE_USERNAME_HOME" {
   type        = string
-  default     = null
+  default     = "home"
   description = "The home directory of the EC2 instance user"
 
   validation {
@@ -125,7 +136,7 @@ variable "AWS_EC2_INSTANCE_USERNAME_HOME" {
 
 variable "AWS_EC2_INSTANCE_SSH_KEY_NAME" {
   type        = string
-  default     = null
+  default     = "ssh_key"
   description = "The SSH key name. The private key will be downloaded to the root directory of this project."
 
   validation {
@@ -240,7 +251,7 @@ variable "ANSIBLE_TAGS" {
 
   validation {
     condition     = length(var.ANSIBLE_TAGS) > 0
-    error_message = "The variable must contain at least one tag and no more than 10 tags."
+    error_message = "The variable must contain at least one tag."
   }
 }
 
