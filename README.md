@@ -5,7 +5,7 @@
 
 # How-to
 ## Windows
-Add an `.env` file at the root of the project as the following:
+Add an `.env` file at the root of the project, include your ansible [tags](#tags):
 ```
 AWS_ACCESS_KEY = "<CUSTOM_VALUE>"
 AWS_SECRET_KEY = "<CUSTOM_VALUE>"
@@ -231,3 +231,6 @@ We strive towards:
 - Multiple version handling regarding specific tools
 - Security and shared responsibility regarding cloud keys
 - Prefer tools that are core essentials to a productive development environment across the board and that go beyond being installed with 1 single command or that can be easily accesible via *Docker* or related technologies.
+
+
+# TODO improve for readability
