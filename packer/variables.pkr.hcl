@@ -266,3 +266,10 @@ variable "GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC" {
     error_message = "The variable must be a valid GitHub personal access token."
   }
 }
+
+variable "PULUMI_PERSONAL_ACCESS_TOKEN" {
+  type    = string
+  default = null
+  sensitive   = true
+  description = "The pulumi personal access token. This variable is only here for practical reasons, it is not used anywhere so far"
+}

@@ -1,7 +1,40 @@
+# Table of contens
+- [Requirements](#requirements)
+  - [Optionals](#optionals)
+- [How-to](#how-to)
+  - [Windows](#windows)
+- [Tags](#tags)
+  - [Cloud providers](#cloud-providers)
+    - [aws](#aws)
+  - [Containerization](#containerization)
+    - [docker](#docker)
+  - [IaC](#iac)
+    - [pulumi](#docker)
+  - [Orchestration](#orchestration)
+    - [helm](#helm)
+    - [kubectl](#kubectl)
+    - [minikube](#minikube)
+  - [Programming languages](#programming-languages)
+    - [dotnet](#dotnet)
+    - [go](#nodejs)
+    - [node.js](#nodejs)
+    - [python](#python)
+    - [rust](#rust)
+  - [Terminal](#terminal)
+    - [starship](#starship)
+  - [Version control](#version-control)
+    - [github](#github)
+  - [Q&A](#qa)
+  - [Contributions](#contributions)
+
 # Requirements
-- [Packer](https://developer.hashicorp.com/packer/downloads)
 - Windows 10 or greater
-- Powershell 7.2.11 or greater
+- [Packer](https://developer.hashicorp.com/packer/downloads) >= 1.2.0, < 2.0.0 (builds your AMI but management is via the *AWS* console) 
+- [Powershell](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.3) 7.2.11 or greater (it is how scripts utilities are written)
+- [OpenSSH](https://learn.microsoft.com/en-us/windows-server/administration/openssh/openssh_install_firstuse?tabs=powershell) (needed to ssh into the instance, just the client)
+## Optionals
+- [Pulumi](https://www.pulumi.com/docs/install/) 3.73.0 or greater (deploy and manage your instance from your cli)
+- [Node](https://nodejs.org/en/download) v18.16.1 or greater (needed for pulumi backend)
 
 # How-to
 ## Windows
@@ -33,7 +66,7 @@ In case any required value is missing you will be prompted to fill it. The comma
 
 Then, at the root of the project run:
 ```
-./scripts/deploy.ps1
+./scripts/build.ps1
 ```
 Can't run the script? Go to [Q&A](#why-is-powershell-not-allowing-me-to-run-scripts)
 
@@ -43,6 +76,36 @@ Once complete, you should:
 - SSH into your *EC2* instance, with the key that packer downloaded to the root of the project, to verify connectivity. Go to [Q&A](#how-to-ssh-into-an-ec2-instance)
 
 If you want to remove your *AMI*, do so from the *AWS EC2* management console.
+
+### Pulumi
+If you want to manage your resources from your cli, additional scripts were provided for that.
+
+Add the following to your `.env` file:
+```
+PULUMI_PERSONAL_ACCESS_TOKEN = "CUSTOM_VALUE"
+```
+*How to get a pulumi personal access [token](https://www.pulumi.com/docs/pulumi-cloud/access-management/access-tokens/#personal-access-tokens).*
+
+The order here matters:
+
+1. Create stack
+```
+./scripts/init_stack.ps1
+```
+2. Deploy
+```
+./scripts/up.ps1
+```
+3. Destroy
+```
+./scripts/down.ps1
+```
+4. Delete stack
+```
+./scripts/remove_stack.ps1
+```
+
+Always make sure that before you remove a stack, you have already destroyed the resources deployed.
 
 # Tags
 Add tags to your environment file located at the 
@@ -130,6 +193,11 @@ As well as:
     update_cache: yes
 ```
 The reason we picked *miniconda* is because we make the assumption you would want to avoid paying for extra storage from the very beginning. Installing anaconda requires at least *3gb* of storage which would require us to deploy an *AMI* with a bigger volume. The decision then relies on you if want additional storage.
+### Rust
+Add `rust` to your tags.
+
+Manage versions with rustup-init.
+
 ## Terminal
 ### Starship
 Add `starship` to your tags.
@@ -231,6 +299,3 @@ We strive towards:
 - Multiple version handling regarding specific tools
 - Security and shared responsibility regarding cloud keys
 - Prefer tools that are core essentials to a productive development environment across the board and that go beyond being installed with 1 single command or that can be easily accesible via *Docker* or related technologies.
-
-
-# TODO improve for readability
