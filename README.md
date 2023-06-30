@@ -1,7 +1,52 @@
-# TODO improve for readability
+# Requirements
+- [Packer](https://developer.hashicorp.com/packer/downloads)
+- > Windows 10
+- > Powershell 7.2.11
+
+# How-to
+## Windows
+Add an `.env` file at the root of the project as the following:
+```
+AWS_ACCESS_KEY = "<CUSTOM_VALUE>"
+AWS_SECRET_KEY = "<CUSTOM_VALUE>"
+AWS_IAM_PROFILE = "<CUSTOM_VALUE>"
+AWS_USER_IDS = ["<CUSTOM_VALUE>"]
+AWS_AMI_NAME = "cloud_dev"
+AWS_INSTANCE_TYPE = "t2.micro"
+AWS_REGION = "us-west-2"
+AWS_EC2_AMI_NAME_FILTER = "ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-20230516"
+AWS_EC2_AMI_ROOT_DEVICE_TYPE = "ebs"
+AWS_EC2_AMI_VIRTUALIZATION_TYPE = "hvm"
+AWS_EC2_AMI_OWNERS = ["099720109477"]
+AWS_EC2_SSH_USERNAME = "ubuntu"
+AWS_EC2_INSTANCE_USERNAME = "dev"
+AWS_EC2_INSTANCE_USERNAME_HOME = "home"
+AWS_EC2_INSTANCE_USERNAME_PASSWORD = "test12345"
+AWS_EC2_INSTANCE_SSH_KEY_NAME = "ssh_key"
+GIT_USERNAME = "<CUSTOM_VALUE>"
+GIT_EMAIL = "<CUSTOM_VALUE>
+ANSIBLE_TAGS = ["<CUSTOM_VALUE>"]
+```
+Some values were prefilled to give you an example. Feel free to replace those as well.
+
+In case any required value is missing you will be prompted to fill it. The command will also provide a brief description of why this value is needed.
+
+Then, at the root of the project run:
+```
+./scripts/deploy.ps1
+```
+Can't run the script? Go to [Q&A](#why-is-powershell-not-allowing-me-to-run-scripts)
+
+Once complete, you should:
+- Limit your ssh key permissions. Go to [Q&A](#how-do-i-fix-the-broad-permissions-error-when-trying-to-ssh-to-my-instance-from-powershell)
+- Go to your *AWS EC2* management console and launch an instance from the recently created *AMI*, no need to add ssh keys.
+- SSH into your *EC2* instance, with the key that packer downloaded to the root of the project, to verify connectivity. Go to [Q&A](#how-to-ssh-into-an-ec2-instance)
+
+If you want to remove your *AMI*, do so from the *AWS EC2* management console.
 
 # Tags
-Add tags to your environment file located at the root folder. Each tag represents a tool.
+Add tags to your environment file located at the 
+root folder. Each tag represents a tool.
 
 For example:
 ```
@@ -15,7 +60,7 @@ Some tools may have specific requirements (i.e cpus, RAM, disk space). Please co
 
 As always, if you think you need a specific level of custommization, all playbooks are located at `packer\ansible\playbooks`.
 
-We welcome any [contributions](#contributions)!
+We welcome any [contributions](#contributions) if you think others can benefit from your changes!
 ## Cloud providers
 ### AWS
 Add `aws` to tags.
@@ -92,7 +137,7 @@ Add `starship` to your tags.
 For more information consult its [docs](https://starship.rs/).
 ## Version control
 ### GitHub
-Add `github` to your tags.
+Add `github` to your tags. Automate the process of adding ssh keys.
 
 Add the following to your environment file.
 ```
@@ -111,6 +156,11 @@ Hi <YOUR_GITHUB_USER>! You've successfully authenticated, but GitHub does not pr
 ```
 
 # Q&A
+## Why is powershell not allowing me to run scripts?
+The most common cause is that you are running the script from a non-admin shell or that your remote policy is not allowing you. In any case, open up a Powershell shell as an admin and run the following command.
+```
+Set-ExecutionPolicy RemoteSigned
+```
 ## What are the recommended Ubuntu images?
 Although you could technically pick any image available so far on *AWS*, some of them may need aditional
 considerations.
@@ -140,7 +190,11 @@ Make sure you have admin privileges and reload VSCode afterwards.
 3. Type 'yes' when prompted to add your instance url to the list of known hosts
 
 Please refer to the aws docs if you don't know where to get your ec2 instance public ip.
-
+## How do I fix the broad permissions error when trying to ssh to my instance from Powershell?
+Run the following command from a powershell admin shell. You only need to do this once unless to remove the ssh key file.
+```
+icacls <AWS_EC2_INSTANCE_SSH_KEY_NAME> /inheritance:r /grant:r "$($env:USERNAME):(R,W)"
+```
 ## How secure are my *AWS* credentials?
 The approach that we took to secure them is based on architectural decisions rather than encryption and 
 decryption (both at rest or in transit).
@@ -169,11 +223,11 @@ Limit the permissions of the credentials from your cloud provider. The responsib
 Please, help us make this project more **usable** and **cross-compatible**. Feel free to open up either an **issue** or a **pull request via forking**.
 ## Design philosophy
 We strive towards:
-- Setting up an entire cloud development environment with 1 single command (assuming you've already setup your cloud credentials)
+- Setting up an entire cloud development environment with as few commands as possible (assuming you've already setup your cloud credentials)
 - Being cross Ubuntu compatible (any other distros are welcomed but for now having at least 8 working *Ubuntu* images is our primary goal)
 - Being *Windows* and *MacOs* compatible
 - Being *AWS*, *Google* and *Azure* compatible
 - Single user experience
 - Multiple version handling regarding specific tools
 - Security and shared responsibility regarding cloud keys
-- Favour tools that are core essentials to a productive development environment across the board and that go beyond being installed with 1 single command or that can be easily accesible via *Docker* or related technologies.
+- Prefer tools that are core essentials to a productive development environment across the board and that go beyond being installed with 1 single command or that can be easily accesible via *Docker* or related technologies.

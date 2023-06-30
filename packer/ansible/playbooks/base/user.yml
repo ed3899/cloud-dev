@@ -8,11 +8,11 @@
   vars:
     user: "{{ instance.user.name }}"
     home: "/{{ instance.user.home }}/{{ user }}"
+    password: "{{ instance.user.password }}"
     ssh_keyname: "{{ instance.ssh.key_name }}"
     ansible_staging_directory: "{{ instance.ansible.staging_directory }}"
     public_directory: "{{ instance.public_directory }}"
     ssh_key_file_path: "{{ public_directory + '/' + ssh_keyname }}"
-# TODO add user password
   tasks:
     - name: Create user
       ansible.builtin.user:
@@ -24,6 +24,7 @@
         ssh_key_bits: 4096
         ssh_key_file: "{{ ssh_key_file_path }}"
         shell: /bin/bash
+        password: "{{ password }}"
       register: create_user_output
 
   post_tasks:

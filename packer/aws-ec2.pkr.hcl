@@ -1,4 +1,3 @@
-# TODO ensure whitespace is being escaped
 locals {
   AWS_ACCESS_KEY                  = trimspace(var.AWS_ACCESS_KEY)
   AWS_SECRET_KEY                  = trimspace(var.AWS_SECRET_KEY)
@@ -13,6 +12,7 @@ locals {
   AWS_AMI_NAME                    = lower(trimspace(regex_replace(var.AWS_AMI_NAME, "\\s+", "-")))
   AWS_EC2_SSH_USERNAME            = trimspace(var.AWS_EC2_SSH_USERNAME)
   AWS_EC2_INSTANCE_USERNAME       = lower(trimspace(regex_replace(var.AWS_EC2_INSTANCE_USERNAME, "\\s+", "-")))
+  AWS_EC2_INSTANCE_USERNAME_PASSWORD = trimspace(var.AWS_EC2_INSTANCE_USERNAME_PASSWORD)
   AWS_EC2_INSTANCE_USERNAME_HOME  = trimspace(var.AWS_EC2_INSTANCE_USERNAME_HOME)
   AWS_EC2_INSTANCE_SSH_KEY_NAME   = lower(trimspace(regex_replace(var.AWS_EC2_INSTANCE_SSH_KEY_NAME, "\\s+", "-")))
 
@@ -120,7 +120,9 @@ build {
       "--extra-vars",
       "AWS_REGION=${local.AWS_REGION}",
       "--extra-vars",
-      "GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC=${local.GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC}"
+      "GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC=${local.GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC}",
+      "--extra-vars",
+      "AWS_EC2_INSTANCE_USERNAME_PASSWORD=${local.AWS_EC2_INSTANCE_USERNAME_PASSWORD}"
     ]
   }
 
