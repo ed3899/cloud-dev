@@ -1,7 +1,7 @@
 # Requirements
 - [Packer](https://developer.hashicorp.com/packer/downloads)
-- > Windows 10
-- > Powershell 7.2.11
+- Windows 10 or greater
+- Powershell 7.2.11 or greater
 
 # How-to
 ## Windows
