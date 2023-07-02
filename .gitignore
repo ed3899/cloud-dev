@@ -23,3 +23,15 @@ secrets/
 ssh_key
 
 .vscode
+
+.node_modules
+
+bin/
+
+*manifest.json*
+
+publicIP.json
+
+ssh_config
+
+[Pp]ulumi.dev.yaml

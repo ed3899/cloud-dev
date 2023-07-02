@@ -1,20 +1,20 @@
 locals {
-  AWS_ACCESS_KEY                  = trimspace(var.AWS_ACCESS_KEY)
-  AWS_SECRET_KEY                  = trimspace(var.AWS_SECRET_KEY)
-  AWS_IAM_PROFILE                 = trimspace(var.AWS_IAM_PROFILE)
-  AWS_INSTANCE_TYPE               = trimspace(var.AWS_INSTANCE_TYPE)
-  AWS_REGION                      = trimspace(var.AWS_REGION)
-  AWS_EC2_AMI_NAME_FILTER         = trimspace(var.AWS_EC2_AMI_NAME_FILTER)
-  AWS_EC2_AMI_ROOT_DEVICE_TYPE    = trimspace(var.AWS_EC2_AMI_ROOT_DEVICE_TYPE)
-  AWS_EC2_AMI_VIRTUALIZATION_TYPE = trimspace(var.AWS_EC2_AMI_VIRTUALIZATION_TYPE)
-  AWS_EC2_AMI_OWNERS              = distinct(var.AWS_EC2_AMI_OWNERS)
-  AWS_USER_IDS                    = distinct(var.AWS_USER_IDS)
-  AWS_AMI_NAME                    = lower(trimspace(regex_replace(var.AWS_AMI_NAME, "\\s+", "-")))
-  AWS_EC2_SSH_USERNAME            = trimspace(var.AWS_EC2_SSH_USERNAME)
-  AWS_EC2_INSTANCE_USERNAME       = lower(trimspace(regex_replace(var.AWS_EC2_INSTANCE_USERNAME, "\\s+", "-")))
+  AWS_ACCESS_KEY                     = trimspace(var.AWS_ACCESS_KEY)
+  AWS_SECRET_KEY                     = trimspace(var.AWS_SECRET_KEY)
+  AWS_IAM_PROFILE                    = trimspace(var.AWS_IAM_PROFILE)
+  AWS_INSTANCE_TYPE                  = trimspace(var.AWS_INSTANCE_TYPE)
+  AWS_REGION                         = trimspace(var.AWS_REGION)
+  AWS_EC2_AMI_NAME_FILTER            = trimspace(var.AWS_EC2_AMI_NAME_FILTER)
+  AWS_EC2_AMI_ROOT_DEVICE_TYPE       = trimspace(var.AWS_EC2_AMI_ROOT_DEVICE_TYPE)
+  AWS_EC2_AMI_VIRTUALIZATION_TYPE    = trimspace(var.AWS_EC2_AMI_VIRTUALIZATION_TYPE)
+  AWS_EC2_AMI_OWNERS                 = distinct(var.AWS_EC2_AMI_OWNERS)
+  AWS_USER_IDS                       = distinct(var.AWS_USER_IDS)
+  AWS_AMI_NAME                       = lower(trimspace(regex_replace(var.AWS_AMI_NAME, "\\s+", "-")))
+  AWS_EC2_SSH_USERNAME               = trimspace(var.AWS_EC2_SSH_USERNAME)
+  AWS_EC2_INSTANCE_USERNAME          = lower(trimspace(regex_replace(var.AWS_EC2_INSTANCE_USERNAME, "\\s+", "-")))
   AWS_EC2_INSTANCE_USERNAME_PASSWORD = trimspace(var.AWS_EC2_INSTANCE_USERNAME_PASSWORD)
-  AWS_EC2_INSTANCE_USERNAME_HOME  = trimspace(var.AWS_EC2_INSTANCE_USERNAME_HOME)
-  AWS_EC2_INSTANCE_SSH_KEY_NAME   = lower(trimspace(regex_replace(var.AWS_EC2_INSTANCE_SSH_KEY_NAME, "\\s+", "-")))
+  AWS_EC2_INSTANCE_USERNAME_HOME     = trimspace(var.AWS_EC2_INSTANCE_USERNAME_HOME)
+  AWS_EC2_INSTANCE_SSH_KEY_NAME      = lower(trimspace(regex_replace(var.AWS_EC2_INSTANCE_SSH_KEY_NAME, "\\s+", "-")))
 
   AWS_EC2_ANSIBLE_STAGING_DIRECTORY_INTERNAL = trimspace(var.AWS_EC2_ANSIBLE_STAGING_DIRECTORY_INTERNAL)
   AWS_EC2_PUBLIC_DIRECTORY_INTERNAL          = trimspace(var.AWS_EC2_PUBLIC_DIRECTORY_INTERNAL)
@@ -22,7 +22,7 @@ locals {
   GIT_USERNAME = lower(trimspace(regex_replace(var.GIT_USERNAME, "\\s+", "-")))
   GIT_EMAIL    = trimspace(var.GIT_EMAIL)
 
-  ANSIBLE_TAGS = join(",", distinct(var.ANSIBLE_TAGS))
+  ANSIBLE_TAGS                          = join(",", distinct(var.ANSIBLE_TAGS))
   GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC = trimspace(var.GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC)
 }
 
@@ -33,6 +33,7 @@ packer {
       source  = "github.com/hashicorp/amazon"
     }
   }
+  required_version = ">= 1.2.0, < 2.0.0"
 }
 
 source "amazon-ebs" "ubuntu" {
@@ -60,7 +61,6 @@ source "amazon-ebs" "ubuntu" {
   tags = {
     Environment        = "development"
     Builder            = "packer"
-    Deployer           = "pulumi"
     BuildRegion        = "{{ .BuildRegion }}"
     Base_AMI_ID        = "{{ .SourceAMI }}"
     Base_AMI_Name      = "{{ .SourceAMIName }}"
@@ -138,7 +138,17 @@ build {
     }
     scripts = ["./scripts/remove_public_directory.sh"]
   }
+
+  post-processor "manifest" {
+    output     = "manifest.json"
+    strip_path = true
+    custom_data = {
+      Environment        = "development"
+      Builder            = "packer"
+      BuildRegion        = local.AWS_REGION
+      AMI_Name      = local.AWS_AMI_NAME
+      AMI_Owners     = join(", ", local.AWS_USER_IDS)
+    }
+  }
 }
-
-
 
