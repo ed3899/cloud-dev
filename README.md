@@ -1,4 +1,7 @@
-# Table of contens
+# Overview
+A cloud development environment you can customize with a bunch of tools.
+
+# Table of contents
 - [Requirements](#requirements)
   - [Optionals](#optionals)
 - [How-to](#how-to)
