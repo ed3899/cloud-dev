@@ -88,7 +88,7 @@ PULUMI_PERSONAL_ACCESS_TOKEN = "CUSTOM_VALUE"
 
 The order here matters:
 
-1. Create stack
+1. Create stack (it initially installs npm modules)
 ```
 ./scripts/init_stack.ps1
 ```

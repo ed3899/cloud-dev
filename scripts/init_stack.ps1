@@ -12,6 +12,13 @@ if ($pass) {
   $targetDirectory = "pulumi"
   Set-Location -Path $targetDirectory
 
+  $directoryPath = "./node_modules"
+
+  if (-not (Test-Path $directoryPath -PathType Container)) {
+    Write-Host "Installing npm modules"
+    npm install -y
+  } 
+
   # Extract environment variables
   # This step is only needed initially because
   # of AWS Credentials. Later on we can extract
