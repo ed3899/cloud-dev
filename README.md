@@ -1,4 +1,7 @@
-# Table of contens
+# Overview
+A cloud development environment you can customize with a bunch of tools.
+
+# Table of contents
 - [Requirements](#requirements)
   - [Optionals](#optionals)
 - [How-to](#how-to)
@@ -88,7 +91,7 @@ PULUMI_PERSONAL_ACCESS_TOKEN = "CUSTOM_VALUE"
 
 The order here matters:
 
-1. Create stack (it initially installs npm modules)
+1. Create stack (it initially installs npm modules if not present)
 ```
 ./scripts/init_stack.ps1
 ```
@@ -96,6 +99,7 @@ The order here matters:
 ```
 ./scripts/up.ps1
 ```
+  - Once deployed an ssh config is generated at the root of the project. Use it to [remote ssh from vs code](#how-to-remote-ssh-from-vs-code).
 3. Destroy
 ```
 ./scripts/down.ps1
@@ -286,6 +290,27 @@ The latter is not free, and the open source version adds again complexity that w
 Again, we would like you to have a simple setup process. If you needed secrets setup on a 3rd party app from the get go, that would hinder the development experience. It's already enough to have to set up an account with your cloud provider.
 
 Limit the permissions of the credentials from your cloud provider. The responsibility of ensuring they hold the right permissions lies on yourself.
+## How to remote ssh from VS Code?
+  1. Ensure that you have the [Remote - SSH extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-ssh) installed in your VS Code. You can find and install it from the Extensions view (Ctrl+Shift+X or View -> Extensions).
+  2. Once the extension is installed, click on the Extensions view button and search for "Remote - SSH". Click on the "Install" button to install the extension.
+  3. Next, open the Command Palette in VS Code by pressing Ctrl+Shift+P (or View -> Command Palette). Type "Remote-SSH: Open Configuration File" and select the option from the list. This will open the SSH config file in the editor.
+  4. In the SSH config file, you need to add the configuration for the remote SSH connection. The format of the entry in the config file should be as follows (these values are generated at runtime):
+    ```
+    Host cloud_dev
+      HostName 52.10.25.215
+      IdentityFile "D:\Documents\DevEnvironments\Cloud\Jammy64\ssh_key"
+      User dev
+      User 22
+      UserKnownHostsFile /dev/null
+      StrictHostKeyChecking no
+      PasswordAuthentication no
+      IdentitiesOnly yes
+      LogLevel FATAL
+    ```
+  5. Save the SSH config file after adding the configuration.
+  6. Go back to the Command Palette (Ctrl+Shift+P) and type "Remote-SSH: Connect to Host". You should see the list of configured SSH hosts from the SSH config file.
+  7. Select the desired host from the list. It will attempt to establish an SSH connection to the remote machine using the provided configuration.
+  8. If everything is set up correctly, a new window will open in VS Code connected to the remote machine via SSH.
 
 # Contributions
 Please, help us make this project more **usable** and **cross-compatible**. Feel free to open up either an **issue** or a **pull request via forking**.
