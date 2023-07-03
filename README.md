@@ -1,5 +1,5 @@
 # Overview
-A cloud development environment you can customize with a bunch of tools.
+A cloud development environment you can customize with a wide range of tools.
 
 # Table of contents
 - [Requirements](#requirements)
@@ -12,7 +12,7 @@ A cloud development environment you can customize with a bunch of tools.
   - [Containerization](#containerization)
     - [docker](#docker)
   - [IaC](#iac)
-    - [pulumi](#docker)
+    - [pulumi](#pulumi)
   - [Orchestration](#orchestration)
     - [helm](#helm)
     - [kubectl](#kubectl)
@@ -31,17 +31,19 @@ A cloud development environment you can customize with a bunch of tools.
   - [Contributions](#contributions)
 
 # Requirements
-- Windows 10 or greater
-- [Packer](https://developer.hashicorp.com/packer/downloads) >= 1.2.0, < 2.0.0 (builds your AMI but management is via the *AWS* console) 
-- [Powershell](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.3) 7.2.11 or greater (it is how scripts utilities are written)
-- [OpenSSH](https://learn.microsoft.com/en-us/windows-server/administration/openssh/openssh_install_firstuse?tabs=powershell) (needed to ssh into the instance, just the client)
+- Windows 10 or a later version is required.
+- [Packer](https://developer.hashicorp.com/packer/downloads) version 1.2.0 to less than 2.0.0 is needed for building AMIs. Their management is done via the AWS console.
+- [Powershell](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.3) version 7.2.11 or higher is required as it's used for writing script utilities.
+- [OpenSSH](https://learn.microsoft.com/en-us/windows-server/administration/openssh/openssh_install_firstuse?tabs=powershell) is necessary for SSH access into the instance, specifically the client part.
 ## Optionals
-- [Pulumi](https://www.pulumi.com/docs/install/) 3.73.0 or greater (deploy and manage your instance from your cli)
-- [Node](https://nodejs.org/en/download) v18.16.1 or greater (needed for pulumi backend)
+- [Pulumi](https://www.pulumi.com/docs/install/): version 3.73.0 or greater (deploy and manage your instance from your CLI).
+- [Node](https://nodejs.org/en/download): version 18.16.1 or greater (required for the pulumi backend).
 
 # How-to
 ## Windows
-Add an `.env` file at the root of the project, include your ansible [tags](#tags):
+1. Create an `.env` file at the root of the project
+2. Make sure to fill in with the required values.
+3. Add your ansible [tags](#tags):
 ```
 AWS_ACCESS_KEY = "<CUSTOM_VALUE>"
 AWS_SECRET_KEY = "<CUSTOM_VALUE>"
@@ -63,35 +65,33 @@ GIT_USERNAME = "<CUSTOM_VALUE>"
 GIT_EMAIL = "<CUSTOM_VALUE>
 ANSIBLE_TAGS = ["<CUSTOM_VALUE>"]
 ```
-Some values were prefilled to give you an example. Feel free to replace those as well.
-
-In case any required value is missing you will be prompted to fill it. The command will also provide a brief description of why this value is needed.
-
-Then, at the root of the project run:
+4. At the root of your project, run the following command:
 ```
 ./scripts/build.ps1
 ```
-Can't run the script? Go to [Q&A](#why-is-powershell-not-allowing-me-to-run-scripts)
+*If you are unable to run the script, please refer to the [Q&A](#why-is-powershell-not-allowing-me-to-run-scripts) section for guidance on why PowerShell may not be allowing you to run scripts.*
 
-Once complete, you should:
-- Limit your ssh key permissions. Go to [Q&A](#how-do-i-fix-the-broad-permissions-error-when-trying-to-ssh-to-my-instance-from-powershell)
-- Go to your *AWS EC2* management console and launch an instance from the recently created *AMI*, no need to add ssh keys.
-- SSH into your *EC2* instance, with the key that packer downloaded to the root of the project, to verify connectivity. Go to [Q&A](#how-to-ssh-into-an-ec2-instance)
+**Post-Build Steps**
 
-If you want to remove your *AMI*, do so from the *AWS EC2* management console.
+Once the script completes, follow these steps:
+  1. Limit the permissions on your *SSH key*. Please refer to the [Q&A](#how-do-i-fix-the-broad-permissions-error-when-trying-to-ssh-to-my-instance-from-powershell) section for guidance on how to fix the broad permissions error when trying to *SSH* to your instance from *PowerShell*.
+  2. In your *AWS EC2 management console*, launch an instance using the recently created *AMI*. You do not need to add *SSH keys* during the launch process.
+  3. SSH into your *EC2* instance using the *SSH key* that *Packer* downloaded to the root of your project. For instructions on how to SSH into an *EC2* instance, please refer to the [Q&A](#how-to-ssh-into-an-ec2-instance) section.
+
+If you want to remove your *AMI*, you can do so from the *AWS EC2 management console*.
 
 ### Pulumi
-If you want to manage your resources from your cli, additional scripts were provided for that.
+Manage your resources from the command line.
 
-Add the following to your `.env` file:
+Make sure to add the following to your `.env` file:
 ```
 PULUMI_PERSONAL_ACCESS_TOKEN = "CUSTOM_VALUE"
 ```
-*How to get a pulumi personal access [token](https://www.pulumi.com/docs/pulumi-cloud/access-management/access-tokens/#personal-access-tokens).*
+To get a Pulumi personal access token, please refer to the [Pulumi documentation](https://www.pulumi.com/docs/pulumi-cloud/access-management/access-tokens/#personal-access-tokens).
 
-The order here matters:
+Follow the steps below in the given order:
 
-1. Create stack (it initially installs npm modules if not present)
+1. Create stack (this will install npm modules if not present):
 ```
 ./scripts/init_stack.ps1
 ```
@@ -99,7 +99,7 @@ The order here matters:
 ```
 ./scripts/up.ps1
 ```
-  - Once deployed an ssh config is generated at the root of the project. Use it to [remote ssh from vs code](#how-to-remote-ssh-from-vs-code).
+  - Once deployed, an SSH config file will be generated at the root of the project. You can use it to [remote SSH from Visual Studio Code](#how-to-remote-ssh-from-vs-code).
 3. Destroy
 ```
 ./scripts/down.ps1
@@ -109,25 +109,23 @@ The order here matters:
 ./scripts/remove_stack.ps1
 ```
 
-Always make sure that before you remove a stack, you have already destroyed the resources deployed.
+Before removing a stack, always make sure that you have already destroyed the resources deployed.
+
+Make sure to follow these steps carefully to manage your resources effectively.
 
 # Tags
-Add tags to your environment file located at the 
-root folder. Each tag represents a tool.
+In your root folder, you need to add tags to your environment file. Each tag represents a tool.
 
-For example:
+For example, modify your .env file as follows:
 ```
 # .env
 ANSIBLE_TAGS = ["aws","node_js","docker"]
 ```
+Please note that there are several tools listed below. Some of these tools may have specific requirements such as CPU, RAM, or disk space. Before building an AMI, it is recommended to consult their respective documentations for any specific requirements.
 
-Tools listed in the section below.
+If you require a specific level of customization, you can find all the playbooks located at `packer\ansible\playbooks.`
 
-Some tools may have specific requirements (i.e cpus, RAM, disk space). Please consult their respective documentations before building an AMI.
-
-As always, if you think you need a specific level of custommization, all playbooks are located at `packer\ansible\playbooks`.
-
-We welcome any [contributions](#contributions) if you think others can benefit from your changes!
+Make sure to add the appropriate tags to your environment file, and if needed, refer to the playbooks to customize your setup accordingly.
 ## Cloud providers
 ### AWS
 Add `aws` to tags.
@@ -165,21 +163,27 @@ It install `dotnet-sdk-7.0` under the hood. If you need to change this, go to `p
         name: <CHANGE_ME_HERE_TO_THE_RIGHT_VERSION>
         update_cache: yes
 ```
-Dotnet follows a different approach for version management. Please read [this](https://learn.microsoft.com/en-us/dotnet/core/versions/selection).
+Please note that dotnet follows a different approach for version management. For more information on how to select the correct version, please read the [official documentation](https://learn.microsoft.com/en-us/dotnet/core/versions/selection).
+
+If you have made the necessary changes to the `dotnet.yml` file and specified the correct version, save the file. The `dotnet-sdk-7.0` will be installed according to the updated configuration.
 ### Go
 Add `go` to tags.
 
-To manage multiple Go versions, please refer to this [thread](https://go.dev/doc/manage-install#installing-multiple) and this [one](https://stackoverflow.com/a/68087898/11941146). The latter shows how to alias multiple Go versions.
+Refer to the official [Go documentation](https://go.dev/doc/manage-install#installing-multiple) to learn how to manage multiple *Go* versions effectively. This guide provides detailed instructions on installing and managing multiple *Go* versions on your system.
+
+Additionally, you can also check out this [Stack Overflow thread](https://stackoverflow.com/a/68087898/11941146), which explains how to alias multiple *Go* versions. This technique allows you to switch between different *Go* versions easily.
 ### Node.js
 Add `node_js` to tags.
 
-It uses [nvm](https://github.com/nvm-sh/nvm) to manage multiple node versions.
+It installs [nvm](https://github.com/nvm-sh/nvm), which is a popular tool for managing multiple versions of *Node.js*. 
+
+Once *nvm* is installed, you can use it to install and manage multiple *Node.js* versions on your system. By using *nvm* commands, you can easily switch between different node versions based on your requirements.
 ### Python
 Add `python` to tags.
 
-It installs [miniconda](https://docs.conda.io/en/latest/miniconda.html#linux-installers) under the hood which is a lightweight version of [anaconda](https://www.anaconda.com/). You can manage multiple python versions, virtual environment and packages with it.
+It installs [miniconda](https://docs.conda.io/en/latest/miniconda.html#linux-installers) which is a lightweight version of [anaconda](https://www.anaconda.com/). *Miniconda* allows you to manage multiple *Python* versions, virtual environments, and packages efficiently.
 
-If want a different *miniconda* version. Please refer to this [download](https://docs.conda.io/en/latest/miniconda.html#linux-installers) page and change the following values accordingly at `packer\ansible\playbooks\programming_languages\python.yml`
+If you prefer a different *miniconda* version, you can refer to the download page for alternative options. Once you have chosen the appropriate version, make the following changes in the `packer\ansible\playbooks\programming_languages\python.yml` file:
 ```
   vars:
     x86_64:
@@ -189,57 +193,60 @@ If want a different *miniconda* version. Please refer to this [download](https:/
       anaconda_url: <ADEQUATE_URL>
       anaconda_sha256: <ADEQUATE_SHA256>
 ```
-As well as:
+Additionally, modify the following section:
 ```
 - name: Ensure needed python version for Anaconda3 is present
   ansible.builtin.apt:
     name: <ADEQUATE_PYTHON_VERSION>
     update_cache: yes
 ```
-The reason we picked *miniconda* is because we make the assumption you would want to avoid paying for extra storage from the very beginning. Installing anaconda requires at least *3gb* of storage which would require us to deploy an *AMI* with a bigger volume. The decision then relies on you if want additional storage.
+Replace `<ADEQUATE_URL>`, `<ADEQUATE_SHA256>`, and `<ADEQUATE_PYTHON_VERSION>` with the appropriate values based on the *miniconda* version you choose.
+
+The reason we suggest using *miniconda* is to save storage space from the start. Installing *anaconda* requires at least 3GB of storage, which would require deploying an *AMI* with a larger volume. The decision to use additional storage is up to you.
 ### Rust
 Add `rust` to your tags.
 
-Manage versions with rustup-init.
-
+Manage versions with [rustup-init](https://forge.rust-lang.org/infra/other-installation-methods.html).
 ## Terminal
 ### Starship
 Add `starship` to your tags.
 
-For more information consult its [docs](https://starship.rs/).
+For more information, please consult its [official documentation](https://starship.rs/).
 ## Version control
 ### GitHub
-Add `github` to your tags. Automate the process of adding ssh keys.
+Add `github` to your tags and automate the process of adding *SSH* keys.
 
-Add the following to your environment file.
-```
-#.env
-GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC = "<CUSTOM_VALUE>"
-```
-Make sure you give the right permissions to the token (i.e "repo", "admin:public_key" are the minimum). For more granular control consult the [docs](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token).
-
-You can test your connection with:
-```
-ssh -T git@github.com
-```
-Type `yes`, click enter and you should get a message like the following:
-```
-Hi <YOUR_GITHUB_USER>! You've successfully authenticated, but GitHub does not provide shell access.
-```
+1. Update your environment file `.env` by adding the following line:
+  ```
+  GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC = "<CUSTOM_VALUE>"
+  ```
+2. Make sure to replace `<CUSTOM_VALUE>` with the appropriate value for your [personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token).
+3. Grant the necessary permissions to the token. At a minimum, the following permissions are required: "repo" and "admin:public_key".
+4. Test your connection using the following command:
+  ```
+  ssh -T git@github.com
+  ```
+  When prompted, type `yes` and press enter. You should receive a message similar to the following:
+  ```
+  Hi <YOUR_GITHUB_USER>! You've successfully authenticated, but GitHub does not provide shell access.
+  ```
 
 # Q&A
 ## Why is powershell not allowing me to run scripts?
-The most common cause is that you are running the script from a non-admin shell or that your remote policy is not allowing you. In any case, open up a Powershell shell as an admin and run the following command.
-```
-Set-ExecutionPolicy RemoteSigned
-```
+If you encounter issues running a script due to a non-admin shell or remote policy restrictions, follow these steps to resolve the problem:
+
+1. Open PowerShell with administrative privileges by doing the following:
+    - Press Windows key to open the Start menu.
+    - Type "PowerShell".
+    - Right-click on "Windows PowerShell" (or "PowerShell") and select "Run as administrator".
+2. Run the following command in the elevated PowerShell window:
+  ```
+  Set-ExecutionPolicy RemoteSigned
+  ```
 ## What are the recommended Ubuntu images?
-Although you could technically pick any image available so far on *AWS*, some of them may need aditional
-considerations.
+When choosing an image on AWS (Amazon Web Services), it is important to consider various factors. While technically any available image can be picked, some may require additional considerations. If you have successfully tried a new image, we encourage you to open an issue or initiate a pull request.
 
-If you've already tried out a new image with success, please feel free open up an issue or initiate a pull request.
-
-For now, here's the list of recommended images:
+For now, here is a list of recommended images:
 
 **Ubuntu Jammy 22.04 AMD64**
 ```
@@ -250,77 +257,89 @@ AWS_EC2_AMI_VIRTUALIZATION_TYPE = "hvm"
 AWS_EC2_AMI_OWNERS = ["099720109477"]
 AWS_EC2_SSH_USERNAME = "ubuntu"
 ```
+By selecting the appropriate image based on the provided details, you can ensure compatibility and meet your requirements when working on AWS.
 ## How to change the location where Packer installs plugins on Windows?
-Please refer to the [docs](https://developer.hashicorp.com/packer/docs/plugins/install-plugins)
-Once you now which variables to change, use `setx` or `Set-Item` to change them.
+Please refer to the [official documentation](https://developer.hashicorp.com/packer/docs/plugins/install-plugins) for detailed instructions on installing plugins.
 
-Make sure you have admin privileges and reload VSCode afterwards.
+Once you have identified the variables that need to be changed, you can use `setx` or `Set-Item` to modify them.
 
+**Note:** Make sure you have administrative privileges before attempting to modify system variables. After making changes, be sure to reload *VSCode* for the modifications to take effect.
 ## How to SSH into an *EC2* instance?
-1. Install [OpenSSH](https://learn.microsoft.com/en-us/windows-server/administration/openssh/openssh_install_firstuse?tabs=gui) client
-2. `ssh -i <path_to_your_private_key> <AWS_EC2_INSTANCE_USERNAME>@<your_ec2_instance_public_ip>`
-3. Type 'yes' when prompted to add your instance url to the list of known hosts
+1. Install the OpenSSH client on your local machine.
+2. Open the command prompt or terminal and run the following command:
+  - `ssh -i <path_to_your_private_key> <AWS_EC2_INSTANCE_USERNAME>@<your_ec2_instance_public_ip>`
+3. When prompted to add your instance URL to the list of known hosts, type `yes` and press enter.
 
-Please refer to the aws docs if you don't know where to get your ec2 instance public ip.
+Please refer to the *aws docs* if you don't know where to get your *ec2* instance public ip.
 ## How do I fix the broad permissions error when trying to ssh to my instance from Powershell?
-Run the following command from a powershell admin shell. You only need to do this once unless to remove the ssh key file.
+Run the following command from a PowerShell admin shell. You only need to do this once unless you removed the SSH key file.
 ```
 icacls <AWS_EC2_INSTANCE_SSH_KEY_NAME> /inheritance:r /grant:r "$($env:USERNAME):(R,W)"
 ```
 ## How secure are my *AWS* credentials?
-The approach that we took to secure them is based on architectural decisions rather than encryption and 
-decryption (both at rest or in transit).
-
-We limit the access to your instance based on you local ip, vpc and security groups at runtime.
-
-So, we suggest you give only the least amount of permissions to the account that holds the credentials.
-
-This facilitates the development process as you would be dealing with plain values. It also makes things easier for us as we don't have to depend on 3rd party vaults.
-
-In case an attacker gets ahold of your aws keys (by somehow passing all the walls we've set), you can limit the impact by only giving those keys the needed permissions for a given task. Feel free to add alerts or anything in that regard. Needless to say, don't use aws root credentials.
-
-This only accounts for placing the values inside a cloud instance using *Ansible*. It doesn't account for how *Packer* uses them to initially communicate with *AWS*.
+The approach we took to secure your credentials is based on architectural decisions rather than heavy reliance on encryption and decryption.
+**Access Limitations at Runtime**
+  - To limit access to your instances, we control access based on your local IP and security groups.
+  - By giving the account that holds the credentials the least amount of permissions, we facilitate the development process, as you work with plain values.
+  - This also simplifies our workflow, as we do not have to depend on third-party vaults.
+**Mitigating Impact in Case of Breach**
+  - In the unlikely event that an attacker gains access to your AWS keys, we can restrict their impact by granting only the necessary permissions for a specific task.
+  - We encourage you to set up alerts or other monitoring mechanisms to provide early detection of any unauthorized activity.
+  - Remember, it is important not to use AWS root credentials to further enhance security.
+**Configuration Details**
+Please note that the information provided above specifically accounts for placing the values inside a cloud instance using *Ansible*. It does not cover how *Packer* utilizes these credentials for initial communication with *AWS*.
 ### Why not vaults?
-We could have opted for options such as *Ansible Vault* or *Hashicorp Vault*.
+We had the option to use tools such as *Ansible Vault* or *Hashicorp Vault* for securing credentials. However, we decided against them due to the following reasons:
+  - Complexity of Local Installation: Using *Ansible Vault* would require this tool to be locally installed, which could increase complexity, especially considering cross-compatibility issues on *Windows* and *MacOS*.
+  - Cost and Complexity: *Hashicorp Vault* is not free, and even the open-source version adds complexity that would only be necessary for a small portion of the utility of this tool.
 
-We didn't go for the primer because it would require that tool to be locally installed, and cross compatibility(*Windows* and *MacOs*) increases complexity.
-
-The latter is not free, and the open source version adds again complexity that would only be necessary for a small portion of the utility of this tool.
+By avoiding these tools, we aim to simplify the setup and maintenance process, ensuring a smoother experience for both contributors and users.
 ### Why not secrets?
-Again, we would like you to have a simple setup process. If you needed secrets setup on a 3rd party app from the get go, that would hinder the development experience. It's already enough to have to set up an account with your cloud provider.
+We prioritize a simple setup process for your convenience. Therefore, we suggest the following approach when it comes to secrets setup and permissions:
 
-Limit the permissions of the credentials from your cloud provider. The responsibility of ensuring they hold the right permissions lies on yourself.
+  - **Minimize External Dependencies:** Having to set up secrets on a 3rd party app right from the start can hinder the development experience. Hence, we recommend avoiding this additional complexity unless absolutely necessary.
+  - **Focus on Cloud Provider Credentials:** By limiting the permissions of your cloud provider credentials, you remain in control of ensuring they have the correct permissions. This puts the responsibility squarely on your own shoulders.
+
+Our aim is to strike a balance between simplicity and security, providing you with a streamlined and efficient development experience while maintaining control over the permissions granted to your cloud provider credentials.
 ## How to remote ssh from VS Code?
   1. Ensure that you have the [Remote - SSH extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-ssh) installed in your VS Code. You can find and install it from the Extensions view (Ctrl+Shift+X or View -> Extensions).
   2. Once the extension is installed, click on the Extensions view button and search for "Remote - SSH". Click on the "Install" button to install the extension.
   3. Next, open the Command Palette in VS Code by pressing Ctrl+Shift+P (or View -> Command Palette). Type "Remote-SSH: Open Configuration File" and select the option from the list. This will open the SSH config file in the editor.
   4. In the SSH config file, you need to add the configuration for the remote SSH connection. The format of the entry in the config file should be as follows (these values are generated at runtime):
+
     ```
-    Host cloud_dev
-      HostName 52.10.25.215
-      IdentityFile "D:\Documents\DevEnvironments\Cloud\Jammy64\ssh_key"
-      User dev
-      User 22
-      UserKnownHostsFile /dev/null
-      StrictHostKeyChecking no
-      PasswordAuthentication no
-      IdentitiesOnly yes
-      LogLevel FATAL
-    ```
+      Host cloud_dev
+        HostName 52.10.25.215
+        IdentityFile "D:\Documents\DevEnvironments\Cloud\Jammy64\ssh_key"
+        User dev
+        User 22
+        UserKnownHostsFile /dev/null
+        StrictHostKeyChecking no
+        PasswordAuthentication no
+        IdentitiesOnly yes
+        LogLevel FATAL
+      ```  
+
   5. Save the SSH config file after adding the configuration.
   6. Go back to the Command Palette (Ctrl+Shift+P) and type "Remote-SSH: Connect to Host". You should see the list of configured SSH hosts from the SSH config file.
   7. Select the desired host from the list. It will attempt to establish an SSH connection to the remote machine using the provided configuration.
   8. If everything is set up correctly, a new window will open in VS Code connected to the remote machine via SSH.
 
 # Contributions
-Please, help us make this project more **usable** and **cross-compatible**. Feel free to open up either an **issue** or a **pull request via forking**.
-## Design philosophy
-We strive towards:
-- Setting up an entire cloud development environment with as few commands as possible (assuming you've already setup your cloud credentials)
-- Being cross Ubuntu compatible (any other distros are welcomed but for now having at least 8 working *Ubuntu* images is our primary goal)
-- Being *Windows* and *MacOs* compatible
-- Being *AWS*, *Google* and *Azure* compatible
-- Single user experience
-- Multiple version handling regarding specific tools
-- Security and shared responsibility regarding cloud keys
-- Prefer tools that are core essentials to a productive development environment across the board and that go beyond being installed with 1 single command or that can be easily accesible via *Docker* or related technologies.
+We would appreciate your assistance in making this project more **usable** and **cross-compatible**. There are two ways you can contribute:
+  1. **Open an Issue**: If you come across any problems or have suggestions for improvement, please open up an issue describing your concern or idea.
+  2. **Submit a Pull Request via Forking**: If you have implemented changes or enhancements and want to share them with us, fork the project, make your modifications, and then submit a pull request.
+
+**Design Philosophy**
+
+In our project, we aim to achieve the following objectives:
+
+  - **Streamlined Cloud Development Setup**: We strive to provide a simple setup process for your cloud development environment, minimizing the number of commands required. Please note that in order to use our tools effectively, you should already have your cloud credentials set up.
+  - **Cross-Compatibility with Ubuntu**: While we welcome other Linux distributions, our primary goal is to ensure compatibility with at least 8 different working Ubuntu images.
+  - **Windows and MacOS Compatibility**: Our project aims to be compatible with both Windows and MacOS environments, allowing users to work seamlessly across different operating systems.
+  - **Cloud Provider Compatibility**: We want our tools to be compatible with major cloud providers such as AWS, Google, and Azure, enabling you to work with your preferred provider.
+  - **Consistent User Experience**: We value a single user experience across different platforms, ensuring a seamless and intuitive workflow.
+  - **Multiple Version Handling**: Our project supports multiple versions of specific tools, enabling flexibility and accommodating diverse requirements.
+  - **Security and Shared Responsibility**: We prioritize security and advocate for shared responsibility when it comes to managing cloud keys. It is crucial to maintain a secure and controlled environment.
+  - **Preference for Essential Tools**: We prefer tools that are essential for productive development across all platforms, extending beyond the scope of simple installation commands. Additionally, we encourage leveraging Docker or related technologies for easy accessibility.
+  - **Readable documentation**: Our project emphasizes the importance of clear and concise documentation. By providing well-documented resources, we aim to enhance understanding and assist users in utilizing our tools effectively.
