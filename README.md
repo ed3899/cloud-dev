@@ -455,6 +455,14 @@ To help you make a decision based on factors such as cost and development needs,
 - [EC2 Instance Types](https://aws.amazon.com/ec2/instance-types/)
 - [EC2 docs](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-types.html)
 
+## How to send files from my host to my instance?
+
+```bash
+scp -i /path/to/keypair.pem /path/to/local/file1 /file2 AWS_EC2_INSTANCE_USERNAME@ec2-instance-ip:/path/on/ec2
+```
+
+Works both on powershell and bash.
+
 ## Contributions
 
 We would appreciate your assistance in making this project more **usable** and **cross-compatible**. There are two ways you can contribute:
