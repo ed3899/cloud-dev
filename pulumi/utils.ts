@@ -39,7 +39,7 @@ type jsonManifest = {
   last_run_uuid: string;
 };
 
-export function getAMI_ID(): string {
+export function getLastBuiltAMI_FromPackerManifest(): string {
   let data: jsonManifest;
   const manifest = "manifest.json";
   const filePath = path.join(__dirname, "..", "packer", manifest);
@@ -71,56 +71,122 @@ export function getAMI_ID(): string {
   return artifact_id.split(":")[1];
 }
 
-export function extractUserIds(input: string): string[] {
-  // Extract the content within the square brackets
-  const content = input.substring(1, input.length - 1);
+export const extractArrayFromString = (input: string): string[] => {
+  return R.pipe(
+    // Remove brackets
+    (str: string) => str.substring(1, str.length - 1),
+    R.split(","),
+    R.map(R.trim),
+    // Remove quotes
+    R.map((id) => id.replace(/['"]/g, "")),
+    R.uniq,
+  )(input);
+};
 
-  // Split the content using commas as delimiters
-  const ids = content.split(",");
-
-  // Remove leading/trailing whitespace and quotes from each ID
-  const cleanedIds = ids.map((id) => id.trim().replace(/['"]/g, ""));
-
-  return cleanedIds;
+interface EnvVars {
+  AWS_USER_IDS: string;
+  AWS_AMI_NAME: string;
+  AWS_INSTANCE_TYPE: string;
+  AWS_EC2_AMI_NAME_FILTER: string;
+  AWS_EC2_AMI_ROOT_DEVICE_TYPE: string;
+  AWS_EC2_AMI_VIRTUALIZATION_TYPE: string;
+  AWS_EC2_AMI_OWNERS: string;
+  AWS_EC2_SSH_USERNAME: string;
+  AWS_EC2_INSTANCE_SSH_KEY_NAME: string;
+  AWS_EC2_INSTANCE_VOLUME_TYPE?: string;
+  AWS_EC2_INSTANCE_VOLUME_SIZE?: string;
+  PACKER_AMI_TO_LAUNCH_FROM?: string;
 }
 
-function checkRequiredVariables(): void {
-  const requiredVariables: string[] = [
-    "AWS_ACCESS_KEY",
-    "AWS_SECRET_KEY",
-    "AWS_IAM_PROFILE",
-    "AWS_USER_IDS",
-    "AWS_AMI_NAME",
-    "AWS_INSTANCE_TYPE",
-    "AWS_REGION",
-    "AWS_EC2_AMI_NAME_FILTER",
-    "AWS_EC2_AMI_ROOT_DEVICE_TYPE",
-    "AWS_EC2_AMI_VIRTUALIZATION_TYPE",
-    "AWS_EC2_AMI_OWNERS",
-    "AWS_EC2_SSH_USERNAME",
-    "AWS_EC2_INSTANCE_SSH_KEY_NAME",
-    "PULUMI_PERSONAL_ACCESS_TOKEN",
-  ];
+function checkRequiredVariables(env: NodeJS.ProcessEnv): EnvVars {
+  const envVars: EnvVars = {
+    AWS_USER_IDS: "",
+    AWS_AMI_NAME: "",
+    AWS_INSTANCE_TYPE: "",
+    AWS_EC2_AMI_NAME_FILTER: "",
+    AWS_EC2_AMI_ROOT_DEVICE_TYPE: "",
+    AWS_EC2_AMI_VIRTUALIZATION_TYPE: "",
+    AWS_EC2_AMI_OWNERS: "",
+    AWS_EC2_SSH_USERNAME: "",
+    AWS_EC2_INSTANCE_SSH_KEY_NAME: "",
+    AWS_EC2_INSTANCE_VOLUME_TYPE: undefined,
+    AWS_EC2_INSTANCE_VOLUME_SIZE: undefined,
+    PACKER_AMI_TO_LAUNCH_FROM: undefined,
+  };
 
-  const missingVariables: string[] = [];
+  // Iterate and fill from process.env
+  const fillEnvVars = (envVars: EnvVars) => {
+    R.forEachObjIndexed((_, key) => {
+      if (process.env[key]) {
+        envVars = R.assoc(key, process.env[key], envVars) as EnvVars;
+      }
+    }, envVars);
 
-  requiredVariables.forEach((variable) => {
-    if (!process.env[variable]) {
-      missingVariables.push(variable);
-    }
+    return envVars;
+  };
+
+  const filledEnvVars = fillEnvVars(envVars);
+
+  // ['alpha234234','asdfasdf234'] or ["alpha234234","asdfasdf234"]. Both as strings
+  const stringArrayPattern = new RegExp(/^\[['"][a-zA-Z\d]+['"](,\s*['"][a-zA-Z\d]+['"])*\]$/);
+
+  const schema = Joi.object<EnvVars>({
+    AWS_USER_IDS: Joi.string().required().trim().pattern(stringArrayPattern),
+    AWS_AMI_NAME: Joi.string().required().trim(),
+    AWS_INSTANCE_TYPE: Joi.string().required(),
+    AWS_EC2_AMI_NAME_FILTER: Joi.string().required().trim(),
+    AWS_EC2_AMI_ROOT_DEVICE_TYPE: Joi.string().required().trim(),
+    AWS_EC2_AMI_VIRTUALIZATION_TYPE: Joi.string().required().trim(),
+    AWS_EC2_AMI_OWNERS: Joi.string().required().trim().pattern(stringArrayPattern),
+    AWS_EC2_SSH_USERNAME: Joi.string().required().trim(),
+    AWS_EC2_INSTANCE_SSH_KEY_NAME: Joi.string().required().trim(),
+    AWS_EC2_INSTANCE_VOLUME_TYPE: Joi.string().trim(),
+    AWS_EC2_INSTANCE_VOLUME_SIZE: Joi.string().trim(),
+    PACKER_AMI_TO_LAUNCH_FROM: Joi.string().trim(),
   });
 
-  if (missingVariables.length > 0) {
-    console.error("Missing environment variables:");
-    missingVariables.forEach((variable) => {
-      console.error(variable);
-    });
-    throw new Error("Missing environment variables");
+  const validationResult = schema.validate(filledEnvVars);
+  if (validationResult.error) {
+    console.error("Ensure no spaces around the variables");
+    console.error(
+      "Arrays must be like ['alpha234234','asdfasdf234'] or [\"alpha234234\",\"asdfasdf234\"] with no spaces neither in each item and between separators",
+    );
+    throw new Error(validationResult.error.message);
   }
+
+  return validationResult.value;
 }
 
-export function runChecks(): void {
-  checkRequiredVariables();
+interface EvolvedOptVars {
+  AWS_EC2_INSTANCE_VOLUME_TYPE: string;
+  AWS_EC2_INSTANCE_VOLUME_SIZE: number;
+  PACKER_AMI_TO_LAUNCH_FROM: string;
+}
+
+interface EvolvedVars extends Partial<EvolvedOptVars> {
+  AWS_USER_IDS: string[];
+  AWS_AMI_NAME: string;
+  AWS_INSTANCE_TYPE: string;
+  AWS_EC2_AMI_NAME_FILTER: string;
+  AWS_EC2_AMI_ROOT_DEVICE_TYPE: string;
+  AWS_EC2_AMI_VIRTUALIZATION_TYPE: string;
+  AWS_EC2_AMI_OWNERS: string[];
+  AWS_EC2_SSH_USERNAME: string;
+  AWS_EC2_INSTANCE_SSH_KEY_NAME: string;
+}
+
+function evolveVars(env: EnvVars): EvolvedVars {
+  const evolvedVars = R.evolve({
+    AWS_USER_IDS: (v: string) => extractArrayFromString(v),
+    AWS_EC2_INSTANCE_VOLUME_SIZE: (v: string | undefined) => (v ? parseInt(v, 10) : undefined),
+    AWS_EC2_AMI_OWNERS: (v: string) => extractArrayFromString(v),
+  })<EnvVars>(env);
+
+  return evolvedVars;
+}
+
+export function getCleanEnvVars(env: NodeJS.ProcessEnv) {
+  return R.pipe(checkRequiredVariables, evolveVars)(env);
 }
 
 export interface SSHConfig {
