@@ -5,14 +5,14 @@ import * as dotenv from "dotenv";
 dotenv.config();
 import {
   getPublicIP,
-  runChecks,
-  getAMI_ID,
+  getCleanEnvVars,
+  getLastBuiltAMI_FromPackerManifest,
   extractUserIds,
   writeSSHConfig,
   getSSH_KeyPath,
 } from "./utils";
 
-runChecks();
+const cleanEnvVars = getCleanEnvVars(process.env);
 
 const PUBLIC_IP = getPublicIP("./publicIP.json");
 
@@ -95,11 +95,13 @@ const securityGroup = new aws.ec2.SecurityGroup(
   { dependsOn: [vpc, routeTableAssociation] },
 );
 
+cleanEnvVars.AWS_USER_IDS
+
 const ami = pulumi.output(
   aws.ec2.getAmi({
     mostRecent: true,
     //TODO refactor into a general
-    owners: extractUserIds(process.env.AWS_USER_IDS!),
+    owners: cleanEnvVars.AWS_USER_IDS,
     tags: {
       Environment: "development",
       Builder: "packer",
@@ -107,7 +109,7 @@ const ami = pulumi.output(
     filters: [
       {
         name: "image-id",
-        values: [getAMI_ID()],
+        values: [getLastBuiltAMI_FromPackerManifest()],
       },
       {
         name: "name",
