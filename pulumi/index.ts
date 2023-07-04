@@ -98,6 +98,7 @@ const securityGroup = new aws.ec2.SecurityGroup(
 const ami = pulumi.output(
   aws.ec2.getAmi({
     mostRecent: true,
+    //TODO refactor into a general
     owners: extractUserIds(process.env.AWS_USER_IDS!),
     tags: {
       Environment: "development",
@@ -132,6 +133,10 @@ const instance = new aws.ec2.Instance(
     vpcSecurityGroupIds: [securityGroup.id],
     subnetId: subnet.id,
     availabilityZone: availableZone,
+    rootBlockDevice: {
+      volumeType: process.env.VOLUME_TYPE!,
+      volumeSize: parseInt(process.env.VOLUME_SIZE!, 10),
+    }
   },
   {
     dependsOn: [vpc, subnet, securityGroup],

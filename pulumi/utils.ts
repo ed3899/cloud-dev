@@ -84,8 +84,17 @@ export function extractUserIds(input: string): string[] {
   return cleanedIds;
 }
 
-function checkRequiredVariables(): void {
-  const requiredVariables: string[] = [
+export const extractArrayFromString = (input: string): string[] => {
+  return R.pipe(
+    (str: string) => str.substring(1, str.length - 1),
+    R.split(','),
+    R.map(R.trim),
+    R.map((id) => id.replace(/['"]/g, ''))
+  )(input);
+};
+
+function checkRequiredVariables(envVars: NodeJS.ProcessEnv) {
+  const requiredVariables = [
     "AWS_ACCESS_KEY",
     "AWS_SECRET_KEY",
     "AWS_IAM_PROFILE",
@@ -102,21 +111,46 @@ function checkRequiredVariables(): void {
     "PULUMI_PERSONAL_ACCESS_TOKEN",
   ];
 
-  const missingVariables: string[] = [];
+  const optionalVariables = [
+    "AWS_EC2_INSTANCE_VOLUME_TYPE",
+    "AWS_EC2_INSTANCE_VOLUME_SIZE"
+  ];
 
-  requiredVariables.forEach((variable) => {
-    if (!process.env[variable]) {
-      missingVariables.push(variable);
-    }
-  });
+  // Check for missing variables
+  const missingVariables = R.reject((variable: string) => Boolean(process.env[variable]), requiredVariables);
 
   if (missingVariables.length > 0) {
     console.error("Missing environment variables:");
-    missingVariables.forEach((variable) => {
-      console.error(variable);
-    });
+    R.forEach(console.error, missingVariables);
     throw new Error("Missing environment variables");
   }
+
+  const mergedVars: string[] = R.concat(requiredVariables, optionalVariables);
+
+  const env: {[key: string]: string } = {}
+
+  R.forEach((item:string) => {
+    env[item] = process.env[item]!
+  }, mergedVars)
+
+  return env;
+}
+
+function cleanEnvVariables(env:{
+  [key: string]: string;
+}) {
+  const arrayLikeVars = [
+    "AWS_USER_IDS",
+    "AWS_EC2_AMI_OWNERS",
+    "ANSIBLE_TAGS"
+  ]
+
+  const transformedEnv = R.evolve({
+    AWS_USER_IDS: (value) => value.toUpperCase(),
+    AWS_EC2_AMI_OWNERS: (value) => value.split(',').map((owner) => owner.trim()),
+    ANSIBLE_TAGS: (value) => value.split(','),
+  })(env)
+
 }
 
 export function runChecks(): void {
