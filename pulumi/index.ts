@@ -7,12 +7,11 @@ import {
   getPublicIP,
   getCleanEnvVars,
   getLastBuiltAMI_FromPackerManifest,
-  extractUserIds,
   writeSSHConfig,
   getSSH_KeyPath,
 } from "./utils";
 
-const cleanEnvVars = getCleanEnvVars(process.env);
+const CLEAN_ENV_VARS = getCleanEnvVars(process.env);
 
 const PUBLIC_IP = getPublicIP("./publicIP.json");
 
@@ -31,9 +30,11 @@ const internetGateway = new aws.ec2.InternetGateway(
 );
 
 // Ensure deployment in a valid AZ
-const availableZone = aws.getAvailabilityZones({
-  state: "available",
-}).then(available => available.names?.[0]);
+const availableZone = aws
+  .getAvailabilityZones({
+    state: "available",
+  })
+  .then((available) => available.names?.[0]);
 
 const subnet = new aws.ec2.Subnet(
   "cloud-dev-subnet",
@@ -41,7 +42,7 @@ const subnet = new aws.ec2.Subnet(
     vpcId: vpc.id,
     cidrBlock: "10.0.0.0/24",
     mapPublicIpOnLaunch: true,
-    availabilityZone: availableZone
+    availabilityZone: availableZone,
   },
   { dependsOn: internetGateway },
 );
@@ -95,13 +96,10 @@ const securityGroup = new aws.ec2.SecurityGroup(
   { dependsOn: [vpc, routeTableAssociation] },
 );
 
-cleanEnvVars.AWS_USER_IDS
-
 const ami = pulumi.output(
   aws.ec2.getAmi({
     mostRecent: true,
-    //TODO refactor into a general
-    owners: cleanEnvVars.AWS_USER_IDS,
+    owners: CLEAN_ENV_VARS.AWS_USER_IDS,
     tags: {
       Environment: "development",
       Builder: "packer",
@@ -109,19 +107,19 @@ const ami = pulumi.output(
     filters: [
       {
         name: "image-id",
-        values: [getLastBuiltAMI_FromPackerManifest()],
+        values: [CLEAN_ENV_VARS.PACKER_AMI_TO_LAUNCH_FROM ?? getLastBuiltAMI_FromPackerManifest()],
       },
       {
         name: "name",
-        values: [process.env.AWS_AMI_NAME!],
+        values: [CLEAN_ENV_VARS.AWS_AMI_NAME],
       },
       {
         name: "root-device-type",
-        values: [process.env.AWS_EC2_AMI_ROOT_DEVICE_TYPE!],
+        values: [CLEAN_ENV_VARS.AWS_EC2_AMI_ROOT_DEVICE_TYPE],
       },
       {
         name: "virtualization-type",
-        values: [process.env.AWS_EC2_AMI_VIRTUALIZATION_TYPE!],
+        values: [CLEAN_ENV_VARS.AWS_EC2_AMI_VIRTUALIZATION_TYPE],
       },
     ],
   }),
@@ -130,15 +128,15 @@ const ami = pulumi.output(
 const instance = new aws.ec2.Instance(
   "cloud-dev-ec2-instance",
   {
-    instanceType: process.env.AWS_INSTANCE_TYPE!,
+    instanceType: CLEAN_ENV_VARS.AWS_INSTANCE_TYPE,
     ami: ami.id,
     vpcSecurityGroupIds: [securityGroup.id],
     subnetId: subnet.id,
     availabilityZone: availableZone,
     rootBlockDevice: {
-      volumeType: process.env.VOLUME_TYPE!,
-      volumeSize: parseInt(process.env.VOLUME_SIZE!, 10),
-    }
+      volumeType: CLEAN_ENV_VARS.AWS_EC2_INSTANCE_VOLUME_TYPE ?? "gp2",
+      volumeSize: CLEAN_ENV_VARS.AWS_EC2_INSTANCE_VOLUME_SIZE ?? 8,
+    },
   },
   {
     dependsOn: [vpc, subnet, securityGroup],

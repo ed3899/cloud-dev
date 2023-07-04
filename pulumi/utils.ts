@@ -71,157 +71,122 @@ export function getLastBuiltAMI_FromPackerManifest(): string {
   return artifact_id.split(":")[1];
 }
 
-export function extractUserIds(input: string): string[] {
-  // Extract the content within the square brackets
-  const content = input.substring(1, input.length - 1);
-
-  // Split the content using commas as delimiters
-  const ids = content.split(",");
-
-  // Remove leading/trailing whitespace and quotes from each ID
-  const cleanedIds = ids.map((id) => id.trim().replace(/['"]/g, ""));
-
-  return cleanedIds;
-}
-
 export const extractArrayFromString = (input: string): string[] => {
   return R.pipe(
+    // Remove brackets
     (str: string) => str.substring(1, str.length - 1),
-    R.split(','),
+    R.split(","),
     R.map(R.trim),
-    R.map((id) => id.replace(/['"]/g, '')),
-    R.uniq
+    // Remove quotes
+    R.map((id) => id.replace(/['"]/g, "")),
+    R.uniq,
   )(input);
 };
 
-interface ReqVars {
-  AWS_ACCESS_KEY: string;
-  AWS_SECRET_KEY: string;
-  AWS_IAM_PROFILE: string;
+interface EnvVars {
   AWS_USER_IDS: string;
   AWS_AMI_NAME: string;
   AWS_INSTANCE_TYPE: string;
-  AWS_REGION: string;
   AWS_EC2_AMI_NAME_FILTER: string;
   AWS_EC2_AMI_ROOT_DEVICE_TYPE: string;
   AWS_EC2_AMI_VIRTUALIZATION_TYPE: string;
   AWS_EC2_AMI_OWNERS: string;
   AWS_EC2_SSH_USERNAME: string;
   AWS_EC2_INSTANCE_SSH_KEY_NAME: string;
-  PULUMI_PERSONAL_ACCESS_TOKEN: string;
+  AWS_EC2_INSTANCE_VOLUME_TYPE?: string;
+  AWS_EC2_INSTANCE_VOLUME_SIZE?: string;
+  PACKER_AMI_TO_LAUNCH_FROM?: string;
 }
 
-interface OptVars {
-  AWS_EC2_INSTANCE_VOLUME_TYPE: string;
-  AWS_EC2_INSTANCE_VOLUME_SIZE: string;
-}
-
-interface MergedVars extends Partial<OptVars>, ReqVars {
-}
-
-
-function checkRequiredVariables(envVars: NodeJS.ProcessEnv): MergedVars {
-  const reqVars: ReqVars = {
-    AWS_ACCESS_KEY: "",
-    AWS_SECRET_KEY: "",
-    AWS_IAM_PROFILE: "",
+function checkRequiredVariables(env: NodeJS.ProcessEnv): EnvVars {
+  const envVars: EnvVars = {
     AWS_USER_IDS: "",
     AWS_AMI_NAME: "",
     AWS_INSTANCE_TYPE: "",
-    AWS_REGION: "",
     AWS_EC2_AMI_NAME_FILTER: "",
     AWS_EC2_AMI_ROOT_DEVICE_TYPE: "",
     AWS_EC2_AMI_VIRTUALIZATION_TYPE: "",
     AWS_EC2_AMI_OWNERS: "",
     AWS_EC2_SSH_USERNAME: "",
     AWS_EC2_INSTANCE_SSH_KEY_NAME: "",
-    PULUMI_PERSONAL_ACCESS_TOKEN: "",
-  }
+    AWS_EC2_INSTANCE_VOLUME_TYPE: undefined,
+    AWS_EC2_INSTANCE_VOLUME_SIZE: undefined,
+    PACKER_AMI_TO_LAUNCH_FROM: undefined,
+  };
 
-  const optVars: OptVars = {
-    AWS_EC2_INSTANCE_VOLUME_TYPE: "",
-    AWS_EC2_INSTANCE_VOLUME_SIZE: "",
-  }
+  // Iterate and fill from process.env
+  const fillEnvVars = (envVars: EnvVars) => {
+    R.forEachObjIndexed((_, key) => {
+      if (process.env[key]) {
+        envVars = R.assoc(key, process.env[key], envVars) as EnvVars;
+      }
+    }, envVars);
 
-  const mergedVars: MergedVars = R.mergeLeft(reqVars, optVars)
-  
+    return envVars;
+  };
+
+  const filledEnvVars = fillEnvVars(envVars);
+
   // ['alpha234234','asdfasdf234'] or ["alpha234234","asdfasdf234"]. Both as strings
-  const stringArrayPattern = new RegExp(/^\[['"][a-zA-Z\d]+['"],['"][a-zA-Z\d]+['"]\]$/);
+  const stringArrayPattern = new RegExp(/^\[['"][a-zA-Z\d]+['"](,\s*['"][a-zA-Z\d]+['"])*\]$/);
 
-  const schema = Joi.object<MergedVars>({
-    AWS_ACCESS_KEY: Joi.string().required().trim(),
-    AWS_SECRET_KEY: Joi.string().required().trim(),
-    AWS_IAM_PROFILE: Joi.string().trim(),
+  const schema = Joi.object<EnvVars>({
     AWS_USER_IDS: Joi.string().required().trim().pattern(stringArrayPattern),
     AWS_AMI_NAME: Joi.string().required().trim(),
     AWS_INSTANCE_TYPE: Joi.string().required(),
-    AWS_REGION: Joi.string().required().trim(),
     AWS_EC2_AMI_NAME_FILTER: Joi.string().required().trim(),
     AWS_EC2_AMI_ROOT_DEVICE_TYPE: Joi.string().required().trim(),
     AWS_EC2_AMI_VIRTUALIZATION_TYPE: Joi.string().required().trim(),
-    AWS_EC2_AMI_OWNERS: Joi.string().required().trim(),
+    AWS_EC2_AMI_OWNERS: Joi.string().required().trim().pattern(stringArrayPattern),
     AWS_EC2_SSH_USERNAME: Joi.string().required().trim(),
     AWS_EC2_INSTANCE_SSH_KEY_NAME: Joi.string().required().trim(),
-    PULUMI_PERSONAL_ACCESS_TOKEN: Joi.string().required().trim(),
     AWS_EC2_INSTANCE_VOLUME_TYPE: Joi.string().trim(),
     AWS_EC2_INSTANCE_VOLUME_SIZE: Joi.string().trim(),
-  })
+    PACKER_AMI_TO_LAUNCH_FROM: Joi.string().trim(),
+  });
 
-  const validationResult = schema.validate(mergedVars);
+  const validationResult = schema.validate(filledEnvVars);
   if (validationResult.error) {
-      console.error("Ensure no spaces around the variables")
-      console.error("Arrays must be like ['alpha234234','asdfasdf234'] or [\"alpha234234\",\"asdfasdf234\"] with no spaces neither in each item and between separators")
-      throw new Error(validationResult.error.message);
+    console.error("Ensure no spaces around the variables");
+    console.error(
+      "Arrays must be like ['alpha234234','asdfasdf234'] or [\"alpha234234\",\"asdfasdf234\"] with no spaces neither in each item and between separators",
+    );
+    throw new Error(validationResult.error.message);
   }
 
   return validationResult.value;
 }
 
-interface CleanedMergedVars extends Partial<OptVars> {
-  AWS_ACCESS_KEY: string;
-  AWS_SECRET_KEY: string;
-  AWS_IAM_PROFILE: string;
+interface EvolvedOptVars {
+  AWS_EC2_INSTANCE_VOLUME_TYPE: string;
+  AWS_EC2_INSTANCE_VOLUME_SIZE: number;
+  PACKER_AMI_TO_LAUNCH_FROM: string;
+}
+
+interface EvolvedVars extends Partial<EvolvedOptVars> {
   AWS_USER_IDS: string[];
   AWS_AMI_NAME: string;
   AWS_INSTANCE_TYPE: string;
-  AWS_REGION: string;
   AWS_EC2_AMI_NAME_FILTER: string;
   AWS_EC2_AMI_ROOT_DEVICE_TYPE: string;
   AWS_EC2_AMI_VIRTUALIZATION_TYPE: string;
   AWS_EC2_AMI_OWNERS: string[];
   AWS_EC2_SSH_USERNAME: string;
   AWS_EC2_INSTANCE_SSH_KEY_NAME: string;
-  PULUMI_PERSONAL_ACCESS_TOKEN: string;
 }
 
-function cleanEnvVariables(env:MergedVars): CleanedMergedVars {
-  const transformedEnv = R.evolve({
-    // AWS_ACCESS_KEY: (v:string) => v.trim(),
-    // AWS_SECRET_KEY: (v: string) => v.trim(),
-    // AWS_IAM_PROFILE: (v: string) => v.trim(),
+function evolveVars(env: EnvVars): EvolvedVars {
+  const evolvedVars = R.evolve({
     AWS_USER_IDS: (v: string) => extractArrayFromString(v),
-    // AWS_AMI_NAME: (v: string) => v.trim(),
-    // AWS_INSTANCE_TYPE: (v: string) => v.trim(),
-    // AWS_REGION: (v: string) => v.trim(),
-    // AWS_EC2_AMI_NAME_FILTER: (v: string) => v.trim(),
-    // AWS_EC2_AMI_ROOT_DEVICE_TYPE: (v: string) => v.trim(),
-    // AWS_EC2_AMI_VIRTUALIZATION_TYPE: (v: string) => v.trim(),
+    AWS_EC2_INSTANCE_VOLUME_SIZE: (v: string | undefined) => (v ? parseInt(v, 10) : undefined),
     AWS_EC2_AMI_OWNERS: (v: string) => extractArrayFromString(v),
-    // AWS_EC2_SSH_USERNAME: (v:string) => v.trim(),
-    // AWS_EC2_INSTANCE_SSH_KEY_NAME: (v:string) => v.trim(),
-    // PULUMI_PERSONAL_ACCESS_TOKEN: (v:string) => v.trim(),
-    // AWS_EC2_INSTANCE_VOLUME_TYPE: (v:string) => v.trim(),
-    // AWS_EC2_INSTANCE_VOLUME_SIZE: (v:string) => v.trim(),
-  })<MergedVars>(env)
+  })<EnvVars>(env);
 
-  return transformedEnv
+  return evolvedVars;
 }
 
 export function getCleanEnvVars(env: NodeJS.ProcessEnv) {
-  return R.pipe(
-    checkRequiredVariables,
-    cleanEnvVariables
-  )(env)
+  return R.pipe(checkRequiredVariables, evolveVars)(env);
 }
 
 export interface SSHConfig {
