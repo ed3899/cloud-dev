@@ -29,6 +29,9 @@ A cloud development environment you can customize with a wide range of tools.
     - [starship](#starship)
   - [Version control](#version-control)
     - [github](#github)
+- [Extras](#extras)
+  - [Unix aliases](#unix-aliases)
+  - [Git aliases](#git-aliases)
 - [Q&A](#qa)
 - [Contributions](#contributions)
 
@@ -306,6 +309,16 @@ Add `github` to your tags and automate the process of adding *SSH* keys.
   ```bash
   Hi <YOUR_GITHUB_USER>! You've successfully authenticated, but GitHub does not provide shell access.
   ```
+
+## Extras
+
+### Unix aliases
+
+If you're looking for some handy *Unix* aliases, you're in luck! We have included a collection of useful aliases that you can use. To costumize them, navigate to the `packer/ansible/playbooks/base/linux_aliases.yml file`
+
+### Git aliases
+
+We haven't forgotten about *Git*! In fact, we have also included some helpful *Git* aliases for you to use. To costumize them, go to the `packer/ansible/playbooks/base/git.yml` file. These aliases will make your *Git* commands more efficient and easier to remember.
 
 ## Q&A
 
