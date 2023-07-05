@@ -9,8 +9,7 @@ import (
 // TODO how to embed binaries
 // TODO how to access folders
 // TODO how to set env vars
-
-
+// TODO Detect and install packer based on os and arc
 
 func main() {
 	// Set packer plugin path
