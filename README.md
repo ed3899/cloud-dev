@@ -24,6 +24,7 @@ A cloud development environment you can customize with a wide range of tools.
     - [go](#nodejs)
     - [node.js](#nodejs)
     - [python](#python)
+    - [ruby](#ruby)
     - [rust](#rust)
   - [Terminal](#terminal)
     - [starship](#starship)
@@ -269,6 +270,12 @@ Additionally, modify the following section:
 Replace `<ADEQUATE_URL>`, `<ADEQUATE_SHA256>`, and `<ADEQUATE_PYTHON_VERSION>` with the appropriate values based on the *miniconda* version you choose.
 
 The reason we suggest using *miniconda* is to save storage space from the start. Installing *anaconda* requires at least 3GB of storage, which would require deploying an *AMI* with a larger volume. The decision to use additional storage is up to you.
+
+### Ruby
+
+Add `ruby` to your tags.
+
+Manage versions with [rbenv](https://github.com/rbenv/rbenv).
 
 #### Rust
 

@@ -20,7 +20,7 @@ secrets/
 
 .env
 
-ssh_key
+*ssh_key*
 
 .vscode
 
