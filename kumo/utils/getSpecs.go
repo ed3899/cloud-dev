@@ -2,6 +2,7 @@ package utils
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -50,11 +51,12 @@ func validateHostCompatibility(s Specs) {
 	}
 }
 
-type PackerURL struct {
+type PackerExe struct {
 	URL string
+	File string
 }
 
-func getPackerUrl(s Specs) *PackerURL {
+func getPackerUrl(s Specs) *PackerExe {
 	packerTemplateUrl := "https://releases.hashicorp.com/packer/1.9.1/packer_1.9.1_{{ .OS }}_{{ .ARCH }}.zip"
 	tmpl, err := template.New("packer-url").Parse(packerTemplateUrl)
 
@@ -68,14 +70,15 @@ func getPackerUrl(s Specs) *PackerURL {
 		log.Fatalf("error executing template: %#v", err)
 	}
 
-	return &PackerURL{
+	return &PackerExe{
 		URL: packerTemplate.String(),
+		File: fmt.Sprintf("packer_%s_%s.zip", s.OS, s.ARCH),
 	}
 
 }
 
-func downloadPacker(p PackerURL) {
-	downloadFile(p.URL, "./packer.zip")
+func downloadPacker(p PackerExe) {
+	downloadFile(p.URL, p.File)
 }
 
 func downloadFile(url string, filePath string) error {
@@ -93,7 +96,7 @@ func downloadFile(url string, filePath string) error {
 
 	bar := progressbar.DefaultBytes(
 		response.ContentLength,
-		filePath,
+		fmt.Sprintf("Downloading %s", filePath),
 	)
 
 	_, err = io.Copy(io.MultiWriter(file, bar), response.Body)
