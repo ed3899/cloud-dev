@@ -267,9 +267,24 @@ variable "GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC" {
   }
 }
 
+//! Not used on build
 variable "PULUMI_PERSONAL_ACCESS_TOKEN" {
   type    = string
   default = null
   sensitive   = true
-  description = "The pulumi personal access token. This variable is only here for practical reasons, it is not used anywhere so far"
+  description = "Used for pulumi only"
+}
+
+variable "AWS_EC2_INSTANCE_VOLUME_TYPE" {
+  type    = string
+  default = null
+  sensitive   = true
+  description = "Used for pulumi only"
+}
+
+variable "AWS_EC2_INSTANCE_VOLUME_SIZE" {
+  type    = string
+  default = null
+  sensitive   = true
+  description = "Used for pulumi only"
 }
