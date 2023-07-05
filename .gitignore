@@ -37,3 +37,5 @@ ssh_config
 [Pp]ulumi.dev.yaml
 
 packer.exe
+
+kumo.exe
