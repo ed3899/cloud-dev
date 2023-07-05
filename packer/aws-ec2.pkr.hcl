@@ -66,6 +66,7 @@ source "amazon-ebs" "ubuntu" {
     Base_AMI_Name      = "{{ .SourceAMIName }}"
     Base_AMI_Owner     = "{{ .SourceAMIOwner }}"
     Base_AMI_OwnerName = "{{ .SourceAMIOwnerName }}"
+    ToolsInstalled = local.ANSIBLE_TAGS
   }
 }
 
