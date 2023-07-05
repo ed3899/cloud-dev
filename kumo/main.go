@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/ed3899/kumo/utils"
+	_ "github.com/ed3899/kumo/utils"
 )
 
 // TODO how to embed binaries
@@ -25,7 +25,6 @@ func main() {
 	// }
 
 	// fmt.Println(string(output))
-	h := new(utils.Host)
-	fmt.Printf("%#v",h.GetSpecs())
 
+		fmt.Println("done")
 }
