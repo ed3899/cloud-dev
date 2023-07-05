@@ -4,7 +4,6 @@
 
   vars_files:
     - "../../vars/main.yml"
-
   vars:
     user: "{{ instance.user.name }}"
     home: "/{{ instance.user.home }}/{{ user }}"
@@ -13,6 +12,18 @@
     ansible_staging_directory: "{{ instance.ansible.staging_directory }}"
     public_directory: "{{ instance.public_directory }}"
     ssh_key_file_path: "{{ public_directory + '/' + ssh_keyname }}"
+    
+  pre_tasks:
+    - name: Install dependency
+      ansible.builtin.apt:
+        name: whois
+        update_cache: yes
+
+    - name: Generate password
+      ansible.builtin.shell:
+        cmd: "echo -n {{ password }} | mkpasswd --method=sha-512 --stdin"
+      register: hashed_password
+
   tasks:
     - name: Create user
       ansible.builtin.user:
@@ -24,7 +35,7 @@
         ssh_key_bits: 4096
         ssh_key_file: "{{ ssh_key_file_path }}"
         shell: /bin/bash
-        password: "{{ password }}"
+        password: "{{ hashed_password.stdout }}"
       register: create_user_output
 
   post_tasks:
