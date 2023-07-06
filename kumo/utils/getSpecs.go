@@ -9,6 +9,7 @@ import (
 	"runtime"
 	"strconv"
 	"sync"
+	"time"
 
 	// "github.com/schollz/progressbar/v3"
 	"github.com/vbauerster/mpb/v8"
@@ -81,17 +82,69 @@ func getPulumiUrl(s Specs) *ZipExecutableRef {
 	}
 }
 
+func generateBars(progress *mpb.Progress, ze []*ZipExecutableRef) []*mpb.Bar {
+	bars := make([]*mpb.Bar, 0)
+
+	for i := 0; i < len(ze); i++ {
+		var bar *mpb.Bar
+		url := ze[i].URL
+		name := ze[i].BinPath
+		resp, err := http.Head(url)
+		if err != nil {
+			log.Printf("Error occurred while sending HEAD request: %v\n", err)
+			continue
+		}
+
+		// Check if the request was successful
+		if resp.StatusCode != http.StatusOK {
+			log.Printf("Received non-200 status code: %d\n", resp.StatusCode)
+			resp.Body.Close()
+			continue
+		}
+		defer resp.Body.Close()
+
+		// Retrieve the Content-Length header
+		contentLength, err := strconv.ParseInt(resp.Header.Get("Content-Length"), 10, 64)
+		if err != nil {
+			log.Printf("There was an error while attempting to parse the content length from '%s': '%#v'", url, err)
+			resp.Body.Close()
+			continue
+		}
+
+		bar = progress.AddBar(int64(contentLength),
+			mpb.PrependDecorators(
+				// simple name decorator
+				decor.Name(name),
+				// decor.DSyncWidth bit enables column width synchronization
+				decor.Percentage(decor.WCSyncSpace),
+			),
+			mpb.AppendDecorators(
+				// replace ETA decorator with "done" message, OnComplete event
+				decor.OnComplete(
+					// ETA decorator with ewma age of 30
+					decor.EwmaETA(decor.ET_STYLE_GO, 30, decor.WCSyncWidth), "done",
+				),
+			),
+		)
+
+		bars = append(bars, bar)
+	}
+
+	return bars
+}
+
 func downloadPackages(ze []*ZipExecutableRef) {
 	resultChan := make(chan DownloadResult)
 	wg := sync.WaitGroup{}
-	progress := mpb.New(mpb.WithWaitGroup(&wg))
+	progress := mpb.New(mpb.WithWaitGroup(&wg), mpb.WithWidth(60), mpb.WithRefreshRate(180*time.Millisecond))
+	bars := generateBars(progress, ze)
+	wg.Add(len(ze))
 
 	for i := 0; i < len(ze); i++ {
-		wg.Add(1)
-		go func(ref ZipExecutableRef) {
+		go func(ref ZipExecutableRef, bar *mpb.Bar) {
 			defer wg.Done()
-			downloadBin(ref, resultChan, progress)
-		}(*ze[i])
+			downloadBin(ref, resultChan, bar)
+		}(*ze[i], bars[i])
 	}
 
 	go func() {
@@ -113,8 +166,8 @@ type DownloadResult struct {
 	Err    error
 }
 
-func downloadBin(ref ZipExecutableRef, resultChan chan<- DownloadResult, progress *mpb.Progress) {
-	err := download(ref.URL, ref.BinPath, progress)
+func downloadBin(ref ZipExecutableRef, resultChan chan<- DownloadResult, bar *mpb.Bar) {
+	err := download(ref.URL, ref.BinPath, bar)
 
 	result := DownloadResult{
 		ZipRef: &ref,
@@ -124,7 +177,7 @@ func downloadBin(ref ZipExecutableRef, resultChan chan<- DownloadResult, progres
 	resultChan <- result
 }
 
-func download(url string, binPath string, progress *mpb.Progress) error {
+func download(url string, binPath string, bar *mpb.Bar) error {
 	// Download
 	response, err := http.Get(url)
 	if err != nil {
@@ -132,27 +185,7 @@ func download(url string, binPath string, progress *mpb.Progress) error {
 	}
 	defer response.Body.Close()
 
-	totalSize, err := strconv.ParseInt(response.Header.Get("Content-Length"), 10, 64)
-	if err != nil {
-		log.Printf("there was an error while attempting to download from '%s': '%#v'", url, err)
-	}
-
 	buffer := make([]byte, 4096)
-
-	bar := progress.AddBar(int64(totalSize),
-		mpb.PrependDecorators(
-			// simple name decorator
-			decor.Name(binPath),
-			// decor.DSyncWidth bit enables column width synchronization
-			decor.Percentage(decor.WCSyncSpace),
-		),
-		mpb.AppendDecorators(
-			// replace ETA decorator with "done" message, OnComplete event
-			decor.OnComplete(
-				// ETA decorator with ewma age of 30
-				decor.EwmaETA(decor.ET_STYLE_GO, 30, decor.WCSyncWidth), "done",
-			),
-		))
 
 	for {
 		bytesDownloaded, err := response.Body.Read(buffer)

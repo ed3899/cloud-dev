@@ -39,3 +39,5 @@ ssh_config
 packer.exe
 
 kumo.exe
+
+*.zip
