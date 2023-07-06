@@ -7,8 +7,11 @@ import (
 	"net/http"
 	"os"
 	"runtime"
+	"sync"
 
 	"github.com/schollz/progressbar/v3"
+	"github.com/vbauerster/mpb/v8"
+	"github.com/vbauerster/mpb/v8/decor"
 )
 
 type Specs struct {
@@ -82,14 +85,42 @@ func getPulumiUrl(s Specs) *ZipExecutableRef {
 // }
 
 func downloadPackages(ze []*ZipExecutableRef) {
-	resultChan := make(chan DownloadResult, 2)
+	resultChan := make(chan DownloadResult)
+	wg := sync.WaitGroup{}
+	p := mpb.New(mpb.WithWaitGroup(&wg))
+	total, numBars := 100, len(ze)
 
-	for i := 0; i < len(ze); i++ {
-		go downloadBin(*ze[i], resultChan)
+	for i := 0; i < numBars; i++ {
+		wg.Add(1)
+		name := fmt.Sprintf("#%v:", ze[i].BinPath)
+		bar := p.AddBar(int64(total),
+			mpb.PrependDecorators(
+				// simple name decorator
+				decor.Name(name),
+				// decor.DSyncWidth bit enables column width synchronization
+				decor.Percentage(decor.WCSyncSpace),
+			),
+			mpb.AppendDecorators(
+				// replace ETA decorator with "done" message, OnComplete event
+				decor.OnComplete(
+					// ETA decorator with ewma age of 30
+					decor.EwmaETA(decor.ET_STYLE_GO, 30, decor.WCSyncWidth), "done",
+				),
+			),
+		)
+
+		go func(ref ZipExecutableRef) {
+			defer wg.Done()
+			downloadBin(ref, resultChan, bar)
+		}(*ze[i])
 	}
 
-	for i := 0; i < len(ze); i++ {
-		result := <-resultChan
+	go func() {
+		wg.Wait()
+		close(resultChan)
+	}()
+
+	for result := range resultChan {
 		if result.Err != nil {
 			log.Printf("Error downloading %s: %v\n", result.ZipRef.URL, result.Err)
 		} else {
@@ -103,7 +134,7 @@ type DownloadResult struct {
 	Err    error
 }
 
-func downloadBin(ref ZipExecutableRef, resultChan chan<- DownloadResult) {
+func downloadBin(ref ZipExecutableRef, resultChan chan<- DownloadResult, bar *mpb.Bar) {
 	err := download(ref.URL, ref.BinPath)
 
 	result := DownloadResult{
@@ -120,6 +151,24 @@ func download(url string, binPath string) error {
 	if err != nil {
 		log.Fatalf("there was an error while attempting to download %#v", url)
 	}
+
+	buffer := make([]byte, 4096)
+	totalBytes := 0
+
+	for {
+		bytesRead, err := response.Body.Read(buffer)
+		if err != nil && err != io.EOF {
+			// Handle the error accordingly (e.g., log, return, etc.)
+			log.Print("err")
+		}
+
+		if bytesRead == 0 {
+			break // Reached the end of the response body
+		}
+		log.Print(totalBytes)
+		totalBytes += bytesRead
+	}
+
 	defer response.Body.Close()
 
 	// Create
