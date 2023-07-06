@@ -19,6 +19,11 @@ type Dependency struct {
 
 type DownloadResult struct {
 	Dependency *Dependency
-	Fulfilled	bool
 	Err        error
+}
+
+type Binary struct {
+	Dependency *Dependency
+	Extracted	bool
+	Err error
 }

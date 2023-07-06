@@ -16,9 +16,10 @@ func init() {
 	downloads := make(chan *utils.DownloadResult, len(dependencies))
 
 	wg := sync.WaitGroup{}
-	wg.Add(len(dependencies))
+	wg.Add(len(dependencies) * 2)
 	utils.AppendBarToDependencies(&wg, dependencies)
 
+	// Start a goroutine for each dependency
 	for _, dep := range dependencies {
 		go utils.Download2(dep, downloads, &wg)
 	}
@@ -29,12 +30,13 @@ func init() {
 		close(downloads) // Close the 'downloads' channel to exit the loop
 	}()
 
-	for download := range downloads {
-		fmt.Println(download.Fulfilled, download.Err)
+	for d := range downloads {
+		if d.Err != nil {
+			fmt.Printf("Error occurred while downloading %s: %v\n", d.Dependency.Name, d.Err)
+			continue
+		}
+		go utils.UnzipSource(d, &wg)
 	}
-
-	// wg.Wait()   // Wait until all downloads are complete
-	// Close the 'done' channel to indicate that we're done
 
 	fmt.Println("All files downloaded!")
 }

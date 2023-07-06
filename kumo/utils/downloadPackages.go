@@ -107,6 +107,11 @@ func Download2(dep *Dependency, downloads chan<- *DownloadResult, wg *sync.WaitG
 	if err != nil {
 		log.Printf("there was an error while attempting to download from '%s'", url)
 		log.Printf("error: %#v", err)
+		downloads <- &DownloadResult{
+			Dependency: dep,
+			Err:        err,
+		}
+		return
 	}
 	defer response.Body.Close()
 	zipPath := dep.ZipPath
@@ -117,6 +122,10 @@ func Download2(dep *Dependency, downloads chan<- *DownloadResult, wg *sync.WaitG
 	if err != nil {
 		log.Printf("there was an error while creating %#v", destDir)
 		log.Printf("error: %#v", err)
+		downloads <- &DownloadResult{
+			Dependency: dep,
+			Err:        err,
+		}
 		return
 	}
 
@@ -125,6 +134,10 @@ func Download2(dep *Dependency, downloads chan<- *DownloadResult, wg *sync.WaitG
 	if err != nil {
 		log.Printf("there was an error while creating %#v", zipPath)
 		log.Printf("error: %#v", err)
+		downloads <- &DownloadResult{
+			Dependency: dep,
+			Err:        err,
+		}
 		return
 	}
 	defer file.Close()
@@ -136,6 +149,11 @@ func Download2(dep *Dependency, downloads chan<- *DownloadResult, wg *sync.WaitG
 
 		if err != nil && err != io.EOF {
 			log.Printf("err while downloading from '%s': %#v", url, err)
+			downloads <- &DownloadResult{
+				Dependency: dep,
+				Err:        err,
+			}
+			return
 		}
 
 		if bytesDownloaded == 0 {
@@ -149,14 +167,18 @@ func Download2(dep *Dependency, downloads chan<- *DownloadResult, wg *sync.WaitG
 		if err != nil {
 			log.Printf("there was an error while writing to %#v", zipPath)
 			log.Printf("error: %#v", err)
+			downloads <- &DownloadResult{
+				Dependency: dep,
+				Err:        err,
+			}
+			return
 		}
 
 	}
 
 	download := &DownloadResult{
 		Dependency: dep,
-		Err:        err,
-		Fulfilled:  true,
+		Err:        nil,
 	}
 
 	downloads <- download

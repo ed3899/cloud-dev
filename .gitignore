@@ -41,3 +41,5 @@ packer.exe
 kumo.exe
 
 *.zip
+
+deps*/

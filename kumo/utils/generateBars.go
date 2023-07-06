@@ -18,6 +18,7 @@ func AppendBarToDependencies(wg *sync.WaitGroup, deps []*Dependency) {
 	for _, d := range deps {
 		// Config the bar
 		bar := progress.AddBar(int64(d.ContentLength),
+			mpb.BarFillerClearOnComplete(),
 			mpb.PrependDecorators(
 				decor.Name(d.Name),
 				decor.Counters(decor.SizeB1024(0), " % .2f / % .2f"),
