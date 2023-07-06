@@ -1,11 +1,13 @@
 package utils
 
 import (
+	"archive/zip"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"runtime"
 	"strconv"
 	"sync"
@@ -22,6 +24,7 @@ type Specs struct {
 
 type ZipExecutableRef struct {
 	URL     string
+	ZipPath string
 	BinPath string
 }
 
@@ -58,32 +61,52 @@ func validateHostCompatibility(s Specs) Specs {
 }
 
 func getPackerUrl(s Specs) *ZipExecutableRef {
+	// Get the current directory
+	dir, err := os.Getwd()
+	if err != nil {
+		log.Fatalf("there was an error getting the current directory: %v", err)
+	}
+
+	// Create the destination path with dir + packer + packer.exe
+	destinationZipPath := filepath.Join(dir, "packer", fmt.Sprintf("packer_%s_%s.zip", s.OS, s.ARCH))
+
+	// Return the zip executable reference
 	return &ZipExecutableRef{
 		URL:     fmt.Sprintf("https://releases.hashicorp.com/packer/1.9.1/packer_1.9.1_%s_%s.zip", s.OS, s.ARCH),
-		BinPath: fmt.Sprintf("packer_%s_%s.zip", s.OS, s.ARCH),
+		BinPath: destinationZipPath,
 	}
 }
 
 func getPulumiUrl(s Specs) *ZipExecutableRef {
+	// Get the current directory
+	dir, err := os.Getwd()
+	if err != nil {
+		log.Fatalf("there was an error getting the current directory: %v", err)
+	}
+
+	// Create the destination path
 	var arch string
 	switch s.ARCH {
 	case "amd64":
 		arch = "x64"
 	}
+	destinationZipPath := filepath.Join(dir, "pulumi", fmt.Sprintf("packer_%s_%s.zip", s.OS, arch))
 
+	// Return the zip executable reference
 	return &ZipExecutableRef{
 		URL:     fmt.Sprintf("https://get.pulumi.com/releases/sdk/pulumi-v3.74.0-%s-%s.zip", s.OS, arch),
-		BinPath: fmt.Sprintf("pulumi_%s_%s.zip", s.OS, s.ARCH),
+		BinPath: destinationZipPath,
 	}
 }
 
 func generateBars(progress *mpb.Progress, ze []*ZipExecutableRef) []*mpb.Bar {
+	// Create the bars
 	bars := make([]*mpb.Bar, 0)
-
 	for i := 0; i < len(ze); i++ {
 		var bar *mpb.Bar
 		url := ze[i].URL
-		name := ze[i].BinPath
+		name := filepath.Base(ze[i].BinPath)
+		// Perform a HEAD request to get the content length
 		resp, err := http.Head(url)
 		if err != nil {
 			log.Printf("Error occurred while sending HEAD request: %v\n", err)
@@ -106,18 +129,14 @@ func generateBars(progress *mpb.Progress, ze []*ZipExecutableRef) []*mpb.Bar {
 			continue
 		}
 
+		// Assign the bar length to the content length
 		bar = progress.AddBar(int64(contentLength),
 			mpb.PrependDecorators(
-				// simple name decorator
 				decor.Name(name),
-				// decor.DSyncWidth bit enables column width synchronization
-				// decor.Percentage(decor.WCSyncSpace),
 				decor.Counters(decor.SizeB1024(0), " % .2f / % .2f"),
 			),
 			mpb.AppendDecorators(
-				// replace ETA decorator with "done" message, OnComplete event
 				decor.OnComplete(
-					// ETA decorator with ewma age of 30
 					decor.Percentage(decor.WCSyncSpace),
 					"done",
 				),
@@ -130,10 +149,64 @@ func generateBars(progress *mpb.Progress, ze []*ZipExecutableRef) []*mpb.Bar {
 	return bars
 }
 
+// Write a function that checks for the existance of the binaries
+func checkBinariesExistence(ze []*ZipExecutableRef) bool {
+	for _, e := range ze {
+		if _, err := os.Stat(e.BinPath); os.IsNotExist(err) {
+			return false
+		}
+	}
+
+	return true
+}
+
+// Write a function that unzip the files
+func unzip(src, dest string) error {
+	r, err := zip.OpenReader(src)
+	if err != nil {
+		return err
+	}
+	defer r.Close()
+
+	// Create the directory
+	os.MkdirAll(dest, 0755)
+
+	// Iterate through the files in the archive
+	for _, f := range r.File {
+		// Open the file
+		rc, err := f.Open()
+		if err != nil {
+			return err
+		}
+		defer rc.Close()
+
+		// Create the file
+		fpath := filepath.Join(dest, f.Name)
+		if f.FileInfo().IsDir() {
+			os.MkdirAll(fpath, f.Mode())
+		} else {
+			os.MkdirAll(filepath.Dir(fpath), f.Mode())
+			f, err := os.OpenFile(
+				fpath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
+			if err != nil {
+				return err
+			}
+			defer f.Close()
+
+			// Write the file
+			_, err = io.Copy(f, rc)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
 func downloadPackages(ze []*ZipExecutableRef) {
 	resultChan := make(chan DownloadResult, len(ze))
 	wg := sync.WaitGroup{}
-	progress := mpb.New(mpb.WithWaitGroup(&wg), mpb.WithWidth(60), mpb.WithRefreshRate(180*time.Millisecond))
+	progress := mpb.New(mpb.WithWaitGroup(&wg), mpb.WithWidth(100), mpb.WithRefreshRate(180*time.Millisecond))
 	bars := generateBars(progress, ze)
 	wg.Add(len(ze))
 
@@ -146,6 +219,7 @@ func downloadPackages(ze []*ZipExecutableRef) {
 
 	go func() {
 		wg.Wait()
+
 		close(resultChan)
 	}()
 
@@ -191,6 +265,13 @@ func download(url string, binPath string, bar *mpb.Bar) error {
 			break // Reached the end of the response body
 		}
 		bar.IncrBy(bytesDownloaded)
+	}
+
+	// Create the file along with all the necessary directories
+	err = os.MkdirAll(filepath.Dir(binPath), 0755)
+	if err != nil {
+		log.Printf("there was an error while creating %#v", binPath)
+		return err
 	}
 
 	// Create
