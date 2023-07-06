@@ -14,7 +14,8 @@ type Dependency struct {
 	ExtractionPath string
 	Present        bool
 	ContentLength  int64
-	Bar            *mpb.Bar
+	DownloadBar    *mpb.Bar
+	ZipBar				 *mpb.Bar
 }
 
 type DownloadResult struct {
@@ -24,6 +25,6 @@ type DownloadResult struct {
 
 type Binary struct {
 	Dependency *Dependency
-	Extracted	bool
-	Err error
+	Extracted  bool
+	Err        error
 }

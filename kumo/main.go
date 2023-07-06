@@ -21,7 +21,7 @@ func init() {
 
 	// Start a goroutine for each dependency
 	for _, dep := range dependencies {
-		go utils.Download2(dep, downloads, &wg)
+		go utils.Download(dep, downloads, &wg)
 	}
 
 	// Start a goroutine to wait for all downloads to complete

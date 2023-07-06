@@ -17,7 +17,7 @@ func AppendBarToDependencies(wg *sync.WaitGroup, deps []*Dependency) {
 
 	for _, d := range deps {
 		// Config the bar
-		bar := progress.AddBar(int64(d.ContentLength),
+		downloadBar := progress.AddBar(int64(d.ContentLength),
 			mpb.BarFillerClearOnComplete(),
 			mpb.PrependDecorators(
 				decor.Name(d.Name),
@@ -28,12 +28,27 @@ func AppendBarToDependencies(wg *sync.WaitGroup, deps []*Dependency) {
 					decor.Percentage(decor.WCSyncSpace),
 					"done",
 				),
+			),
+		)
 
+		zipBar := progress.AddBar(int64(d.ContentLength),
+			mpb.BarFillerClearOnComplete(),
+			mpb.PrependDecorators(
+				decor.Name(d.Name),
+				decor.Counters(decor.SizeB1024(0), " % .2f / % .2f"),
+			),
+			mpb.AppendDecorators(
+				decor.OnComplete(
+					decor.Percentage(decor.WCSyncSpace),
+					"done",
+				),
 			),
 		)
 
 		// Assign the bar to the dependency
-		d.Bar = bar
+		d.DownloadBar = downloadBar
+		d.ZipBar = zipBar
+
 	}
 }
 

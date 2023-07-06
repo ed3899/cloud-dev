@@ -9,11 +9,13 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+
+	"github.com/vbauerster/mpb/v8"
 )
 
 func UnzipSource(dr *DownloadResult, wg *sync.WaitGroup) *Binary {
 	// 1. Open the zip file
-    defer wg.Done()
+	defer wg.Done()
 	reader, err := zip.OpenReader(dr.Dependency.ZipPath)
 	if err != nil {
 		log.Printf("there was an error while opening the zip file: %v", err)
@@ -38,7 +40,7 @@ func UnzipSource(dr *DownloadResult, wg *sync.WaitGroup) *Binary {
 
 	// 3. Iterate over zip files inside the archive and unzip each of them
 	for _, f := range reader.File {
-		err := unzipFile(f, destination)
+		err := unzipFile(f, destination, dr.Dependency.DownloadBar)
 		if err != nil {
 			log.Printf("there was an error while unzipping the file: %v", err)
 			return &Binary{
@@ -52,7 +54,25 @@ func UnzipSource(dr *DownloadResult, wg *sync.WaitGroup) *Binary {
 	return nil
 }
 
-func unzipFile(f *zip.File, destination string) error {
+func getZipSize(path string) (size int64, err error) {
+	zipfile, err := os.Open(path)
+	if err != nil {
+			return
+	}
+	defer zipfile.Close()
+
+	info, err := zipfile.Stat()
+	if err != nil {
+			return
+	}
+	size = info.Size()
+
+	return
+}
+
+// How to get the zip size without unzipping it
+
+func unzipFile(f *zip.File, destination string, bar *mpb.Bar) error {
 	// 4. Check if file paths are not vulnerable to Zip Slip
 	filePath := filepath.Join(destination, f.Name)
 	if !strings.HasPrefix(filePath, filepath.Clean(destination)+string(os.PathSeparator)) {
@@ -85,8 +105,23 @@ func unzipFile(f *zip.File, destination string) error {
 	}
 	defer zippedFile.Close()
 
-	if _, err := io.Copy(destinationFile, zippedFile); err != nil {
-		return err
-	}
+    buffer := make([]byte, 4096)
+    for {
+        bytesCopied, err := zippedFile.Read(buffer)
+        if err != nil && err != io.EOF {
+            return err
+        }
+        if bytesCopied == 0 {
+            break
+        }
+        if _, err := destinationFile.Write(buffer[:bytesCopied]); err != nil {
+            return err
+        }
+        bar.IncrBy(bytesCopied)
+    }
+
+	// if _, err := io.Copy(destinationFile, zippedFile); err != nil {
+	// 	return err
+	// }
 	return nil
 }
