@@ -15,7 +15,7 @@ func DraftPackerDependency(s Specs) *Dependency {
 	}
 
 	// Create destination paths
-	destinationZipPath := filepath.Join(dir, fmt.Sprintf("packer_%s_%s.zip", s.OS, s.ARCH))
+	destinationZipPath := filepath.Join(dir, "deps", fmt.Sprintf("packer_%s_%s.zip", s.OS, s.ARCH))
 	destinationExtractionPath := filepath.Join(dir, "packer")
 	url := fmt.Sprintf("https://releases.hashicorp.com/packer/1.9.1/packer_1.9.1_%s_%s.zip", s.OS, s.ARCH)
 
@@ -24,7 +24,7 @@ func DraftPackerDependency(s Specs) *Dependency {
 		return &Dependency{
 			URL:            url,
 			ExtractionPath: destinationExtractionPath,
-			ZipPath: 			destinationZipPath,
+			ZipPath:        destinationZipPath,
 			Present:        true,
 		}
 	}

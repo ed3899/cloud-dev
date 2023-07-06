@@ -12,21 +12,21 @@ import (
 	"github.com/vbauerster/mpb/v8"
 )
 
-func DownloadDependencies(ze []*Dependency) {
-	resultChan := make(chan DownloadResult, len(ze))
+func DownloadDependencies(deps []*Dependency) {
+	resultChan := make(chan DownloadResult, len(deps))
 	wg := sync.WaitGroup{}
 	progress := mpb.New(mpb.WithWaitGroup(&wg), mpb.WithWidth(100), mpb.WithRefreshRate(180*time.Millisecond))
-	bars := GenerateBars(progress, ze)
-	wg.Add(len(ze))
+	bars := GenerateBars(progress, deps)
+	wg.Add(len(deps))
 
-	for i, v := range ze {
-		go func(ref *Dependency, bar *mpb.Bar) {
+	for i, v := range deps {
+		go func(dep *Dependency, bar *mpb.Bar) {
 			defer wg.Done()
-			if ref.Present {
-				log.Printf("File '%s' already exists", ref.ExtractionPath)
+			if dep.Present {
+				log.Printf("Dependency '%s' already exists. Skipped", filepath.Base(dep.ZipPath))
 				return
 			}
-			DownloadZip(ref, resultChan, bar)
+			HandleDownloads(dep, resultChan, bar)
 		}(v, bars[i])
 	}
 
@@ -43,36 +43,37 @@ func DownloadDependencies(ze []*Dependency) {
 	}
 }
 
-func DownloadZip(ref *Dependency, resultChan chan<- DownloadResult, bar *mpb.Bar) {
-	err := Download(ref.URL, ref.ExtractionPath, bar)
+func HandleDownloads(dep *Dependency, resultChan chan<- DownloadResult, bar *mpb.Bar) {
+	err := Download(dep.URL, dep.ZipPath, bar)
 
 	result := DownloadResult{
-		Dependency: ref,
+		Dependency: dep,
 		Err:        err,
 	}
 
 	resultChan <- result
 }
 
-func Download(url string, binPath string, bar *mpb.Bar) error {
+func Download(url string, path string, bar *mpb.Bar) error {
 	// Download
 	response, err := http.Get(url)
 	if err != nil {
 		log.Printf("there was an error while attempting to download from '%s': '%#v'", url, err)
 	}
 	defer response.Body.Close()
+	destDir := filepath.Dir(path)
 
 	// Create the file along with all the necessary directories
-	err = os.MkdirAll(filepath.Dir(binPath), 0755)
+	err = os.MkdirAll(destDir, 0755)
 	if err != nil {
-		log.Printf("there was an error while creating %#v", binPath)
+		log.Printf("there was an error while creating %#v", destDir)
 		return err
 	}
 
 	// Create
-	file, err := os.OpenFile(binPath, os.O_CREATE|os.O_WRONLY, 0744)
+	file, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY, 0744)
 	if err != nil {
-		log.Printf("there was an error while creating %#v", binPath)
+		log.Printf("there was an error while creating %#v", path)
 		return err
 	}
 	defer file.Close()
@@ -95,7 +96,7 @@ func Download(url string, binPath string, bar *mpb.Bar) error {
 		_, err = file.Write(buffer[:bytesDownloaded])
 
 		if err != nil {
-			log.Printf("there was an error while writing to %#v", binPath)
+			log.Printf("there was an error while writing to %#v", path)
 			return err
 		}
 

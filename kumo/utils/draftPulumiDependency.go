@@ -21,8 +21,8 @@ func DraftPulumiDependency(s Specs) *Dependency {
 		arch = "x64"
 	}
 	// Create destination paths
+	destinationZipPath := filepath.Join(dir, "deps", fmt.Sprintf("pulumi_%s_%s.zip", s.OS, arch))
 	destinationExtractionPath := filepath.Join(dir, "pulumi")
-	destinationZipPath := filepath.Join(dir, "pulumi", fmt.Sprintf("packer_%s_%s.zip", s.OS, arch))
 	url := fmt.Sprintf("https://get.pulumi.com/releases/sdk/pulumi-v3.74.0-%s-%s.zip", s.OS, arch)
 
 	if FileExists(destinationExtractionPath) {
