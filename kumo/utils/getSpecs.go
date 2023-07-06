@@ -11,7 +11,6 @@ import (
 	"sync"
 	"time"
 
-	// "github.com/schollz/progressbar/v3"
 	"github.com/vbauerster/mpb/v8"
 	"github.com/vbauerster/mpb/v8/decor"
 )
@@ -21,11 +20,6 @@ type Specs struct {
 	ARCH string
 }
 
-type Urls struct {
-	Packer string
-	Pulumi string
-}
-
 type ZipExecutableRef struct {
 	URL     string
 	BinPath string
@@ -33,12 +27,10 @@ type ZipExecutableRef struct {
 
 func init() {
 	hs := getHostSpecs()
-	validateHostCompatibility(hs)
-	packerUrl := getPackerUrl(hs)
-	pulumiUrl := getPulumiUrl(hs)
+	vh := validateHostCompatibility(hs)
+	packerUrl := getPackerUrl(vh)
+	pulumiUrl := getPulumiUrl(vh)
 	urls := []*ZipExecutableRef{packerUrl, pulumiUrl}
-
-	// downloadPacker(*packerUrl)
 	downloadPackages(urls)
 }
 
@@ -49,7 +41,7 @@ func getHostSpecs() Specs {
 	}
 }
 
-func validateHostCompatibility(s Specs) {
+func validateHostCompatibility(s Specs) Specs {
 	switch s.OS {
 	case "windows":
 		switch s.ARCH {
@@ -61,6 +53,8 @@ func validateHostCompatibility(s Specs) {
 	default:
 		log.Fatalf("Looks like your operative system is not supported :/")
 	}
+
+	return s
 }
 
 func getPackerUrl(s Specs) *ZipExecutableRef {
@@ -137,17 +131,17 @@ func generateBars(progress *mpb.Progress, ze []*ZipExecutableRef) []*mpb.Bar {
 }
 
 func downloadPackages(ze []*ZipExecutableRef) {
-	resultChan := make(chan DownloadResult)
+	resultChan := make(chan DownloadResult, len(ze))
 	wg := sync.WaitGroup{}
 	progress := mpb.New(mpb.WithWaitGroup(&wg), mpb.WithWidth(60), mpb.WithRefreshRate(180*time.Millisecond))
 	bars := generateBars(progress, ze)
 	wg.Add(len(ze))
 
-	for i := 0; i < len(ze); i++ {
-		go func(ref ZipExecutableRef, bar *mpb.Bar) {
+	for i, v := range ze {
+		go func(ref *ZipExecutableRef, bar *mpb.Bar) {
 			defer wg.Done()
 			downloadBin(ref, resultChan, bar)
-		}(*ze[i], bars[i])
+		}(v, bars[i])
 	}
 
 	go func() {
@@ -167,11 +161,11 @@ type DownloadResult struct {
 	Err    error
 }
 
-func downloadBin(ref ZipExecutableRef, resultChan chan<- DownloadResult, bar *mpb.Bar) {
+func downloadBin(ref *ZipExecutableRef, resultChan chan<- DownloadResult, bar *mpb.Bar) {
 	err := download(ref.URL, ref.BinPath, bar)
 
 	result := DownloadResult{
-		ZipRef: &ref,
+		ZipRef: ref,
 		Err:    err,
 	}
 
@@ -189,17 +183,14 @@ func download(url string, binPath string, bar *mpb.Bar) error {
 	buffer := make([]byte, 4096)
 
 	for {
-		// start := time.Now()
 		bytesDownloaded, err := response.Body.Read(buffer)
 		if err != nil && err != io.EOF {
-			// Handle the error accordingly (e.g., log, return, etc.)
 			log.Printf("err while downloading from '%s': %#v", url, err)
 		}
 		if bytesDownloaded == 0 {
 			break // Reached the end of the response body
 		}
 		bar.IncrBy(bytesDownloaded)
-		// bar.EwmaIncrement(time.Since(start))
 	}
 
 	// Create
