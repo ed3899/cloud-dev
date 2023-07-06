@@ -117,13 +117,15 @@ func generateBars(progress *mpb.Progress, ze []*ZipExecutableRef) []*mpb.Bar {
 				// simple name decorator
 				decor.Name(name),
 				// decor.DSyncWidth bit enables column width synchronization
-				decor.Percentage(decor.WCSyncSpace),
+				// decor.Percentage(decor.WCSyncSpace),
+				decor.Counters(decor.SizeB1024(0), " % .2f / % .2f"),
 			),
 			mpb.AppendDecorators(
 				// replace ETA decorator with "done" message, OnComplete event
 				decor.OnComplete(
 					// ETA decorator with ewma age of 30
-					decor.EwmaETA(decor.ET_STYLE_GO, 30, decor.WCSyncWidth), "done",
+					decor.Percentage(decor.WCSyncSpace),
+					"done",
 				),
 			),
 		)
@@ -187,6 +189,7 @@ func download(url string, binPath string, bar *mpb.Bar) error {
 	buffer := make([]byte, 4096)
 
 	for {
+		// start := time.Now()
 		bytesDownloaded, err := response.Body.Read(buffer)
 		if err != nil && err != io.EOF {
 			// Handle the error accordingly (e.g., log, return, etc.)
@@ -196,6 +199,7 @@ func download(url string, binPath string, bar *mpb.Bar) error {
 			break // Reached the end of the response body
 		}
 		bar.IncrBy(bytesDownloaded)
+		// bar.EwmaIncrement(time.Since(start))
 	}
 
 	// Create
