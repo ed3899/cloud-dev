@@ -5,13 +5,14 @@ type Specs struct {
 	ARCH string
 }
 
-type ZipExecutableRef struct {
-	URL     string
-	ZipPath string
-	BinPath string
+type Dependency struct {
+	URL            string
+	ZipPath        string
+	ExtractionPath string
+	Present        bool
 }
 
 type DownloadResult struct {
-	ZipRef *ZipExecutableRef
-	Err    error
+	Dependency *Dependency
+	Err        error
 }

@@ -5,17 +5,18 @@ import (
 	"net/http"
 	"path/filepath"
 	"strconv"
+
 	"github.com/vbauerster/mpb/v8"
 	"github.com/vbauerster/mpb/v8/decor"
 )
 
-func GenerateBars(progress *mpb.Progress, ze []*ZipExecutableRef) []*mpb.Bar {
+func GenerateBars(progress *mpb.Progress, ze []*Dependency) []*mpb.Bar {
 	// Create the bars
 	bars := make([]*mpb.Bar, 0)
 	for i := 0; i < len(ze); i++ {
 		var bar *mpb.Bar
 		url := ze[i].URL
-		name := filepath.Base(ze[i].BinPath)
+		name := filepath.Base(ze[i].ExtractionPath)
 		// Perform a HEAD request to get the content length
 		resp, err := http.Head(url)
 		if err != nil {
