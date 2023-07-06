@@ -7,11 +7,16 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
+	"time"
+
+	"github.com/vbauerster/mpb/v8"
+	"github.com/vbauerster/mpb/v8/decor"
 )
 
 func Download(dep *Dependency, downloads chan<- *DownloadResult, wg *sync.WaitGroup) {
 	// Download
 	defer wg.Done()
+
 	url := dep.URL
 	response, err := http.Get(url)
 	if err != nil {
@@ -27,7 +32,7 @@ func Download(dep *Dependency, downloads chan<- *DownloadResult, wg *sync.WaitGr
 	zipPath := dep.ZipPath
 	destDir := filepath.Dir(zipPath)
 
-	// Create the file along with all the necessary directories
+	// Create the destination along with all the necessary directories
 	err = os.MkdirAll(destDir, 0755)
 	if err != nil {
 		log.Printf("there was an error while creating %#v", destDir)
@@ -39,7 +44,7 @@ func Download(dep *Dependency, downloads chan<- *DownloadResult, wg *sync.WaitGr
 		return
 	}
 
-	// Create
+	// Create file to write to
 	file, err := os.OpenFile(zipPath, os.O_CREATE|os.O_WRONLY, 0744)
 	if err != nil {
 		log.Printf("there was an error while creating %#v", zipPath)
@@ -54,6 +59,7 @@ func Download(dep *Dependency, downloads chan<- *DownloadResult, wg *sync.WaitGr
 
 	buffer := make([]byte, 4096)
 
+	// Iterate over the response body and write to the file while updating the progress bar
 	for {
 		bytesDownloaded, err := response.Body.Read(buffer)
 
@@ -86,10 +92,33 @@ func Download(dep *Dependency, downloads chan<- *DownloadResult, wg *sync.WaitGr
 
 	}
 
+	// Create the download result and send it to the channel
 	download := &DownloadResult{
 		Dependency: dep,
 		Err:        nil,
 	}
 
 	downloads <- download
+}
+
+func attachProgressBar(wg *sync.WaitGroup, d *Dependency) *Dependency {
+	progress := mpb.New(mpb.WithWaitGroup(wg), mpb.WithWidth(100), mpb.WithRefreshRate(180*time.Millisecond))
+
+	downloadBar := progress.AddBar(int64(d.ContentLength),
+		mpb.BarFillerClearOnComplete(),
+		mpb.PrependDecorators(
+			decor.Name(d.Name),
+			decor.Counters(decor.SizeB1024(0), " % .2f / % .2f"),
+		),
+		mpb.AppendDecorators(
+			decor.OnComplete(
+				decor.Percentage(decor.WCSyncSpace),
+				"done",
+			),
+		),
+	)
+
+	d.DownloadBar = downloadBar
+
+	return d
 }

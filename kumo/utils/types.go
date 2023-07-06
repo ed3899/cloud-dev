@@ -1,6 +1,10 @@
 package utils
 
-import "github.com/vbauerster/mpb/v8"
+import (
+	"sync"
+
+	"github.com/vbauerster/mpb/v8"
+)
 
 type Specs struct {
 	OS   string
@@ -14,6 +18,7 @@ type Dependency struct {
 	ExtractionPath string
 	Present        bool
 	ContentLength  int64
+	WaitGroup      *sync.WaitGroup
 	DownloadBar    *mpb.Bar
 	ZipBar				 *mpb.Bar
 }
