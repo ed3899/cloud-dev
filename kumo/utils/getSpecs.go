@@ -7,9 +7,10 @@ import (
 	"net/http"
 	"os"
 	"runtime"
+	"strconv"
 	"sync"
 
-	"github.com/schollz/progressbar/v3"
+	// "github.com/schollz/progressbar/v3"
 	"github.com/vbauerster/mpb/v8"
 	"github.com/vbauerster/mpb/v8/decor"
 )
@@ -80,38 +81,16 @@ func getPulumiUrl(s Specs) *ZipExecutableRef {
 	}
 }
 
-// func downloadPacker(p ZipExecutableRef) {
-// 	downloadBin(p.URL, p.BinPath)
-// }
-
 func downloadPackages(ze []*ZipExecutableRef) {
 	resultChan := make(chan DownloadResult)
 	wg := sync.WaitGroup{}
-	p := mpb.New(mpb.WithWaitGroup(&wg))
-	total, numBars := 100, len(ze)
+	progress := mpb.New(mpb.WithWaitGroup(&wg))
 
-	for i := 0; i < numBars; i++ {
+	for i := 0; i < len(ze); i++ {
 		wg.Add(1)
-		name := fmt.Sprintf("#%v:", ze[i].BinPath)
-		bar := p.AddBar(int64(total),
-			mpb.PrependDecorators(
-				// simple name decorator
-				decor.Name(name),
-				// decor.DSyncWidth bit enables column width synchronization
-				decor.Percentage(decor.WCSyncSpace),
-			),
-			mpb.AppendDecorators(
-				// replace ETA decorator with "done" message, OnComplete event
-				decor.OnComplete(
-					// ETA decorator with ewma age of 30
-					decor.EwmaETA(decor.ET_STYLE_GO, 30, decor.WCSyncWidth), "done",
-				),
-			),
-		)
-
 		go func(ref ZipExecutableRef) {
 			defer wg.Done()
-			downloadBin(ref, resultChan, bar)
+			downloadBin(ref, resultChan, progress)
 		}(*ze[i])
 	}
 
@@ -134,8 +113,8 @@ type DownloadResult struct {
 	Err    error
 }
 
-func downloadBin(ref ZipExecutableRef, resultChan chan<- DownloadResult, bar *mpb.Bar) {
-	err := download(ref.URL, ref.BinPath)
+func downloadBin(ref ZipExecutableRef, resultChan chan<- DownloadResult, progress *mpb.Progress) {
+	err := download(ref.URL, ref.BinPath, progress)
 
 	result := DownloadResult{
 		ZipRef: &ref,
@@ -145,31 +124,49 @@ func downloadBin(ref ZipExecutableRef, resultChan chan<- DownloadResult, bar *mp
 	resultChan <- result
 }
 
-func download(url string, binPath string) error {
+func download(url string, binPath string, progress *mpb.Progress) error {
 	// Download
 	response, err := http.Get(url)
 	if err != nil {
-		log.Fatalf("there was an error while attempting to download %#v", url)
+		log.Printf("there was an error while attempting to download from '%s': '%#v'", url, err)
+	}
+	defer response.Body.Close()
+
+	totalSize, err := strconv.ParseInt(response.Header.Get("Content-Length"), 10, 64)
+	if err != nil {
+		log.Printf("there was an error while attempting to download from '%s': '%#v'", url, err)
 	}
 
 	buffer := make([]byte, 4096)
-	totalBytes := 0
+
+	bar := progress.AddBar(int64(totalSize),
+		mpb.PrependDecorators(
+			// simple name decorator
+			decor.Name(binPath),
+			// decor.DSyncWidth bit enables column width synchronization
+			decor.Percentage(decor.WCSyncSpace),
+		),
+		mpb.AppendDecorators(
+			// replace ETA decorator with "done" message, OnComplete event
+			decor.OnComplete(
+				// ETA decorator with ewma age of 30
+				decor.EwmaETA(decor.ET_STYLE_GO, 30, decor.WCSyncWidth), "done",
+			),
+		))
 
 	for {
-		bytesRead, err := response.Body.Read(buffer)
+		bytesDownloaded, err := response.Body.Read(buffer)
 		if err != nil && err != io.EOF {
 			// Handle the error accordingly (e.g., log, return, etc.)
-			log.Print("err")
+			log.Printf("err while downloading from '%s': %#v", url, err)
 		}
 
-		if bytesRead == 0 {
+		if bytesDownloaded == 0 {
 			break // Reached the end of the response body
 		}
-		log.Print(totalBytes)
-		totalBytes += bytesRead
-	}
+		bar.IncrBy(bytesDownloaded)
 
-	defer response.Body.Close()
+	}
 
 	// Create
 	file, err := os.OpenFile(binPath, os.O_CREATE|os.O_WRONLY, 0744)
@@ -178,13 +175,8 @@ func download(url string, binPath string) error {
 	}
 	defer file.Close()
 
-	bar := progressbar.DefaultBytes(
-		response.ContentLength,
-		fmt.Sprintf("Downloading %s", binPath),
-	)
-
 	// Fill
-	_, err = io.Copy(io.MultiWriter(file, bar), response.Body)
+	_, err = io.Copy(file, response.Body)
 	if err != nil {
 		log.Fatalf("there was an error while copying contents to %#v", binPath)
 		return err
