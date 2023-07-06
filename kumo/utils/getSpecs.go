@@ -33,6 +33,7 @@ type ZipExecutableRef struct {
 
 func init() {
 	hs := getHostSpecs()
+	validateHostCompatibility(hs)
 	packerUrl := getPackerUrl(hs)
 	pulumiUrl := getPulumiUrl(hs)
 	urls := []*ZipExecutableRef{packerUrl, pulumiUrl}
@@ -155,8 +156,6 @@ func downloadPackages(ze []*ZipExecutableRef) {
 	for result := range resultChan {
 		if result.Err != nil {
 			log.Printf("Error downloading %s: %v\n", result.ZipRef.URL, result.Err)
-		} else {
-			fmt.Printf("Downloaded %s to %s successfully\n", result.ZipRef.URL, result.ZipRef.BinPath)
 		}
 	}
 }
@@ -193,25 +192,24 @@ func download(url string, binPath string, bar *mpb.Bar) error {
 			// Handle the error accordingly (e.g., log, return, etc.)
 			log.Printf("err while downloading from '%s': %#v", url, err)
 		}
-
 		if bytesDownloaded == 0 {
 			break // Reached the end of the response body
 		}
 		bar.IncrBy(bytesDownloaded)
-
 	}
 
 	// Create
 	file, err := os.OpenFile(binPath, os.O_CREATE|os.O_WRONLY, 0744)
 	if err != nil {
-		log.Fatalf("there was an error while creating %#v", binPath)
+		log.Printf("there was an error while creating %#v", binPath)
+		return err
 	}
 	defer file.Close()
 
 	// Fill
 	_, err = io.Copy(file, response.Body)
 	if err != nil {
-		log.Fatalf("there was an error while copying contents to %#v", binPath)
+		log.Printf("there was an error while copying contents to %#v", binPath)
 		return err
 	}
 
