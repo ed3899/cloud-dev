@@ -152,6 +152,14 @@ func Download2(dep *Dependency, downloads chan<- *DownloadResult, wg *sync.WaitG
 		}
 
 	}
+
+	download := &DownloadResult{
+		Dependency: dep,
+		Err:        err,
+		Fulfilled:  true,
+	}
+
+	downloads <- download
 }
 
 func Download(url string, path string, bar *mpb.Bar) error {
