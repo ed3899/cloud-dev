@@ -20,7 +20,7 @@ func init() {
 	wg := sync.WaitGroup{}
 	wg.Add(len(dependencies) * 2)
 	progress := mpb.New(mpb.WithWaitGroup(&wg), mpb.WithWidth(60), mpb.WithRefreshRate(180*time.Millisecond))
-	utils.AppendDownloadBar(progress, dependencies)
+	utils.AttachDownloadBar(progress, dependencies)
 
 	// Start a download for each dependency
 	for _, dep := range dependencies {
@@ -43,16 +43,18 @@ func init() {
 		close(downloads)
 	}()
 
+	// Start a goroutine to unzip each dependency
 	for dr := range downloads {
 		if dr.Err != nil {
 			fmt.Printf("Error occurred while downloading %s: %v\n", dr.Dependency.Name, dr.Err)
 			continue
 		}
 
-		utils.AppendZipBar(progress, dr)
+		utils.AttachZipBar(progress, dr)
+
 		go func(dr *utils.DownloadResult) {
 			defer wg.Done()
-			err := utils.UnzipSource(dr)
+			err := utils.Unzip(dr)
 			if err != nil {
 				fmt.Printf("Error occurred while unzipping %s: %v\n", dr.Dependency.Name, err)
 				return
@@ -60,6 +62,7 @@ func init() {
 		}(dr)
 	}
 
+	// Start a goroutine to wait for all unzips to complete and flush the progress bar
 	go func() {
 		progress.Wait()
 	}()

@@ -25,13 +25,6 @@ type DownloadResult struct {
 	Err        error
 }
 
-type ZipFile struct {
-	Name string
-	Path string
-	Extracted bool
-	Error error
-}
-
 type Binary struct {
 	Dependency *Dependency
 	Extracted  bool

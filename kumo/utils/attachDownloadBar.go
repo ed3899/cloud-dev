@@ -8,7 +8,7 @@ import (
 	"github.com/vbauerster/mpb/v8/decor"
 )
 
-func AppendDownloadBar(p *mpb.Progress, deps []*Dependency) {
+func AttachDownloadBar(p *mpb.Progress, deps []*Dependency) {
 	for _, d := range deps {
 		// Config the bar
 		downloadBar := p.AddBar(int64(d.ContentLength),

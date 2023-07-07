@@ -11,7 +11,7 @@ import (
 	"sync"
 )
 
-func UnzipSource(dr *DownloadResult) error {
+func Unzip(dr *DownloadResult) error {
 	// 1. Open the zip file
 	reader, err := zip.OpenReader(dr.Dependency.ZipPath)
 	if err != nil {
@@ -110,26 +110,6 @@ func unzipFile(f *zip.File, destination string) (int64, error) {
 		return 0, err
 	}
 	defer zippedFile.Close()
-
-	// buffer := make([]byte, 4096)
-	// // 8. Copy the content of the file to the destination file while updating the progress bar
-	// for {
-	// 	bytesCopied, err := zippedFile.Read(buffer)
-	// 	if err != nil && err != io.EOF {
-	// 		return err
-
-	// 	}
-	// 	if bytesCopied == 0 {
-	// 		break
-	// 	}
-	// 	if _, err := destinationFile.Write(buffer[:bytesCopied]); err != nil {
-	// 		return err
-	// 	}
-
-	// 	bytesUnzipped <- bytesCopied
-	// }
-
-	// Give me an alternative using io.Copy
 
 	bytesCopied, err := io.Copy(destinationFile, zippedFile)
 	if err != nil {

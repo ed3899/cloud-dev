@@ -9,7 +9,7 @@ import (
 	"github.com/vbauerster/mpb/v8/decor"
 )
 
-func AppendZipBar(p *mpb.Progress, dr *DownloadResult) {
+func AttachZipBar(p *mpb.Progress, dr *DownloadResult) {
 	zipSize, err := getZipSize(dr.Dependency.ZipPath)
 	if err != nil {
 		log.Printf("there was an error while getting the zip size: %v", err)
@@ -43,13 +43,13 @@ func AppendZipBar(p *mpb.Progress, dr *DownloadResult) {
 func getZipSize(path string) (size int64, err error) {
 	zipfile, err := os.Open(path)
 	if err != nil {
-			return
+		return
 	}
 	defer zipfile.Close()
 
 	info, err := zipfile.Stat()
 	if err != nil {
-			return
+		return
 	}
 	size = info.Size()
 
