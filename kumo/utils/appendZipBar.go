@@ -9,20 +9,20 @@ import (
 	"github.com/vbauerster/mpb/v8/decor"
 )
 
-func AppendZipBar(p *mpb.Progress, d *DownloadResult) {
-	zipSize, err := getZipSize(d.Dependency.ZipPath)
+func AppendZipBar(p *mpb.Progress, dr *DownloadResult) {
+	zipSize, err := getZipSize(dr.Dependency.ZipPath)
 	if err != nil {
 		log.Printf("there was an error while getting the zip size: %v", err)
 		return
 	}
 
-	barName := fmt.Sprintf("%s.zip", d.Dependency.Name)
+	barName := fmt.Sprintf("%s.zip", dr.Dependency.Name)
 
 	// Config the bar
 	zipBar := p.AddBar(zipSize,
-		mpb.BarQueueAfter(d.Dependency.DownloadBar),
+		mpb.BarQueueAfter(dr.Dependency.DownloadBar),
 		mpb.BarFillerClearOnComplete(),
-		mpb.BarRemoveOnComplete(),
+		// mpb.BarRemoveOnComplete(),
 		mpb.PrependDecorators(
 			decor.Name(barName),
 			decor.Counters(decor.SizeB1024(0), " % .2f / % .2f"),
@@ -36,7 +36,7 @@ func AppendZipBar(p *mpb.Progress, d *DownloadResult) {
 	)
 
 	// Assign the bar to the dependency
-	d.Dependency.ZipBar = zipBar
+	dr.Dependency.ZipBar = zipBar
 
 }
 

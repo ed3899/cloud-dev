@@ -3,8 +3,10 @@ package main
 import (
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/ed3899/kumo/utils"
+	"github.com/vbauerster/mpb/v8"
 )
 
 func init() {
@@ -17,7 +19,8 @@ func init() {
 
 	wg := sync.WaitGroup{}
 	wg.Add(len(dependencies) * 2)
-	progress := utils.AppendDownloadBar(&wg, dependencies)
+	progress := mpb.New(mpb.WithWaitGroup(&wg), mpb.WithWidth(60), mpb.WithRefreshRate(180*time.Millisecond))
+	utils.AppendDownloadBar(progress, dependencies)
 
 	// Start a download for each dependency
 	for _, dep := range dependencies {
@@ -57,7 +60,7 @@ func init() {
 		}(dr)
 	}
 
-	progress.Wait()
+	wg.Wait()
 
 	fmt.Println("All files downloaded!")
 }
