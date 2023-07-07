@@ -3,8 +3,10 @@ package main
 import (
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/ed3899/kumo/utils"
+	"github.com/vbauerster/mpb/v8"
 )
 
 func init() {
@@ -31,10 +33,14 @@ func init() {
 	}()
 
 	for d := range downloads {
+		progress := mpb.New(mpb.WithWaitGroup(&wg), mpb.WithWidth(100), mpb.WithRefreshRate(180*time.Millisecond))
+
 		if d.Err != nil {
 			fmt.Printf("Error occurred while downloading %s: %v\n", d.Dependency.Name, d.Err)
 			continue
 		}
+
+		utils.AppendZipBar(progress, d)
 		go utils.UnzipSource(d, &wg)
 	}
 
