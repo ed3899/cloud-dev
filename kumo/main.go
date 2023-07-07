@@ -57,6 +57,8 @@ func init() {
 		}(dr)
 	}
 
+	progress.Wait()
+
 	fmt.Println("All files downloaded!")
 }
 
