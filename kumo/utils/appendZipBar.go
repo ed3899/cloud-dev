@@ -22,6 +22,7 @@ func AppendZipBar(p *mpb.Progress, d *DownloadResult) {
 	zipBar := p.AddBar(zipSize,
 		mpb.BarQueueAfter(d.Dependency.DownloadBar),
 		mpb.BarFillerClearOnComplete(),
+		mpb.BarRemoveOnComplete(),
 		mpb.PrependDecorators(
 			decor.Name(barName),
 			decor.Counters(decor.SizeB1024(0), " % .2f / % .2f"),
