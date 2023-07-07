@@ -23,7 +23,7 @@ func DraftPulumiDependency(s Specs) *Dependency {
 	// Create fields
 	name := "pulumi"
 	destinationZipPath := filepath.Join(dir, "deps", fmt.Sprintf("%s_%s_%s.zip", name, s.OS, arch))
-	destinationExtractionPath := filepath.Join(dir, name)
+	destinationExtractionPath := filepath.Join(dir, "deps", name)
 	url := fmt.Sprintf("https://get.pulumi.com/releases/sdk/pulumi-v3.74.0-%s-%s.zip", s.OS, arch)
 	contentLength := GetContentLength(url)
 
@@ -35,7 +35,7 @@ func DraftPulumiDependency(s Specs) *Dependency {
 			ExtractionPath: destinationExtractionPath,
 			ZipPath:        destinationZipPath,
 			Present:        true,
-			ContentLength: contentLength,
+			ContentLength:  contentLength,
 		}
 	}
 
@@ -45,7 +45,7 @@ func DraftPulumiDependency(s Specs) *Dependency {
 		ExtractionPath: destinationExtractionPath,
 		ZipPath:        destinationZipPath,
 		Present:        false,
-		ContentLength: contentLength,
+		ContentLength:  contentLength,
 	}
 
 }

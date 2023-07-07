@@ -17,7 +17,7 @@ func DraftPackerDependency(s Specs) *Dependency {
 	// Create fields
 	name := "packer"
 	destinationZipPath := filepath.Join(dir, "deps", fmt.Sprintf("%s_%s_%s.zip", name, s.OS, s.ARCH))
-	destinationExtractionPath := filepath.Join(dir, name)
+	destinationExtractionPath := filepath.Join(dir, "deps", name)
 	url := fmt.Sprintf("https://releases.hashicorp.com/packer/1.9.1/packer_1.9.1_%s_%s.zip", s.OS, s.ARCH)
 	contentLength := GetContentLength(url)
 

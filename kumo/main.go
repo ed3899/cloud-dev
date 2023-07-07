@@ -18,6 +18,7 @@ func init() {
 	downloads := make(chan *utils.DownloadResult, len(dependencies))
 
 	wg := sync.WaitGroup{}
+	// Add 2 to the wait group for each dependency (1 for download, 1 for unzip)
 	wg.Add(len(dependencies) * 2)
 	progress := mpb.New(mpb.WithWaitGroup(&wg), mpb.WithWidth(60), mpb.WithRefreshRate(180*time.Millisecond))
 	utils.AttachDownloadBar(progress, dependencies)
