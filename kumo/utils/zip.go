@@ -33,9 +33,11 @@ func UnzipSource(dr *DownloadResult, wg *sync.WaitGroup) error {
 	bins := make(chan *Binary, 8)
 	errCh := make(chan error, len(reader.File))
 
-	var wgUnzip sync.WaitGroup // Wait group for unzipping goroutines
+	// Wait group for unzipping goroutines
+	var wgUnzip sync.WaitGroup
 	wgUnzip.Add(len(reader.File))
 
+	// Wait group for unzipping goroutines
 	for _, f := range reader.File {
 		go func(f *zip.File) {
 			defer wgUnzip.Done()
@@ -56,12 +58,14 @@ func UnzipSource(dr *DownloadResult, wg *sync.WaitGroup) error {
 		}(f)
 	}
 
+	// Wait for all unzipping goroutines to finish
 	go func() {
 		wgUnzip.Wait()
 		close(errCh)
 		close(bins)
 	}()
 
+	// Update the progress bar for every unzipped file
 	go func() {
 		for b := range bytesUnzipped {
 			dr.Dependency.ZipBar.IncrBy(b)
@@ -69,6 +73,7 @@ func UnzipSource(dr *DownloadResult, wg *sync.WaitGroup) error {
 		close(bytesUnzipped)
 	}()
 
+	// Range over the error channel and return the first error
 	for err := range errCh {
 		if err != nil {
 			return err

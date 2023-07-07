@@ -19,20 +19,28 @@ func init() {
 	wg.Add(len(dependencies) * 2)
 	progress := utils.AppendDownloadBar(&wg, dependencies)
 
-	// Start a goroutine for each dependency
+	// Start a download for each dependency
 	for _, dep := range dependencies {
-		go utils.Download(dep, downloads, &wg)
+		go func(dep *utils.Dependency) {
+			defer wg.Done()
+			err := utils.Download(dep, downloads)
+			if err != nil {
+				downloads <- &utils.DownloadResult{
+					Dependency: dep,
+					Err:        err,
+				}
+				return
+			}
+		}(dep)
 	}
 
 	// Start a goroutine to wait for all downloads to complete
 	go func() {
-		wg.Wait()        // Wait until all downloads are complete
-		close(downloads) // Close the 'downloads' channel to exit the loop
+		wg.Wait()
+		close(downloads)
 	}()
 
 	for d := range downloads {
-		// progress := mpb.New(mpb.WithWaitGroup(&wg), mpb.WithWidth(100), mpb.WithRefreshRate(180*time.Millisecond))
-
 		if d.Err != nil {
 			fmt.Printf("Error occurred while downloading %s: %v\n", d.Dependency.Name, d.Err)
 			continue
@@ -44,7 +52,6 @@ func init() {
 
 	fmt.Println("All files downloaded!")
 }
-
 
 func main() {
 
