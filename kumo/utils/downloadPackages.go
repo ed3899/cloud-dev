@@ -7,10 +7,6 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
-	"time"
-
-	"github.com/vbauerster/mpb/v8"
-	"github.com/vbauerster/mpb/v8/decor"
 )
 
 func Download(dep *Dependency, downloads chan<- *DownloadResult, wg *sync.WaitGroup) {
@@ -78,6 +74,7 @@ func Download(dep *Dependency, downloads chan<- *DownloadResult, wg *sync.WaitGr
 
 		dep.DownloadBar.IncrBy(bytesDownloaded)
 
+
 		_, err = file.Write(buffer[:bytesDownloaded])
 
 		if err != nil {
@@ -87,6 +84,7 @@ func Download(dep *Dependency, downloads chan<- *DownloadResult, wg *sync.WaitGr
 				Dependency: dep,
 				Err:        err,
 			}
+
 			return
 		}
 
@@ -99,26 +97,4 @@ func Download(dep *Dependency, downloads chan<- *DownloadResult, wg *sync.WaitGr
 	}
 
 	downloads <- download
-}
-
-func attachProgressBar(wg *sync.WaitGroup, d *Dependency) *Dependency {
-	progress := mpb.New(mpb.WithWaitGroup(wg), mpb.WithWidth(100), mpb.WithRefreshRate(180*time.Millisecond))
-
-	downloadBar := progress.AddBar(int64(d.ContentLength),
-		mpb.BarFillerClearOnComplete(),
-		mpb.PrependDecorators(
-			decor.Name(d.Name),
-			decor.Counters(decor.SizeB1024(0), " % .2f / % .2f"),
-		),
-		mpb.AppendDecorators(
-			decor.OnComplete(
-				decor.Percentage(decor.WCSyncSpace),
-				"done",
-			),
-		),
-	)
-
-	d.DownloadBar = downloadBar
-
-	return d
 }

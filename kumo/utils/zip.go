@@ -9,13 +9,16 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	// "time"
 
 	"github.com/vbauerster/mpb/v8"
+	// "github.com/vbauerster/mpb/v8/decor"
 )
 
 func UnzipSource(dr *DownloadResult, wg *sync.WaitGroup) *Binary {
 	// 1. Open the zip file
 	defer wg.Done()
+
 	reader, err := zip.OpenReader(dr.Dependency.ZipPath)
 	if err != nil {
 		log.Printf("there was an error while opening the zip file: %v", err)
@@ -38,9 +41,30 @@ func UnzipSource(dr *DownloadResult, wg *sync.WaitGroup) *Binary {
 		}
 	}
 
+	// // Create a progress bar for unzipping the files
+	// progress := mpb.New(mpb.WithWaitGroup(wg), mpb.WithWidth(100), mpb.WithRefreshRate(180*time.Millisecond))
+	// unzipBar := progress.AddBar(int64(len(reader.File)),
+	// 	mpb.BarQueueAfter(dr.Dependency.DownloadBar),
+	// 	mpb.BarFillerClearOnComplete(),
+	// 	mpb.PrependDecorators(
+	// 		decor.Name(fmt.Sprintf("%s.zip", dr.Dependency.Name)),
+	// 		decor.Counters(decor.SizeB1024(0), " % .2f / % .2f"),
+	// 	),
+	// 	mpb.AppendDecorators(
+	// 		decor.OnComplete(
+	// 			decor.Percentage(decor.WCSyncSpace),
+	// 			"done",
+	// 		),
+	// 	),
+	// )
+
+	// for i := 0; i < len(reader.File); i++ {
+	// 	unzipBar.IncrBy(i)
+	// }
+
 	// 3. Iterate over zip files inside the archive and unzip each of them
 	for _, f := range reader.File {
-		err := unzipFile(f, destination, dr.Dependency.DownloadBar)
+		err := unzipFile(f, destination, dr.Dependency.ZipBar)
 		if err != nil {
 			log.Printf("there was an error while unzipping the file: %v", err)
 			return &Binary{
@@ -53,24 +77,6 @@ func UnzipSource(dr *DownloadResult, wg *sync.WaitGroup) *Binary {
 
 	return nil
 }
-
-func getZipSize(path string) (size int64, err error) {
-	zipfile, err := os.Open(path)
-	if err != nil {
-			return
-	}
-	defer zipfile.Close()
-
-	info, err := zipfile.Stat()
-	if err != nil {
-			return
-	}
-	size = info.Size()
-
-	return
-}
-
-// How to get the zip size without unzipping it
 
 func unzipFile(f *zip.File, destination string, bar *mpb.Bar) error {
 	// 4. Check if file paths are not vulnerable to Zip Slip
@@ -105,23 +111,21 @@ func unzipFile(f *zip.File, destination string, bar *mpb.Bar) error {
 	}
 	defer zippedFile.Close()
 
-    buffer := make([]byte, 4096)
-    for {
-        bytesCopied, err := zippedFile.Read(buffer)
-        if err != nil && err != io.EOF {
-            return err
-        }
-        if bytesCopied == 0 {
-            break
-        }
-        if _, err := destinationFile.Write(buffer[:bytesCopied]); err != nil {
-            return err
-        }
-        bar.IncrBy(bytesCopied)
-    }
+	buffer := make([]byte, 4096)
+	// 8. Copy the content of the file to the destination file while updating the progress bar
+	for {
+		bytesCopied, err := zippedFile.Read(buffer)
+		if err != nil && err != io.EOF {
+			return err
+		}
+		if bytesCopied == 0 {
+			break
+		}
+		if _, err := destinationFile.Write(buffer[:bytesCopied]); err != nil {
+			return err
+		}
+		bar.IncrBy(bytesCopied)
+	}
 
-	// if _, err := io.Copy(destinationFile, zippedFile); err != nil {
-	// 	return err
-	// }
 	return nil
 }

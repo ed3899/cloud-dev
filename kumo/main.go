@@ -3,10 +3,10 @@ package main
 import (
 	"fmt"
 	"sync"
-	"time"
+	// "time"
 
 	"github.com/ed3899/kumo/utils"
-	"github.com/vbauerster/mpb/v8"
+	// "github.com/vbauerster/mpb/v8"
 )
 
 func init() {
@@ -19,7 +19,7 @@ func init() {
 
 	wg := sync.WaitGroup{}
 	wg.Add(len(dependencies) * 2)
-	utils.AppendDownloadBar(&wg, dependencies)
+	progress := utils.AppendDownloadBar(&wg, dependencies)
 
 	// Start a goroutine for each dependency
 	for _, dep := range dependencies {
@@ -33,7 +33,7 @@ func init() {
 	}()
 
 	for d := range downloads {
-		progress := mpb.New(mpb.WithWaitGroup(&wg), mpb.WithWidth(100), mpb.WithRefreshRate(180*time.Millisecond))
+		// progress := mpb.New(mpb.WithWaitGroup(&wg), mpb.WithWidth(100), mpb.WithRefreshRate(180*time.Millisecond))
 
 		if d.Err != nil {
 			fmt.Printf("Error occurred while downloading %s: %v\n", d.Dependency.Name, d.Err)
@@ -46,6 +46,7 @@ func init() {
 
 	fmt.Println("All files downloaded!")
 }
+
 
 func main() {
 
