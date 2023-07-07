@@ -60,6 +60,10 @@ func init() {
 		}(dr)
 	}
 
+	go func() {
+		progress.Wait()
+	}()
+
 	wg.Wait()
 
 	fmt.Println("All files downloaded!")
