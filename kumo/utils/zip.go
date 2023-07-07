@@ -9,8 +9,6 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
-	// "time"
-	// "github.com/vbauerster/mpb/v8/decor"
 )
 
 func UnzipSource(dr *DownloadResult, wg *sync.WaitGroup) error {
@@ -33,8 +31,7 @@ func UnzipSource(dr *DownloadResult, wg *sync.WaitGroup) error {
 
 	bytesUnzipped := make(chan int, 4096)
 	bins := make(chan *Binary, 8)
-	zipFiles := make(chan *ZipFile, 8)
-	done := make(chan bool, 5)
+	errCh := make(chan error, len(reader.File))
 
 	var wgUnzip sync.WaitGroup // Wait group for unzipping goroutines
 	wgUnzip.Add(len(reader.File))
@@ -43,20 +40,25 @@ func UnzipSource(dr *DownloadResult, wg *sync.WaitGroup) error {
 		go func(f *zip.File) {
 			defer wgUnzip.Done()
 
-			err := unzipFile(f, destination, bytesUnzipped)
+			bytesCopied, err := unzipFile(f, destination)
 			if err != nil {
 				log.Printf("there was an error while unzipping the file: %v", err)
+				errCh <- err
 				bins <- &Binary{
 					Dependency: dr.Dependency,
 					Extracted:  false,
 					Err:        err,
 				}
+				return
 			}
+
+			bytesUnzipped <- int(bytesCopied)
 		}(f)
 	}
 
 	go func() {
-		wgUnzip.Wait() // Wait for all unzipping goroutines to finish
+		wgUnzip.Wait()
+		close(errCh)
 		close(bins)
 	}()
 
@@ -64,83 +66,72 @@ func UnzipSource(dr *DownloadResult, wg *sync.WaitGroup) error {
 		for b := range bytesUnzipped {
 			dr.Dependency.ZipBar.IncrBy(b)
 		}
+		close(bytesUnzipped)
 	}()
 
-	wgUnzip.Wait()
-	close(bytesUnzipped)
-
-	go func() {
-		for z := range zipFiles {
-			if z.Error != nil {
-				log.Printf("there was an error while unzipping the file: %v", z.Error)
-				bins <- &Binary{
-					Dependency: dr.Dependency,
-					Extracted:  false,
-					Err:        z.Error,
-				}
-			}
-		}
-		close(zipFiles)
-		done <- true
-	}()
-
-	for b := range bins {
-		if b.Err != nil {
-			return b.Err
+	for err := range errCh {
+		if err != nil {
+			return err
 		}
 	}
 
 	return nil
 }
 
-func unzipFile(f *zip.File, destination string, bytesUnzipped chan<- int) error {
+func unzipFile(f *zip.File, destination string) (int64, error) {
 	// 4. Check if file paths are not vulnerable to Zip Slip
 	filePath := filepath.Join(destination, f.Name)
 	if !strings.HasPrefix(filePath, filepath.Clean(destination)+string(os.PathSeparator)) {
-		return fmt.Errorf("%s: illegal file path", filePath)
+		return 0, fmt.Errorf("%s: illegal file path", filePath)
 	}
 
 	// 5. Create directory tree
 	if f.FileInfo().IsDir() {
-		return nil
+		return 0, nil
 	}
 
 	if err := os.MkdirAll(filepath.Dir(filePath), os.ModePerm); err != nil {
-		return err
+		return 0, err
 	}
 
 	// 6. Create a destination file for unzipped content
 	destinationFile, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
 	if err != nil {
-		return err
+		return 0, err
 	}
 	defer destinationFile.Close()
 
 	// 7. Unzip the content of a file and copy it to the destination file
 	zippedFile, err := f.Open()
 	if err != nil {
-		return err
+		return 0, err
 	}
 	defer zippedFile.Close()
 
-	buffer := make([]byte, 4096)
-	// 8. Copy the content of the file to the destination file while updating the progress bar
-	for {
-		bytesCopied, err := zippedFile.Read(buffer)
-		if err != nil && err != io.EOF {
-			return err
+	// buffer := make([]byte, 4096)
+	// // 8. Copy the content of the file to the destination file while updating the progress bar
+	// for {
+	// 	bytesCopied, err := zippedFile.Read(buffer)
+	// 	if err != nil && err != io.EOF {
+	// 		return err
 
-		}
-		if bytesCopied == 0 {
-			break
-		}
-		if _, err := destinationFile.Write(buffer[:bytesCopied]); err != nil {
-			return err
-		}
+	// 	}
+	// 	if bytesCopied == 0 {
+	// 		break
+	// 	}
+	// 	if _, err := destinationFile.Write(buffer[:bytesCopied]); err != nil {
+	// 		return err
+	// 	}
 
-		bytesUnzipped <- bytesCopied
-		// bar.IncrBy(bytesCopied)
+	// 	bytesUnzipped <- bytesCopied
+	// }
+
+	// Give me an alternative using io.Copy
+
+	bytesCopied, err := io.Copy(destinationFile, zippedFile)
+	if err != nil {
+		return 0, err
 	}
 
-	return nil
+	return bytesCopied, nil
 }

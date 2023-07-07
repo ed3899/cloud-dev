@@ -30,7 +30,7 @@ func AppendZipBar(p *mpb.Progress, d *DownloadResult) {
 		mpb.AppendDecorators(
 			decor.OnComplete(
 				decor.Percentage(decor.WCSyncSpace),
-				"done",
+				"unzipped",
 			),
 		),
 	)

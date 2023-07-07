@@ -23,7 +23,7 @@ func AppendDownloadBar(wg *sync.WaitGroup, deps []*Dependency) *mpb.Progress {
 			mpb.AppendDecorators(
 				decor.OnComplete(
 					decor.Percentage(decor.WCSyncSpace),
-					"done",
+					"downloaded",
 				),
 			),
 		)

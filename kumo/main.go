@@ -3,10 +3,8 @@ package main
 import (
 	"fmt"
 	"sync"
-	// "time"
 
 	"github.com/ed3899/kumo/utils"
-	// "github.com/vbauerster/mpb/v8"
 )
 
 func init() {
