@@ -17,10 +17,7 @@ func init() {
 
 	wg := sync.WaitGroup{}
 	wg.Add(len(dependencies) * 2)
-	utils.AppendWaitGroup(&wg, dependencies)
 	utils.AppendDownloadBar(&wg, dependencies)
-
-	// utils.AppendBarToDependencies(&wg, dependencies)
 
 	// Start a goroutine for each dependency
 	for _, dep := range dependencies {

@@ -10,7 +10,7 @@ import (
 
 func AppendDownloadBar(wg *sync.WaitGroup, deps []*Dependency) {
 	progress := mpb.New(mpb.WithWaitGroup(wg), mpb.WithWidth(100), mpb.WithRefreshRate(180*time.Millisecond))
-
+	
 	for _, d := range deps {
 		// Config the bar
 		downloadBar := progress.AddBar(int64(d.ContentLength),

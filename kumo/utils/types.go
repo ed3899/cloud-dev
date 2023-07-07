@@ -1,8 +1,6 @@
 package utils
 
 import (
-	"sync"
-
 	"github.com/vbauerster/mpb/v8"
 )
 
@@ -18,7 +16,6 @@ type Dependency struct {
 	ExtractionPath string
 	Present        bool
 	ContentLength  int64
-	WaitGroup      *sync.WaitGroup
 	DownloadBar    *mpb.Bar
 	ZipBar				 *mpb.Bar
 }
