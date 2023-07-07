@@ -40,14 +40,21 @@ func init() {
 		close(downloads)
 	}()
 
-	for d := range downloads {
-		if d.Err != nil {
-			fmt.Printf("Error occurred while downloading %s: %v\n", d.Dependency.Name, d.Err)
+	for dr := range downloads {
+		if dr.Err != nil {
+			fmt.Printf("Error occurred while downloading %s: %v\n", dr.Dependency.Name, dr.Err)
 			continue
 		}
 
-		utils.AppendZipBar(progress, d)
-		go utils.UnzipSource(d, &wg)
+		utils.AppendZipBar(progress, dr)
+		go func(dr *utils.DownloadResult) {
+			defer wg.Done()
+			err := utils.UnzipSource(dr)
+			if err != nil {
+				fmt.Printf("Error occurred while unzipping %s: %v\n", dr.Dependency.Name, err)
+				return
+			}
+		}(dr)
 	}
 
 	fmt.Println("All files downloaded!")

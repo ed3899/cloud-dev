@@ -11,10 +11,8 @@ import (
 	"sync"
 )
 
-func UnzipSource(dr *DownloadResult, wg *sync.WaitGroup) error {
+func UnzipSource(dr *DownloadResult) error {
 	// 1. Open the zip file
-	defer wg.Done()
-
 	reader, err := zip.OpenReader(dr.Dependency.ZipPath)
 	if err != nil {
 		return err
