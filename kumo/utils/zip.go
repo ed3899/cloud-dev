@@ -43,7 +43,6 @@ func Unzip(dr *DownloadResult, binsChan chan<- *Binary) error {
 				log.Printf("there was an error while unzipping the file: %v", err)
 				binsChan <- &Binary{
 					Dependency: dr.Dependency,
-					Extracted:  false,
 					Err:        err,
 				}
 				return
@@ -63,18 +62,14 @@ func Unzip(dr *DownloadResult, binsChan chan<- *Binary) error {
 		for b := range bytesUnzipped {
 			dr.Dependency.ZipBar.IncrBy(b)
 		}
-		log.Fatal("8")
 
 		binsChan <- &Binary{
 			Dependency: dr.Dependency,
-			Extracted:  true,
 			Err:        nil,
 		}
-		log.Fatal("7")
 	}(dr)
 
 	wgUnzip.Wait()
-	log.Fatal("6")
 
 	return nil
 }

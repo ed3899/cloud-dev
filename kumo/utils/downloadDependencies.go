@@ -43,7 +43,12 @@ func DownloadDependencies(dps *Dependencies) (*Binaries, error) {
 	}
 
 	// Create a channel to receive unzip results
-	binaries := make(chan *Binary, 2)
+	binariesChan := make(chan *Binary, 2)
+
+	go func() {
+		wg.Wait()
+		close(downloads)
+	}()
 
 	// Start a goroutine to unzip each dependency
 	for dr := range downloads {
@@ -55,7 +60,7 @@ func DownloadDependencies(dps *Dependencies) (*Binaries, error) {
 		AttachZipBar(progress, dr)
 		go func(dr *DownloadResult) {
 			defer wg.Done()
-			err := Unzip(dr, binaries)
+			err := Unzip(dr, binariesChan)
 			if err != nil {
 				fmt.Printf("Error occurred while unzipping %s: %v\n", dr.Dependency.Name, err)
 				return
@@ -63,22 +68,29 @@ func DownloadDependencies(dps *Dependencies) (*Binaries, error) {
 		}(dr)
 	}
 
-	log.Fatal("4")
-	wg.Wait()
+	progress.Wait()
+	close(binariesChan)
 
 	// Start a goroutine to wait for all binaries to be created
-	log.Fatal("3")
-	for binary := range binaries {
-		log.Fatal("2")
+	binaries := &Binaries{}
+
+	for binary := range binariesChan {
 		if binary.Err != nil {
 			log.Printf("Error occurred while creating binary %s: %v\n", binary.Dependency.Name, binary.Err)
 			continue
 		}
+		
+		switch binary.Dependency.Name {
+		case "packer":
+			binaries.Packer = binary
+			continue
+		case "pulumi":
+			binaries.Pulumi = binary
+			continue
+		}
 	}
-
-	log.Fatalf("1")
 
 	fmt.Println("All dependencies downloaded!")
 
-	return &Binaries{}, nil
+	return binaries, nil
 }

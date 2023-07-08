@@ -29,7 +29,6 @@ type DownloadResult struct {
 
 type Binary struct {
 	Dependency *Dependency
-	Extracted  bool
 	Err        error
 }
 
