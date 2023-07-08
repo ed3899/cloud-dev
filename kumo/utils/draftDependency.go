@@ -15,7 +15,7 @@ func DraftDependency(name string, s Specs) (*Dependency, error) {
 		log.Printf("there was an error getting the current directory: %v", err)
 		return nil, err
 	}
-	// TODO
+
 	depsDir := "deps"
 
 	getDestinationZipPath := func() string {
@@ -40,9 +40,8 @@ func DraftDependency(name string, s Specs) (*Dependency, error) {
 		return nil, err
 	}
 
-	if FileDoesNotExist(getDestinationZipPath()) {
-		log.Println(getDestinationExtractionPath())
-		log.Println(getDestinationZipPath())
+	if DependencyNotPresent(getDestinationZipPath()) {
+		log.Printf("%s not present", name)
 		return &Dependency{
 			Name:           name,
 			URL:            url,

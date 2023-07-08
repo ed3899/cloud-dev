@@ -11,29 +11,49 @@ import (
 )
 
 func DownloadDependencies(dps *Dependencies) (*Binaries, error) {
-	// If there are no dependencies to be downloaded, return
+	// If dependencies are present, return them
 	if len(*dps) == 0 {
-		log.Println("All dependencies are installed")
-		return nil, nil
+		log.Println("All dependencies are present")
+		binaries := &Binaries{
+			Packer: &Binary{
+				Dependency: &Dependency{
+					Name:    "packer",
+				},
+			},
+			Pulumi: &Binary{
+				Dependency: &Dependency{
+					Name:    "pulumi",
+				},
+			},
+		}
+		return binaries, nil
 	}
+
+
+	// Initiate download of dependencies
+	log.Printf("Downloading %d dependencies...\n", len(*dps))
 
 	// Create a channel to receive download results
 	downloads := make(chan *DownloadResult, len(*dps))
 
 	// Create a wait group to wait for all downloads to complete
 	wg := sync.WaitGroup{}
+	// Create a wait group to wait for all bars to complete
 	bwg := sync.WaitGroup{}
 
 	// Add 2 to the wait group for each dependency (1 for download, 1 for unzip)
 	wg.Add(len(*dps) * 2)
+
+	// Add 1 to the wait group for each bar
 	progress := mpb.New(mpb.WithWaitGroup(&bwg), mpb.WithWidth(60), mpb.WithAutoRefresh())
 
-	// Start a download for each dependency
+	// Downloading...
 	bwg.Add(1)
 	go func(dps *Dependencies, p *mpb.Progress) {
 		defer bwg.Done()
-
+		// Range over dependencies
 		for _, dep := range *dps {
+			// Download the dependency
 			go func(dep *Dependency, p *mpb.Progress) {
 				defer wg.Done()
 				AttachDownloadBar(p, dep)
@@ -45,8 +65,10 @@ func DownloadDependencies(dps *Dependencies) (*Binaries, error) {
 
 	// Create a channel to receive unzip results
 	binariesChan := make(chan *Binary, 2)
+	// Create a channel to receive errors
 	errChan := make(chan error, 2)
 
+	// Wait to close channels
 	go func() {
 		wg.Wait()
 		close(downloads)
@@ -54,10 +76,11 @@ func DownloadDependencies(dps *Dependencies) (*Binaries, error) {
 		close(errChan)
 	}()
 
+	// Unzipping...
 	bwg.Add(1)
 	go func(errChan chan<- error, progress *mpb.Progress) {
 		defer bwg.Done()
-		// Start a goroutine to unzip each dependency
+		// Range over downloads channel
 		for dr := range downloads {
 			if dr.Err != nil {
 				// Remove the download if there was an error
@@ -78,6 +101,7 @@ func DownloadDependencies(dps *Dependencies) (*Binaries, error) {
 				continue
 			}
 
+			// Unzip the download
 			go func(dr *DownloadResult, p *mpb.Progress) {
 				defer wg.Done()
 				AttachZipBar(p, dr)
@@ -86,13 +110,15 @@ func DownloadDependencies(dps *Dependencies) (*Binaries, error) {
 		}
 	}(errChan, progress)
 
+	// Wait for bars to complete and flush
 	bwg.Wait()
 
+	// Check for errors
 	if err, ok := <-errChan; ok {
 		return nil, err
 	}
 
-	// Start a goroutine to wait for all binaries to be created
+	// Assemble binaries
 	binaries := &Binaries{}
 
 	for binary := range binariesChan {

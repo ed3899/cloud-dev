@@ -1,33 +1,20 @@
 package utils
 
 import (
-	"log"
 	"os"
 )
 
-func DependenciesToBeDownloaded(dp []*Dependency) []*Dependency {
-	for _, d := range dp {
-		if FileExists(d.ExtractionPath) {
-			d.Present = true
-		} else {
-			d.Present = false
-		}
-	}
-	return dp
-}
-
-func FileExists(filepath string) bool {
-	_, err := os.Stat(filepath)
+func DependencyPresent(absolutePath string) bool {
+	_, err := os.Stat(absolutePath)
 	if err == nil {
 		return true // File exists
 	}
 	if os.IsNotExist(err) {
-		log.Printf("File '%s' does not exist", filepath)
-		return false // File does not exist
+		return false
 	}
-	return false // Error occurred while checking file existence
+	return false
 }
 
-func FileDoesNotExist(filepath string) bool {
-	return !FileExists(filepath)
+func DependencyNotPresent(absolutePath string) bool {
+	return !DependencyPresent(absolutePath)
 }

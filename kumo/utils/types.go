@@ -14,7 +14,6 @@ type Dependency struct {
 	URL            string
 	ZipPath        string
 	ExtractionPath string
-	Present        bool
 	ContentLength  int64
 	DownloadBar    *mpb.Bar
 	ZipBar         *mpb.Bar
