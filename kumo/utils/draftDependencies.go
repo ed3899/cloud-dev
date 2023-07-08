@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"log"
+	"fmt"
 
 	"github.com/pkg/errors"
 )
@@ -12,8 +12,8 @@ func DraftDependencies(neededBinaries []string, s Specs) (*Dependencies, error) 
 	for _, v := range neededBinaries {
 		msdpc, err := DraftDependency(v, s)
 		if err != nil {
-			error := errors.Wrap(err, "failed to draft dependency")
-			log.Printf("there was an error drafting the dependency: %v", err)
+			msg := fmt.Sprintf("failed to draft dependency: %v", v)
+			error := errors.Wrap(err, msg)
 			return nil, error
 		}
 		if msdpc == nil {

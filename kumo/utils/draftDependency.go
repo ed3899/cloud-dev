@@ -1,34 +1,38 @@
 package utils
 
 import (
+	"fmt"
 	"log"
+
 	"github.com/pkg/errors"
 )
 
 func DraftDependency(name string, s Specs) (*Dependency, error) {
 	destinationZipPath, err := GetDependencyZipPath(name, s)
 	if err != nil {
-		err = errors.Wrap(err, "failed to get zip path for dependency")
+		msg := fmt.Sprintf("failed to get zip path for dependency: %v", name)
+		err = errors.Wrap(err, msg)
 		return nil, err
 	}
 
 	destinationExtractionPath, err := GetDependencyExtractionPath(name)
 	if err != nil {
-		err = errors.Wrap(err, "failed to get extraction path for dependency")
+		msg := fmt.Sprintf("failed to get extraction path for dependency: %v", name)
+		err = errors.Wrap(err, msg)
 		return nil, err
 	}
 
 	url, err := GetUrlForDep(name, s)
 	if err != nil {
-		err = errors.Wrap(err, "failed to get url for dependency")
-		log.Printf("there was an error getting the url for the dependency: %v", err)
+		msg := fmt.Sprintf("failed to get url for dependency: %v", name)
+		err = errors.Wrap(err, msg)
 		return nil, err
 	}
 
 	contentLength, err := GetContentLength(url)
 	if err != nil {
-		err = errors.Wrap(err, "failed to get url for dependency")
-		log.Printf("there was an error getting the url for the dependency: %v", err)
+		msg := fmt.Sprintf("failed to get content length for dependency: %v", name)
+		err = errors.Wrap(err, msg)
 		return nil, err
 	}
 
