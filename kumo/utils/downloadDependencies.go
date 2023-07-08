@@ -26,58 +26,71 @@ func DownloadDependencies(dps *Dependencies) (*Binaries, error) {
 
 	// Add 2 to the wait group for each dependency (1 for download, 1 for unzip)
 	wg.Add(len(*dps) * 2)
-	bwg.Add(2)
-	progress := mpb.New(mpb.WithWaitGroup(&bwg),mpb.WithWidth(60), mpb.WithAutoRefresh())
+	progress := mpb.New(mpb.WithWaitGroup(&bwg), mpb.WithWidth(60), mpb.WithAutoRefresh())
 
 	// Start a download for each dependency
-	for _, dep := range *dps {
-		go func(dep *Dependency, p *mpb.Progress) {
-			defer wg.Done()
-			AttachDownloadBar(p, dep)
-			Download(dep, downloads)
-		}(dep, progress)
-	}
+	bwg.Add(1)
+	go func(dps *Dependencies, p *mpb.Progress) {
+		defer bwg.Done()
+
+		for _, dep := range *dps {
+			go func(dep *Dependency, p *mpb.Progress) {
+				defer wg.Done()
+				AttachDownloadBar(p, dep)
+				Download(dep, downloads)
+			}(dep, progress)
+		}
+
+	}(dps, progress)
 
 	// Create a channel to receive unzip results
 	binariesChan := make(chan *Binary, 2)
+	errChan := make(chan error, 2)
 
 	go func() {
 		wg.Wait()
-		bwg.Done()
-		bwg.Done()
 		close(downloads)
 		close(binariesChan)
+		close(errChan)
 	}()
 
-	// Start a goroutine to unzip each dependency
-	for dr := range downloads {
-		if dr.Err != nil {
-			// Remove the download if there was an error
-			msg := fmt.Sprintf("Error occurred while downloading %s", dr.Dependency.Name)
-			err := errors.Wrap(dr.Err, msg)
-			log.Println(err)
-
-			log.Printf("Removing failed download %s...\n", dr.Dependency.ZipPath)
-			err = os.RemoveAll(dr.Dependency.ZipPath)
-			// If there was an error removing the failed download, return
-			if err != nil {
-				msg := fmt.Sprintf("Error occurred while removing failed download %s", dr.Dependency.ZipPath)
-				err := errors.Wrap(err, msg)
+	bwg.Add(1)
+	go func(errChan chan<- error, progress *mpb.Progress) {
+		defer bwg.Done()
+		// Start a goroutine to unzip each dependency
+		for dr := range downloads {
+			if dr.Err != nil {
+				// Remove the download if there was an error
+				msg := fmt.Sprintf("Error occurred while downloading %s", dr.Dependency.Name)
+				err := errors.Wrap(dr.Err, msg)
 				log.Println(err)
-				return nil, err
+
+				log.Printf("Removing failed download %s...\n", dr.Dependency.ZipPath)
+				err = os.RemoveAll(dr.Dependency.ZipPath)
+				// If there was an error removing the failed download, return
+				if err != nil {
+					msg := fmt.Sprintf("Error occurred while removing failed download %s", dr.Dependency.ZipPath)
+					err := errors.Wrap(err, msg)
+					errChan <- err
+					return
+				}
+
+				continue
 			}
 
-			continue
+			go func(dr *DownloadResult, p *mpb.Progress) {
+				defer wg.Done()
+				AttachZipBar(p, dr)
+				Unzip(dr, binariesChan)
+			}(dr, progress)
 		}
-
-		go func(dr *DownloadResult, p *mpb.Progress) {
-			defer wg.Done()
-			AttachZipBar(p, dr)
-			Unzip(dr, binariesChan)
-		}(dr, progress)
-	}
+	}(errChan, progress)
 
 	bwg.Wait()
+
+	if err, ok := <-errChan; ok {
+		return nil, err
+	}
 
 	// Start a goroutine to wait for all binaries to be created
 	binaries := &Binaries{}
