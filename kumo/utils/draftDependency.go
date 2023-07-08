@@ -1,29 +1,21 @@
 package utils
 
 import (
-	"fmt"
 	"log"
-	"path/filepath"
-
 	"github.com/pkg/errors"
 )
 
 func DraftDependency(name string, s Specs) (*Dependency, error) {
-	cwd, err := GetCWD()
+	destinationZipPath, err := GetDependencyZipPath(name, s)
 	if err != nil {
-		err = errors.Wrap(err, "failed to get current directory")
-		log.Printf("there was an error getting the current directory: %v", err)
+		err = errors.Wrap(err, "failed to get zip path for dependency")
 		return nil, err
 	}
 
-	depsDir := "deps"
-
-	getDestinationZipPath := func() string {
-		return filepath.Join(cwd, depsDir, fmt.Sprintf("%s_%s_%s.zip", name, s.OS, s.ARCH))
-	}
-
-	getDestinationExtractionPath := func() string {
-		return filepath.Join(cwd, depsDir, name)
+	destinationExtractionPath, err := GetDependencyExtractionPath(name)
+	if err != nil {
+		err = errors.Wrap(err, "failed to get extraction path for dependency")
+		return nil, err
 	}
 
 	url, err := GetUrlForDep(name, s)
@@ -40,13 +32,13 @@ func DraftDependency(name string, s Specs) (*Dependency, error) {
 		return nil, err
 	}
 
-	if DependencyNotPresent(getDestinationZipPath()) {
+	if DependencyNotPresent(destinationZipPath) {
 		log.Printf("%s not present", name)
 		return &Dependency{
 			Name:           name,
 			URL:            url,
-			ExtractionPath: getDestinationExtractionPath(),
-			ZipPath:        getDestinationZipPath(),
+			ExtractionPath: destinationExtractionPath,
+			ZipPath:        destinationZipPath,
 			ContentLength:  contentLength,
 		}, nil
 	}
