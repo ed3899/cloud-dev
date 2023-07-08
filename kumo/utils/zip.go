@@ -4,30 +4,42 @@ import (
 	"archive/zip"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
+
+	"github.com/pkg/errors"
 )
 
-func Unzip(dr *DownloadResult, binsChan chan<- *Binary) error {
+func Unzip(dr *DownloadResult, binsChan chan<- *Binary) {
 	// 1. Open the zip file
 	reader, err := zip.OpenReader(dr.Dependency.ZipPath)
 	if err != nil {
-		return err
+		error := errors.Wrap(err, "failed to open zip file")
+		binsChan <- &Binary{
+			Dependency: dr.Dependency,
+			Err:        error,
+		}
+		return
 	}
 	defer reader.Close()
 
 	// 2. Get the absolute destination path
 	destination, err := filepath.Abs(dr.Dependency.ExtractionPath)
 	if err != nil {
-		return err
+		error := errors.Wrap(err, "failed to get absolute path")
+		binsChan <- &Binary{
+			Dependency: dr.Dependency,
+			Err:        error,
+		}
+		return
 	}
 
 	// 3. Iterate over zip files inside the archive and unzip each of them
 
 	bytesUnzipped := make(chan int)
+	unsuccesfulUnzip := make(chan bool, 1)
 
 	// Wait group for unzipping goroutines
 	var wgUnzip sync.WaitGroup
@@ -40,11 +52,12 @@ func Unzip(dr *DownloadResult, binsChan chan<- *Binary) error {
 
 			bytesCopied, err := unzipFile(f, destination)
 			if err != nil {
-				log.Printf("there was an error while unzipping the file: %v", err)
+				error := errors.Wrap(err, "failed to unzip file")
 				binsChan <- &Binary{
 					Dependency: dr.Dependency,
-					Err:        err,
+					Err:        error,
 				}
+				unsuccesfulUnzip <- true
 				return
 			}
 
@@ -63,15 +76,20 @@ func Unzip(dr *DownloadResult, binsChan chan<- *Binary) error {
 			dr.Dependency.ZipBar.IncrBy(b)
 		}
 
-		binsChan <- &Binary{
-			Dependency: dr.Dependency,
-			Err:        nil,
+		select {
+			// If the unzipping was not successful, return
+		case <-unsuccesfulUnzip:
+			return
+		default:
+			// Otherwise, send the dependency to the channel
+			binsChan <- &Binary{
+				Dependency: dr.Dependency,
+				Err:        nil,
+			}
 		}
 	}(dr)
 
 	wgUnzip.Wait()
-
-	return nil
 }
 
 func unzipFile(f *zip.File, destination string) (int64, error) {

@@ -5,13 +5,20 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+
+	"github.com/pkg/errors"
 )
 
-func Download(dep *Dependency, downloads chan<- *DownloadResult) error {
+func Download(dep *Dependency, downloads chan<- *DownloadResult) {
 	url := dep.URL
 	response, err := http.Get(url)
 	if err != nil {
-		return err
+		err = errors.Wrap(err, "failed to get dependency")
+		downloads <- &DownloadResult{
+			Dependency: dep,
+			Err:        err,
+		}
+		return
 	}
 	defer response.Body.Close()
 	zipPath := dep.ZipPath
@@ -20,13 +27,23 @@ func Download(dep *Dependency, downloads chan<- *DownloadResult) error {
 	// Create the destination along with all the necessary directories
 	err = os.MkdirAll(destDir, 0755)
 	if err != nil {
-		return err
+		err = errors.Wrap(err, "failed to create destination directory")
+		downloads <- &DownloadResult{
+			Dependency: dep,
+			Err:        err,
+		}
+		return
 	}
 
 	// Create file to write to
 	file, err := os.OpenFile(zipPath, os.O_CREATE|os.O_WRONLY, 0744)
 	if err != nil {
-		return err
+		err = errors.Wrap(err, "failed to create file")
+		downloads <- &DownloadResult{
+			Dependency: dep,
+			Err:        err,
+		}
+		return
 	}
 	defer file.Close()
 
@@ -37,7 +54,12 @@ func Download(dep *Dependency, downloads chan<- *DownloadResult) error {
 		bytesDownloaded, err := response.Body.Read(buffer)
 
 		if err != nil && err != io.EOF {
-			return err
+			err = errors.Wrap(err, "failed to read response body")
+			downloads <- &DownloadResult{
+				Dependency: dep,
+				Err:        err,
+			}
+			return
 		}
 
 		if bytesDownloaded == 0 {
@@ -49,7 +71,12 @@ func Download(dep *Dependency, downloads chan<- *DownloadResult) error {
 		_, err = file.Write(buffer[:bytesDownloaded])
 
 		if err != nil {
-			return err
+			err = errors.Wrap(err, "failed to write to file")
+			downloads <- &DownloadResult{
+				Dependency: dep,
+				Err:        err,
+			}
+			return
 		}
 
 	}
@@ -61,6 +88,4 @@ func Download(dep *Dependency, downloads chan<- *DownloadResult) error {
 	}
 
 	downloads <- download
-
-	return nil
 }

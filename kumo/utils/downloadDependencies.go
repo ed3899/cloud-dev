@@ -31,14 +31,7 @@ func DownloadDependencies(dps *Dependencies) (*Binaries, error) {
 	for _, dep := range *dps {
 		go func(dep *Dependency) {
 			defer wg.Done()
-			err := Download(dep, downloads)
-			if err != nil {
-				downloads <- &DownloadResult{
-					Dependency: dep,
-					Err:        err,
-				}
-				return
-			}
+			Download(dep, downloads)
 		}(dep)
 	}
 
@@ -53,18 +46,15 @@ func DownloadDependencies(dps *Dependencies) (*Binaries, error) {
 	// Start a goroutine to unzip each dependency
 	for dr := range downloads {
 		if dr.Err != nil {
-			fmt.Printf("Error occurred while downloading %s: %v\n", dr.Dependency.Name, dr.Err)
+			// Remove the download if there was an error
+			log.Printf("Error occurred while downloading %s: %v\n", dr.Dependency.Name, dr.Err)
 			continue
 		}
 
 		AttachZipBar(progress, dr)
 		go func(dr *DownloadResult) {
 			defer wg.Done()
-			err := Unzip(dr, binariesChan)
-			if err != nil {
-				fmt.Printf("Error occurred while unzipping %s: %v\n", dr.Dependency.Name, err)
-				return
-			}
+			Unzip(dr, binariesChan)
 		}(dr)
 	}
 
@@ -79,7 +69,7 @@ func DownloadDependencies(dps *Dependencies) (*Binaries, error) {
 			log.Printf("Error occurred while creating binary %s: %v\n", binary.Dependency.Name, binary.Err)
 			continue
 		}
-		
+
 		switch binary.Dependency.Name {
 		case "packer":
 			binaries.Packer = binary
