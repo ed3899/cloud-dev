@@ -9,8 +9,8 @@ import (
 
 // TODO Remove zips after extraction
 
-var Packer *utils.Packer
-var Pulumi *utils.Pulumi
+var Packer *binz.Packer
+var Pulumi *binz.Pulumi
 
 func init() {
 	bins, err := utils.GetBinaries()
