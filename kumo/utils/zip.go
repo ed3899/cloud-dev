@@ -39,7 +39,7 @@ func Unzip(dr *DownloadResult, binsChan chan<- *Binary) {
 	// 3. Iterate over zip files inside the archive and unzip each of them
 
 	bytesUnzipped := make(chan int)
-	unsuccesfulUnzip := make(chan bool, 1)
+	unsuccesfulUnzip := make(chan bool, len(reader.File))
 
 	// Wait group for unzipping goroutines
 	var wgUnzip sync.WaitGroup
@@ -67,29 +67,37 @@ func Unzip(dr *DownloadResult, binsChan chan<- *Binary) {
 
 	go func() {
 		wgUnzip.Wait()
+		close(unsuccesfulUnzip)
 		close(bytesUnzipped)
 	}()
 
-	// Update the progress bar for every unzipped file
-	go func(dr *DownloadResult) {
-		for b := range bytesUnzipped {
+OuterLoop:
+	for {
+		select {
+		// If the unzipping was not successful, return
+		case uz, open := <-unsuccesfulUnzip:
+			if !open {
+				break OuterLoop
+			}
+
+			if uz {
+				break OuterLoop
+			}
+
+		default:
+			b, open := <-bytesUnzipped
+			if !open {
+				// Otherwise, send the dependency to the channel
+				break OuterLoop
+			}
 			dr.Dependency.ZipBar.IncrBy(b)
 		}
+	}
 
-		select {
-			// If the unzipping was not successful, return
-		case <-unsuccesfulUnzip:
-			return
-		default:
-			// Otherwise, send the dependency to the channel
-			binsChan <- &Binary{
-				Dependency: dr.Dependency,
-				Err:        nil,
-			}
-		}
-	}(dr)
-
-	wgUnzip.Wait()
+	binsChan <- &Binary{
+		Dependency: dr.Dependency,
+		Err:        nil,
+	}
 }
 
 func unzipFile(f *zip.File, destination string) (int64, error) {
