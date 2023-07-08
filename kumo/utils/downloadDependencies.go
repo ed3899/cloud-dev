@@ -17,35 +17,44 @@ func DownloadDependencies(dps *Dependencies) (*Binaries, error) {
 		binaries := &Binaries{
 			Packer: &Binary{
 				Dependency: &Dependency{
-					Name:    "packer",
+					Name: "packer",
 				},
 			},
 			Pulumi: &Binary{
 				Dependency: &Dependency{
-					Name:    "pulumi",
+					Name: "pulumi",
 				},
 			},
 		}
 		return binaries, nil
 	}
 
-
 	// Initiate download of dependencies
 	log.Printf("Downloading %d dependencies...\n", len(*dps))
 
 	// Create a channel to receive download results
 	downloads := make(chan *DownloadResult, len(*dps))
+	// Create a channel to receive unzip results
+	binariesChan := make(chan *Binary, 2)
+	// Create a channel to receive errors
+	errChan := make(chan error, 2)
 
 	// Create a wait group to wait for all downloads to complete
 	wg := sync.WaitGroup{}
-	// Create a wait group to wait for all bars to complete
-	bwg := sync.WaitGroup{}
-
 	// Add 2 to the wait group for each dependency (1 for download, 1 for unzip)
 	wg.Add(len(*dps) * 2)
-
+	// Create a wait group to wait for all bars to complete
+	bwg := sync.WaitGroup{}
 	// Add 1 to the wait group for each bar
 	progress := mpb.New(mpb.WithWaitGroup(&bwg), mpb.WithWidth(60), mpb.WithAutoRefresh())
+
+	// Close channels when pipeline is complete
+	go func() {
+		wg.Wait()
+		close(downloads)
+		close(binariesChan)
+		close(errChan)
+	}()
 
 	// Downloading...
 	bwg.Add(1)
@@ -62,19 +71,6 @@ func DownloadDependencies(dps *Dependencies) (*Binaries, error) {
 		}
 
 	}(dps, progress)
-
-	// Create a channel to receive unzip results
-	binariesChan := make(chan *Binary, 2)
-	// Create a channel to receive errors
-	errChan := make(chan error, 2)
-
-	// Wait to close channels
-	go func() {
-		wg.Wait()
-		close(downloads)
-		close(binariesChan)
-		close(errChan)
-	}()
 
 	// Unzipping...
 	bwg.Add(1)
