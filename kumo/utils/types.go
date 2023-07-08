@@ -35,3 +35,11 @@ type Binaries struct {
 	Packer *Binary
 	Pulumi *Binary
 }
+
+type Packer struct {
+	ExecutablePath string
+}
+
+type Pulumi struct {
+	ExecutablePath string
+}
