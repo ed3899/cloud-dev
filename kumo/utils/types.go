@@ -17,8 +17,10 @@ type Dependency struct {
 	Present        bool
 	ContentLength  int64
 	DownloadBar    *mpb.Bar
-	ZipBar				 *mpb.Bar
+	ZipBar         *mpb.Bar
 }
+
+type Dependencies = []*Dependency
 
 type DownloadResult struct {
 	Dependency *Dependency
@@ -29,4 +31,9 @@ type Binary struct {
 	Dependency *Dependency
 	Extracted  bool
 	Err        error
+}
+
+type Binaries struct {
+	Packer *Binary
+	Pulumi *Binary
 }

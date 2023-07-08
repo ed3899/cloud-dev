@@ -27,3 +27,7 @@ func FileExists(filepath string) bool {
 	}
 	return false // Error occurred while checking file existence
 }
+
+func FileDoesNotExist(filepath string) bool {
+	return !FileExists(filepath)
+}

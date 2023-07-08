@@ -1,16 +1,18 @@
 package utils
 
 import (
-	"log"
 	"net/http"
+
+	"github.com/pkg/errors"
 )
 
-func GetContentLength(url string) int64 {
+func GetContentLength(url string) (int64, error) {
 	response, err := http.Head(url)
 	if err != nil {
-		log.Fatalf("there was an error while attempting to download from '%s': '%#v'", url, err)
+		err = errors.Wrap(err, "failed to get current directory")
+		return 0, err
 	}
 	defer response.Body.Close()
 
-	return response.ContentLength
+	return response.ContentLength, nil
 }
