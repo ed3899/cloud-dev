@@ -11,7 +11,7 @@ import (
 	"sync"
 )
 
-func Unzip(dr *DownloadResult, binsChan chan *Binary) error {
+func Unzip(dr *DownloadResult, binsChan chan<- *Binary) error {
 	// 1. Open the zip file
 	reader, err := zip.OpenReader(dr.Dependency.ZipPath)
 	if err != nil {
@@ -27,29 +27,25 @@ func Unzip(dr *DownloadResult, binsChan chan *Binary) error {
 
 	// 3. Iterate over zip files inside the archive and unzip each of them
 
-	bytesUnzipped := make(chan int, 4096)
-	// bins := make(chan *Binary, 8)
-	errCh := make(chan error, len(reader.File))
+	bytesUnzipped := make(chan int)
 
 	// Wait group for unzipping goroutines
 	var wgUnzip sync.WaitGroup
-	wgUnzip.Add(len(reader.File))
 
 	// Wait group for unzipping goroutines
 	for _, f := range reader.File {
+		wgUnzip.Add(1)
 		go func(f *zip.File) {
 			defer wgUnzip.Done()
 
 			bytesCopied, err := unzipFile(f, destination)
 			if err != nil {
 				log.Printf("there was an error while unzipping the file: %v", err)
-				errCh <- err
 				binsChan <- &Binary{
 					Dependency: dr.Dependency,
 					Extracted:  false,
 					Err:        err,
 				}
-				close(binsChan)
 				return
 			}
 
@@ -57,11 +53,9 @@ func Unzip(dr *DownloadResult, binsChan chan *Binary) error {
 		}(f)
 	}
 
-	// Wait for all unzipping goroutines to finish
 	go func() {
 		wgUnzip.Wait()
-		close(errCh)
-		// close(bins)
+		close(bytesUnzipped)
 	}()
 
 	// Update the progress bar for every unzipped file
@@ -69,22 +63,18 @@ func Unzip(dr *DownloadResult, binsChan chan *Binary) error {
 		for b := range bytesUnzipped {
 			dr.Dependency.ZipBar.IncrBy(b)
 		}
-		close(bytesUnzipped)
+		log.Fatal("8")
 
 		binsChan <- &Binary{
 			Dependency: dr.Dependency,
 			Extracted:  true,
 			Err:        nil,
 		}
-		close(binsChan)
+		log.Fatal("7")
 	}(dr)
 
-	// Range over the error channel and return the first error
-	for err := range errCh {
-		if err != nil {
-			return err
-		}
-	}
+	wgUnzip.Wait()
+	log.Fatal("6")
 
 	return nil
 }

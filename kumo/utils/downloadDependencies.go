@@ -23,7 +23,7 @@ func DownloadDependencies(dps *Dependencies) (*Binaries, error) {
 	wg := sync.WaitGroup{}
 
 	// Add 3 to the wait group for each dependency (1 for download, 1 for unzip, 1 for attaching the binary)
-	wg.Add(len(*dps) * 3)
+	wg.Add(len(*dps) * 2)
 	progress := mpb.New(mpb.WithWaitGroup(&wg), mpb.WithWidth(60), mpb.WithRefreshRate(180*time.Millisecond))
 	AttachDownloadBar(progress, *dps)
 
@@ -42,12 +42,6 @@ func DownloadDependencies(dps *Dependencies) (*Binaries, error) {
 		}(dep)
 	}
 
-	// Start a goroutine to wait for all downloads to complete
-	go func() {
-		wg.Wait()
-		close(downloads)
-	}()
-
 	// Create a channel to receive unzip results
 	binaries := make(chan *Binary, 2)
 
@@ -59,7 +53,6 @@ func DownloadDependencies(dps *Dependencies) (*Binaries, error) {
 		}
 
 		AttachZipBar(progress, dr)
-
 		go func(dr *DownloadResult) {
 			defer wg.Done()
 			err := Unzip(dr, binaries)
@@ -70,19 +63,20 @@ func DownloadDependencies(dps *Dependencies) (*Binaries, error) {
 		}(dr)
 	}
 
-	// Start a goroutine to wait for all unzips to complete and flush the progress bar
-	go func() {
-		progress.Wait()
-	}()
-
+	log.Fatal("4")
+	wg.Wait()
 
 	// Start a goroutine to wait for all binaries to be created
-	go func() {
-		
-	}()
+	log.Fatal("3")
+	for binary := range binaries {
+		log.Fatal("2")
+		if binary.Err != nil {
+			log.Printf("Error occurred while creating binary %s: %v\n", binary.Dependency.Name, binary.Err)
+			continue
+		}
+	}
 
-
-	wg.Wait()
+	log.Fatalf("1")
 
 	fmt.Println("All dependencies downloaded!")
 
