@@ -15,7 +15,7 @@ var Packer *binz.Packer
 var Pulumi *binz.Pulumi
 
 var rootCmd = &cobra.Command{
-	Long: `🌩️ Kumo: Your quick and easy way to a cloud development environment.`,
+	Long: `🌩️ Kumo: Your quick and easy cloud development environment.`,
 }
 
 func init() {
@@ -73,6 +73,7 @@ func init() {
 			log.Println("Hello World")
 		},
 	}
+
 
 	rootCmd.AddCommand(buildCmd, upCmd, destroyCmd)
 }
