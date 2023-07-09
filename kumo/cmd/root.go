@@ -74,7 +74,6 @@ func init() {
 		},
 	}
 
-
 	rootCmd.AddCommand(buildCmd, upCmd, destroyCmd)
 }
 
