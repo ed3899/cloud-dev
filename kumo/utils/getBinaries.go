@@ -4,7 +4,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func GetBinaries() (*Binaries, error) {
+func GetBinaries() (binaries *Binaries, err error) {
 	// Validate host compatibility
 	specs := ValidateHostCompatibility(GetHostSpecs())
 
@@ -15,8 +15,18 @@ func GetBinaries() (*Binaries, error) {
 		return nil, errors.Wrap(err, "failed to draft missing dependencies")
 	}
 
+	// No missing dependencies
+	if len(*missingDependencies) == 0 {
+		// Get already downloaded binaries
+		binaries, err := GetLocalBinaries()
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to get local binaries")
+		}
+		return binaries, nil
+	}
+
 	// Download missing dependencies
-	binaries, err := DownloadDependencies(missingDependencies)
+	binaries, err = DownloadDependencies(missingDependencies)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to download dependencies")
 	}

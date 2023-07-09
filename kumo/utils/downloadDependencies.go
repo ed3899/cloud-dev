@@ -10,25 +10,9 @@ import (
 	"github.com/vbauerster/mpb/v8"
 )
 
+// Downloads dependencies and returns a struct containing the binaries
+// If dps is empty, returns the already downloaded binaries
 func DownloadDependencies(dps *Dependencies) (*Binaries, error) {
-	// If dependencies are present, return them
-	if len(*dps) == 0 {
-		log.Println("All dependencies are present")
-		binaries := &Binaries{
-			Packer: &Binary{
-				Dependency: &Dependency{
-					Name: "packer",
-				},
-			},
-			Pulumi: &Binary{
-				Dependency: &Dependency{
-					Name: "pulumi",
-				},
-			},
-		}
-		return binaries, nil
-	}
-
 	// Initiate download of dependencies
 	log.Printf("Downloading %d dependencies...\n", len(*dps))
 

@@ -2,7 +2,7 @@ package binz
 
 import (
 	"log"
-	// "os/exec"
+	"os/exec"
 )
 
 type PackerI interface {
@@ -15,8 +15,12 @@ type Packer struct {
 
 func (p *Packer) Build(kc KumoConfig) {
 	log.Println("Building AMI...")
-	log.Print(kc)
+	log.Print(p.ExecutablePath)
+	cmd := exec.Command(p.ExecutablePath, "version")
+	output,err := cmd.CombinedOutput()
+	if err != nil {
+		log.Fatalf("Error occurred while running packer: %v", err)
+	}
 
-	// cmd := exec.Command(p.ExecutablePath, "build", "kumo.config.yaml")
-	// cmd.Run()
+	log.Printf("Output: %s", string(output))
 }

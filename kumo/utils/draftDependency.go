@@ -8,14 +8,14 @@ import (
 )
 
 func DraftDependency(name string, s Specs) (*Dependency, error) {
-	destinationZipPath, err := GetDependencyZipPath(name, s)
+	destinationZipPath, err := CraftSingleZipPath(name, s)
 	if err != nil {
 		msg := fmt.Sprintf("failed to get zip path for dependency: %v", name)
 		err = errors.Wrap(err, msg)
 		return nil, err
 	}
 
-	destinationExtractionPath, err := GetDependencyExtractionPath(name)
+	destinationExtractionPath, err := CraftSingleExtractionPath(name)
 	if err != nil {
 		msg := fmt.Sprintf("failed to get extraction path for dependency: %v", name)
 		err = errors.Wrap(err, msg)

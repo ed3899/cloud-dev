@@ -6,7 +6,8 @@ import (
 	"github.com/pkg/errors"
 )
 
-func GetDependencyExtractionPath(name string) (string, error) {
+// Crafts the absolute path to a directory where the dependency will be extracted
+func CraftSingleExtractionPath(name string) (string, error) {
 	cwd, err := GetCWD()
 	if err != nil {
 		err = errors.Wrap(err, "failed to get current directory")

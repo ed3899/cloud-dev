@@ -7,7 +7,8 @@ import (
 	"github.com/pkg/errors"
 )
 
-func GetDependencyZipPath(name string, s Specs) (string, error) {
+// Crafts the absolute path to a directory where the dependency will be downloaded
+func CraftSingleZipPath(name string, s Specs) (string, error) {
 	cwd, err := GetCWD()
 	if err != nil {
 		err = errors.Wrap(err, "failed to get current directory")
