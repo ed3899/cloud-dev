@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/ed3899/kumo/binz"
+	"github.com/ed3899/kumo/cmd"
 	"github.com/ed3899/kumo/utils"
 )
 
@@ -22,5 +23,5 @@ func init() {
 }
 
 func main() {
-
+	cmd.Execute()
 }
