@@ -7,6 +7,7 @@ import (
 
 	"github.com/ed3899/kumo/binz"
 	"github.com/ed3899/kumo/utils"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
 
@@ -33,16 +34,16 @@ func init() {
       to SSH into your instance.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			// Check if kumo config is present
-			kcp, err := binz.KumoConfigPresent()
+			kc, err := binz.GetKumoConfig()
 			if err != nil {
-				log.Fatalf("Error occurred while checking if kumo config is present: %v", err)
+				err = errors.Wrapf(err, "%s failed", cmd.Name())
+				log.Fatal(err)
 			}
-			kcnp := !kcp
 
 			switch {
-			case len(args) == 0 && kcp:
-				packer.Build()
-			case len(args) == 0 && kcnp:
+			case len(args) == 0:
+				packer.Build(kc)
+			case len(args) == 0:
 			case len(args) == 1:
 			default:
 				log.Fatalf("Invalid number of arguments: %v", args)

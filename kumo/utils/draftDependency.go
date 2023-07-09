@@ -36,7 +36,7 @@ func DraftDependency(name string, s Specs) (*Dependency, error) {
 		return nil, err
 	}
 
-	if DependencyNotPresent(destinationZipPath) {
+	if FileNotPresent(destinationZipPath) {
 		log.Printf("%s not present", name)
 		return &Dependency{
 			Name:           name,

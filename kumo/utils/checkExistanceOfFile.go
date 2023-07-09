@@ -4,7 +4,7 @@ import (
 	"os"
 )
 
-func DependencyPresent(absolutePath string) bool {
+func FilePresent(absolutePath string) bool {
 	_, err := os.Stat(absolutePath)
 	if err == nil {
 		return true // File exists
@@ -15,6 +15,6 @@ func DependencyPresent(absolutePath string) bool {
 	return false
 }
 
-func DependencyNotPresent(absolutePath string) bool {
-	return !DependencyPresent(absolutePath)
+func FileNotPresent(absolutePath string) bool {
+	return !FilePresent(absolutePath)
 }

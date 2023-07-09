@@ -13,8 +13,10 @@ type Packer struct {
 	ExecutablePath string
 }
 
-func (p *Packer) Build() {
-	log.Println("Building AMI with default kumo config file")
+func (p *Packer) Build(kc KumoConfig) {
+	log.Println("Building AMI...")
+	log.Print(kc)
+
 	// cmd := exec.Command(p.ExecutablePath, "build", "kumo.config.yaml")
 	// cmd.Run()
 }
