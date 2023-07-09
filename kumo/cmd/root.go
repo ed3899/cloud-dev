@@ -23,7 +23,7 @@ func init() {
 	if err != nil {
 		log.Fatalf("Error occurred while getting binaries: %v", err)
 	}
-	packer, pulumi := binz.GetBinaryInstances(bins)
+	packer, _ := binz.GetBinaryInstances(bins)
 
 	var buildCmd = &cobra.Command{
 		Use:   "build [ /path/to/kumo.config.yaml ]",
@@ -32,12 +32,17 @@ func init() {
       to your root directory. Please keep these keys safe. If you lose them, you will not be able
       to SSH into your instance.`,
 		Run: func(cmd *cobra.Command, args []string) {
-			// Do Stuff Here
-			switch {
-			case len(args) == 0 && binz.KumoConfigPresent():
-				log.Println("Building AMI with default config file")
+			// Check if kumo config is present
+			kcp, err := binz.KumoConfigPresent()
+			if err != nil {
+				log.Fatalf("Error occurred while checking if kumo config is present: %v", err)
+			}
+			kcnp := !kcp
 
-			case len(args) == 0 && binz.KumoConfigNotPresent():
+			switch {
+			case len(args) == 0 && kcp:
+				packer.Build()
+			case len(args) == 0 && kcnp:
 			case len(args) == 1:
 			default:
 				log.Fatalf("Invalid number of arguments: %v", args)
