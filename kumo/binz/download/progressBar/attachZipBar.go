@@ -1,13 +1,19 @@
-package utils
+package progressBar
 
 import (
 	"fmt"
 	"log"
 	"os"
 
+	"github.com/ed3899/kumo/binz/download/draft"
 	"github.com/vbauerster/mpb/v8"
 	"github.com/vbauerster/mpb/v8/decor"
 )
+
+type DownloadResult struct {
+	Dependency *draft.Dependency
+	Err        error
+}
 
 func AttachZipBar(p *mpb.Progress, dr *DownloadResult) {
 	zipSize, err := getZipSize(dr.Dependency.ZipPath)

@@ -1,4 +1,4 @@
-package utils
+package download
 
 import (
 	"archive/zip"
@@ -9,10 +9,12 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/ed3899/kumo/binz/download/progressBar"
 	"github.com/pkg/errors"
 )
 
-func Unzip(dr *DownloadResult, binsChan chan<- *Binary) {
+// Unzips a zip file to a destination directory. Uses the appended extraction path on the given struct to create a directory tree
+func Unzip(dr *progressBar.DownloadResult, binsChan chan<- *Binary) {
 	// 1. Open the zip file
 	reader, err := zip.OpenReader(dr.Dependency.ZipPath)
 	if err != nil {
@@ -100,7 +102,8 @@ OuterLoop:
 	}
 }
 
-func unzipFile(f *zip.File, destination string) (int64, error) {
+// Unzips a file from a zip archive and copies the bytes to a destination directory
+func unzipFile(f *zip.File, destination string) (bytesCopied int64, err error) {
 	// 4. Check if file paths are not vulnerable to Zip Slip
 	filePath := filepath.Join(destination, f.Name)
 	if !strings.HasPrefix(filePath, filepath.Clean(destination)+string(os.PathSeparator)) {
@@ -112,7 +115,7 @@ func unzipFile(f *zip.File, destination string) (int64, error) {
 		return 0, nil
 	}
 
-	if err := os.MkdirAll(filepath.Dir(filePath), os.ModePerm); err != nil {
+	if err = os.MkdirAll(filepath.Dir(filePath), os.ModePerm); err != nil {
 		return 0, err
 	}
 
@@ -130,7 +133,7 @@ func unzipFile(f *zip.File, destination string) (int64, error) {
 	}
 	defer zippedFile.Close()
 
-	bytesCopied, err := io.Copy(destinationFile, zippedFile)
+	bytesCopied, err = io.Copy(destinationFile, zippedFile)
 	if err != nil {
 		return 0, err
 	}

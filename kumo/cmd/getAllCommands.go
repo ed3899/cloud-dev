@@ -4,14 +4,14 @@ import (
 	"log"
 
 	"github.com/ed3899/kumo/binz"
-	"github.com/ed3899/kumo/utils"
+	"github.com/ed3899/kumo/binz/download"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
 
 type CobraCommands = []*cobra.Command
 
-func GetAllCommands(bins *utils.Binaries) (*CobraCommands) {
+func GetAllCommands(bins *download.Binaries) *CobraCommands {
 	packer, err := binz.GetPackerInstance(bins)
 	if err != nil {
 		err = errors.Wrap(err, "Error occurred while getting Packer instance")

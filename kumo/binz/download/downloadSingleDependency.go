@@ -1,4 +1,4 @@
-package utils
+package download
 
 import (
 	"io"
@@ -6,15 +6,17 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/ed3899/kumo/binz/download/draft"
+	"github.com/ed3899/kumo/binz/download/progressBar"
 	"github.com/pkg/errors"
 )
 
-func Download(dep *Dependency, downloads chan<- *DownloadResult) {
+func Download(dep *draft.Dependency, downloads chan<- *progressBar.DownloadResult) {
 	url := dep.URL
 	response, err := http.Get(url)
 	if err != nil {
 		err = errors.Wrap(err, "failed to get dependency")
-		downloads <- &DownloadResult{
+		downloads <- &progressBar.DownloadResult{
 			Dependency: dep,
 			Err:        err,
 		}
@@ -28,7 +30,7 @@ func Download(dep *Dependency, downloads chan<- *DownloadResult) {
 	err = os.MkdirAll(destDir, 0755)
 	if err != nil {
 		err = errors.Wrap(err, "failed to create destination directory")
-		downloads <- &DownloadResult{
+		downloads <- &progressBar.DownloadResult{
 			Dependency: dep,
 			Err:        err,
 		}
@@ -39,7 +41,7 @@ func Download(dep *Dependency, downloads chan<- *DownloadResult) {
 	file, err := os.OpenFile(zipPath, os.O_CREATE|os.O_WRONLY, 0744)
 	if err != nil {
 		err = errors.Wrap(err, "failed to create file")
-		downloads <- &DownloadResult{
+		downloads <- &progressBar.DownloadResult{
 			Dependency: dep,
 			Err:        err,
 		}
@@ -55,7 +57,7 @@ func Download(dep *Dependency, downloads chan<- *DownloadResult) {
 
 		if err != nil && err != io.EOF {
 			err = errors.Wrap(err, "failed to read response body")
-			downloads <- &DownloadResult{
+			downloads <- &progressBar.DownloadResult{
 				Dependency: dep,
 				Err:        err,
 			}
@@ -72,7 +74,7 @@ func Download(dep *Dependency, downloads chan<- *DownloadResult) {
 
 		if err != nil {
 			err = errors.Wrap(err, "failed to write to file")
-			downloads <- &DownloadResult{
+			downloads <- &progressBar.DownloadResult{
 				Dependency: dep,
 				Err:        err,
 			}
@@ -82,7 +84,7 @@ func Download(dep *Dependency, downloads chan<- *DownloadResult) {
 	}
 
 	// Create the download result and send it to the channel
-	download := &DownloadResult{
+	download := &progressBar.DownloadResult{
 		Dependency: dep,
 		Err:        nil,
 	}

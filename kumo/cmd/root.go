@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/ed3899/kumo/binz"
 	"github.com/ed3899/kumo/config"
-	"github.com/ed3899/kumo/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -15,7 +15,7 @@ var rootCmd = &cobra.Command{
 
 func init() {
 	// Get the binaries
-	bins := utils.GetBinaries()
+	bins := binz.GetBinaries()
 	// Read the config
 	config.ReadKumoConfig(&config.KumoConfig{
 		Name: "kumo.config",

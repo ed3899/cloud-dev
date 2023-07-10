@@ -4,6 +4,18 @@ import (
 	"runtime"
 )
 
+type Specs struct {
+	OS   string
+	ARCH string
+}
+
+func GetSpecs() *Specs {
+	return &Specs{
+		OS:   runtime.GOOS,
+		ARCH: runtime.GOARCH,
+	}
+}
+
 func IsCompatible() bool {
 	switch runtime.GOOS {
 	case "windows":

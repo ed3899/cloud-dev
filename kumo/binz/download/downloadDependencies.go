@@ -1,4 +1,4 @@
-package utils
+package download
 
 import (
 	"fmt"
@@ -6,18 +6,30 @@ import (
 	"os"
 	"sync"
 
+	"github.com/ed3899/kumo/binz/download/draft"
+	"github.com/ed3899/kumo/binz/download/progressBar"
 	"github.com/pkg/errors"
 	"github.com/vbauerster/mpb/v8"
 )
 
+type Binary struct {
+	Dependency *draft.Dependency
+	Err        error
+}
+
+type Binaries struct {
+	Packer *Binary
+	Pulumi *Binary
+}
+
 // Downloads dependencies and returns a struct containing the binaries
 // If dps is empty, returns the already downloaded binaries
-func DownloadDependencies(dps *Dependencies) (*Binaries, error) {
+func DownloadDependencies(dps *draft.Dependencies) (*Binaries, error) {
 	// Initiate download of dependencies
 	log.Printf("Downloading %d dependencies...\n", len(*dps))
 
 	// Create a channel to receive download results
-	downloads := make(chan *DownloadResult, len(*dps))
+	downloads := make(chan *progressBar.DownloadResult, len(*dps))
 	// Create a channel to receive unzip results
 	binariesChan := make(chan *Binary, 2)
 	// Create a channel to receive errors
@@ -42,14 +54,14 @@ func DownloadDependencies(dps *Dependencies) (*Binaries, error) {
 
 	// Downloading...
 	bwg.Add(1)
-	go func(dps *Dependencies, p *mpb.Progress) {
+	go func(dps *draft.Dependencies, p *mpb.Progress) {
 		defer bwg.Done()
 		// Range over dependencies
 		for _, dep := range *dps {
 			// Download the dependency
-			go func(dep *Dependency, p *mpb.Progress) {
+			go func(dep *draft.Dependency, p *mpb.Progress) {
 				defer wg.Done()
-				AttachDownloadBar(p, dep)
+				progressBar.AttachDownloadBar(p, dep)
 				Download(dep, downloads)
 			}(dep, progress)
 		}
@@ -82,9 +94,9 @@ func DownloadDependencies(dps *Dependencies) (*Binaries, error) {
 			}
 
 			// Unzip the download
-			go func(dr *DownloadResult, p *mpb.Progress) {
+			go func(dr *progressBar.DownloadResult, p *mpb.Progress) {
 				defer wg.Done()
-				AttachZipBar(p, dr)
+				progressBar.AttachZipBar(p, dr)
 				Unzip(dr, binariesChan)
 			}(dr, progress)
 		}

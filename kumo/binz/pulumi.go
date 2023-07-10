@@ -5,6 +5,7 @@ import (
 	"os/exec"
 	"path/filepath"
 
+	"github.com/ed3899/kumo/binz/download"
 	"github.com/ed3899/kumo/utils"
 	"github.com/pkg/errors"
 )
@@ -29,7 +30,7 @@ func (p *Pulumi) deployToAWS() {
 
 func (p *Pulumi) Up(cloud string) {
 	// Build the kumo deployment
-	// 
+	//
 	switch cloud {
 	case "aws":
 		p.deployToAWS()
@@ -43,7 +44,7 @@ func (p *Pulumi) Destroy()  {
 
 }
 
-func GetPulumiInstance(bins *utils.Binaries) (pulumi *Pulumi, err error) {
+func GetPulumiInstance(bins *download.Binaries) (pulumi *Pulumi, err error) {
 	// Create the absolute path to the executable
 	ep := filepath.Join(bins.Pulumi.Dependency.ExtractionPath, "pulumi", "bin", "pulumi.exe")
 

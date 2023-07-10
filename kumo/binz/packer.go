@@ -5,6 +5,7 @@ import (
 	"os/exec"
 	"path/filepath"
 
+	"github.com/ed3899/kumo/binz/download"
 	"github.com/ed3899/kumo/utils"
 	"github.com/pkg/errors"
 )
@@ -37,7 +38,7 @@ func (p *Packer) Build(cloud string) {
 	}
 }
 
-func GetPackerInstance(bins *utils.Binaries) (packer *Packer, err error) {
+func GetPackerInstance(bins *download.Binaries) (packer *Packer, err error) {
 	// Create the absolute path to the executable
 	ep := filepath.Join(bins.Packer.Dependency.ExtractionPath, "packer.exe")
 

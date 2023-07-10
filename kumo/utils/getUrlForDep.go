@@ -3,10 +3,11 @@ package utils
 import (
 	"fmt"
 
+	"github.com/ed3899/kumo/host"
 	"github.com/pkg/errors"
 )
 
-func GetUrlForDep(name string, s Specs) (string, error) {
+func GetUrlForDep(name string, s *host.Specs) (string, error) {
 	switch name {
 	case "packer":
 		url := fmt.Sprintf("https://releases.hashicorp.com/packer/1.9.1/packer_1.9.1_%s_%s.zip", s.OS, s.ARCH)

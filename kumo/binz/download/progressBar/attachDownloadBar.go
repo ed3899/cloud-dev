@@ -1,11 +1,12 @@
-package utils
+package progressBar
 
 import (
+	"github.com/ed3899/kumo/binz/download/draft"
 	"github.com/vbauerster/mpb/v8"
 	"github.com/vbauerster/mpb/v8/decor"
 )
 
-func AttachDownloadBar(p *mpb.Progress, d *Dependency) {
+func AttachDownloadBar(p *mpb.Progress, d *draft.Dependency) {
 	// Config the bar
 	downloadBar := p.AddBar(int64(d.ContentLength),
 		mpb.BarFillerClearOnComplete(),
