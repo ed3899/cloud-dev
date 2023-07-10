@@ -8,6 +8,7 @@ import (
 
 	"github.com/ed3899/kumo/utils"
 	"github.com/pkg/errors"
+	"github.com/spf13/viper"
 	"gopkg.in/yaml.v3"
 )
 
@@ -218,5 +219,16 @@ func (kc *KumoConfig) GetKumoEnvironment() (ke *KumoEnvironment, err error) {
 		return ke, nil
 	default:
 		return nil, errors.New("unknown kumo config kind")
+	}
+}
+
+func ReadKumoConfig()  {
+	viper.SetConfigName("kumo.config")
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath(".")
+	err := viper.ReadInConfig()
+	if err != nil {
+		err = errors.Wrap(err, "Error reading config file")
+		log.Fatal(err)
 	}
 }

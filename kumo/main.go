@@ -8,14 +8,10 @@ import (
 )
 
 // TODO Remove zips after extraction
-
 func init() {
-	// Validate host compatibility
-	specs := host.Specs{}
-	if specs.NotValid() {
+	if host.IsNotCompatible() {
 		log.Fatal("Host is not compatible with kumo :/")
 	}
-	
 }
 
 func main() {
