@@ -26,31 +26,7 @@ func init() {
 	}
 	packer, _ := binz.GetBinaryInstances(bins)
 
-	var buildCmd = &cobra.Command{
-		Use:   "build [ /path/to/kumo.config.yaml ]",
-		Short: "Build an AMI with predefined tools",
-		Long: `Build an AMI with predefined tools. Any AMI you build with Kumo will have a set of SSH keys downloaded
-      to your root directory. Please keep these keys safe. If you lose them, you will not be able
-      to SSH into your instance.`,
-		Run: func(cmd *cobra.Command, args []string) {
-			// Check if kumo config is present
-			kc, err := binz.GetKumoConfig()
-			if err != nil {
-				err = errors.Wrapf(err, "%s failed", cmd.Name())
-				log.Fatal(err)
-			}
-
-			switch {
-			case len(args) == 0:
-				packer.Build(kc)
-			case len(args) == 0:
-			case len(args) == 1:
-			default:
-				log.Fatalf("Invalid number of arguments: %v", args)
-				log.Fatalf("Please see 'kumo build --help' for usage")
-			}
-		},
-	}
+	var buildCmd = 
 
 	var upCmd = &cobra.Command{
 		Use:   "up [ /path/to/kumo.config.yaml ]",

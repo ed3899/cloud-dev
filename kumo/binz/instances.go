@@ -5,5 +5,5 @@ import (
 )
 
 func GetBinaryInstances(bins *utils.Binaries) (packer *Packer, pulumi *Pulumi) {
-	return GetPackerInstance(bins), GetPulumiInstance(bins)
+	
 }

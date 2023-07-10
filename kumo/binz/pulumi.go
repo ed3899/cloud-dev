@@ -7,6 +7,10 @@ import (
 	"github.com/pkg/errors"
 )
 
+type Pulumi struct {
+	ExecutablePath string
+}
+
 func GetPulumiInstance(bins *utils.Binaries) (pulumi *Pulumi, err error) {
 	// Create the absolute path to the executable
 	ep := filepath.Join(bins.Pulumi.Dependency.ExtractionPath, "pulumi", "bin", "pulumi.exe")
