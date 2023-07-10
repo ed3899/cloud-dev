@@ -134,17 +134,6 @@ variable "AWS_EC2_INSTANCE_USERNAME_HOME" {
   }
 }
 
-variable "AWS_EC2_INSTANCE_SSH_KEY_NAME" {
-  type        = string
-  default     = "ssh_key"
-  description = "The SSH key name. The private key will be downloaded to the root directory of this project."
-
-  validation {
-    condition     = length(var.AWS_EC2_INSTANCE_SSH_KEY_NAME) > 0
-    error_message = "SSH key name cannot be empty."
-  }
-}
-
 variable "AWS_EC2_SSH_USERNAME" {
   type        = string
   default     = null
@@ -265,26 +254,4 @@ variable "GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC" {
     condition     = can(regex("[a-zA-Z0-9]+", var.GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC))
     error_message = "The variable must be a valid GitHub personal access token."
   }
-}
-
-//! Not used on build
-variable "PULUMI_PERSONAL_ACCESS_TOKEN" {
-  type    = string
-  default = null
-  sensitive   = true
-  description = "Used for pulumi only"
-}
-
-variable "AWS_EC2_INSTANCE_VOLUME_TYPE" {
-  type    = string
-  default = null
-  sensitive   = true
-  description = "Used for pulumi only"
-}
-
-variable "AWS_EC2_INSTANCE_VOLUME_SIZE" {
-  type    = string
-  default = null
-  sensitive   = true
-  description = "Used for pulumi only"
 }
