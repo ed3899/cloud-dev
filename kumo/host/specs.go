@@ -1,6 +1,8 @@
 package host
 
-import "runtime"
+import (
+	"runtime"
+)
 
 type SpecsI interface {
 	Valid()
@@ -15,25 +17,25 @@ type Specs struct {
 
 // Validates host compatibility based on wether packer and pulumi
 // are supported by the host OS and ARCH
-func (s *Specs) Valid() (valid bool) {
+func (s *Specs) Valid() bool {
 	switch runtime.GOOS {
 	case "windows":
 		switch runtime.GOARCH {
 		case "386":
+			return true
 		case "amd64":
+			return true
 		default:
 			return false
 		}
 	default:
 		return false
 	}
-
-	return false
 }
 
 // Validates host compatibility based on wether packer and pulumi
 // are supported by the host OS and ARCH
-func (s *Specs) NotValid() (valid bool) {
+func (s *Specs) NotValid() bool {
 	return !s.Valid()
 }
 

@@ -2,12 +2,11 @@ package binz
 
 import (
 	"log"
-	"os/exec"
 	"path/filepath"
 
 	"github.com/ed3899/kumo/utils"
 	"github.com/pkg/errors"
-	"github.com/ed3899/kumo/config"
+	"github.com/spf13/viper"
 )
 
 type PackerI interface {
@@ -18,15 +17,15 @@ type Packer struct {
 	ExecutablePath string
 }
 
-func (p *Packer) Build(ke *config.KumoEnvironment ) {
-	//TODO Add env vars to command
-
+func (p *Packer) Build() {
 	log.Printf("Building AMI with Packer...")
-	cmd := exec.Command(p.ExecutablePath, "build")
-	err := cmd.Run()
-	if err != nil {
-		log.Fatal(err)
-	}
+	log.Print(viper.GetStringMap("AWS"))
+
+	// cmd := exec.Command(p.ExecutablePath, "build")
+	// err := cmd.Run()
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 }
 
 func GetPackerInstance(bins *utils.Binaries) (packer *Packer, err error) {

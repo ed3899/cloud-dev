@@ -9,6 +9,7 @@ import (
 	"github.com/ed3899/kumo/utils"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var Packer *binz.Packer
@@ -20,37 +21,25 @@ var rootCmd = &cobra.Command{
 
 func init() {
 	// Get the binaries
-	bins, err := utils.GetBinaries()
+	bins := utils.GetBinaries()
+	packer, pulumi := binz.GetBinaryInstances(bins)
+
+	viper.SetConfigName("kumo.config")
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath(".")
+	err := viper.ReadInConfig()
 	if err != nil {
-		log.Fatalf("Error occurred while getting binaries: %v", err)
-	}
-	packer, _ := binz.GetBinaryInstances(bins)
-
-	var buildCmd = 
-
-	var upCmd = &cobra.Command{
-		Use:   "up [ /path/to/kumo.config.yaml ]",
-		Short: "Deploy your AMI to the cloud",
-		Long: `Deploy you cloud development environment. If no AMI is specified in the config file, Kumo will
-    deploy the latest AMI built. It generates an SSH config file for you to easily SSH into your
-    instances from VSCode.`,
-		Run: func(cmd *cobra.Command, args []string) {
-			// Do Stuff Here
-			log.Println("Hello World")
-		},
+		err = errors.Wrap(err, "Error reading config file")
+		log.Fatal(err)
 	}
 
-	var destroyCmd = &cobra.Command{
-		Use:   "destroy [ /path/to/kumo.config.yaml ]",
-		Short: "Destroy your cloud environment",
-		Long:  `Destroy your last deployed cloud environment. Doesn't destroy the AMI. It will also remove the SSH config file.`,
-		Run: func(cmd *cobra.Command, args []string) {
-			// Do Stuff Here
-			log.Println("Hello World")
-		},
+	ccmds := []*cobra.Command{
+		GetBuildCommand(packer),
+		GetUpCommand(pulumi),
+		GetDestroyCommand(pulumi),
 	}
 
-	rootCmd.AddCommand(buildCmd, upCmd, destroyCmd)
+	rootCmd.AddCommand(ccmds...)
 }
 
 func Execute() {

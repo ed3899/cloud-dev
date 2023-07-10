@@ -246,7 +246,7 @@ variable "ANSIBLE_TAGS" {
 
 variable "GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC" {
   type        = string
-  default     = null
+  default     = ""
   sensitive   = true
   description = "The github personal access token use to setup ssh access on your instance"
 

@@ -70,7 +70,6 @@ type KumoConfigContent struct {
 }
 
 type KumoConfigI interface {
-	parseAWSKumoEnvironment(*KumoConfigContent) (*KumoAWSEnvironment, error)
 	GetKumoEnvironment() (*KumoEnvironment, error)
 }
 
@@ -95,9 +94,8 @@ type KumoAWSEnvironment struct {
 	AWS_EC2_INSTANCE_USERNAME          string
 	AWS_EC2_INSTANCE_USERNAME_HOME     string
 	AWS_EC2_INSTANCE_USERNAME_PASSWORD string
-	AWS_EC2_INSTANCE_SSH_KEY_NAME      string
 	AWS_EC2_INSTANCE_VOLUME_TYPE       string
-	AWS_EC2_INSTANCE_VOLUME_SIZE       string
+	AWS_EC2_INSTANCE_VOLUME_SIZE       int
 }
 
 type KumoGeneralEnvironment struct {
@@ -165,50 +163,58 @@ func GetKumoConfig(kind string) (kc *KumoConfig, err error) {
 	return kc, errors.New("kumo config file not found")
 }
 
-func (kc *KumoConfig) attachGeneralEnvironment(kcc *KumoConfigContent, ke *KumoEnvironment) (kge *KumoGeneralEnvironment, err error) {
-
+func (kc *KumoConfig) attachGeneralEnvironment(ke *KumoEnvironment, kcc *KumoConfigContent) {
+	ke.KumoGeneralEnvironment.GIT_EMAIL = kcc.Git.Email
+	ke.KumoGeneralEnvironment.GIT_USERNAME = kcc.Git.Username
+	ke.KumoGeneralEnvironment.ANSIBLE_TAGS = kcc.AMI.Tools
 }
 
-func (kc *KumoConfig) attachOptionalEnvironment(kcc *KumoConfigContent, ke *KumoEnvironment) (koe *KumoOptionalEnvironment, err error) {
-
+func (kc *KumoConfig) attachOptionalEnvironment(ke *KumoEnvironment, kcc *KumoConfigContent) {
+	ke.KumoOptionalEnvironment.GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC = kcc.GitHub.PersonalAccessTokenClassic
+	ke.KumoOptionalEnvironment.PULUMI_PERSONAL_ACCESS_TOKEN = kcc.Pulumi.PersonalAccessToken
 }
 
-func (kc *KumoConfig) attachAWSKumoEnvironment(kcc *KumoConfigContent, ke *KumoEnvironment) (kae *KumoAWSEnvironment, err error) {
-
+func (kc *KumoConfig) attachAWSKumoEnvironment(ke *KumoEnvironment, kcc *KumoConfigContent) {
+	ke.KumoAWSEnvironment.AWS_ACCESS_KEY = kcc.AWS.AccessKeyId
+	ke.KumoAWSEnvironment.AWS_SECRET_KEY = kcc.AWS.SecretAccessKey
+	ke.KumoAWSEnvironment.AWS_IAM_PROFILE = kcc.AWS.IAmProfile
+	ke.KumoAWSEnvironment.AWS_USER_IDS = kcc.AWS.UserIds
+	ke.KumoAWSEnvironment.AWS_AMI_NAME = kcc.AMI.Name
+	ke.KumoAWSEnvironment.AWS_INSTANCE_TYPE = kcc.AWS.EC2.Instance.Type
+	ke.KumoAWSEnvironment.AWS_REGION = kcc.AWS.Region
+	ke.KumoAWSEnvironment.AWS_EC2_AMI_NAME_FILTER = kcc.AMI.Base.Filter
+	ke.KumoAWSEnvironment.AWS_EC2_AMI_ROOT_DEVICE_TYPE = kcc.AMI.Base.RootDeviceType
+	ke.KumoAWSEnvironment.AWS_EC2_AMI_VIRTUALIZATION_TYPE = kcc.AMI.Base.VirtualizationType
+	ke.KumoAWSEnvironment.AWS_EC2_AMI_OWNERS = kcc.AMI.Base.Owners
+	ke.KumoAWSEnvironment.AWS_EC2_SSH_USERNAME = kcc.AMI.Base.User
+	ke.KumoAWSEnvironment.AWS_EC2_INSTANCE_USERNAME = kcc.AMI.User
+	ke.KumoAWSEnvironment.AWS_EC2_INSTANCE_USERNAME_HOME = kcc.AMI.Home
+	ke.KumoAWSEnvironment.AWS_EC2_INSTANCE_USERNAME_PASSWORD = kcc.AMI.Password
+	ke.KumoAWSEnvironment.AWS_EC2_INSTANCE_VOLUME_TYPE = kcc.AWS.EC2.Volume.Type
+	ke.KumoAWSEnvironment.AWS_EC2_INSTANCE_VOLUME_SIZE = kcc.AWS.EC2.Volume.Size
 }
 
 func (kc *KumoConfig) GetKumoEnvironment() (ke *KumoEnvironment, err error) {
 	// Open the file
 	ykc, err := os.Open(kc.Path)
-	defer ykc.Close()
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to open kumo config file")
 	}
+	defer ykc.Close()
 
 	kcc := &KumoConfigContent{}
 	err = yaml.NewDecoder(ykc).Decode(&kcc)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to decode aws kumo config file")
+		return nil, errors.Wrap(err, "failed to decode kumo config file")
 	}
 
 	ke = &KumoEnvironment{}
-
-	kge, err := kc.attachGeneralEnvironment(kcc, ke)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to get general kumo config content")
-	}
-	
-	koe, err := kc.attachOptionalEnvironment(kcc, ke)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to get optional kumo config content")
-	}
+	kc.attachGeneralEnvironment(ke, kcc)
+	kc.attachOptionalEnvironment(ke, kcc)
 
 	switch kc.Kind {
 	case "aws":
-		kae, err := kc.attachAWSKumoEnvironment(kcc, ke)
-		if err != nil {
-			return nil, errors.Wrap(err, "failed to get aws kumo config content")
-		}
+		kc.attachAWSKumoEnvironment(ke, kcc)
 		return ke, nil
 	default:
 		return nil, errors.New("unknown kumo config kind")
