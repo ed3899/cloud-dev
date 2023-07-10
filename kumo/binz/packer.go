@@ -2,11 +2,11 @@ package binz
 
 import (
 	"log"
+	"os/exec"
 	"path/filepath"
 
 	"github.com/ed3899/kumo/utils"
 	"github.com/pkg/errors"
-	"github.com/spf13/viper"
 )
 
 type PackerI interface {
@@ -17,15 +17,24 @@ type Packer struct {
 	ExecutablePath string
 }
 
-func (p *Packer) Build() {
-	log.Printf("Building AMI with Packer...")
-	log.Print(viper.GetStringMap("AWS"))
+func (p *Packer) buildAMI_OnAWS() {
+	cmd := exec.Command(p.ExecutablePath, "version")
+	output, err := cmd.CombinedOutput()
+	log.Print(string(output))
+	if err != nil {
+		err = errors.Wrap(err, "Error occurred while building AMI")
+		log.Fatal(err)
+	}
+}
 
-	// cmd := exec.Command(p.ExecutablePath, "build")
-	// err := cmd.Run()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
+func (p *Packer) Build(cloud string) {
+	switch cloud {
+	case "aws":
+		p.buildAMI_OnAWS()
+	default:
+		err := errors.Errorf("Cloud '%s' not supported", cloud)
+		log.Fatal(err)
+	}
 }
 
 func GetPackerInstance(bins *utils.Binaries) (packer *Packer, err error) {

@@ -20,7 +20,9 @@ var rootCmd = &cobra.Command{
 func init() {
 	// Get the binaries
 	bins := utils.GetBinaries()
+	// Read the config
 	config.ReadKumoConfig()
+	// Assemble commands
 	ccmds := GetAllCommands(bins)
 	rootCmd.AddCommand(*ccmds...)
 }
