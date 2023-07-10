@@ -8,38 +8,71 @@ import (
 
 	"github.com/ed3899/kumo/utils"
 	"github.com/pkg/errors"
+	"gopkg.in/yaml.v3"
 )
 
+type AWS_Config struct {
+	AccessKeyId     string
+	SecretAccessKey string
+	IAmProfile      string
+	UserIds         []string
+	Region          string
+	EC2             struct {
+		Instance struct {
+			Type string
+		}
+		Volume struct {
+			Type string
+			Size int
+		}
+	}
+}
+
+type AMI_Config struct {
+	Name string
+	Base struct {
+		Filter             string
+		User               string
+		RootDeviceType     string
+		VirtualizationType string
+		Owners             []string
+	}
+	User     string
+	Home     string
+	Password string
+	Tools    []string
+}
+
+type GitConfig struct {
+	Username string
+	Email    string
+}
+
+type GitHubConfig struct {
+	PersonalAccessTokenClassic string
+}
+
+type PulumiConfig struct {
+	PersonalAccessToken string
+}
+
+type UpConfig struct {
+	AMI_Id string
+}
+
 type KumoConfigContent struct {
-	AWS_ACCESS_KEY                        string
-	AWS_SECRET_KEY                        string
-	AWS_IAM_PROFILE                       string
-	AWS_USER_IDS                          []string
-	AWS_AMI_NAME                          string
-	AWS_INSTANCE_TYPE                     string
-	AWS_REGION                            string
-	AWS_EC2_AMI_NAME_FILTER               string
-	AWS_EC2_AMI_ROOT_DEVICE_TYPE          string
-	AWS_EC2_AMI_VIRTUALIZATION_TYPE       string
-	AWS_EC2_AMI_OWNERS                    []string
-	AWS_EC2_SSH_USERNAME                  string
-	AWS_EC2_INSTANCE_USERNAME             string
-	AWS_EC2_INSTANCE_USERNAME_HOME        string
-	AWS_EC2_INSTANCE_USERNAME_PASSWORD    string
-	AWS_EC2_INSTANCE_SSH_KEY_NAME         string
-	AWS_EC2_INSTANCE_VOLUME_TYPE          string
-	AWS_EC2_INSTANCE_VOLUME_SIZE          string
-	GIT_USERNAME                          string
-	GIT_EMAIL                             string
-	TOOLS                                 string
-	GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC string
-	PULUMI_PERSONAL_ACCESS_TOKEN          string
+	AWS    *AWS_Config
+	AMI    *AMI_Config
+	Git    *GitConfig
+	GitHub *GitHubConfig
+	Pulumi *PulumiConfig
+	Up     *UpConfig
 }
 
 type KumoConfig struct {
-	YAML_AbsPath string
-	ParsedEnv    string
+	Path string
 	Content      *KumoConfigContent
+	ParsedEnv    string
 }
 
 func GetKumoConfig() (kc *KumoConfig, err error) {
@@ -68,7 +101,7 @@ func GetKumoConfig() (kc *KumoConfig, err error) {
 			return errors.New("found a directory but should be a file")
 		case pattern.MatchString(d.Name()):
 			log.Printf("Found kumo config file: %s", d.Name())
-			kc.YAML_AbsPath = path
+			kc.Path = path
 			return nil
 		}
 
@@ -82,14 +115,28 @@ func GetKumoConfig() (kc *KumoConfig, err error) {
 	// Check if the kumo path exists. This is somehow obvious when getting
 	// no error from the above function. However, it allows us to prove
 	// the abscence of the file in case of an empty string passed as the path
-	if utils.FilePresent(kc.YAML_AbsPath) {
+	if utils.FilePresent(kc.Path) {
 		return kc, nil
 	}
 
 	return kc, errors.New("kumo config file not found")
 }
 
-func TransformKumoConfig(kc *KumoConfig) (err error) {
-	// Parse the yaml file
-	
+func ParseKumoConfig(kc *KumoConfig, kind string) (err error) {
+	// Open the file
+	ykccf, err := os.Open(kc.Path)
+	if err != nil {
+		return errors.Wrap(err, "failed to open kumo config file")
+	}
+	defer ykccf.Close()
+
+	kcc := KumoConfigContent{}
+	err = yaml.NewDecoder(ykccf).Decode(&kcc)
+	if err != nil {
+		return errors.Wrap(err, "failed to decode kumo config file")
+	}
+
+	if err != nil {
+		log.Fatalf("error: %v", err)
+	}
 }

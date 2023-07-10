@@ -28,7 +28,7 @@ func (p *Packer) Build2(ccmd *cobra.Command, args []string) {
 		log.Println("Building AMI...")
 		cmd := exec.Command(p.ExecutablePath, "version")
 
-		cmd.Env = append(cmd.Env, []string{"", ""})
+		cmd.Env = append(cmd.Env, "")
 		output, err := cmd.CombinedOutput()
 		if err != nil {
 			log.Fatalf("Error occurred while running packer: %v", err)
