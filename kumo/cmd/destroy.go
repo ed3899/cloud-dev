@@ -9,7 +9,7 @@ import (
 
 func GetDestroyCommand(p *binz.Pulumi) *cobra.Command {
 	return &cobra.Command{
-		Use:   "destroy [ /path/to/kumo.config.yaml ]",
+		Use:   "destroy",
 		Short: "Destroy your cloud environment",
 		Long:  `Destroy your last deployed cloud environment. Doesn't destroy the AMI. It will also remove the SSH config file.`,
 		Run: func(cmd *cobra.Command, args []string) {

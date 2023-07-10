@@ -9,10 +9,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// type CobraCommands interface {
-// 	[]*cobra.Command
-// }
-
 type CobraCommands = []*cobra.Command
 
 func GetAllCommands(bins *utils.Binaries) (*CobraCommands) {

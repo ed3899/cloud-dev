@@ -14,8 +14,7 @@ func GetBuildCommand(p *binz.Packer) *cobra.Command {
 		to your root directory. Please keep these keys safe. If you lose them, you will not be able
 		to SSH into your instance.`,
 		Run: func(cmd *cobra.Command, args []string) {
-			cloud := viper.GetString("cloud")
-			p.Build(cloud)
+			p.Build(viper.GetString("cloud"))
 		},
 	}
 
