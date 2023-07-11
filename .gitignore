@@ -49,3 +49,5 @@ vendor/
 */packer/plugins
 
 *kumo.config*
+
+kumokey*
