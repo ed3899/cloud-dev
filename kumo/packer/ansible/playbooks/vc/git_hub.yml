@@ -1,0 +1,48 @@
+- name: GitHub
+  hosts: localhost
+  become: true
+
+  vars_files:
+    - ../../vars/main.yml
+  vars:
+    user: "{{ instance.user.name }}"
+    home: "/{{ instance.user.home }}/{{ user }}"
+    ssh_keys_dir: "{{ home }}/.ssh"
+    github_patc: "{{ github.personal_access_token_classic }}"
+
+  pre_tasks:
+    - name: Install dependency
+      ansible.builtin.apt:
+        name: openssh-client
+        update_cache: true
+
+    - name: Generate key pair
+      community.crypto.openssh_keypair:
+        path: "{{ ssh_keys_dir }}/github"
+        type: ed25519
+        owner: "{{ user }}"
+        mode: "0700"
+      register: github_ssh_key_pair
+
+  tasks:
+    - name: Add public key
+      community.general.github_key:
+        name: "packer_cloud-dev_key"
+        token: "{{ github_patc }}"
+        pubkey: "{{ github_ssh_key_pair.public_key }}"
+      register: github_pubkey_added
+      when: github_ssh_key_pair is succeeded
+
+    - name: Authorize public key
+      ansible.posix.authorized_key:
+        user: "{{ user }}"
+        key: "{{ github_ssh_key_pair.public_key }}"
+      when: github_pubkey_added is succeeded
+
+    - name: Add host to ssh config
+      community.general.ssh_config:
+        host: github.com
+        hostname: github.com
+        user: "{{ user }}"
+        identity_file: "{{ github_ssh_key_pair.filename }}"
+      when: github_pubkey_added is succeeded

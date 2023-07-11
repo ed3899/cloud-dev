@@ -1,0 +1,12 @@
+- name: Python for ansible setup
+  hosts: all
+  become: true
+  tasks:
+  # This is important if you're dealing with multiple python versions on the VM.
+  - name: Ensure the right version needed for provisioning is selected
+    community.general.alternatives:
+      name: python3
+      link: "{{ ansible_python.executable }}"
+      path: "/usr/bin/python{{ ansible_python.version.major }}.{{ ansible_python.version.minor }}"
+      priority: 100
+      state: selected

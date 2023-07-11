@@ -1,0 +1,37 @@
+- name: Dotnet
+  hosts: localhost
+  become: true
+
+  vars_files:
+   - ../../vars/main.yml
+  vars:
+    user: "{{ instance.user.name }}"
+    home: "/{{ instance.user.home }}/{{ user }}"
+  # We need git to manage multiple go versions.
+  # So it is important to consider this when removing git from the 
+  # base playbook.
+  tasks:
+    - name: Install dotnet sdk
+      ansible.builtin.apt:
+        name: dotnet-sdk-7.0
+        update_cache: true
+
+  post_tasks:
+    - name: Enable tab autocompletion
+      ansible.builtin.blockinfile:
+        path: "{{ home }}/.bashrc"
+        backup: true
+        create: true
+        block: |
+          # bash parameter completion for the dotnet CLI
+          function _dotnet_bash_complete()
+          {
+            local cur="${COMP_WORDS[COMP_CWORD]}" IFS=$'\n'
+            local candidates
+
+            read -d '' -ra candidates < <(dotnet complete --position "${COMP_POINT}" "${COMP_LINE}" 2>/dev/null)
+
+            read -d '' -ra COMPREPLY < <(compgen -W "${candidates[*]:-}" -- "$cur")
+          }
+
+          complete -f -F _dotnet_bash_complete dotnet

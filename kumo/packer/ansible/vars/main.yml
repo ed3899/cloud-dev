@@ -1,0 +1,32 @@
+instance:
+  user:
+    name: "{{ AWS_EC2_INSTANCE_USERNAME }}"
+    home: "{{ AWS_EC2_INSTANCE_USERNAME_HOME }}"
+    password: "{{ AWS_EC2_INSTANCE_USERNAME_PASSWORD }}"
+
+  ssh:
+    key_name: "{{ AWS_EC2_INSTANCE_SSH_KEY_NAME }}"
+
+  ansible:
+    staging_directory: "{{ AWS_EC2_ANSIBLE_STAGING_DIRECTORY_INTERNAL }}"
+
+  public_directory: "{{ AWS_EC2_PUBLIC_DIRECTORY_INTERNAL }}"
+
+packer:
+  provisioning_user: "{{ AWS_EC2_SSH_USERNAME }}"
+
+aws:
+  access_key: "{{ AWS_ACCESS_KEY }}"
+  secret_key: "{{ AWS_SECRET_KEY }}"
+  region: "{{ AWS_REGION }}"
+
+github:
+  personal_access_token_classic: "{{ GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC }}"
+
+git:
+  username: "{{ GIT_USERNAME }}"
+  email: "{{ GIT_EMAIL }}"
+
+deb_architecture:
+  aarch64: arm64
+  x86_64: amd64

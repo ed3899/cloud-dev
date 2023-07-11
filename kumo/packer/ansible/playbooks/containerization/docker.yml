@@ -1,0 +1,66 @@
+- name: Docker
+  hosts: localhost
+  become: true
+
+  vars_files:
+    - ../../vars/main.yml
+
+  vars:
+    keyring_file: /etc/apt/trusted.gpg.d/docker.gpg
+    user: "{{ instance.user.name }}"
+    docker_group: docker
+    ubuntu_docker_link: https://download.docker.com/linux/ubuntu
+
+  pre_tasks:
+    - name: Install Docker dependencies
+      ansible.builtin.apt:
+        name: "{{ item }}"
+        update_cache: true
+      loop:
+        - curl
+        - ca-certificates
+        - gnupg
+
+    - name: Add Docker's GPG apt key
+      ansible.builtin.apt_key:
+        url: "{{ ubuntu_docker_link }}/gpg"
+        keyring: "{{ keyring_file }}"
+
+    - name: Debug message
+      ansible.builtin.debug:
+        msg: "{{ [ansible_architecture] | map('extract', deb_architecture) | first }}"
+
+    - name: Add Docker repo
+      ansible.builtin.apt_repository:
+        repo: "deb [arch={{ [ansible_architecture] | map('extract', deb_architecture) | first }} signed-by={{ keyring_file }}] {{ ubuntu_docker_link }} {{ ansible_distribution_release }} stable"
+      when: ansible_distribution == "Ubuntu"
+
+
+  tasks:
+    - name: Create docker group
+      ansible.builtin.group:
+        name: "{{ docker_group }}"
+        
+    - name: Install Docker components
+      ansible.builtin.apt:
+        name: "{{ item }}"
+        update_cache: true
+      loop:
+        - docker-ce
+        - docker-ce-cli
+        - containerd.io
+        - docker-buildx-plugin
+        - docker-compose-plugin
+
+    - name: Add local user to the docker group
+      ansible.builtin.user:
+        name: "{{ user }}"
+        groups: "{{ docker_group }}"
+        append: true
+
+  post_tasks:
+    - name: Start docker
+      ansible.builtin.service:
+        name: docker
+        state: started
+        enabled: true

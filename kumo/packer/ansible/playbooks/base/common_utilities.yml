@@ -1,0 +1,17 @@
+- name: Common dependencies
+  hosts: localhost
+  become: true
+  
+  tasks:
+    - name: Install general utilities
+      ansible.builtin.apt:
+        name: "{{ item }}"
+        update_cache: yes
+      loop:
+        - net-tools
+        - snapd
+        - bash-completion
+        - tree
+        - netcat
+        - less
+        - groff

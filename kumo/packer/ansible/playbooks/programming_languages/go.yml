@@ -1,0 +1,27 @@
+- name: Go
+  hosts: localhost
+  become: true
+
+  vars_files:
+    - ../../vars/main.yml
+
+  vars:
+    user: "{{ instance.user.name }}"
+    home: "/{{ instance.user.home }}/{{ user }}"
+
+  # We need git to manage multiple go versions.
+  # So it is important to consider this when removing git from the 
+  # base playbook.
+  tasks:
+    - name: Install Go
+      community.general.snap:
+        name: go
+        classic: true
+  
+  post_tasks:
+    - name: Add Go to path
+      ansible.builtin.lineinfile:
+        path: "{{ home }}/.profile"
+        backup: true
+        create: true
+        line: "export PATH=$PATH:{{ home }}/go/bin"

@@ -1,0 +1,29 @@
+- name: Starship
+  hosts: localhost
+  become: true
+
+  vars_files:
+    - ../../vars/main.yml
+  vars:
+    user: "{{ instance.user.name }}"
+    home: "/{{ instance.user.home }}/{{ user }}"
+
+  pre_tasks:
+    - name: Install fira-code font
+      ansible.builtin.apt:
+        name: fonts-firacode
+        update_cache: yes
+
+  tasks:
+    - name: Install starship
+      community.general.snap:
+        name: starship
+        channel: latest/edge
+
+  post_tasks:
+    - name: Add init script
+      ansible.builtin.lineinfile:
+        path: "{{ home }}/.profile"
+        create: true
+        backup: true
+        line: eval "$(starship init bash)"

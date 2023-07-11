@@ -1,0 +1,72 @@
+- name: Linux aliases
+  hosts: localhost
+  become: true
+
+  vars_files:
+    - ../../vars/main.yml
+
+  vars:
+    user: "{{ instance.user.name }}"
+    home: "/{{ instance.user.home }}/{{ user }}"
+
+  tasks:
+    - name: Add aliases to .profile
+      ansible.builtin.blockinfile:
+        path: "{{ home }}/.profile"
+        backup: true
+        create: true
+        owner: "{{ user }}"
+        block: |
+          ## Profile aliases                              # Comments for section
+
+          # Show hidden files #
+          alias l.='ls -d .* --color=auto'                # Alias for listing hidden files
+
+          ## a quick way to get out of current directory
+          alias ..='cd ..'                                # Alias for moving up one directory
+          alias ...='cd ../../../'                       # Alias for moving up three directories
+          alias ....='cd ../../../../'                   # Alias for moving up four directories
+          alias .....='cd ../../../../'                  # Alias for moving up five directories
+          alias .4='cd ../../../../'                     # Alias for moving up four directories
+          alias .5='cd ../../../../../'                  # Alias for moving up five directories
+
+          ## handy short cuts
+          alias h='history'                               # Alias for showing command history
+          alias j='jobs -l'                               # Alias for showing active jobs
+          alias path='echo -e ${PATH//:/\n}'             # Alias for showing the system PATH
+
+          alias now='date +"%T"'                          # Alias for showing the current time
+          alias nowtime=now
+          alias nowdate='date +"%d-%m-%Y"'                # Alias for showing the current date
+
+          alias getusers='cut -d: -f1 /etc/passwd'        # Alias for showing all users on the system
+
+          ## Stop after sending 5 ECHO_REQUEST packets 
+          alias ping='ping -c 5'                          # Alias for pinging with 5 packets
+
+          ## Do not wait interval 1 second, go fast 
+          alias fastping='ping -c 100 -s.2'               # Alias for pinging very quickly
+
+          ## Use netstat command to quickly list all TCP/UDP port on the server:
+          alias ports='netstat -tulanp'                   # Alias for showing all open ports
+
+          ## show memory usage
+          alias meminfo='free -m -l -t'                   # Alias for showing memory usage information
+
+          ## get top processes eating memory
+          alias psmem='ps auxf | sort -nr -k 4'           # Alias for showing processes sorted by memory usage
+          alias psmem10='ps auxf | sort -nr -k 4 | head -10' # Alias for showing top 10 processes sorted by memory usage
+
+          ## get top processes eating cpu ##
+          alias pscpu='ps auxf | sort -nr -k 3'           # Alias for showing processes sorted by CPU usage
+          alias pscpu10='ps auxf | sort -nr -k 3 | head -10' # Alias for showing top 10 processes sorted by CPU usage
+
+          ## Get server cpu info
+          ## older system use /proc/cpuinfo
+          alias cpuinfo='less /proc/cpuinfo'              # Alias for showing CPU information
+
+          ## get GPU ram on desktop / laptop
+          alias gpumeminfo='grep -i --color memory /var/log/Xorg.0.log' # Alias for showing GPU memory usage information
+
+          ## Download with retry
+          alias wget='wget -c'                           # Alias for downloading files using wget with retrying option enabled

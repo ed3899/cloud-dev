@@ -1,0 +1,64 @@
+- name: Kubectl
+  hosts: localhost
+  become: true
+
+  vars_files:
+    - ../../vars/main.yml
+
+  vars:
+    arch: "{{ [ansible_architecture] | map('extract', deb_architecture) | first }}"
+    kubectl_convert_plugin: kubectl-convert
+    kubectl_convert_stable_release_cmd: curl -L -s https://dl.k8s.io/release/stable.txt
+    kubectl_convert_plugin_command: "curl -LO 'https://dl.k8s.io/release/PLACEHOLDER/bin/linux/{{ arch }}/{{ kubectl_convert_plugin }}'"
+    kubectl_convert_plugin_checksum: kubectl-convert.sha256
+    kubectl_convert_plugin_download_checksum_command: "curl -LO 'https://dl.k8s.io/PLACEHOLDER/bin/linux/{{ arch }}/{{ kubectl_convert_plugin_checksum }}'"
+    verify_kubectl_convert_checksum_command: "echo \"$(cat {{ kubectl_convert_plugin_checksum }}) {{ kubectl_convert_plugin }}\" | sha256sum --check"
+    kubectl_install_command: install -o root -g root -m 0755 {{ kubectl_convert_plugin }} /usr/local/bin/{{ kubectl_convert_plugin }}
+    public_directory: "{{ instance.public_directory }}"
+
+  pre_tasks:
+    - name: Install dependency
+      ansible.builtin.apt:
+        name: coreutils
+        update_cache: true
+
+  tasks:
+    - name: Install kubectl
+      community.general.snap:
+        name:
+          - kubectl
+        classic: true
+
+    - name: Add kubectl autocompletion to bash
+      ansible.builtin.shell: |
+        kubectl completion bash | sudo tee kubectl > /dev/null
+        chmod a+r kubectl
+      args:
+        chdir: /etc/bash_completion.d
+
+  post_tasks:
+    - name: Get latest stable kubectl convert version
+      ansible.builtin.shell: "{{ kubectl_convert_stable_release_cmd }}"
+      register: kubectl_convert_release
+
+    - name: Download kubectl convert plugin
+      ansible.builtin.shell: "{{ kubectl_convert_plugin_command | regex_replace('PLACEHOLDER', kubectl_convert_release.stdout) }}"
+      args:
+        chdir: "{{ public_directory }}"
+
+    - name: Download kubectl convert checksum
+      ansible.builtin.shell: "{{ kubectl_convert_plugin_download_checksum_command | regex_replace('PLACEHOLDER', kubectl_convert_release.stdout) }}"
+      args:
+        chdir: "{{ public_directory }}"
+
+    - name: Verify checksum
+      ansible.builtin.shell: "{{ verify_kubectl_convert_checksum_command }}"
+      args:
+        chdir: "{{ public_directory }}"
+      register: checksum
+
+    - name: Install kubectl convert plugin
+      when: checksum.rc == 0
+      ansible.builtin.shell: "{{ kubectl_install_command }}"
+      args:
+        chdir: "{{ public_directory }}"
