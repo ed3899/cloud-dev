@@ -6,12 +6,15 @@ import (
 	"path/filepath"
 
 	"github.com/ed3899/kumo/binz/download"
+	"github.com/ed3899/kumo/binz/download/draft"
 	"github.com/ed3899/kumo/utils"
 	"github.com/pkg/errors"
 )
 
 type PackerI interface {
-	Build()
+	DraftDependency() (*draft.Dependency, error)
+	GetPackerInstance(*download.Binaries) (*Packer, error)
+	Build(string)
 }
 
 type Packer struct {

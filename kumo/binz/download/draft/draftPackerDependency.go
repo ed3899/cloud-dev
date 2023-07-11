@@ -7,23 +7,12 @@ import (
 	"github.com/ed3899/kumo/host"
 	"github.com/ed3899/kumo/utils"
 	"github.com/pkg/errors"
-	"github.com/vbauerster/mpb/v8"
 )
 
-type Dependency struct {
-	Name           string
-	Present        bool
-	URL            string
-	ZipPath        string
-	ExtractionPath string
-	ContentLength  int64
-	DownloadBar    *mpb.Bar
-	ZipBar         *mpb.Bar
-}
+func DraftPackerDependency() (dp *Dependency, err error) {
+	name := "packer"
+	s := host.GetSpecs()
 
-// Return a dependency indicating whether the dependency is present. This only considers the presence
-// of the downloaded zip file. If the downloaded zip file is present, the dependency is considered present.
-func DraftDependency(name string, s *host.Specs) (dp *Dependency, err error) {
 	destinationZipPath, err := utils.CraftSingleZipPath(name, s)
 	if err != nil {
 		msg := fmt.Sprintf("failed to get zip path for dependency: %v", name)
@@ -79,4 +68,5 @@ func DraftDependency(name string, s *host.Specs) (dp *Dependency, err error) {
 		ZipPath:        destinationZipPath,
 		ContentLength:  contentLength,
 	}, nil
+
 }

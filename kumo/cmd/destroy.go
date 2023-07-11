@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func GetDestroyCommand(p *binz.Pulumi) *cobra.Command {
+func GetDestroyCommand(p *binz.Terraform) *cobra.Command {
 	return &cobra.Command{
 		Use:   "destroy",
 		Short: "Destroy your cloud environment",

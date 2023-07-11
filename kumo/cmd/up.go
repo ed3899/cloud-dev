@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func GetUpCommand(p *binz.Pulumi) *cobra.Command {
+func GetUpCommand(p *binz.Terraform) *cobra.Command {
 	return &cobra.Command{
 		Use:   "up",
 		Short: "Deploy your AMI to the cloud",

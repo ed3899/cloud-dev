@@ -18,16 +18,16 @@ func GetAllCommands(bins *download.Binaries) *CobraCommands {
 		log.Fatal(err)
 	}
 
-	pulumi, err := binz.GetPulumiInstance(bins)
+	terraform, err := binz.GetTerraformInstance(bins)
 	if err != nil {
-		err = errors.Wrap(err, "Error occurred while getting Pulumi instance")
+		err = errors.Wrap(err, "Error occurred while getting Terraform instance")
 		log.Fatal(err)
 	}
 
 	ccmds := []*cobra.Command{
 		GetBuildCommand(packer),
-		GetUpCommand(pulumi),
-		GetDestroyCommand(pulumi),
+		GetUpCommand(terraform),
+		GetDestroyCommand(terraform),
 	}
 
 	return &ccmds

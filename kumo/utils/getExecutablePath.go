@@ -20,5 +20,5 @@ func GetExecutablePath(name string) (absExecutablePath string, err error) {
 		return "", err
 	}
 
-	return filepath.Join(cwd, GetDepsDir(), name, name+".exe"), nil
+	return filepath.Join(cwd, GetDependenciesDirName(), name, name+".exe"), nil
 }

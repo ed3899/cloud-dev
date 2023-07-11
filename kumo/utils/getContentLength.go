@@ -6,6 +6,7 @@ import (
 	"github.com/pkg/errors"
 )
 
+// Returns the content length of the url.
 func GetContentLength(url string) (int64, error) {
 	response, err := http.Head(url)
 	if err != nil {

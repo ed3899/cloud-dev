@@ -18,8 +18,8 @@ type Binary struct {
 }
 
 type Binaries struct {
-	Packer *Binary
-	Pulumi *Binary
+	Packer    *Binary
+	Terraform *Binary
 }
 
 // Downloads dependencies and returns a struct containing the binaries
@@ -136,8 +136,8 @@ func DownloadDependencies(dps *draft.Dependencies) (*Binaries, error) {
 		case "packer":
 			binaries.Packer = binary
 			continue
-		case "pulumi":
-			binaries.Pulumi = binary
+		case "terraform":
+			binaries.Terraform = binary
 			continue
 		}
 	}

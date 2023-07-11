@@ -1,6 +1,6 @@
 package utils
 
 // Returns the name of the dependencies directory.
-func GetDepsDir() string {
+func GetDependenciesDirName() string {
 	return "deps"
 }

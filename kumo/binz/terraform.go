@@ -10,16 +10,18 @@ import (
 	"github.com/pkg/errors"
 )
 
-type PulumiI interface {
+type TerraformI interface {
 	Up()
 }
 
-type Pulumi struct {
+type Terraform struct {
 	ExecutablePath string
 }
 
-func (p *Pulumi) deployToAWS() {
-	cmd := exec.Command(p.ExecutablePath, "version")
+
+
+func (t *Terraform) deployToAWS() {
+	cmd := exec.Command(t.ExecutablePath, "version")
 	output, err := cmd.CombinedOutput()
 	log.Print(string(output))
 	if err != nil {
@@ -28,35 +30,35 @@ func (p *Pulumi) deployToAWS() {
 	}
 }
 
-func (p *Pulumi) Up(cloud string) {
+func (t *Terraform) Up(cloud string) {
 	// Build the kumo deployment
 	//
 	switch cloud {
 	case "aws":
-		p.deployToAWS()
+		t.deployToAWS()
 	default:
 		err := errors.Errorf("Cloud '%s' not supported", cloud)
 		log.Fatal(err)
 	}
 }
 
-func (p *Pulumi) Destroy()  {
+func (t *Terraform) Destroy() {
 
 }
 
-func GetPulumiInstance(bins *download.Binaries) (pulumi *Pulumi, err error) {
+func GetTerraformInstance(bins *download.Binaries) (terraform *Terraform, err error) {
 	// Create the absolute path to the executable
-	ep := filepath.Join(bins.Pulumi.Dependency.ExtractionPath, "pulumi", "bin", "pulumi.exe")
+	ep := filepath.Join(bins.Terraform.Dependency.ExtractionPath, "terraform.exe")
 
 	// Validate existence
 	if utils.FileNotPresent(ep) {
-		err = errors.New("Pulumi executable not found")
+		err = errors.New("Terraform executable not found")
 		return nil, err
 	}
 
-	pulumi = &Pulumi{
+	terraform = &Terraform{
 		ExecutablePath: ep,
 	}
 
-	return pulumi, nil
+	return terraform, nil
 }

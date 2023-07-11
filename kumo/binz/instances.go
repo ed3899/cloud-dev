@@ -5,15 +5,13 @@ import (
 
 	"github.com/ed3899/kumo/binz/download"
 	"github.com/ed3899/kumo/binz/download/draft"
-	"github.com/ed3899/kumo/host"
 	"github.com/ed3899/kumo/utils"
 	"github.com/pkg/errors"
 )
 
 func GetBinaries() (binaries *download.Binaries) {
 	// Get missing dependencies
-	neededBinaries := []string{"packer", "pulumi"}
-	missingDependencies, err := draft.DraftDependencies(neededBinaries, host.GetSpecs())
+	missingDependencies, err := draft.CraftDependencies()
 	if err != nil {
 		err = errors.Wrap(err, "failed to draft missing dependencies")
 		log.Fatal(err)
@@ -40,20 +38,20 @@ func GetBinaries() (binaries *download.Binaries) {
 	return binaries
 }
 
-func GetBinaryInstances(bins *download.Binaries) (packer *Packer, pulumi *Pulumi) {
+func GetBinaryInstances(bins *download.Binaries) (packer *Packer, terraform *Terraform) {
 	packer, err := GetPackerInstance(bins)
 	if err != nil {
 		err = errors.Wrap(err, "Error occurred while getting Packer instance")
 		log.Fatal(err)
 	}
 
-	pulumi, err = GetPulumiInstance(bins)
+	terraform, err = GetTerraformInstance(bins)
 	if err != nil {
-		err = errors.Wrap(err, "Error occurred while getting Pulumi instance")
+		err = errors.Wrap(err, "Error occurred while getting Terraform instance")
 		log.Fatal(err)
 	}
 
-	return packer, pulumi
+	return packer, terraform
 }
 
 // Return the local binaries
@@ -63,9 +61,9 @@ func GetLocalBinaries() (binaries *download.Binaries, err error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get packer extraction path")
 	}
-	pulumiep, err := utils.CraftSingleExtractionPath("pulumi")
+	terraformep, err := utils.CraftSingleExtractionPath("terraform")
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to get pulumi extraction path")
+		return nil, errors.Wrap(err, "failed to get terraform extraction path")
 	}
 
 	// Craft binaries
@@ -76,10 +74,10 @@ func GetLocalBinaries() (binaries *download.Binaries, err error) {
 				ExtractionPath: packerep,
 			},
 		},
-		Pulumi: &download.Binary{
+		Terraform: &download.Binary{
 			Dependency: &draft.Dependency{
-				Name:           "pulumi",
-				ExtractionPath: pulumiep,
+				Name:           "terraform",
+				ExtractionPath: terraformep,
 			},
 		},
 	}
