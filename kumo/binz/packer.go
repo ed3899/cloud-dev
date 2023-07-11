@@ -82,12 +82,17 @@ func (p *Packer) buildAMI_OnAWS() (err error) {
 	gVarsFileFlag := fmt.Sprintf("-var-file=%s", generalPackerVarsPath)
 	awsVarsFileFlag := fmt.Sprintf("-var-file=%s", awsPackerVarsPath)
 
-	cmd := exec.Command(p.ExecutablePath, "validate", gVarsFileFlag, awsVarsFileFlag, ".")
-	output, err := cmd.CombinedOutput()
-	log.Print(string(output))
-	if err != nil {
-		err = errors.Wrap(err, "Error occurred while building AMI with AWS Config")
-		return err
+	cmd := exec.Command(p.ExecutablePath, "build", gVarsFileFlag, awsVarsFileFlag, ".")
+	cmdErr := utils.RunCmdAndStreamOutput(cmd)
+	if cmdErr != nil {
+		cmdErr = errors.Wrap(cmdErr, "Error occurred while building Packer AMI")
+		err = os.Chdir(initialLocation)
+		if err != nil {
+			err = errors.Wrap(err, "Error occurred while changing directory to initial location")
+			totalError := errors.Wrap(cmdErr, err.Error())
+			return totalError
+		}
+		return cmdErr
 	}
 
 	// Change back to initial location
