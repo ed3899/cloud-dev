@@ -13,6 +13,7 @@ import (
 )
 
 func AttachToProcessStdAll(cmd *exec.Cmd) (err error) {
+	// Get StdoutPipe and StderrPipe
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
 		err = errors.Wrap(err, "Error occurred while getting StdoutPipe")
@@ -25,6 +26,7 @@ func AttachToProcessStdAll(cmd *exec.Cmd) (err error) {
 		return err
 	}
 
+	// Start command
 	if err := cmd.Start(); err != nil {
 		err = errors.Wrap(err, "Error occurred while starting command")
 		return err
@@ -38,6 +40,7 @@ func AttachToProcessStdAll(cmd *exec.Cmd) (err error) {
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
 
+	// Close errChan and sigChan when copyWg is done
 	go func() {
 		copyWg.Wait()
 		close(errChan)
@@ -45,6 +48,7 @@ func AttachToProcessStdAll(cmd *exec.Cmd) (err error) {
 		close(done)
 	}()
 
+	// Copy StdoutPipe and StderrPipe to Stdout and Stderr
 	go func(src *io.ReadCloser, dest *os.File) {
 		defer copyWg.Done()
 		if _, err := io.Copy(dest, *src); err != nil {
@@ -63,6 +67,7 @@ func AttachToProcessStdAll(cmd *exec.Cmd) (err error) {
 		}
 	}(&stderr, os.Stderr)
 
+	// Wait for command to finish
 	go func() {
 		if err := cmd.Wait(); err != nil {
 			err = errors.Wrap(err, "Error occurred while waiting for command to finish")
@@ -72,6 +77,7 @@ func AttachToProcessStdAll(cmd *exec.Cmd) (err error) {
 		done <- true
 	}()
 
+// Wait for error, interrupt signal or done
 OuterLoop:
 	for {
 		select {
