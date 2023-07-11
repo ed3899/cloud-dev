@@ -83,7 +83,7 @@ func (p *Packer) buildAMI_OnAWS() (err error) {
 	awsVarsFileFlag := fmt.Sprintf("-var-file=%s", awsPackerVarsPath)
 
 	cmd := exec.Command(p.ExecutablePath, "validate", gVarsFileFlag, awsVarsFileFlag, ".")
-	cmdErr := utils.RunCmdAndStreamOutput(cmd)
+	cmdErr := utils.AttachToProcessStdAll(cmd)
 	if cmdErr != nil {
 		cmdErr = errors.Wrap(cmdErr, "Error occurred while building Packer AMI")
 		err = os.Chdir(initialLocation)

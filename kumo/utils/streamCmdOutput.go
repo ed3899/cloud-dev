@@ -2,26 +2,17 @@ package utils
 
 import (
 	"io"
+	"log"
 	"os"
 	"os/exec"
+	"os/signal"
 	"sync"
+	"syscall"
 
 	"github.com/pkg/errors"
 )
 
-func RunCmdAndStreamOutput(cmd *exec.Cmd) (err error) {
-	stat, err := os.Stdin.Stat()
-	if err != nil {
-		err = errors.Wrap(err, "Error occurred while getting Stdin stat")
-		return err
-	}
-
-	stdin, err := cmd.StdinPipe()
-	if err != nil {
-		err = errors.Wrap(err, "Error occurred while getting StdinPipe")
-		return err
-	}
-
+func AttachToProcessStdAll(cmd *exec.Cmd) (err error) {
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
 		err = errors.Wrap(err, "Error occurred while getting StdoutPipe")
@@ -42,30 +33,17 @@ func RunCmdAndStreamOutput(cmd *exec.Cmd) (err error) {
 	copyWg := &sync.WaitGroup{}
 	copyWg.Add(2)
 
-	errChan := make(chan error)
+	done := make(chan bool, 1)
+	errChan := make(chan error, 1)
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
 
 	go func() {
 		copyWg.Wait()
 		close(errChan)
+		close(sigChan)
+		close(done)
 	}()
-
-	// Check if there is any input available from stdin
-	if (stat.Mode() & os.ModeCharDevice) == 0 {
-		// If there is, copy it to stdinPipe
-		copyWg.Add(1)
-
-		go func(src *os.File, dest *io.WriteCloser) {
-			defer copyWg.Done()
-
-			if _, err := io.Copy(*dest, src); err != nil {
-				err = errors.Wrap(err, "Error occurred while copying Stdin to StdinPipe")
-				errChan <- err
-				return
-			}
-			(*dest).Close()
-
-		}(os.Stdin, &stdin)
-	}
 
 	go func(src *io.ReadCloser, dest *os.File) {
 		defer copyWg.Done()
@@ -91,13 +69,34 @@ func RunCmdAndStreamOutput(cmd *exec.Cmd) (err error) {
 			errChan <- err
 			return
 		}
+		done <- true
 	}()
 
-	for err := range errChan {
-		if err != nil {
-			return err
+OuterLoop:
+	for {
+		select {
+		case errFromChan := <-errChan:
+			switch {
+			case errFromChan != nil:
+				if err := cmd.Process.Signal(syscall.SIGTERM); err != nil {
+					err = errors.Wrap(err, "Error occurred while sending interrupt signal to process")
+					log.Fatal(err)
+				}
+				log.Fatal(err)
+			default:
+				continue OuterLoop
+			}
+
+		case <-sigChan:
+			log.Println("Received interrupt signal, sending interrupt signal to process")
+			if err := cmd.Process.Signal(syscall.SIGTERM); err != nil {
+				err = errors.Wrap(err, "Error occurred while sending interrupt signal to process")
+				log.Fatal(err)
+			}
+			os.Exit(0)
+
+		case <-done:
+			return nil
 		}
 	}
-
-	return nil
 }
