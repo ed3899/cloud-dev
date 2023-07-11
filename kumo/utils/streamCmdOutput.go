@@ -10,6 +10,18 @@ import (
 )
 
 func RunCmdAndStreamOutput(cmd *exec.Cmd) (err error) {
+	stat, err := os.Stdin.Stat()
+	if err != nil {
+		err = errors.Wrap(err, "Error occurred while getting Stdin stat")
+		return err
+	}
+
+	stdin, err := cmd.StdinPipe()
+	if err != nil {
+		err = errors.Wrap(err, "Error occurred while getting StdinPipe")
+		return err
+	}
+
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
 		err = errors.Wrap(err, "Error occurred while getting StdoutPipe")
@@ -37,23 +49,41 @@ func RunCmdAndStreamOutput(cmd *exec.Cmd) (err error) {
 		close(errChan)
 	}()
 
-	go func(dest *os.File, src *io.ReadCloser) {
+	// Check if there is any input available from stdin
+	if (stat.Mode() & os.ModeCharDevice) == 0 {
+		// If there is, copy it to stdinPipe
+		copyWg.Add(1)
+
+		go func(src *os.File, dest *io.WriteCloser) {
+			defer copyWg.Done()
+
+			if _, err := io.Copy(*dest, src); err != nil {
+				err = errors.Wrap(err, "Error occurred while copying Stdin to StdinPipe")
+				errChan <- err
+				return
+			}
+			(*dest).Close()
+
+		}(os.Stdin, &stdin)
+	}
+
+	go func(src *io.ReadCloser, dest *os.File) {
 		defer copyWg.Done()
-		if _, err := io.Copy(dest, stdout); err != nil {
+		if _, err := io.Copy(dest, *src); err != nil {
 			err = errors.Wrap(err, "Error occurred while copying StdoutPipe to Stdout")
 			errChan <- err
 			return
 		}
-	}(os.Stdout, &stdout)
+	}(&stdout, os.Stdout)
 
-	go func(dest *os.File, src *io.ReadCloser) {
+	go func(src *io.ReadCloser, dest *os.File) {
 		defer copyWg.Done()
-		if _, err := io.Copy(os.Stderr, stderr); err != nil {
+		if _, err := io.Copy(dest, *src); err != nil {
 			err = errors.Wrap(err, "Error occurred while copying StderrPipe to Stderr")
 			errChan <- err
 			return
 		}
-	}(os.Stderr, &stderr)
+	}(&stderr, os.Stderr)
 
 	go func() {
 		if err := cmd.Wait(); err != nil {

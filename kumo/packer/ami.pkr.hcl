@@ -14,7 +14,7 @@ locals {
   AWS_EC2_INSTANCE_USERNAME          = lower(trimspace(regex_replace(var.AWS_EC2_INSTANCE_USERNAME, "\\s+", "-")))
   AWS_EC2_INSTANCE_USERNAME_PASSWORD = trimspace(var.AWS_EC2_INSTANCE_USERNAME_PASSWORD)
   AWS_EC2_INSTANCE_USERNAME_HOME     = trimspace(var.AWS_EC2_INSTANCE_USERNAME_HOME)
-  AWS_EC2_INSTANCE_SSH_KEY_NAME      = format("%s-%s-%s", local.AWS_AMI_NAME, local.AWS_EC2_INSTANCE_USERNAME, formatdate("DD-MMM-YY-hh-mm-ss-ZZZ", timestamp()))
+  AWS_EC2_INSTANCE_SSH_KEY_NAME      = format("kumokey-%s-%s-%s", local.AWS_AMI_NAME, local.AWS_EC2_INSTANCE_USERNAME, formatdate("DD-MMM-YY-hh-mm-ss-ZZZ", timestamp()))
 
   AWS_EC2_ANSIBLE_STAGING_DIRECTORY_INTERNAL = trimspace(var.AWS_EC2_ANSIBLE_STAGING_DIRECTORY_INTERNAL)
   AWS_EC2_PUBLIC_DIRECTORY_INTERNAL          = trimspace(var.AWS_EC2_PUBLIC_DIRECTORY_INTERNAL)
