@@ -1,8 +1,0 @@
-- name: Helm
-  hosts: localhost
-  become: true
-  tasks:
-    - name: Install Helm
-      community.general.snap:
-        name: helm
-        classic: true
