@@ -1,11 +1,6 @@
 package templates
 
 import (
-	"os"
-	"path/filepath"
-	"text/template"
-
-	"github.com/ed3899/kumo/utils"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 )
@@ -47,38 +42,9 @@ func CraftAWSPackerVarsFile() (awsPackerVarsPath string, err error) {
 		AWS_EC2_INSTANCE_USERNAME_PASSWORD: viper.GetString("AMI.Password"),
 	}
 
-	cwd, err := os.Getwd()
+	awsPackerVarsPath, err = CraftGenericPackerVarsFile[*AWS_PackerEnvironment]("AWS_PackerVarsTemplate.tmpl", "aws_ami.pkrvars.hcl", awsEnv)
 	if err != nil {
-		err = errors.Wrap(err, "Error occurred while getting current working directory")
-		return "", err
-	}
-
-	awsTemplatePath := filepath.Join(cwd, "templates", "AWS_PackerVarsTemplate.tmpl")
-
-	tmpl, err := template.ParseFiles(awsTemplatePath)
-	if err != nil {
-		err = errors.Wrap(err, "Error occurred while parsing Packer AWS Vars template file")
-		return "", err
-	}
-
-	phcldir, err := utils.GetPackerHclDirPath()
-	if err != nil {
-		err = errors.Wrap(err, "Error occurred while getting Packer HCL directory path")
-		return "", err
-	}
-
-	awsPackerVarsPath = filepath.Join(phcldir, "aws_ami.pkrvars.hcl")
-
-	file, err := os.Create(awsPackerVarsPath)
-	if err != nil {
-		err = errors.Wrap(err, "Error occurred while creating Packer AWS Vars file")
-		return "", err
-	}
-	defer file.Close()
-
-	err = tmpl.Execute(file, awsEnv)
-	if err != nil {
-		err = errors.Wrap(err, "Error occurred while executing Packer AWS Vars template file")
+		err = errors.Wrap(err, "Error occurred while crafting generic Packer Vars file")
 		return "", err
 	}
 
