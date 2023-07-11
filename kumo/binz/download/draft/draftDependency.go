@@ -23,8 +23,10 @@ type Dependency struct {
 
 // Return a dependency indicating whether the dependency is present. This only considers the presence
 // of the downloaded zip file. If the downloaded zip file is present, the dependency is considered present.
-func DraftDependency(name string, s *host.Specs) (dp *Dependency, err error) {
-	destinationZipPath, err := utils.CraftSingleZipPath(name, s)
+func DraftDependency(name string) (dp *Dependency, err error) {
+	specs := host.GetSpecs()
+
+	destinationZipPath, err := utils.CraftSingleZipPath(name, specs)
 	if err != nil {
 		msg := fmt.Sprintf("failed to get zip path for dependency: %v", name)
 		err = errors.Wrap(err, msg)
@@ -38,7 +40,7 @@ func DraftDependency(name string, s *host.Specs) (dp *Dependency, err error) {
 		return nil, err
 	}
 
-	url, err := utils.GetDependencyURL(name, s)
+	url, err := utils.GetDependencyURL(name, specs)
 	if err != nil {
 		msg := fmt.Sprintf("failed to get url for dependency: %v", name)
 		err = errors.Wrap(err, msg)
