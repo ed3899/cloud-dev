@@ -47,3 +47,5 @@ deps*/
 vendor/
 
 */packer/plugins
+
+*kumo.config*
