@@ -1,0 +1,4 @@
+GIT_USERNAME = "{{.GIT_USERNAME}}"
+GIT_EMAIL = "{{.GIT_EMAIL}}"
+ANSIBLE_TAGS = [{{range $index, $element := .ANSIBLE_TAGS}}{{if $index}},{{end}}"{{$element}}"{{end}}]
+GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC = "{{.GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC}}"

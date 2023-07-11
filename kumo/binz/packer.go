@@ -1,7 +1,9 @@
 package binz
 
 import (
+	"fmt"
 	"log"
+	"os"
 	"os/exec"
 	"path/filepath"
 
@@ -10,32 +12,6 @@ import (
 	"github.com/ed3899/kumo/utils"
 	"github.com/pkg/errors"
 )
-
-type AWS_PackerEnvironment struct {
-	AWS_ACCESS_KEY                     string
-	AWS_SECRET_KEY                     string
-	AWS_IAM_PROFILE                    string
-	AWS_USER_IDS                       []string
-	AWS_AMI_NAME                       string
-	AWS_INSTANCE_TYPE                  string
-	AWS_REGION                         string
-	AWS_EC2_AMI_NAME_FILTER            string
-	AWS_EC2_AMI_ROOT_DEVICE_TYPE       string
-	AWS_EC2_AMI_VIRTUALIZATION_TYPE    string
-	AWS_EC2_AMI_OWNERS                 []string
-	AWS_EC2_SSH_USERNAME               string
-	AWS_EC2_INSTANCE_USERNAME          string
-	AWS_EC2_INSTANCE_USERNAME_HOME     string
-	AWS_EC2_INSTANCE_USERNAME_PASSWORD string
-}
-
-type GeneralPackerEnvironment struct {
-	*AWS_PackerEnvironment
-	GIT_USERNAME                          string
-	GIT_EMAIL                             string
-	ANSIBLE_TAGS                          []string
-	GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC string
-}
 
 type PackerI interface {
 	GetPackerInstance(*download.Binaries) (*Packer, error)
@@ -46,42 +22,78 @@ type Packer struct {
 	ExecutablePath string
 }
 
-func (p *Packer) init() (phclfp string, err error) {
-	phclfp, err = utils.GetPackerHclFilePath()
+// Initializes Packer and returns the path to the Packer HCL file if successful.
+func (p *Packer) init() (err error) {
+	phclfp, err := utils.GetPackerHclFilePath()
 	if err != nil {
 		err = errors.Wrap(err, "Error occurred while getting Packer HCL file path")
-		return "", err
+		return err
 	}
 
 	cmd := exec.Command(p.ExecutablePath, "init", phclfp)
-	output, err := cmd.CombinedOutput()
-	log.Print(string(output))
+	_, err = cmd.CombinedOutput()
 	if err != nil {
 		err = errors.Wrap(err, "Error occurred while initializing Packer")
-		return "", err
+		return err
 	}
 
-	return phclfp, nil
+	return nil
 }
 
 func (p *Packer) buildAMI_OnAWS() (err error) {
-	phclfp, err := p.init()
+	err = p.init()
 	if err != nil {
 		err = errors.Wrap(err, "Error occurred while initializing Packer with AWS config")
 		return err
 	}
 
-	_, err = templates.CraftAWSPackerVarsFile()
+	// Create Packer vars files
+	generalPackerVarsPath, err := templates.CraftGeneralPackerVarsFile()
 	if err != nil {
-		err = errors.Wrap(err, "Error occurred while writing Packer AWS vars file")
+		err = errors.Wrap(err, "Error occurred while writing general Packer vars file")
 		return err
 	}
 
-	cmd := exec.Command(p.ExecutablePath, "validate", phclfp)
+	awsPackerVarsPath, err := templates.CraftAWSPackerVarsFile()
+	if err != nil {
+		err = errors.Wrap(err, "Error occurred while writing AWS Packer vars file")
+		return err
+	}
+
+	// Change directory to Packer HCL directory
+	initialLocation, err := os.Getwd()
+	if err != nil {
+		err = errors.Wrap(err, "Error occurred while getting current working directory")
+		return err
+	}
+
+	runLocation, err := utils.GetPackerHclDirPath()
+	if err != nil {
+		err = errors.Wrap(err, "Error occurred while getting Packer HCL directory path")
+		return err
+	}
+
+	err = os.Chdir(runLocation)
+	if err != nil {
+		err = errors.Wrap(err, "Error occurred while changing directory to Packer HCL directory")
+		return err
+	}
+
+	gVarsFileFlag := fmt.Sprintf("-var-file=%s", generalPackerVarsPath)
+	awsVarsFileFlag := fmt.Sprintf("-var-file=%s", awsPackerVarsPath)
+
+	cmd := exec.Command(p.ExecutablePath, "validate", gVarsFileFlag, awsVarsFileFlag, ".")
 	output, err := cmd.CombinedOutput()
 	log.Print(string(output))
 	if err != nil {
 		err = errors.Wrap(err, "Error occurred while building AMI with AWS Config")
+		return err
+	}
+
+	// Change back to initial location
+	err = os.Chdir(initialLocation)
+	if err != nil {
+		err = errors.Wrap(err, "Error occurred while changing directory to initial location")
 		return err
 	}
 
