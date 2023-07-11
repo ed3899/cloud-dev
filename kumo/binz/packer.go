@@ -2,15 +2,13 @@ package binz
 
 import (
 	"log"
-	"os"
 	"os/exec"
 	"path/filepath"
-	"text/template"
 
 	"github.com/ed3899/kumo/binz/download"
+	"github.com/ed3899/kumo/templates"
 	"github.com/ed3899/kumo/utils"
 	"github.com/pkg/errors"
-	"github.com/spf13/viper"
 )
 
 type AWS_PackerEnvironment struct {
@@ -66,79 +64,6 @@ func (p *Packer) init() (phclfp string, err error) {
 	return phclfp, nil
 }
 
-func (p *Packer) WritePackerAWS_VarsFile() (awsPackerHclPath string, err error) {
-	envData := &AWS_PackerEnvironment{
-		AWS_ACCESS_KEY:                     viper.GetString("AWS.AccessKeyId"),
-		AWS_SECRET_KEY:                     viper.GetString("AWS.SecretAccessKey"),
-		AWS_IAM_PROFILE:                    viper.GetString("AWS.IamProfile"),
-		AWS_USER_IDS:                       viper.GetStringSlice("AWS.UserIds"),
-		AWS_AMI_NAME:                       viper.GetString("AMI.Name"),
-		AWS_INSTANCE_TYPE:                  viper.GetString("AWS.EC2.Instance.Type"),
-		AWS_REGION:                         viper.GetString("AWS.Region"),
-		AWS_EC2_AMI_NAME_FILTER:            viper.GetString("AMI.Base.Filter"),
-		AWS_EC2_AMI_ROOT_DEVICE_TYPE:       viper.GetString("AMI.Base.RootDeviceType"),
-		AWS_EC2_AMI_VIRTUALIZATION_TYPE:    viper.GetString("AMI.Base.VirtualizationType"),
-		AWS_EC2_AMI_OWNERS:                 viper.GetStringSlice("AMI.Base.Owners"),
-		AWS_EC2_SSH_USERNAME:               viper.GetString("AMI.Base.User"),
-		AWS_EC2_INSTANCE_USERNAME:          viper.GetString("AMI.User"),
-		AWS_EC2_INSTANCE_USERNAME_HOME:     viper.GetString("AMI.Home"),
-		AWS_EC2_INSTANCE_USERNAME_PASSWORD: viper.GetString("AMI.Password"),
-	}
-
-	cwd, err := os.Getwd()
-	if err != nil {
-		err = errors.Wrap(err, "Error occurred while getting current working directory")
-		return "", err
-	}
-
-	awsTemplatePath := filepath.Join(cwd, "templates", "AWS_PackerVarsTemplate.txt")
-
-	tmpl, err := template.ParseFiles(awsTemplatePath)
-	if err != nil {
-		err = errors.Wrap(err, "Error occurred while parsing Packer AWS Vars template file")
-		return "", err
-	}
-
-	phcldir, err := utils.GetPackerHclDirPath()
-	if err != nil {
-		err = errors.Wrap(err, "Error occurred while getting Packer HCL directory path")
-		return "", err
-	}
-
-	awsPackerHclPath = filepath.Join(phcldir, "aws_ami.pkr.hcl")
-
-	file, err := os.Create(awsPackerHclPath)
-	if err != nil {
-		err = errors.Wrap(err, "Error occurred while creating Packer AWS Vars file")
-		return "", err
-	}
-	defer file.Close()
-
-	err = tmpl.Execute(file, envData)
-	if err != nil {
-		err = errors.Wrap(err, "Error occurred while executing Packer AWS Vars template file")
-		return "", err
-	}
-
-	return awsPackerHclPath, nil
-
-}
-
-func (p *Packer) writePackerVarsFile(cloud string) (path string, err error) {
-	switch cloud {
-	case "aws":
-		path, err = p.WritePackerAWS_VarsFile()
-		if err != nil {
-			err = errors.Wrap(err, "Error occurred while writing Packer AWS vars file")
-			return "", err
-		}
-		return path, nil
-	default:
-		err = errors.Errorf("Cloud '%s' not supported", cloud)
-		return "", err
-	}
-}
-
 func (p *Packer) buildAMI_OnAWS() (err error) {
 	phclfp, err := p.init()
 	if err != nil {
@@ -146,7 +71,7 @@ func (p *Packer) buildAMI_OnAWS() (err error) {
 		return err
 	}
 
-	_, err = p.writePackerVarsFile("aws")
+	_, err = templates.CraftAWSPackerVarsFile()
 	if err != nil {
 		err = errors.Wrap(err, "Error occurred while writing Packer AWS vars file")
 		return err
