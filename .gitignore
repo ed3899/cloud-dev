@@ -45,3 +45,5 @@ kumo.exe
 deps*/
 
 vendor/
+
+*/packer/plugins

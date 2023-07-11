@@ -4,8 +4,8 @@ AWS:
   SecretAccessKey: ""
   IAmProfile: ""
   UserIds:
-    - a
-    - b
+    - 2342342x
+    - b34234
   Region: ""
   EC2:
     Instance:
