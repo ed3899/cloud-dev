@@ -42,7 +42,7 @@ func CraftAWSPackerVarsFile() (awsPackerVarsPath string, err error) {
 		AWS_EC2_INSTANCE_USERNAME_PASSWORD: viper.GetString("AMI.Password"),
 	}
 
-	awsPackerVarsPath, err = CraftGenericPackerVarsFile[*AWS_PackerEnvironment]("AWS_PackerVarsTemplate.tmpl", "aws_ami.pkrvars.hcl", awsEnv)
+	awsPackerVarsPath, err = CraftGenericPackerVarsFile[*AWS_PackerEnvironment]("AWS_PackerVarsTemplate.tmpl", "aws_ami.auto.pkrvars.hcl", awsEnv)
 	if err != nil {
 		err = errors.Wrap(err, "Error occurred while crafting generic Packer Vars file")
 		return "", err

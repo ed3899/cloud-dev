@@ -21,7 +21,7 @@ func CraftGeneralPackerVarsFile() (generalPackerVarsPath string, err error) {
 		GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC: viper.GetString("GitHub.PersonalAccessTokenClassic"),
 	}
 
-	generalPackerVarsPath, err = CraftGenericPackerVarsFile[*GeneralPackerEnvironment]("GeneralPackerVarsTemplate.tmpl", "general_ami.pkrvars.hcl", genEnv)
+	generalPackerVarsPath, err = CraftGenericPackerVarsFile[*GeneralPackerEnvironment]("GeneralPackerVarsTemplate.tmpl", "general_ami.auto.pkrvars.hcl", genEnv)
 
 	if err != nil {
 		err = errors.Wrap(err, "Error occurred while crafting generic Packer Vars file")

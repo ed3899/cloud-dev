@@ -20,6 +20,10 @@ type Terraform struct {
 }
 
 
+func (t *Terraform) init(err error)  {
+	
+}
+
 
 func (t *Terraform) deployToAWS() {
 	cmd := exec.Command(t.ExecutablePath, "version")
@@ -32,8 +36,6 @@ func (t *Terraform) deployToAWS() {
 }
 
 func (t *Terraform) Up(cloud string) {
-	// Build the kumo deployment
-	//
 	switch cloud {
 	case "aws":
 		t.deployToAWS()

@@ -1,7 +1,6 @@
 package binz
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -19,74 +18,113 @@ type PackerI interface {
 }
 
 type Packer struct {
-	ExecutablePath string
+	initialLocation    string
+	RunLocationAbsPath string
+	ExecutableAbsPath  string
 }
 
-// Initializes Packer and returns the path to the Packer HCL file if successful.
-func (p *Packer) init() (err error) {
-	phclfp, err := utils.GetPackerHclFilePath()
+// Initializes Packer
+func (p *Packer) init(cloud string) (err error) {
+	// Create the absolute path to the plugin directory
+	pdaa, err := utils.CraftAbsolutePath("packer", cloud, "plugins")
 	if err != nil {
-		err = errors.Wrap(err, "Error occurred while getting Packer HCL file path")
+		err = errors.Wrap(err, "Error occurred while crafting absolute path to Packer plugins")
 		return err
 	}
 
-	cmd := exec.Command(p.ExecutablePath, "init", phclfp)
+	// Set PACKER_PLUGIN_PATH environment variable
+	err = os.Setenv("PACKER_PLUGIN_PATH", pdaa)
+	if err != nil {
+		err = errors.Wrap(err, "Error occurred while setting PACKER_PLUGIN_PATH environment variable")
+		log.Fatal(err)
+	}
+
+	// Get initial location
+	initialLocation, err := os.Getwd()
+	if err != nil {
+		err = errors.Wrap(err, "Error occurred while getting current working directory")
+		return err
+	}
+	p.initialLocation = initialLocation
+
+	// Get run location
+	rlap, err := utils.CraftAbsolutePath("packer", cloud)
+	if err != nil {
+		err = errors.Wrap(err, "Error occurred while crafting absolute path to run location")
+		return err
+	}
+	p.RunLocationAbsPath = rlap
+
+	// Change directory to run location
+	err = os.Chdir(p.RunLocationAbsPath)
+	if err != nil {
+		err = errors.Wrap(err, "Error occurred while changing directory to run location")
+		return err
+	}
+
+	// Run command
+	cmd := exec.Command(p.ExecutableAbsPath, "init", ".")
 	_, err = cmd.CombinedOutput()
+
 	if err != nil {
 		err = errors.Wrap(err, "Error occurred while initializing Packer")
+
+		// Change directory to initial location in case of error
+		errx := os.Chdir(p.initialLocation)
+		if errx != nil {
+			errx = errors.Wrap(err, "Error occurred while changing directory to initial location")
+			return errx
+		}
+
+		return err
+	}
+
+	// Change directory to initial location
+	err = os.Chdir(p.initialLocation)
+	if err != nil {
+		err = errors.Wrap(err, "Error occurred while changing directory to initial location")
 		return err
 	}
 
 	return nil
 }
 
-func (p *Packer) buildAMI_OnAWS() (err error) {
-	err = p.init()
+func (p *Packer) buildAMI_OnCloud(cloud string) (err error) {
+	err = p.init(cloud)
 	if err != nil {
 		err = errors.Wrap(err, "Error occurred while initializing Packer with AWS config")
 		return err
 	}
 
 	// Create Packer vars files
-	generalPackerVarsPath, err := templates.CraftGeneralPackerVarsFile()
+	_, err = templates.CraftGeneralPackerVarsFile()
 	if err != nil {
 		err = errors.Wrap(err, "Error occurred while writing general Packer vars file")
 		return err
 	}
 
-	awsPackerVarsPath, err := templates.CraftAWSPackerVarsFile()
+	_, err = templates.CraftAWSPackerVarsFile()
 	if err != nil {
 		err = errors.Wrap(err, "Error occurred while writing AWS Packer vars file")
 		return err
 	}
 
 	// Change directory to Packer HCL directory
-	initialLocation, err := os.Getwd()
-	if err != nil {
-		err = errors.Wrap(err, "Error occurred while getting current working directory")
-		return err
-	}
-
-	runLocation, err := utils.GetPackerHclDirPath()
-	if err != nil {
-		err = errors.Wrap(err, "Error occurred while getting Packer HCL directory path")
-		return err
-	}
-
-	err = os.Chdir(runLocation)
+	err = os.Chdir(p.RunLocationAbsPath)
 	if err != nil {
 		err = errors.Wrap(err, "Error occurred while changing directory to Packer HCL directory")
 		return err
 	}
 
-	gVarsFileFlag := fmt.Sprintf("-var-file=%s", generalPackerVarsPath)
-	awsVarsFileFlag := fmt.Sprintf("-var-file=%s", awsPackerVarsPath)
+	// Run command
+	cmd := exec.Command(p.ExecutableAbsPath, "validate", ".")
 
-	cmd := exec.Command(p.ExecutablePath, "build", gVarsFileFlag, awsVarsFileFlag, ".")
+	// Attach to process
 	cmdErr := utils.AttachToProcessStdAll(cmd)
 	if cmdErr != nil {
 		cmdErr = errors.Wrap(cmdErr, "Error occurred while building Packer AMI")
-		err = os.Chdir(initialLocation)
+		// Change directory to initial location in case of error
+		err = os.Chdir(p.initialLocation)
 		if err != nil {
 			err = errors.Wrap(err, "Error occurred while changing directory to initial location")
 			totalError := errors.Wrap(cmdErr, err.Error())
@@ -96,7 +134,7 @@ func (p *Packer) buildAMI_OnAWS() (err error) {
 	}
 
 	// Change back to initial location
-	err = os.Chdir(initialLocation)
+	err = os.Chdir(p.initialLocation)
 	if err != nil {
 		err = errors.Wrap(err, "Error occurred while changing directory to initial location")
 		return err
@@ -108,7 +146,7 @@ func (p *Packer) buildAMI_OnAWS() (err error) {
 func (p *Packer) Build(cloud string) {
 	switch cloud {
 	case "aws":
-		err := p.buildAMI_OnAWS()
+		err := p.buildAMI_OnCloud(cloud)
 		if err != nil {
 			err = errors.Wrap(err, "Error occurred while building AMI on AWS")
 			log.Fatal(err)
@@ -121,16 +159,16 @@ func (p *Packer) Build(cloud string) {
 
 func GetPackerInstance(bins *download.Binaries) (packer *Packer, err error) {
 	// Create the absolute path to the executable
-	ep := filepath.Join(bins.Packer.Dependency.ExtractionPath, "packer.exe")
+	eap := filepath.Join(bins.Packer.Dependency.ExtractionPath, "packer.exe")
 
 	// Validate existence
-	if utils.FileNotPresent(ep) {
+	if utils.FileNotPresent(eap) {
 		err = errors.New("Packer executable not found")
 		return nil, err
 	}
 
 	packer = &Packer{
-		ExecutablePath: ep,
+		ExecutableAbsPath: eap,
 	}
 
 	return packer, nil

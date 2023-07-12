@@ -6,7 +6,6 @@ import (
 
 	"github.com/ed3899/kumo/binz"
 	"github.com/ed3899/kumo/config"
-	"github.com/ed3899/kumo/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -17,8 +16,6 @@ var rootCmd = &cobra.Command{
 func init() {
 	// Get the binaries
 	bins := binz.GetBinaries()
-	// Set the packer plugin path
-	config.SetPackerPluginPath(utils.GetPackerPluginPath())
 	// Read the config
 	config.ReadKumoConfig(&config.KumoConfig{
 		Name: "kumo.config",
