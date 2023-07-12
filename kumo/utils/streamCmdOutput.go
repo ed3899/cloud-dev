@@ -54,20 +54,10 @@ func AttachToProcessStdAll(cmd *exec.Cmd) (err error) {
 	go func() {
 		for e := range errChan {
 			if e != nil {
-				errx := errors.Wrap(e, "Sending interrupt signal to process")
+				errx := errors.Wrap(e, "Error occurred while copying std")
 				log.Print(errx)
-
-				if err := cmd.Process.Signal(syscall.SIGTERM); err != nil {
-					errx := errors.Wrap(err, "Sending kill signal to process...")
-					log.Print(errx)
-
-					if err := cmd.Process.Kill(); err != nil {
-						errx := errors.Wrap(err, "Error occurred while sending kill signal to process")
-						log.Print(errx)
-						return
-					}
-					return
-				}
+				log.Print("Sending interrupt signal to process...")
+				TerminateCommand(cmd)
 				return
 			}
 		}
@@ -79,21 +69,7 @@ func AttachToProcessStdAll(cmd *exec.Cmd) (err error) {
 			case is := <-interrupt:
 				if is != nil {
 					log.Println("Interrupt signal received. Gracefully shutting down...")
-
-					if err := cmd.Process.Signal(syscall.SIGTERM); err != nil {
-						errx := errors.Wrap(err, "Sending interrupt signal not supported")
-						log.Print(errx)
-
-						log.Print("Sending kill signal instead")
-						if err := cmd.Process.Kill(); err != nil {
-							errx := errors.Wrap(err, "Sending kill signal not supported")
-							log.Print(errx)
-							return
-						}
-
-						return
-					}
-
+					TerminateCommand(cmd)
 					return
 				}
 			default:
