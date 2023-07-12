@@ -1,7 +1,3 @@
-data "aws_availability_zones" "available" {
-  state = "available"
-}
-
 locals {
   AWS_REGION                   = trimspace(var.AWS_REGION)
   AMI_ID                       = trimspace(var.AMI_ID)
@@ -11,7 +7,6 @@ locals {
 
   allowed_ip           = trimspace(var.allowed_ip)
   first_available_zone = length(data.aws_availability_zones.available.names) > 0 ? data.aws_availability_zones.available.names[0] : null
-
 }
 
 terraform {
@@ -27,6 +22,19 @@ terraform {
 
 provider "aws" {
   region = local.AWS_REGION
+}
+
+data "aws_availability_zones" "available" {
+  state = "available"
+}
+
+data "aws_ami" "kumo-ami" {
+  most_recent = true
+
+  filter {
+    name   = "image-id"
+    values = [local.AMI_ID]
+  }
 }
 
 resource "aws_vpc" "kumo-vpc" {
@@ -91,15 +99,22 @@ resource "aws_vpc_security_group_ingress_rule" "kumo-security-group-ingress-rule
   to_port     = 22
 }
 
-resource "aws_instance" "app_server" {
-  ami           = "ami-830c94e3"
-  instance_type = "t2.micro"
+resource "aws_instance" "kumo-ec2-instance" {
+  instance_type          = local.AWS_INSTANCE_TYPE
+  ami                    = data.aws_ami.kumo-ami.id
+  vpc_security_group_ids = [aws_security_group.kumo-security-group.id]
+  subnet_id              = aws_subnet.kumo-subnet.id
+  availability_zone      = local.first_available_zone
 
-  tags = {
-    Name = "ExampleAppServerInstance"
+  root_block_device {
+    volume_type = local.AWS_EC2_INSTANCE_VOLUME_TYPE
+    volume_size = local.AWS_EC2_INSTANCE_VOLUME_SIZE
   }
+
+  depends_on = [aws_vpc.kumo-vpc, aws_subnet.kumo-subnet, aws_security_group.kumo-security-group]
 }
 
 output "public_ip" {
-  value = aws_instance.app_server.public_ip
+  description = "The public IP address of the EC2 instance you can connect to via SSH"
+  value       = "Deployment complete, now try 'ssh -i <path_to_your_private_key> <AWS_EC2_INSTANCE_USERNAME>@${aws_instance.kumo-ec2-instance.public_ip}' to connect to your EC2 instance"
 }
