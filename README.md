@@ -387,6 +387,8 @@ Please refer to the *aws docs* if you don't know where to get your *ec2* instanc
 
 Run the following command from a PowerShell admin shell. You only need to do this once unless you removed the SSH key file.
 
+Make sure the username is the same that will be sshing into the ec2 instance, otherwise change it to the appropiate one.
+
 ```powershell
 icacls <AWS_EC2_INSTANCE_SSH_KEY_NAME> /inheritance:r /grant:r "$($env:USERNAME):(R,W)"
 ```
@@ -447,7 +449,7 @@ Our aim is to strike a balance between simplicity and security, providing you wi
         PasswordAuthentication no
         IdentitiesOnly yes
         LogLevel FATAL
-      ```  
+      ```
 
   5. Save the SSH config file after adding the configuration.
   6. Go back to the Command Palette (`Ctrl+Shift+P`) and type "Remote-SSH: Connect to Host". You should see the list of configured SSH hosts from the SSH config file.
