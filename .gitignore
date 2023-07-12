@@ -54,3 +54,4 @@ kumokey*
 
 .terraform
 .terraform.lock.hcl
+*.tfvars

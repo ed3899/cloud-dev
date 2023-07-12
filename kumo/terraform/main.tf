@@ -1,3 +1,7 @@
+locals {
+  AMI_ID = var.AMI_ID
+}
+
 terraform {
   required_providers {
     aws = {
