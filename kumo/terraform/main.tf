@@ -116,5 +116,5 @@ resource "aws_instance" "kumo-ec2-instance" {
 
 output "public_ip" {
   description = "The public IP address of the EC2 instance you can connect to via SSH"
-  value       = "Deployment complete, now try 'ssh -i <path_to_your_private_key> <AWS_EC2_INSTANCE_USERNAME>@${aws_instance.kumo-ec2-instance.public_ip}' to connect to your EC2 instance"
+  value       = "Deployment complete, now try 'ssh -i <path_to_your_private_key> <AMI.User>@${aws_instance.kumo-ec2-instance.public_ip}' to connect to your EC2 instance"
 }
