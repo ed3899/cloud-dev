@@ -8,6 +8,7 @@ import (
 )
 
 // TODO Remove zips after extraction
+// TODO Set ssh key file permissions to 600
 func init() {
 	if host.IsNotCompatible() {
 		log.Fatal("Host is not compatible with kumo :/")

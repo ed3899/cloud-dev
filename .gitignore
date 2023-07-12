@@ -51,3 +51,6 @@ vendor/
 *kumo.config*
 
 kumokey*
+
+.terraform
+.terraform.lock.hcl
