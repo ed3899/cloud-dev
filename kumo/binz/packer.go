@@ -18,7 +18,7 @@ type PackerI interface {
 }
 
 type Packer struct {
-	initialLocation    string
+	InitialLocation    string
 	RunLocationAbsPath string
 	ExecutableAbsPath  string
 }
@@ -45,9 +45,9 @@ func (p *Packer) init(cloud string) (err error) {
 		err = errors.Wrap(err, "Error occurred while getting current working directory")
 		return err
 	}
-	p.initialLocation = initialLocation
+	p.InitialLocation = initialLocation
 
-	// Get run location
+	// Get run location TODO add wrapf
 	rlap, err := utils.CraftAbsolutePath("packer", cloud)
 	if err != nil {
 		err = errors.Wrap(err, "Error occurred while crafting absolute path to run location")
@@ -69,7 +69,7 @@ func (p *Packer) init(cloud string) (err error) {
 	if cmdErr != nil {
 		cmdErr = errors.Wrapf(cmdErr, "Error occured while initializing packer for %v", cloud)
 		// Change directory to initial location in case of error
-		err = os.Chdir(p.initialLocation)
+		err = os.Chdir(p.InitialLocation)
 		if err != nil {
 			err = errors.Wrap(err, "Error occurred while changing directory to initial location")
 			totalError := errors.Wrap(cmdErr, err.Error())
@@ -79,7 +79,7 @@ func (p *Packer) init(cloud string) (err error) {
 	}
 
 	// Change directory to initial location
-	err = os.Chdir(p.initialLocation)
+	err = os.Chdir(p.InitialLocation)
 	if err != nil {
 		err = errors.Wrap(err, "Error occurred while changing directory to initial location")
 		return err
@@ -116,7 +116,7 @@ func (p *Packer) buildOnCloud(cloud string) (err error) {
 	if cmdErr != nil {
 		cmdErr = errors.Wrapf(cmdErr, "Error occurred while running Packer validate for '%s'", cloud)
 		// Change directory to initial location in case of error
-		err = os.Chdir(p.initialLocation)
+		err = os.Chdir(p.InitialLocation)
 		if err != nil {
 			err = errors.Wrap(err, "Error occurred while changing directory to initial location")
 			totalError := errors.Wrap(cmdErr, err.Error())
@@ -126,7 +126,7 @@ func (p *Packer) buildOnCloud(cloud string) (err error) {
 	}
 
 	// Change back to initial location
-	err = os.Chdir(p.initialLocation)
+	err = os.Chdir(p.InitialLocation)
 	if err != nil {
 		err = errors.Wrap(err, "Error occurred while changing directory to initial location")
 		return err

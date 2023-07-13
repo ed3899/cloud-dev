@@ -14,14 +14,14 @@ type PackerEnvironmentI interface {
 
 func CraftGenericPackerVarsFile[E PackerEnvironmentI](cloud, templateName, packerVarsFileName string, env E) (resultingPackerVarsPath string, err error) {
 	// Get template
-	generalTemplatePath, err := utils.CraftAbsolutePath("templates", templateName)
-	tmpl, err := template.ParseFiles(generalTemplatePath)
+	templatePath, err := utils.CraftAbsolutePath("templates", templateName)
+	tmpl, err := template.ParseFiles(templatePath)
 	if err != nil {
 		err = errors.Wrap(err, "Error occurred while crafting absolute path to Packer AWS Vars template file")
 		return "", err
 	}
 
-	// Create Packer Vars file
+	// Create vars file
 	resultingPackerVarsPath, err = utils.CraftAbsolutePath("packer", cloud, packerVarsFileName)
 	if err != nil {
 		err = errors.Wrap(err, "Error occurred while crafting absolute path to Packer AWS Vars file")
@@ -42,6 +42,6 @@ func CraftGenericPackerVarsFile[E PackerEnvironmentI](cloud, templateName, packe
 		return "", err
 	}
 
-	// Return path to Packer Vars file
+	// Return path to vars file
 	return resultingPackerVarsPath, nil
 }

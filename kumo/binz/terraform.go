@@ -2,6 +2,7 @@ package binz
 
 import (
 	"log"
+	"os"
 	"os/exec"
 	"path/filepath"
 
@@ -16,17 +17,68 @@ type TerraformI interface {
 }
 
 type Terraform struct {
-	ExecutablePath string
+	InitialLocation    string
+	RunLocationAbsPath string
+	ExecutableAbsPath  string
 }
 
+func (t *Terraform) init(cloud string) (err error) {
+	// Get and set initial location
+	initialLocation, err := os.Getwd()
+	if err != nil {
+		err = errors.Wrap(err, "Error occurred while getting current working directory")
+		return err
+	}
+	t.InitialLocation = initialLocation
 
-func (t *Terraform) init(err error)  {
+	// Get and set run location
+	rlap, err := utils.CraftAbsolutePath("terraform", cloud)
+	if err != nil {
+		err = errors.Wrapf(err, "Error occurred while crafting absolute path to run location for cloud '%s'", cloud)
+		return err
+	}
+	t.RunLocationAbsPath = rlap
+
+	// Change directory to run location
+	err = os.Chdir(t.RunLocationAbsPath)
+	if err != nil {
+		err = errors.Wrapf(err, "Error occurred while changing directory to run location '%s'", t.RunLocationAbsPath)
+		return err
+	}
+
+	cmd := exec.Command(t.ExecutableAbsPath, "init", ".")
+	cmdErr := utils.AttachCliToProcess(cmd)
+
+	if cmdErr != nil {
+		cmdErr = errors.Wrapf(cmdErr, "Error occured while initializing packer for %v", cloud)
+		// Change directory to initial location in case of error
+		err = os.Chdir(t.InitialLocation)
+		if err != nil {
+			err = errors.Wrap(err, "Error occurred while changing directory to initial location")
+			totalError := errors.Wrap(cmdErr, err.Error())
+			return totalError
+		}
+		return cmdErr
+	}
+
+	// Change directory to initial location
+	err = os.Chdir(t.InitialLocation)
+	if err != nil {
+		err = errors.Wrap(err, "Error occurred while changing directory to initial location")
+		return err
+	}
+
+	return nil
+}
+
+func (t *Terraform) deployToCloud(cloud string) (err error) {
+	err = t.init(cloud)
+	if err != nil {
+		err = errors.Wrapf(err, "Error occurred while initializing Packer for '%s'", cloud)
+		return err
+	}
 	
-}
-
-
-func (t *Terraform) deployToAWS() {
-	cmd := exec.Command(t.ExecutablePath, "version")
+	cmd := exec.Command(t.ExecutableAbsPath, "version")
 	output, err := cmd.CombinedOutput()
 	log.Print(string(output))
 	if err != nil {
@@ -36,11 +88,9 @@ func (t *Terraform) deployToAWS() {
 }
 
 func (t *Terraform) Up(cloud string) {
-	switch cloud {
-	case "aws":
-		t.deployToAWS()
-	default:
-		err := errors.Errorf("Cloud '%s' not supported", cloud)
+	err := t.deployToCloud(cloud)
+	if err != nil {
+		err = errors.Wrapf(err, "Error occurred while deploying to cloud '%s'", cloud)
 		log.Fatal(err)
 	}
 }
@@ -60,7 +110,7 @@ func GetTerraformInstance(bins *download.Binaries) (terraform *Terraform, err er
 	}
 
 	terraform = &Terraform{
-		ExecutablePath: ep,
+		ExecutableAbsPath: ep,
 	}
 
 	return terraform, nil
