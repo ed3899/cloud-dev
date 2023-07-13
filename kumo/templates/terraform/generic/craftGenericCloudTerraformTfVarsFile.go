@@ -10,18 +10,23 @@ import (
 
 // Crafts a generic cloud Terraform Vars file.
 //
-// It looks for templates under "./templates/terraform/<kind>/<templateName>.tmpl"
+// It looks for templates under "./templates/terraform/<cloud>/<templateName>.tmpl"
 //
-// It creates a file under "./terraform/<kind>/<terraformVarsFileName>.auto.tfvars"
+// It creates a file under "./terraform/<cloud>/<terraformVarsFileName>.auto.tfvars"
 //
 // The env parameter is a pointer to a struct that contains the data
 // to be used in the template. Example:
 //
-//	env :=	&GeneralTerraformEnvironment{AMI_ID: "ami-123456", ALLOWED_IP: "0.0.0.0/0")}
+//	awsEnv := &AWS_TerraformEnvironment{
+//		AWS_REGION:                   viper.GetString("AWS.Region"),
+//		AWS_INSTANCE_TYPE:            viper.GetString("AWS.EC2.Instance.Type"),
+//		AWS_EC2_INSTANCE_VOLUME_TYPE: viper.GetString("AWS.EC2.Volume.Type"),
+//		AWS_EC2_INSTANCE_VOLUME_SIZE: viper.GetInt("AWS.EC2.Volume.Size"),
+//	}
 //
 // Usage:
 //
-//	("aws", "GeneralTerraformTfVars.tmpl", "general.auto.tfvars", env) -> ("terraform/aws/general.auto.tfvars", nil)
+//	("aws", "AWS_TerraformTfVars.tmpl", "aws.auto.tfvars", awsEnv) -> ("terraform/aws/aws.auto.tfvars", nil)
 func CraftGenericCloudTerraformTfVarsFile(cloud, templateName, terraformVarsFileName string, env any) (resultingTerraformTfVarsPath string, err error) {
 	// Get template
 	templatePath, err := utils.CraftAbsolutePath("templates", "terraform", cloud, templateName)

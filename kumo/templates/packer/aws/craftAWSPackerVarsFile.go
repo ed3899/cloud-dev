@@ -1,6 +1,7 @@
 package templates
 
 import (
+	templates_packer_generic "github.com/ed3899/kumo/templates/packer/generic"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 )
@@ -42,8 +43,8 @@ func CraftAWSPackerVarsFile() (awsPackerVarsPath string, err error) {
 		AWS_EC2_INSTANCE_USERNAME_PASSWORD: viper.GetString("AMI.Password"),
 	}
 
-	awsPackerVarsPath, err = CraftGenericPackerVarsFile[*AWS_PackerEnvironment]("aws", "AWS_PackerVarsTemplate.tmpl", "aws_ami.auto.pkrvars.hcl", awsEnv)
-	
+	awsPackerVarsPath, err = templates_packer_generic.CraftGenericCloudPackerVarsFile("aws", "AWS_PackerVars.tmpl", "aws_ami.auto.pkrvars.hcl", *awsEnv)
+
 	if err != nil {
 		err = errors.Wrap(err, "Error occurred while crafting generic Packer Vars file")
 		return "", err

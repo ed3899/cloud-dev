@@ -2,8 +2,13 @@ package templates
 
 import "github.com/pkg/errors"
 
+import (
+	templates_packer_general "github.com/ed3899/kumo/templates/packer/general"
+	templates_packer_aws "github.com/ed3899/kumo/templates/packer/aws"
+)
+
 func CraftCloudPackerVarsFile(cloud string) (cloudPackerVarsFilePath string, err error) {
-	_, err = CraftGeneralPackerVarsFile(cloud)
+	_, err = templates_packer_general.CraftGeneralPackerVarsFile(cloud)
 	if err != nil {
 		err = errors.Wrap(err, "Error occurred while writing general Packer vars file")
 		return "", err
@@ -11,7 +16,7 @@ func CraftCloudPackerVarsFile(cloud string) (cloudPackerVarsFilePath string, err
 
 	switch cloud {
 	case "aws":
-		cloudPackerVarsFilePath, err = CraftAWSPackerVarsFile()
+		cloudPackerVarsFilePath, err = templates_packer_aws.CraftAWSPackerVarsFile()
 		if err != nil {
 			err = errors.Wrap(err, "Error occurred while crafting AWS Packer Vars file")
 			return "", err

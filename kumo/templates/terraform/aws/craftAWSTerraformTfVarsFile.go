@@ -22,6 +22,7 @@ func CraftAWS_TerraformTfVarsFile(cloud string) (generalTerraformVarsPath string
 		AWS_EC2_INSTANCE_VOLUME_SIZE: viper.GetInt("AWS.EC2.Volume.Size"),
 	}
 
+	// TODO check the pointer stuff
 	awsTerraformVarsPath, err := templates_terraform_generic.CraftGenericCloudTerraformTfVarsFile(cloud, "AWS_TerraformTfVars.tmpl", "aws.auto.tfvars", *awsEnv)
 	if err != nil {
 		err = errors.Wrapf(err, "Error occurred while crafting generic Terraform Vars file for cloud '%s'", cloud)

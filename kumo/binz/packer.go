@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/ed3899/kumo/binz/download"
-	"github.com/ed3899/kumo/templates"
+	templates_packer "github.com/ed3899/kumo/templates/packer"
 	"github.com/ed3899/kumo/utils"
 	"github.com/pkg/errors"
 )
@@ -95,7 +95,7 @@ func (p *Packer) buildOnCloud(cloud string) (err error) {
 		return err
 	}
 
-	_, err = templates.CraftCloudPackerVarsFile(cloud)
+	_, err = templates_packer.CraftCloudPackerVarsFile(cloud)
 	if err != nil {
 		err = errors.Wrapf(err, "Error occurred while crafting Packer vars file for '%s'", cloud)
 		return err
@@ -109,7 +109,7 @@ func (p *Packer) buildOnCloud(cloud string) (err error) {
 	}
 
 	// Run command
-	cmd := exec.Command(p.ExecutableAbsPath, "validate", ".")
+	cmd := exec.Command(p.ExecutableAbsPath, "build", ".")
 
 	// Attach to process
 	cmdErr := utils.AttachCliToProcess(cmd)
