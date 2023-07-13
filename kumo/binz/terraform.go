@@ -24,7 +24,7 @@ type Terraform struct {
 	ExecutableAbsPath  string
 }
 
-func (t *Terraform) init(cloud string) (err error) {
+func (t *Terraform) setInitialAndRunLocations(cloud string) (err error) {
 	// Get and set initial location
 	initialLocation, err := os.Getwd()
 	if err != nil {
@@ -40,6 +40,17 @@ func (t *Terraform) init(cloud string) (err error) {
 		return err
 	}
 	t.RunLocationAbsPath = rlap
+
+	return nil
+}
+
+func (t *Terraform) init(cloud string) (err error) {
+	// Set initial and run locations
+	err = t.setInitialAndRunLocations(cloud)
+	if err != nil {
+		err = errors.Wrapf(err, "Error occurred while setting initial and run locations for cloud '%s'", cloud)
+		return err
+	}
 
 	// Change directory to run location
 	err = os.Chdir(t.RunLocationAbsPath)
@@ -113,7 +124,7 @@ func (t *Terraform) deployToCloud(cloud string) (err error) {
 	}
 
 	// Run cmd
-	cmd := exec.Command(t.ExecutableAbsPath, "apply")
+	cmd := exec.Command(t.ExecutableAbsPath, "apply", "-auto-approve")
 	// Attach to process
 	cmdErr := utils.AttachCliToProcess(cmd)
 	if cmdErr != nil {
@@ -161,8 +172,43 @@ func (t *Terraform) Up(cloud string) {
 	}
 }
 
-func (t *Terraform) Destroy() {
+func (t *Terraform) Destroy(cloud string) {
+	// Set initial and run locations
+	err := t.setInitialAndRunLocations(cloud)
+	if err != nil {
+		err = errors.Wrapf(err, "Error occurred while setting initial and run locations for cloud '%s'", cloud)
+		log.Fatal(err)
+	}
 
+	// Change the directory to terraform run location
+	err = os.Chdir(t.RunLocationAbsPath)
+	if err != nil {
+		err = errors.Wrapf(err, "Error occurred while changing directory to Terraform directory for '%s'", cloud)
+		log.Fatal(err)
+	}
+
+	// Run cmd
+	cmd := exec.Command(t.ExecutableAbsPath, "destroy", "-auto-approve")
+	// Attach to process
+	cmdErr := utils.AttachCliToProcess(cmd)
+	if cmdErr != nil {
+		cmdErr = errors.Wrapf(cmdErr, "Error occurred while running Terraform cmd for '%s'", cloud)
+		// Change directory to initial location in case of error
+		err = os.Chdir(t.InitialLocation)
+		if err != nil {
+			err = errors.Wrap(err, "Error occurred while changing directory to initial location")
+			totalError := errors.Wrap(cmdErr, err.Error())
+			log.Fatal(totalError)
+		}
+		log.Fatal(cmdErr)
+	}
+
+	// Change back to initial location
+	err = os.Chdir(t.InitialLocation)
+	if err != nil {
+		err = errors.Wrap(err, "Error occurred while changing directory to initial location")
+		log.Fatal(err)
+	}
 }
 
 func GetTerraformInstance(bins *download.Binaries) (terraform *Terraform, err error) {
