@@ -173,8 +173,15 @@ func (t *Terraform) Up(cloud string) {
 }
 
 func (t *Terraform) Destroy(cloud string) {
+	// Set cloud credentials
+	err := setCloudCredentials(cloud)
+	if err != nil {
+		err = errors.Wrapf(err, "Error occurred while setting cloud credentials for '%s'", cloud)
+		log.Fatal(err)
+	}
+
 	// Set initial and run locations
-	err := t.setInitialAndRunLocations(cloud)
+	err = t.setInitialAndRunLocations(cloud)
 	if err != nil {
 		err = errors.Wrapf(err, "Error occurred while setting initial and run locations for cloud '%s'", cloud)
 		log.Fatal(err)
