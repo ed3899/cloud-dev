@@ -23,7 +23,7 @@ type Dependency struct {
 
 // Return a dependency indicating whether the dependency is present. This only considers the presence
 // of the downloaded zip file. If the downloaded zip file is present, the dependency is considered present.
-func DraftDependency(name string) (dp *Dependency, err error) {
+func CraftDependency(name string) (dp *Dependency, err error) {
 	depsDir := utils.GetDependenciesDirName()
 	specs := host.GetSpecs()
 	zipName := fmt.Sprintf("%s_%s_%s.zip", name, specs.OS, specs.ARCH)
