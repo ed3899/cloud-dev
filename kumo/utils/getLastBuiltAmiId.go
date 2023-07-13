@@ -3,6 +3,7 @@ package utils
 import (
 	"encoding/json"
 	"os"
+	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
@@ -14,7 +15,7 @@ type PackerBuild struct {
 }
 
 type PackerManifest struct {
-	Builds []*PackerBuild
+	Builds      []*PackerBuild
 	LastRunUUID string `json:"last_run_uuid"`
 }
 
@@ -35,7 +36,7 @@ func GetLastBuiltAmiId(packerManifestPath string) (amiId string, err error) {
 		return "", err
 	}
 
-	// Get AMI ID for last Packer build
+	// Get last built artifact id for last Packer build
 	lastBuildAMI_Id := lo.Filter(packerManifest.Builds, func(pb *PackerBuild, index int) bool {
 		return pb.PackerRunUUID == packerManifest.LastRunUUID
 	})
@@ -45,5 +46,8 @@ func GetLastBuiltAmiId(packerManifestPath string) (amiId string, err error) {
 		return "", err
 	}
 
-	return lastBuildAMI_Id[0].ArtifactId, nil
+	// Extract only the AMI ID
+	amiId = strings.Split(lastBuildAMI_Id[0].ArtifactId, ":")[1]
+
+	return amiId, nil
 }

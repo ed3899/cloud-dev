@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/ed3899/kumo/binz"
@@ -27,7 +28,8 @@ func GetUpCommand(t *binz.Terraform) *cobra.Command {
 				viper.Set("ALLOWED_ID", defaultIp)
 			}
 			// Set allowed IP
-			viper.Set("ALLOWED_ID", pIp)
+			aip := fmt.Sprintf("%s/32", pIp)
+			viper.Set("ALLOWED_ID", aip)
 			log.Printf("Your public IP is %s, it will be used as the allowed IP for SSH", pIp)
 
 			t.Up(viper.GetString("cloud"))

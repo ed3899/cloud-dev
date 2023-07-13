@@ -2,10 +2,10 @@ package cmd
 
 import (
 	"log"
-	"runtime/debug"
 
 	"github.com/ed3899/kumo/binz"
 	"github.com/ed3899/kumo/config"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -34,8 +34,8 @@ func init() {
 }
 
 func Execute() {
-	stackTrace := debug.Stack()
 	if err := rootCmd.Execute(); err != nil {
-		log.Fatalf("Error occurred while running kumo: %v\nStack Trace: %s", err, stackTrace)
+		err = errors.Wrapf(err, "Error occurred while running kumo")
+		log.Fatal(err)
 	}
 }

@@ -10,6 +10,7 @@ import (
 	templates_terraform "github.com/ed3899/kumo/templates/terraform"
 	"github.com/ed3899/kumo/utils"
 	"github.com/pkg/errors"
+	"github.com/spf13/viper"
 )
 
 type TerraformI interface {
@@ -73,14 +74,30 @@ func (t *Terraform) init(cloud string) (err error) {
 	return nil
 }
 
-func (t *Terraform) deployToCloud(cloud string) (err error) {
-	// Initialize terraform
-	err = t.init(cloud)
-	if err != nil {
-		err = errors.Wrapf(err, "Error occurred while initializing Terraform for '%s'", cloud)
+func setCloudCredentials(cloud string) (err error) {
+	switch cloud {
+	case "aws":
+		err = os.Setenv("AWS_ACCESS_KEY_ID", viper.GetString("AWS.AccessKeyId"))
+		if err != nil {
+			err = errors.Wrap(err, "Error occurred while setting AWS_ACCESS_KEY_ID environment variable")
+			return err
+		}
+
+		err = os.Setenv("AWS_SECRET_ACCESS_KEY", viper.GetString("AWS.SecretAccessKey"))
+		if err != nil {
+			err = errors.Wrap(err, "Error occurred while setting AWS_SECRET_ACCESS_KEY environment variable")
+			return err
+		}
+
+		return nil
+
+	default:
+		err = errors.Errorf("Cloud '%s' is not supported", cloud)
 		return err
 	}
+}
 
+func (t *Terraform) deployToCloud(cloud string) (err error) {
 	// Craft Terraform Vars file
 	_, err = templates_terraform.CraftCloudTerraformTfVarsFile(cloud)
 	if err != nil {
@@ -96,7 +113,7 @@ func (t *Terraform) deployToCloud(cloud string) (err error) {
 	}
 
 	// Run cmd
-	cmd := exec.Command(t.ExecutableAbsPath, "version")
+	cmd := exec.Command(t.ExecutableAbsPath, "apply")
 	// Attach to process
 	cmdErr := utils.AttachCliToProcess(cmd)
 	if cmdErr != nil {
@@ -122,7 +139,22 @@ func (t *Terraform) deployToCloud(cloud string) (err error) {
 }
 
 func (t *Terraform) Up(cloud string) {
-	err := t.deployToCloud(cloud)
+	// Initialize terraform
+	err := t.init(cloud)
+	if err != nil {
+		err = errors.Wrapf(err, "Error occurred while initializing Terraform for '%s'", cloud)
+		log.Fatal(err)
+	}
+
+	// Set cloud credentials
+	err = setCloudCredentials(cloud)
+	if err != nil {
+		err = errors.Wrapf(err, "Error occurred while setting cloud credentials for '%s'", cloud)
+		log.Fatal(err)
+	}
+
+	// Deploy to cloud
+	err = t.deployToCloud(cloud)
 	if err != nil {
 		err = errors.Wrapf(err, "Error occurred while deploying to cloud '%s'", cloud)
 		log.Fatal(err)
