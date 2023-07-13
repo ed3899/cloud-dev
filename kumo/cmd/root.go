@@ -2,11 +2,13 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/ed3899/kumo/binz"
 	"github.com/ed3899/kumo/config"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var rootCmd = &cobra.Command{
@@ -22,6 +24,11 @@ func init() {
 		Type: "yaml",
 		Path: ".",
 	})
+	// Check cloud compatibility
+	cloud := viper.GetString("cloud")
+	if cloud != "aws" {
+		log.Fatalf("Cloud '%s' not yet supported", cloud)
+	}
 	// Assemble commands
 	ccmds := GetAllCommands(bins)
 	rootCmd.AddCommand(*ccmds...)

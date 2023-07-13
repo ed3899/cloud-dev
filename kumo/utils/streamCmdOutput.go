@@ -11,7 +11,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func AttachToProcessStdAll(cmd *exec.Cmd) (err error) {
+func AttachCliToProcess(cmd *exec.Cmd) (err error) {
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, syscall.SIGINT, syscall.SIGTERM)
 

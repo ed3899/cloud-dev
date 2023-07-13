@@ -2,7 +2,6 @@ package templates
 
 import (
 	"os"
-	"path/filepath"
 	"text/template"
 
 	"github.com/ed3899/kumo/utils"
@@ -13,31 +12,22 @@ type PackerEnvironmentI interface {
 	*AWS_PackerEnvironment | *GeneralPackerEnvironment
 }
 
-func CraftGenericPackerVarsFile[E PackerEnvironmentI](templateName, packerVarsFileName string, env E) (resultingPackerVarsPath string, err error) {
-	// Get current working directory
-	cwd, err := os.Getwd()
-	if err != nil {
-		err = errors.Wrap(err, "Error occurred while getting current working directory")
-		return "", err
-	}
-
-	// Parse template file
-	generalTemplatePath := filepath.Join(cwd, "templates", templateName)
+func CraftGenericPackerVarsFile[E PackerEnvironmentI](cloud, templateName, packerVarsFileName string, env E) (resultingPackerVarsPath string, err error) {
+	// Get template
+	generalTemplatePath, err := utils.CraftAbsolutePath("templates", templateName)
 	tmpl, err := template.ParseFiles(generalTemplatePath)
 	if err != nil {
-		err = errors.Wrap(err, "Error occurred while parsing Packer AWS Vars template file")
-		return "", err
-	}
-
-	// Get Packer HCL directory path
-	phcldir, err := utils.GetPackerHclDirPath()
-	if err != nil {
-		err = errors.Wrap(err, "Error occurred while getting Packer HCL directory path")
+		err = errors.Wrap(err, "Error occurred while crafting absolute path to Packer AWS Vars template file")
 		return "", err
 	}
 
 	// Create Packer Vars file
-	resultingPackerVarsPath = filepath.Join(phcldir, packerVarsFileName)
+	resultingPackerVarsPath, err = utils.CraftAbsolutePath("packer", cloud, packerVarsFileName)
+	if err != nil {
+		err = errors.Wrap(err, "Error occurred while crafting absolute path to Packer AWS Vars file")
+		return "", err
+	}
+
 	file, err := os.Create(resultingPackerVarsPath)
 	if err != nil {
 		err = errors.Wrap(err, "Error occurred while creating Packer AWS Vars file")

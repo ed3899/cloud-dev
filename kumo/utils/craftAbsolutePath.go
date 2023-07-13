@@ -15,6 +15,7 @@ import (
 //
 //	("packer", "packer.exe") -> "C:\\Users\\user\\kumo\\packer\\packer.exe"
 //	("terraform", "terraform.exe") -> "/home/user/kumo/terraform/terraform.exe"
+//	("templates") -> "C:\\Users\\user\\kumo\\templates"
 func CraftAbsolutePath(paths ...string) (absolutePath string, err error) {
 	cwd, err := os.Getwd()
 	if err != nil {

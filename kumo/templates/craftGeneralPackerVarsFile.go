@@ -13,7 +13,7 @@ type GeneralPackerEnvironment struct {
 	GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC string
 }
 
-func CraftGeneralPackerVarsFile() (generalPackerVarsPath string, err error) {
+func CraftGeneralPackerVarsFile(cloud string) (generalPackerVarsPath string, err error) {
 	genEnv := &GeneralPackerEnvironment{
 		GIT_USERNAME:                          viper.GetString("Git.Username"),
 		GIT_EMAIL:                             viper.GetString("Git.Email"),
@@ -21,7 +21,7 @@ func CraftGeneralPackerVarsFile() (generalPackerVarsPath string, err error) {
 		GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC: viper.GetString("GitHub.PersonalAccessTokenClassic"),
 	}
 
-	generalPackerVarsPath, err = CraftGenericPackerVarsFile[*GeneralPackerEnvironment]("GeneralPackerVarsTemplate.tmpl", "general_ami.auto.pkrvars.hcl", genEnv)
+	generalPackerVarsPath, err = CraftGenericPackerVarsFile[*GeneralPackerEnvironment](cloud,"GeneralPackerVarsTemplate.tmpl", "general_ami.auto.pkrvars.hcl", genEnv)
 
 	if err != nil {
 		err = errors.Wrap(err, "Error occurred while crafting generic Packer Vars file")
