@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/ed3899/kumo/binz/download"
+	templates_terraform "github.com/ed3899/kumo/templates/terraform"
 	"github.com/ed3899/kumo/utils"
 	"github.com/pkg/errors"
 )
@@ -46,11 +47,12 @@ func (t *Terraform) init(cloud string) (err error) {
 		return err
 	}
 
-	cmd := exec.Command(t.ExecutableAbsPath, "init", ".")
+	// Run cmd
+	cmd := exec.Command(t.ExecutableAbsPath, "init")
 	cmdErr := utils.AttachCliToProcess(cmd)
 
 	if cmdErr != nil {
-		cmdErr = errors.Wrapf(cmdErr, "Error occured while initializing packer for %v", cloud)
+		cmdErr = errors.Wrapf(cmdErr, "Error occured while initializing terraform for %v", cloud)
 		// Change directory to initial location in case of error
 		err = os.Chdir(t.InitialLocation)
 		if err != nil {
@@ -72,19 +74,51 @@ func (t *Terraform) init(cloud string) (err error) {
 }
 
 func (t *Terraform) deployToCloud(cloud string) (err error) {
+	// Initialize terraform
 	err = t.init(cloud)
 	if err != nil {
-		err = errors.Wrapf(err, "Error occurred while initializing Packer for '%s'", cloud)
+		err = errors.Wrapf(err, "Error occurred while initializing Terraform for '%s'", cloud)
 		return err
 	}
-	
-	cmd := exec.Command(t.ExecutableAbsPath, "version")
-	output, err := cmd.CombinedOutput()
-	log.Print(string(output))
+
+	// Craft Terraform Vars file
+	_, err = templates_terraform.CraftCloudTerraformTfVarsFile(cloud)
 	if err != nil {
-		err = errors.Wrap(err, "Error occurred while building AMI")
-		log.Fatal(err)
+		err = errors.Wrapf(err, "Error occurred while crafting Terraform Vars file for cloud '%s'", cloud)
+		return err
 	}
+
+	// Change the directory to terraform run location
+	err = os.Chdir(t.RunLocationAbsPath)
+	if err != nil {
+		err = errors.Wrapf(err, "Error occurred while changing directory to Terraform directory for '%s'", cloud)
+		return err
+	}
+
+	// Run cmd
+	cmd := exec.Command(t.ExecutableAbsPath, "version")
+	// Attach to process
+	cmdErr := utils.AttachCliToProcess(cmd)
+	if cmdErr != nil {
+		cmdErr = errors.Wrapf(cmdErr, "Error occurred while running Terraform cmd for '%s'", cloud)
+		// Change directory to initial location in case of error
+		err = os.Chdir(t.InitialLocation)
+		if err != nil {
+			err = errors.Wrap(err, "Error occurred while changing directory to initial location")
+			totalError := errors.Wrap(cmdErr, err.Error())
+			return totalError
+		}
+		return cmdErr
+	}
+
+	// Change back to initial location
+	err = os.Chdir(t.InitialLocation)
+	if err != nil {
+		err = errors.Wrap(err, "Error occurred while changing directory to initial location")
+		return err
+	}
+
+	return nil
 }
 
 func (t *Terraform) Up(cloud string) {

@@ -16,7 +16,7 @@ func GetAmiToBeUsed(packerManifestPath, cloud string) (amiIdToBeUsed string, err
 	}
 
 	// Set AMI ID to be used based on config file
-	kumoConfigAmiId := viper.GetString("Up.AWS.AMI_ID")
+	kumoConfigAmiId := viper.GetString("Up.AMI_Id")
 	switch {
 	// If AMI ID is not set in config file and no AMI ID is found in manifest.json, return error
 	case lastBuiltAmiId == "" && kumoConfigAmiId == "":

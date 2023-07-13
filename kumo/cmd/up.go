@@ -19,14 +19,16 @@ func GetUpCommand(t *binz.Terraform) *cobra.Command {
 		instances from VSCode.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			// Get public IP
-			ip, err := utils.GetPublicIp()
+			pIp, err := utils.GetPublicIp()
 			if err != nil {
-				err = errors.Wrap(err, "Error occurred while getting public IP, your instance will have default SSH from '0.0.0.0/0'")
+				defaultIp := "0.0.0.0/0"
+				err = errors.Wrapf(err, "Error occurred while getting public IP, your instance will have default SSH from '%s'", defaultIp)
 				log.Println(err)
+				viper.Set("ALLOWED_ID", defaultIp)
 			}
 			// Set allowed IP
-			viper.Set("ALLOWED_ID", ip)
-			log.Printf("Your public IP is %s, it will be used as the allowed IP for SSH", ip)
+			viper.Set("ALLOWED_ID", pIp)
+			log.Printf("Your public IP is %s, it will be used as the allowed IP for SSH", pIp)
 
 			t.Up(viper.GetString("cloud"))
 		},
