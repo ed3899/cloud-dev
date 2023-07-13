@@ -56,12 +56,14 @@ func GetBinaryInstances(bins *download.Binaries) (packer *Packer, terraform *Ter
 
 // Return the local binaries
 func GetLocalBinaries() (binaries *download.Binaries, err error) {
+	depsDir := utils.GetDependenciesDirName()
+
 	// Craft extraction paths
-	packerep, err := utils.CraftSingleExtractionPath("packer")
+	packerep, err := utils.CraftAbsolutePath(depsDir, "packer")
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get packer extraction path")
 	}
-	terraformep, err := utils.CraftSingleExtractionPath("terraform")
+	terraformep, err := utils.CraftAbsolutePath(depsDir, "terraform")
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get terraform extraction path")
 	}

@@ -24,16 +24,18 @@ type Dependency struct {
 // Return a dependency indicating whether the dependency is present. This only considers the presence
 // of the downloaded zip file. If the downloaded zip file is present, the dependency is considered present.
 func DraftDependency(name string) (dp *Dependency, err error) {
+	depsDir := utils.GetDependenciesDirName()
 	specs := host.GetSpecs()
+	zipName := fmt.Sprintf("%s_%s_%s.zip", name, specs.OS, specs.ARCH)
 
-	destinationZipPath, err := utils.CraftSingleZipPath(name, specs)
+	destinationZipPath, err := utils.CraftAbsolutePath(depsDir, zipName)
 	if err != nil {
 		msg := fmt.Sprintf("failed to get zip path for dependency: %v", name)
 		err = errors.Wrap(err, msg)
 		return nil, err
 	}
 
-	destinationExtractionPath, err := utils.CraftSingleExtractionPath(name)
+	destinationExtractionPath, err := utils.CraftAbsolutePath(depsDir, name)
 	if err != nil {
 		msg := fmt.Sprintf("failed to get extraction path for dependency: %v", name)
 		err = errors.Wrap(err, msg)
@@ -54,7 +56,7 @@ func DraftDependency(name string) (dp *Dependency, err error) {
 		return nil, err
 	}
 
-	executablePath, err := utils.GetExecutablePath(name)
+	executablePath, err := utils.CraftAbsolutePath(depsDir, "packer", "packer.exe")
 	if err != nil {
 		msg := fmt.Sprintf("failed to get executable path for dependency: %v", name)
 		err = errors.Wrap(err, msg)
