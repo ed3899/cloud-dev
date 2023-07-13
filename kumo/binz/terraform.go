@@ -187,7 +187,7 @@ func (t *Terraform) Destroy(cloud string) {
 		log.Fatal(err)
 	}
 
-	// Change the directory to terraform run location
+	// Go terraform run location
 	err = os.Chdir(t.RunLocationAbsPath)
 	if err != nil {
 		err = errors.Wrapf(err, "Error occurred while changing directory to Terraform directory for '%s'", cloud)
@@ -210,7 +210,7 @@ func (t *Terraform) Destroy(cloud string) {
 		log.Fatal(cmdErr)
 	}
 
-	// Change back to initial location
+	// Go back to initial location
 	err = os.Chdir(t.InitialLocation)
 	if err != nil {
 		err = errors.Wrap(err, "Error occurred while changing directory to initial location")
