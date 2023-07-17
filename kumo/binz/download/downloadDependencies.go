@@ -104,7 +104,7 @@ func DownloadDependencies(dps *draft.Dependencies) (*Binaries, error) {
 
 	// Wait for bars to complete and flush
 	bwg.Wait()
-	progress.Wait()
+	progress.Shutdown()
 
 	// Check for errors
 	if err, ok := <-errChan; ok {

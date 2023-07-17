@@ -1,19 +1,21 @@
 package utils
 
 import (
+	"bufio"
 	"io"
 	"log"
 	"os"
 	"os/exec"
-	"os/signal"
-	"syscall"
+	"sync"
+	// "os/signal"
+	// "syscall"
 
 	"github.com/pkg/errors"
 )
 
 func AttachCliToProcess(cmd *exec.Cmd) (err error) {
-	interrupt := make(chan os.Signal, 1)
-	signal.Notify(interrupt, syscall.SIGINT, syscall.SIGTERM)
+	// interrupt := make(chan os.Signal, 1)
+	// signal.Notify(interrupt, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
 
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
@@ -33,7 +35,31 @@ func AttachCliToProcess(cmd *exec.Cmd) (err error) {
 		return err
 	}
 
+	var stop sync.WaitGroup
+	stopChan := make(chan bool, 1)
 	errChan := make(chan error, 1)
+
+	stop.Add(1)
+	go func() {
+		defer stop.Done()
+		reader := bufio.NewReader(os.Stdin)
+		for {
+			char, _, err := reader.ReadRune()
+			if err != nil {
+					log.Println("Error reading input:", err)
+					return
+			}
+
+			switch char {
+			case 'q':
+					log.Println("You pressed 'q'. Exiting...")
+					stopChan <- true
+					return
+			default:
+					continue
+			}
+	}
+	}()
 
 	go func(src *io.ReadCloser, dest *os.File) {
 		if _, err := io.Copy(dest, *src); err != nil {
@@ -51,24 +77,21 @@ func AttachCliToProcess(cmd *exec.Cmd) (err error) {
 		}
 	}(&stderr, os.Stderr)
 
+	stop.Add(1)
 	go func() {
-		for e := range errChan {
-			if e != nil {
-				errx := errors.Wrap(e, "Error occurred while copying std")
-				log.Print(errx)
-				log.Print("Sending interrupt signal to process...")
-				TerminateCommand(cmd)
-				return
-			}
-		}
-	}()
-
-	go func() {
+		defer stop.Done()
 		for {
 			select {
-			case is := <-interrupt:
-				if is != nil {
-					log.Println("Interrupt signal received. Gracefully shutting down...")
+			case s := <-stopChan:
+				if s {
+					log.Print("Gracefully shutting down...")
+					TerminateCommand(cmd)
+					return
+				}
+			case err := <-errChan:
+				if err != nil {
+					err = errors.Wrap(err, "Error occurred while copying std")
+					log.Print(err)
 					TerminateCommand(cmd)
 					return
 				}
@@ -82,11 +105,13 @@ func AttachCliToProcess(cmd *exec.Cmd) (err error) {
 	if err := cmd.Wait(); err != nil {
 		err = errors.Wrap(err, "Error occurred while waiting for command to finish")
 		close(errChan)
-		close(interrupt)
+		close(stopChan)
+		// close(interrupt)
 		return err
 	}
 
 	close(errChan)
-	close(interrupt)
+	close(stopChan)
+	// close(interrupt)
 	return nil
 }
