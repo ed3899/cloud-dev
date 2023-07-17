@@ -35,6 +35,13 @@ func GetBinaries() (binaries *download.Binaries) {
 		log.Fatal(err)
 	}
 
+	// Remove downloaded zips
+	err = download.RemoveDownloads(missingDependencies)
+	if err != nil {
+		err = errors.Wrapf(err, "failed to remove downloads")
+		log.Print(err)
+	}
+
 	return binaries
 }
 
