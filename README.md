@@ -390,7 +390,7 @@ Run the following command from a PowerShell admin shell. You only need to do thi
 Make sure the username is the same that will be sshing into the ec2 instance, otherwise change it to the appropiate one.
 
 ```powershell
-icacls <AWS_EC2_INSTANCE_SSH_KEY_NAME> /inheritance:r /grant:r "$($env:USERNAME):(R,W)"
+icacls <AWS_EC2_INSTANCE_SSH_KEY_NAME> /inheritance:r /grant:r "$($env:USERNAME):(R,W,D)"
 ```
 
 ## How secure are my *AWS* credentials?
