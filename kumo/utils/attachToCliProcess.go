@@ -1,22 +1,18 @@
 package utils
 
 import (
-	"bufio"
 	"io"
 	"log"
 	"os"
 	"os/exec"
+	"os/signal"
 	"sync"
-	// "os/signal"
-	// "syscall"
+	"syscall"
 
 	"github.com/pkg/errors"
 )
 
 func AttachCliToProcess(cmd *exec.Cmd) (err error) {
-	// interrupt := make(chan os.Signal, 1)
-	// signal.Notify(interrupt, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
-
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
 		err = errors.Wrap(err, "Error occurred while getting StdoutPipe")
@@ -35,63 +31,73 @@ func AttachCliToProcess(cmd *exec.Cmd) (err error) {
 		return err
 	}
 
-	var stop sync.WaitGroup
-	stopChan := make(chan bool, 1)
-	errChan := make(chan error, 1)
+	var mg sync.WaitGroup
+	cmdErrChan := make(chan error, 1)
+	cmdDone := make(chan bool, 1)
 
-	stop.Add(1)
-	go func() {
-		defer stop.Done()
-		reader := bufio.NewReader(os.Stdin)
-		for {
-			char, _, err := reader.ReadRune()
-			if err != nil {
-					log.Println("Error reading input:", err)
-					return
-			}
-
-			switch char {
-			case 'q':
-					log.Println("You pressed 'q'. Exiting...")
-					stopChan <- true
-					return
-			default:
-					continue
-			}
-	}
-	}()
-
+	mg.Add(1)
 	go func(src *io.ReadCloser, dest *os.File) {
+		defer mg.Done()
 		if _, err := io.Copy(dest, *src); err != nil {
 			errx := errors.Wrap(err, "Error occurred while copying StdoutPipe to Stdout")
-			errChan <- errx
+			cmdErrChan <- errx
 			return
 		}
 	}(&stdout, os.Stdout)
 
+	mg.Add(1)
 	go func(src *io.ReadCloser, dest *os.File) {
+		defer mg.Done()
 		if _, err := io.Copy(dest, *src); err != nil {
 			errx := errors.Wrap(err, "Error occurred while copying StderrPipe to Stderr")
-			errChan <- errx
+			cmdErrChan <- errx
 			return
 		}
 	}(&stderr, os.Stderr)
 
-	stop.Add(1)
+	mg.Add(1)
 	go func() {
-		defer stop.Done()
+		defer mg.Done()
+		if err := cmd.Wait(); err != nil {
+			err = errors.Wrap(err, "Error occurred while waiting for command to finish")
+			cmdErrChan <- err
+		}
+	}()
+
+	go func() {
+		defer close(cmdDone)
+		defer close(cmdErrChan)
+		mg.Wait()
+		cmdDone <- true
+	}()
+
+	var sg sync.WaitGroup
+	var signalChan = make(chan os.Signal, 1)
+	signal.Notify(signalChan, os.Interrupt, syscall.SIGTERM)
+	var mainErrChan = make(chan error, 1)
+
+	sg.Add(1)
+	go func() {
+		defer sg.Done()
+		defer close(mainErrChan)
 		for {
 			select {
-			case s := <-stopChan:
-				if s {
-					log.Print("Gracefully shutting down...")
+			case err := <-cmdErrChan:
+				if err != nil {
+					err = errors.Wrap(err, "Error occurred while copying std")
+					mainErrChan <- err
 					TerminateCommand(cmd)
 					return
 				}
-			case err := <-errChan:
-				if err != nil {
-					err = errors.Wrap(err, "Error occurred while copying std")
-					log.Print(err)
+
+			case d := <-cmdDone:
+				if d {
+					return
+				}
+
+			case s := <-signalChan:
+				if s != nil {
+					log.Println("You pressed Ctrl+C. Exiting...")
 					TerminateCommand(cmd)
 					return
 				}
@@ -101,17 +107,13 @@ func AttachCliToProcess(cmd *exec.Cmd) (err error) {
 		}
 	}()
 
-	// Wait for command to finish
-	if err := cmd.Wait(); err != nil {
-		err = errors.Wrap(err, "Error occurred while waiting for command to finish")
-		close(errChan)
-		close(stopChan)
-		// close(interrupt)
-		return err
+	sg.Wait()
+
+	for err := range mainErrChan {
+		if err != nil {
+			return err
+		}
 	}
 
-	close(errChan)
-	close(stopChan)
-	// close(interrupt)
 	return nil
 }
