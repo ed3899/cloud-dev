@@ -19,7 +19,9 @@ type PackerManifest struct {
 	LastRunUUID string `json:"last_run_uuid"`
 }
 
+// Returns the AMI ID of the last built AMI. The AMI ID is extracted from the Packer manifest file.
 func GetLastBuiltAmiId(packerManifestPath string) (amiId string, err error) {
+	// Open packer manifest file
 	file, err := os.Open(packerManifestPath)
 	if err != nil {
 		err = errors.Wrapf(err, "Error occurred while opening packer manifest file '%s'", packerManifestPath)

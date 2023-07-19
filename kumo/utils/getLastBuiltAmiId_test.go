@@ -6,6 +6,7 @@ import (
 )
 
 func TestGetLastBuiltAmiId(t *testing.T) {
+	// Create a temporary packer manifest file
 	tmpFile, err := os.CreateTemp("", "test_get_last_built_ami_id")
 	if err != nil {
 		t.Fatalf("Failed to create temporary file: %v", err)

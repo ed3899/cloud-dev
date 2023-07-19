@@ -7,6 +7,7 @@ import (
 )
 
 func TestGetDependencyURL(t *testing.T) {
+	// Define test cases
 	testCases := []struct {
 		specs       *host.Specs
 		name        string
@@ -47,12 +48,15 @@ func TestGetDependencyURL(t *testing.T) {
 		},
 	}
 
+	// Iterate over test cases
 	for _, tc := range testCases {
+		// Get the dependency URL
 		url, err := GetDependencyURL(tc.name, tc.specs)
 		if err != nil {
 			t.Errorf("Unexpected error: %v", err)
 		}
 
+		// Check if the URL matches the expected value
 		if url != tc.expectedURL {
 			t.Errorf("Expected URL: %s, Got: %s", tc.expectedURL, url)
 		}
