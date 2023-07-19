@@ -2,6 +2,7 @@ package binz
 
 import (
 	"log"
+	"path/filepath"
 
 	"github.com/ed3899/kumo/binz/download"
 	"github.com/ed3899/kumo/binz/download/draft"
@@ -66,11 +67,12 @@ func GetLocalBinaries() (binaries *download.Binaries, err error) {
 	depsDir := utils.GetDependenciesDirName()
 
 	// Craft extraction paths
-	packerep, err := utils.CraftAbsolutePath(depsDir, "packer")
+	packerep, err := filepath.Abs(filepath.Join(depsDir, "packer"))
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get packer extraction path")
 	}
-	terraformep, err := utils.CraftAbsolutePath(depsDir, "terraform")
+
+	terraformep, err := filepath.Abs(filepath.Join(depsDir, "terraform"))
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get terraform extraction path")
 	}

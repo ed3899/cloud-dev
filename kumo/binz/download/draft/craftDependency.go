@@ -3,6 +3,7 @@ package draft
 import (
 	"fmt"
 	"log"
+	"path/filepath"
 
 	"github.com/ed3899/kumo/host"
 	"github.com/ed3899/kumo/utils"
@@ -43,18 +44,18 @@ type Dependency struct {
 //
 // The paths are absolute paths and the format changes depending on the OS.
 func CraftHashicorpDependency(name string) (dp *Dependency, err error) {
-	depsDir := utils.GetDependenciesDirName()
+	depsDirName := utils.GetDependenciesDirName()
 	specs := host.GetSpecs()
 	zipName := fmt.Sprintf("%s_%s_%s.zip", name, specs.OS, specs.ARCH)
 
-	destinationZipPath, err := utils.CraftAbsolutePath(depsDir, zipName)
+	destinationZipPath, err := filepath.Abs(filepath.Join(depsDirName, zipName))
 	if err != nil {
 		msg := fmt.Sprintf("failed to get zip path for dependency: %v", name)
 		err = errors.Wrap(err, msg)
 		return nil, err
 	}
 
-	destinationExtractionPath, err := utils.CraftAbsolutePath(depsDir, name)
+	destinationExtractionPath, err := filepath.Abs(filepath.Join(depsDirName, name))
 	if err != nil {
 		msg := fmt.Sprintf("failed to get extraction path for dependency: %v", name)
 		err = errors.Wrap(err, msg)
@@ -75,7 +76,7 @@ func CraftHashicorpDependency(name string) (dp *Dependency, err error) {
 		return nil, err
 	}
 
-	executablePath, err := utils.CraftAbsolutePath(depsDir, name, fmt.Sprintf("%s.exe", name))
+	executablePath, err := filepath.Abs(filepath.Join(depsDirName, name, fmt.Sprintf("%s.exe", name)))
 	if err != nil {
 		msg := fmt.Sprintf("failed to get executable path for dependency: %v", name)
 		err = errors.Wrap(err, msg)

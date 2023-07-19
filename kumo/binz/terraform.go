@@ -34,7 +34,7 @@ func (t *Terraform) setInitialAndRunLocations(cloud string) (err error) {
 	t.InitialLocation = initialLocation
 
 	// Get and set run location
-	rlap, err := utils.CraftAbsolutePath("terraform", cloud)
+	rlap, err := filepath.Abs(filepath.Join("terraform", cloud))
 	if err != nil {
 		err = errors.Wrapf(err, "Error occurred while crafting absolute path to run location for cloud '%s'", cloud)
 		return err

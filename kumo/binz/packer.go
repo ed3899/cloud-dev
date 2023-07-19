@@ -26,7 +26,7 @@ type Packer struct {
 // Initializes Packer
 func (p *Packer) init(cloud string) (err error) {
 	// Create the absolute path to the plugin directory
-	pdap, err := utils.CraftAbsolutePath("packer", cloud, "plugins")
+	pdap, err := filepath.Abs(filepath.Join("packer", cloud, "plugins"))
 	if err != nil {
 		err = errors.Wrap(err, "Error occurred while crafting absolute path to Packer plugins")
 		return err
@@ -47,8 +47,8 @@ func (p *Packer) init(cloud string) (err error) {
 	}
 	p.InitialLocation = initialLocation
 
-	// Get run location TODO add wrapf
-	rlap, err := utils.CraftAbsolutePath("packer", cloud)
+	// Get run location
+	rlap, err := filepath.Abs(filepath.Join("packer", cloud))
 	if err != nil {
 		err = errors.Wrap(err, "Error occurred while crafting absolute path to run location")
 		return err

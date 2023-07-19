@@ -2,9 +2,9 @@ package templates
 
 import (
 	"os"
+	"path/filepath"
 	"text/template"
 
-	"github.com/ed3899/kumo/utils"
 	"github.com/pkg/errors"
 )
 
@@ -29,7 +29,7 @@ import (
 //	("aws", "AWS_TerraformTfVars.tmpl", "aws.auto.tfvars", awsEnv) -> ("terraform/aws/aws.auto.tfvars", nil)
 func CraftGenericCloudTerraformTfVarsFile(cloud, templateName, terraformVarsFileName string, env any) (resultingTerraformTfVarsPath string, err error) {
 	// Get template
-	templatePath, err := utils.CraftAbsolutePath("templates", "terraform", cloud, templateName)
+	templatePath, err := filepath.Abs(filepath.Join("templates", "terraform", cloud, templateName))
 	tmpl, err := template.ParseFiles(templatePath)
 	if err != nil {
 		err = errors.Wrapf(err, "Error occurred while crafting absolute path to %s template file", templateName)
@@ -37,7 +37,7 @@ func CraftGenericCloudTerraformTfVarsFile(cloud, templateName, terraformVarsFile
 	}
 
 	// Create vars file
-	resultingTerraformTfVarsPath, err = utils.CraftAbsolutePath("terraform", cloud, terraformVarsFileName)
+	resultingTerraformTfVarsPath, err = filepath.Abs(filepath.Join("terraform", cloud, terraformVarsFileName))
 	if err != nil {
 		err = errors.Wrapf(err, "Error occurred while crafting absolute path to %s file", terraformVarsFileName)
 		return "", err

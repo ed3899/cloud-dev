@@ -2,10 +2,10 @@ package templates
 
 import (
 	"os"
+	"path/filepath"
 	"text/template"
 
 	templates_packer_aws "github.com/ed3899/kumo/templates/packer/aws"
-	"github.com/ed3899/kumo/utils"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 )
@@ -28,7 +28,7 @@ func CraftGeneralPackerVarsFile(cloud string) (generalPackerVarsPath string, err
 
 	// Get template
 	generalTmplName := "GeneralPackerVars.tmpl"
-	templatePath, err := utils.CraftAbsolutePath("templates", "packer", "general", generalTmplName)
+	templatePath, err := filepath.Abs(filepath.Join("templates", "packer", "general", generalTmplName))
 	tmpl, err := template.ParseFiles(templatePath)
 	if err != nil {
 		err = errors.Wrapf(err, "Error occurred while crafting absolute path to %s template file", generalTmplName)
@@ -37,7 +37,7 @@ func CraftGeneralPackerVarsFile(cloud string) (generalPackerVarsPath string, err
 
 	// Create vars file
 	generalPackerVarsFileName := "general.auto.tfvars"
-	generalPackerVarsPath, err = utils.CraftAbsolutePath("terraform", cloud, generalPackerVarsFileName)
+	generalPackerVarsPath, err = filepath.Abs(filepath.Join("terraform", cloud, generalPackerVarsFileName))
 	if err != nil {
 		err = errors.Wrapf(err, "Error occurred while crafting absolute path to %s file", generalPackerVarsFileName)
 		return "", err

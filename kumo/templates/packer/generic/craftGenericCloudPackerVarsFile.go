@@ -2,9 +2,9 @@ package templates
 
 import (
 	"os"
+	"path/filepath"
 	"text/template"
 
-	"github.com/ed3899/kumo/utils"
 	"github.com/pkg/errors"
 )
 
@@ -40,7 +40,7 @@ import (
 //	("aws", "AWS_PackerVarsTemplate.tmpl", "aws.auto.pkrvars", env) -> ("packer/aws/aws.auto.pkrvars", nil)
 func CraftGenericCloudPackerVarsFile(cloud, templateName, packerVarsFileName string, env any) (resultingPackerVarsPath string, err error) {
 	// Get template
-	templatePath, err := utils.CraftAbsolutePath("templates", "packer", cloud, templateName)
+	templatePath, err := filepath.Abs(filepath.Join("templates", "packer", cloud, templateName))
 	tmpl, err := template.ParseFiles(templatePath)
 	if err != nil {
 		err = errors.Wrapf(err, "Error occurred while crafting absolute path to %s template file", templateName)
@@ -48,7 +48,7 @@ func CraftGenericCloudPackerVarsFile(cloud, templateName, packerVarsFileName str
 	}
 
 	// Create vars file
-	resultingPackerVarsPath, err = utils.CraftAbsolutePath("packer", cloud, packerVarsFileName)
+	resultingPackerVarsPath, err = filepath.Abs(filepath.Join("packer", cloud, packerVarsFileName))
 	if err != nil {
 		err = errors.Wrap(err, "Error occurred while crafting absolute path to Packer AWS Vars file")
 		return "", err
