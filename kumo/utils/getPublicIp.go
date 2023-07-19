@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"github.com/pkg/errors"
@@ -18,7 +18,7 @@ func GetPublicIp() (ip string, err error) {
 	defer resp.Body.Close()
 
 	// Read the response body
-	bytesResp, err := ioutil.ReadAll(resp.Body)
+	bytesResp, err := io.ReadAll(resp.Body)
 	if err != nil {
 		err = errors.Wrap(err, "Error occurred while reading response body")
 		return "", err
