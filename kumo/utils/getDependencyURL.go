@@ -7,13 +7,23 @@ import (
 	"github.com/pkg/errors"
 )
 
+func GetLastPackerVersion() string {
+	return "1.9.1"
+}
+
+func GetLatestTerraformVersion() string {
+	return "1.5.3"
+}
+
 func GetDependencyURL(name string, s *host.Specs) (url string, err error) {
 	switch name {
 	case "packer":
-		url = fmt.Sprintf("https://releases.hashicorp.com/packer/1.9.1/packer_1.9.1_%s_%s.zip", s.OS, s.ARCH)
+		version := GetLastPackerVersion()
+		url = fmt.Sprintf("https://releases.hashicorp.com/packer/%s/packer_%s_%s_%s.zip", version, version, s.OS, s.ARCH)
 		return url, nil
 	case "terraform":
-		url = fmt.Sprintf("https://releases.hashicorp.com/terraform/1.5.2/terraform_1.5.2_%s_%s.zip", s.OS, s.ARCH)
+		version := GetLatestTerraformVersion()
+		url = fmt.Sprintf("https://releases.hashicorp.com/terraform/%s/terraform_%s_%s_%s.zip", version, version, s.OS, s.ARCH)
 		return url, nil
 	default:
 		err := errors.New("no url found for dependency")
