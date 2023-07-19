@@ -7,10 +7,9 @@ import (
 	"github.com/ed3899/kumo/host"
 )
 
-// TODO Remove zips after extraction
 // TODO Set ssh key file permissions to 600
-// TODO nest terraform and packer config files in a directory according to the cloud they are deploying to
 // TODO add AMI.User tag to packer ami
+// TODO integration test for packer and terraform urls
 func init() {
 	if host.IsNotCompatible() {
 		log.Fatal("Host is not compatible with kumo :/")
