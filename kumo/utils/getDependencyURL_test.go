@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"net/url"
 	"testing"
 
 	"github.com/ed3899/kumo/host"
@@ -48,6 +49,11 @@ func TestGetDependencyURL(t *testing.T) {
 		},
 	}
 
+	isValidUrl := func(input string) bool {
+		_, err := url.ParseRequestURI(input)
+		return err == nil
+	}
+
 	// Iterate over test cases
 	for _, tc := range testCases {
 		// Get the dependency URL
@@ -59,6 +65,11 @@ func TestGetDependencyURL(t *testing.T) {
 		// Check if the URL matches the expected value
 		if url != tc.expectedURL {
 			t.Errorf("Expected URL: %s, Got: %s", tc.expectedURL, url)
+		}
+
+		// Check if the URL is valid
+		if !isValidUrl(url) {
+			t.Errorf("Expected URL to be valid, but it is not: %s", url)
 		}
 	}
 }

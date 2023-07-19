@@ -8,13 +8,13 @@ import (
 )
 
 // Creates an absolute path with the given path(s). Cross os compatible.
-// Takes the current working directory from which kumo.exe is executed as the root.
+// Takes the current working directory from which main.go is executed, or if called
+// from a test, the current working directory from which the test is executed.
 // It does not verify for existance of the resulting path.
 //
 // Example:
 //
-//	("packer", "packer.exe") -> "C:\\Users\\user\\kumo\\packer\\packer.exe"
-//	("terraform", "terraform.exe") -> "/home/user/kumo/terraform/terraform.exe"
+//	("path1", "path2") -> "C:\\Users\\user\\kumo\\path1\\path2"
 //	("templates") -> "C:\\Users\\user\\kumo\\templates"
 func CraftAbsolutePath(paths ...string) (absolutePath string, err error) {
 	cwd, err := os.Getwd()
