@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"fmt"
+	"os"
 	"os/exec"
 	"sync"
 	"testing"
@@ -14,6 +16,47 @@ func TestUtils(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Utils Suite")
 }
+
+var _ = Describe("GetLastBuiltAmiId", func() {
+	var tmpFile *os.File
+	var expectedAmiId = "67890"
+
+	BeforeEach(func() {
+		var err error
+		tmpFile, err = os.CreateTemp("", "test_get_last_built_ami_id")
+		Expect(err).ToNot(HaveOccurred())
+
+		jsonData := fmt.Sprintf(`{
+			"builds": [
+							{
+											"packer_run_uuid": "abc123",
+											"artifact_id": "ami:12345"
+							},
+							{
+											"packer_run_uuid": "def456",
+											"artifact_id": "ami:%s"
+							}
+			],
+			"last_run_uuid": "def456"
+		}`, expectedAmiId)
+
+		_, err = tmpFile.WriteString(jsonData)
+		Expect(err).ToNot(HaveOccurred())
+	})
+
+	AfterEach(func() {
+		tmpFile.Close()
+		os.Remove(tmpFile.Name())
+	})
+
+	It("returns the last built AMI ID", func() {
+		// Run the test using the temporary packer manifest file
+		amiId, err := GetLastBuiltAmiId(tmpFile.Name())
+		Expect(err).ToNot(HaveOccurred())
+
+		Expect(amiId).To(Equal(expectedAmiId))
+	})
+})
 
 var _ = Describe("GetPublicIp", func() {
 	It("should return the public IP", func(ctx SpecContext) {
