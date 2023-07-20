@@ -11,7 +11,9 @@ import (
 	"github.com/pkg/errors"
 )
 
-func Download(dep *draft.Dependency, downloads chan<- *progressBar.DownloadResult) {
+// Downloads a dependency from the given url and saves it to the given path declared on the dependency. Sends the
+// result to the downloads channel.
+func DownloadDependency(dep *draft.Dependency, downloads chan<- *progressBar.DownloadResult) {
 	url := dep.URL
 	response, err := http.Get(url)
 	if err != nil {

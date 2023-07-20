@@ -9,6 +9,7 @@ require (
 	github.com/spf13/viper v1.16.0
 	github.com/stretchr/testify v1.8.4
 	github.com/vbauerster/mpb/v8 v8.4.0
+	go.uber.org/mock v0.2.0
 )
 
 require (

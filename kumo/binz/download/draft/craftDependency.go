@@ -11,6 +11,10 @@ import (
 	"github.com/vbauerster/mpb/v8"
 )
 
+type ProgressBar interface {
+	IncrBy(int)
+}
+
 type Dependency struct {
 	Name           string
 	Present        bool
@@ -18,7 +22,7 @@ type Dependency struct {
 	ZipPath        string
 	ExtractionPath string
 	ContentLength  int64
-	DownloadBar    *mpb.Bar
+	DownloadBar    ProgressBar
 	ZipBar         *mpb.Bar
 }
 

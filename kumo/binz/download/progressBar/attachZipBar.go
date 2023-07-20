@@ -26,7 +26,7 @@ func AttachZipBar(p *mpb.Progress, dr *DownloadResult) {
 
 	// Config the bar
 	zipBar := p.AddBar(zipSize,
-		mpb.BarQueueAfter(dr.Dependency.DownloadBar),
+		mpb.BarQueueAfter(dr.Dependency.DownloadBar.(*mpb.Bar)),
 		mpb.BarFillerClearOnComplete(),
 		mpb.PrependDecorators(
 			decor.Name(barName),

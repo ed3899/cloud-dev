@@ -62,7 +62,7 @@ func DownloadDependencies(dps *draft.Dependencies) (*Binaries, error) {
 			go func(dep *draft.Dependency, p *mpb.Progress) {
 				defer wg.Done()
 				progressBar.AttachDownloadBar(p, dep)
-				Download(dep, downloads)
+				DownloadDependency(dep, downloads)
 			}(dep, progress)
 		}
 
