@@ -56,3 +56,5 @@ kumokey*
 .terraform.lock.hcl
 *.tfvars
 *.tfstate*
+
+ginkgo.report

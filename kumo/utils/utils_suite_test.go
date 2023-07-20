@@ -3,8 +3,8 @@ package utils
 import (
 	"os/exec"
 	"sync"
-	"time"
 	"testing"
+	"time"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -14,6 +14,17 @@ func TestUtils(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Utils Suite")
 }
+
+var _ = Describe("GetPublicIp", func() {
+	It("should return the public IP", func(ctx SpecContext) {
+		ip, err := GetPublicIp()
+		Expect(err).To(BeNil())
+		Expect(ip).ToNot(BeEmpty())
+
+		ipPattern := `\b(?:\d{1,3}\.){3}\d{1,3}\b`
+		Expect(ip).To(MatchRegexp(ipPattern))
+	})
+})
 
 var _ = Describe("TerminateCommand", func() {
 	Context("TerminateCommand", func() {
@@ -39,6 +50,6 @@ var _ = Describe("TerminateCommand", func() {
 			wg.Wait()
 
 			Expect(cmd.ProcessState.ExitCode()).To(Equal(1))
-		}, SpecTimeout(time.Second * 10))
+		}, SpecTimeout(time.Second*10))
 	})
 })
