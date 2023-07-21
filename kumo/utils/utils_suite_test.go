@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"sync"
 	"testing"
 	"time"
@@ -21,6 +22,60 @@ func TestUtils(t *testing.T) {
 	RunSpecs(t, "Utils Suite")
 }
 
+var _ = Describe("CheckExistanceOfDir", func() {
+	var tempDirPath string
+
+	BeforeEach(func() {
+		// Get current working directory
+		cwd, err := os.Getwd()
+		Expect(err).NotTo(HaveOccurred())
+
+		// Create a temporary directory for testing
+		tempDirPath = filepath.Join(cwd, "tmp")
+		err = os.Mkdir(tempDirPath, 0755)
+		Expect(err).NotTo(HaveOccurred())
+	})
+
+	AfterEach(func() {
+		err := os.Remove(tempDirPath)
+		Expect(err).NotTo(HaveOccurred())
+	})
+
+	Context("TestDirExists", func() {
+		When("the directory exists", func() {
+			It("should return true", func() {
+				exist, err := DirExist(tempDirPath)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(exist).To(BeTrue())
+			})
+		})
+		When("the directory does not exist", func() {
+			It("should return false", func() {
+				exist, err := DirExist("path/to/nonexisting/dir")
+				Expect(err).NotTo(HaveOccurred())
+				Expect(exist).To(BeFalse())
+			})
+		})
+	})
+
+	Context("TestDirNotExists", func() {
+		When("the directory exists", func() {
+			It("should return false", func() {
+				exist, err := DirNotExist(tempDirPath)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(exist).To(BeFalse())
+			})
+		})
+		When("the directory does not exist", func() {
+			It("should return true", func() {
+				exist, err := DirNotExist("path/to/nonexisting/dir")
+				Expect(err).NotTo(HaveOccurred())
+				Expect(exist).To(BeTrue())
+			})
+		})
+	})
+})
+
 var _ = Describe("CheckExistanceOfFile", func() {
 	var (
 		existingTempFile *os.File
@@ -32,10 +87,10 @@ var _ = Describe("CheckExistanceOfFile", func() {
 
 		cwd, err := os.Getwd()
 		Expect(err).NotTo(HaveOccurred())
-		
+
 		existingTempFile, err = os.CreateTemp(cwd, "test-file-present")
 		Expect(err).NotTo(HaveOccurred())
-		defer func ()  {
+		defer func() {
 			err = existingTempFile.Close()
 			Expect(err).NotTo(HaveOccurred())
 		}()
