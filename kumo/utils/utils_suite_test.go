@@ -31,20 +31,64 @@ var _ = Describe("GetDependencyURL", func() {
 		expectedURL string
 	}
 
+	latestPackerVersion := GetLatestPackerVersion()
+	latestTerraformVersion := GetLatestTerraformVersion()
+
 	DescribeTable("returns the correct dependency URL with valid format", func(tc *TestCase) {
 		url, err := GetDependencyURL(tc.name, tc.specs)
 		Expect(err).ToNot(HaveOccurred())
 		Expect(url).To(Equal(tc.expectedURL))
 		Expect(isValidURL(url)).To(BeTrue())
 	},
-		Entry("packer", &TestCase{
+		Entry("when crafting for packer on windows amd64", &TestCase{
 			specs: &host.Specs{
 				OS:   "windows",
 				ARCH: "amd64",
 			},
 			name:        "packer",
-			expectedURL: "https://releases.hashicorp.com/packer/1.9.1/packer_1.9.1_windows_amd64.zip",
-		}))
+			expectedURL: fmt.Sprintf("https://releases.hashicorp.com/packer/%s/packer_%s_windows_amd64.zip", latestPackerVersion, latestPackerVersion),
+		}),
+		Entry("when crafting for packer on windows 386", &TestCase{
+			specs: &host.Specs{
+				OS:   "windows",
+				ARCH: "386",
+			},
+			name:        "packer",
+			expectedURL: fmt.Sprintf("https://releases.hashicorp.com/packer/%s/packer_%s_windows_386.zip", latestPackerVersion, latestPackerVersion),
+		}),
+		Entry("when crafting for packer on macos amd64", &TestCase{
+			specs: &host.Specs{
+				OS:   "darwin",
+				ARCH: "amd64",
+			},
+			name:        "packer",
+			expectedURL: fmt.Sprintf("https://releases.hashicorp.com/packer/%s/packer_%s_darwin_amd64.zip", latestPackerVersion, latestPackerVersion),
+		}),
+		Entry("when crafting for packer on macos arm64", &TestCase{
+			specs: &host.Specs{
+				OS:   "darwin",
+				ARCH: "arm64",
+			},
+			name:        "packer",
+			expectedURL: fmt.Sprintf("https://releases.hashicorp.com/packer/%s/packer_%s_darwin_arm64.zip", latestPackerVersion, latestPackerVersion),
+		}),
+		Entry("when crafting for terraform on macos arm64", &TestCase{
+			specs: &host.Specs{
+				OS:   "darwin",
+				ARCH: "arm64",
+			},
+			name:        "terraform",
+			expectedURL: fmt.Sprintf("https://releases.hashicorp.com/terraform/%s/terraform_%s_darwin_arm64.zip", latestTerraformVersion, latestTerraformVersion),
+		}),
+		Entry("when crafting for terraform on macos amd64", &TestCase{
+			specs: &host.Specs{
+				OS:   "darwin",
+				ARCH: "amd64",
+			},
+			name:        "terraform",
+			expectedURL: fmt.Sprintf("https://releases.hashicorp.com/terraform/%s/terraform_%s_darwin_amd64.zip", latestTerraformVersion, latestTerraformVersion),
+		}),
+	)
 })
 
 var _ = Describe("GetLastBuiltAmiId", func() {
