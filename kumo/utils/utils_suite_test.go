@@ -2,6 +2,8 @@ package utils
 
 import (
 	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"net/url"
 	"os"
 	"os/exec"
@@ -18,6 +20,30 @@ func TestUtils(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Utils Suite")
 }
+
+var _ = Describe("GetContentLength", func() {
+	var (
+		ts *httptest.Server
+	)
+
+	BeforeEach(func() {
+		ts = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Length", "100")
+			w.WriteHeader(http.StatusOK)
+		}))
+	})
+
+	AfterEach(func() {
+		ts.Close()
+	})
+
+	It("returns the expected result", func() {
+		expectedResult := int64(100)
+		result, err := GetContentLength(ts.URL)
+		Expect(err).To(BeNil())
+		Expect(result).To(Equal(expectedResult))
+	})
+})
 
 var _ = Describe("GetDependenciesDirName", func() {
 	It("should return the correct dependencies directory name", func() {
