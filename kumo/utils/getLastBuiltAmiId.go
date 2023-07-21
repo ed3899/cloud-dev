@@ -3,6 +3,7 @@ package utils
 import (
 	"encoding/json"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -19,12 +20,23 @@ type PackerManifest struct {
 	LastRunUUID string `json:"last_run_uuid"`
 }
 
-// Returns the AMI ID of the last built AMI. The AMI ID is extracted from the Packer manifest file.
-func GetLastBuiltAmiId(packerManifestPath string) (amiId string, err error) {
+// Returns the AMI ID of the last built AMI. The AMI ID is extracted from the Packer manifest file. This function
+// expects the absolute path to the Packer manifest file.
+//
+// Example:
+//
+//	("packer/aws/manifest.json") -> ("ami-0c3fd0f5d33134a76", nil)
+func GetLastBuiltAmiId(packerManifestAbsPath string) (amiId string, err error) {
+	// Check if packer manifest path is absolute
+	if !filepath.IsAbs(packerManifestAbsPath) {
+		err = errors.New("The packer manifest path is not absolute")
+		return "", err
+	}
+
 	// Open packer manifest file
-	file, err := os.Open(packerManifestPath)
+	file, err := os.Open(packerManifestAbsPath)
 	if err != nil {
-		err = errors.Wrapf(err, "Error occurred while opening packer manifest file '%s'", packerManifestPath)
+		err = errors.Wrapf(err, "Error occurred while opening packer manifest file '%s'", packerManifestAbsPath)
 		return "", err
 	}
 	defer file.Close()
@@ -34,7 +46,7 @@ func GetLastBuiltAmiId(packerManifestPath string) (amiId string, err error) {
 	var packerManifest PackerManifest
 	err = decoder.Decode(&packerManifest)
 	if err != nil {
-		err = errors.Wrapf(err, "Error occurred while decoding packer manifest file '%s'", packerManifestPath)
+		err = errors.Wrapf(err, "Error occurred while decoding packer manifest file '%s'", packerManifestAbsPath)
 		return "", err
 	}
 
@@ -51,5 +63,5 @@ func GetLastBuiltAmiId(packerManifestPath string) (amiId string, err error) {
 	// Extract only the AMI ID
 	amiId = strings.Split(lastBuildAMI_Id[0].ArtifactId, ":")[1]
 
-	return amiId, nil
+	return
 }

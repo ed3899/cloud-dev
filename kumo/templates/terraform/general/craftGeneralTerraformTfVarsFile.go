@@ -8,6 +8,7 @@ import (
 
 	templates_terraform_aws "github.com/ed3899/kumo/templates/terraform/aws"
 	templates_terraform_utils "github.com/ed3899/kumo/templates/terraform/utils"
+	"github.com/ed3899/kumo/utils"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 )
@@ -18,27 +19,7 @@ type GeneralTerraformEnvironment struct {
 	ALLOWED_IP string
 }
 
-func CraftGeneralTerraformTfVarsFile(cloud string) (generalTerraformVarsPath string, err error) {
-	// Get packer manifest
-	packerManifestPath, err := filepath.Abs(filepath.Join("packer", cloud, "manifest.json"))
-	if err != nil {
-		err = errors.Wrapf(err, "Error occurred while crafting absolute path to packer manifest for cloud '%s'", cloud)
-		return "", err
-	}
-
-	// Get AMI ID to be used
-	amiIdToBeUsed, err := templates_terraform_utils.GetAmiToBeUsed(packerManifestPath, cloud)
-	if err != nil {
-		log.Fatal(err)
-	}
-	// Get host public IP
-	allowedIp := viper.GetString("ALLOWED_ID")
-
-	genEnv := &GeneralTerraformEnvironment{
-		AMI_ID:     amiIdToBeUsed,
-		ALLOWED_IP: allowedIp,
-	}
-
+func CraftGeneralTerraformTfVarsFile(gte *GeneralTerraformEnvironment) (generalTerraformVarsPath string, err error) {
 	// Get template
 	generalTmplName := "GeneralTerraformTfVars.tmpl"
 	templatePath, err := filepath.Abs(filepath.Join("templates", "terraform", "general", generalTmplName))
@@ -64,7 +45,7 @@ func CraftGeneralTerraformTfVarsFile(cloud string) (generalTerraformVarsPath str
 	defer file.Close()
 
 	// Execute template file
-	err = tmpl.Execute(file, genEnv)
+	err = tmpl.Execute(file, *gte)
 	if err != nil {
 		err = errors.Wrapf(err, "Error occurred while executing %s template file", generalTmplName)
 		return "", err

@@ -7,7 +7,14 @@ import (
 	"github.com/pkg/errors"
 )
 
-// Returns the public IP of the machine running the program. Makes an external call.
+// Returns the public IP of the machine running the program.
+// Returns an empty string and an error if the call fails.
+//
+// Makes an external call.
+//
+// Example:
+//
+// 	() -> ("123.456.789.012", nil)
 func GetPublicIp() (ip string, err error) {
 	// Send GET request to retrieve public IP
 	resp, err := http.Get("https://api.ipify.org?format=text")
@@ -27,6 +34,6 @@ func GetPublicIp() (ip string, err error) {
 	// Convert the response body to a string
 	ip = string(bytesResp)
 
-	 // Return the public IP and no error
+	// Return the public IP and no error
 	return ip, nil
 }

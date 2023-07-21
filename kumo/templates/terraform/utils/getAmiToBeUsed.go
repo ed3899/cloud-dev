@@ -3,20 +3,33 @@ package templates
 import (
 	"github.com/ed3899/kumo/utils"
 	"github.com/pkg/errors"
-	"github.com/spf13/viper"
 )
 
-func GetAmiToBeUsed(packerManifestPath, cloud string) (amiIdToBeUsed string, err error) {
+type GetAmiToBeUsed_Props struct {
+	GetPackerManifest  GetPackerManifestF
+	GetLastBuiltAmiId  GetLastBuiltAmiIdF
+	GetCurrentCloud    utils.GetCurrentCloudF
+	GetAmiIdFromConfig utils.GetAmiIdFromConfigF
+}
+
+func GetAmiToBeUsed(props *GetAmiToBeUsed_Props) (amiIdToBeUsed string, err error) {
+	// Get packer manifest path
+	packerManifestPath, err := props.GetPackerManifest(props.GetCurrentCloud)
+	if err != nil {
+		err = errors.Wrapf(err, "Error occurred while getting packer manifest path for cloud '%s'", props.cloud)
+		return "", err
+	}
+
 	// Get last built AMI ID
-	lastBuiltAmiId, err := utils.GetLastBuiltAmiId(packerManifestPath)
+	lastBuiltAmiId, err := props.GetLastBuiltAmiId(packerManifestPath)
 	var lbaierr error
 	if err != nil {
-		err = errors.Wrapf(err, "Error occurred while getting last built AMI ID for cloud '%s'", cloud)
+		err = errors.Wrapf(err, "Error occurred while getting last built AMI ID for cloud '%s'", props.cloud)
 		lbaierr = err
 	}
 
 	// Set AMI ID to be used based on config file
-	kumoConfigAmiId := viper.GetString("Up.AMI_Id")
+	kumoConfigAmiId := props.amiIdFromConfigFile
 	switch {
 	// If AMI ID is not set in config file and no AMI ID is found in manifest.json, return error
 	case lastBuiltAmiId == "" && kumoConfigAmiId == "":
@@ -32,3 +45,4 @@ func GetAmiToBeUsed(packerManifestPath, cloud string) (amiIdToBeUsed string, err
 
 	return amiIdToBeUsed, nil
 }
+

@@ -36,7 +36,7 @@ var _ = Describe("CraftGenericCloudTerraformTfVarsFile", func() {
 		nonExistentTemplateName = "AWS_TerraformTfVars_non_existent.tmpl"
 		terraformVarsFileName   = "aws.auto.tfvars"
 	)
-	
+
 	// Change to root directory
 	BeforeEach(func() {
 		initialLocation, err = os.Getwd()
@@ -80,4 +80,9 @@ var _ = Describe("CraftGenericCloudTerraformTfVarsFile", func() {
 			Expect(resultingTerraformTfVarsPath).To(Equal(""))
 		})
 	})
+})
+
+
+var _ = Describe("GetAmiToBeUsed", func ()  {
+	
 })

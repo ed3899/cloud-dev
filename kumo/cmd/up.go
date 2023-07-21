@@ -20,7 +20,7 @@ func GetUpCommand(t *binz.Terraform) *cobra.Command {
 		instances from VSCode.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			// Get public IP
-			pIp, err := utils.GetPublicIp()
+			pIp, err := utils.GetAllowedIp()
 			if err != nil {
 				defaultIp := "0.0.0.0/0"
 				err = errors.Wrapf(err, "Error occurred while getting public IP, your instance will have default SSH from '%s'", defaultIp)
