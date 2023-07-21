@@ -19,6 +19,12 @@ func TestUtils(t *testing.T) {
 	RunSpecs(t, "Utils Suite")
 }
 
+var _ = Describe("GetDependenciesDirName", func() {
+	It("should return the correct dependencies directory name", func() {
+		Expect(GetDependenciesDirName()).To(Equal("deps"))
+	})
+})
+
 var _ = Describe("GetDependencyURL", func() {
 	isValidURL := func(input string) bool {
 		_, err := url.ParseRequestURI(input)
