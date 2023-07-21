@@ -12,7 +12,10 @@ import (
 //
 // It looks for templates under "./templates/terraform/<cloud>/<templateName>.tmpl"
 //
-// It creates a file under "./terraform/<cloud>/<terraformVarsFileName>.auto.tfvars"
+// It creates a file under "./terraform/<cloud>/<terraformVarsFileName>.auto.tfvars"}
+//
+// This function should be run or called from the root directory of the project. Otherwise, it will fail to find the
+// templates
 //
 // The env parameter is a pointer to a struct that contains the data
 // to be used in the template. Example:
@@ -30,9 +33,15 @@ import (
 func CraftGenericCloudTerraformTfVarsFile(cloud, templateName, terraformVarsFileName string, env any) (resultingTerraformTfVarsPath string, err error) {
 	// Get template
 	templatePath, err := filepath.Abs(filepath.Join("templates", "terraform", cloud, templateName))
-	tmpl, err := template.ParseFiles(templatePath)
 	if err != nil {
 		err = errors.Wrapf(err, "Error occurred while crafting absolute path to %s template file", templateName)
+		return "", err
+	}
+
+	// Parse template file
+	tmpl, err := template.ParseFiles(templatePath)
+	if err != nil {
+		err = errors.Wrapf(err, "Error occurred while parsing %s template file", templateName)
 		return "", err
 	}
 
