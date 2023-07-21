@@ -36,13 +36,14 @@ func CraftGenericCloudTerraformTfVarsFile(cloud, templateName, terraformVarsFile
 		return "", err
 	}
 
-	// Create vars file
+	// Craft absolute path to vars file
 	resultingTerraformTfVarsPath, err = filepath.Abs(filepath.Join("terraform", cloud, terraformVarsFileName))
 	if err != nil {
 		err = errors.Wrapf(err, "Error occurred while crafting absolute path to %s file", terraformVarsFileName)
 		return "", err
 	}
 
+	// Create vars file
 	file, err := os.Create(resultingTerraformTfVarsPath)
 	if err != nil {
 		err = errors.Wrapf(err, "Error occurred while creating %s file", terraformVarsFileName)
