@@ -21,6 +21,47 @@ func TestUtils(t *testing.T) {
 	RunSpecs(t, "Utils Suite")
 }
 
+var _ = Describe("CheckExistanceOfFile", func() {
+	var (
+		existingTempFile *os.File
+		etfp             string
+	)
+
+	BeforeEach(func() {
+		var err error
+
+		cwd, err := os.Getwd()
+		Expect(err).NotTo(HaveOccurred())
+		
+		existingTempFile, err = os.CreateTemp(cwd, "test-file-present")
+		Expect(err).NotTo(HaveOccurred())
+		defer func ()  {
+			err = existingTempFile.Close()
+			Expect(err).NotTo(HaveOccurred())
+		}()
+
+		etfp = existingTempFile.Name()
+	})
+
+	AfterEach(func() {
+		err := os.Remove(etfp)
+		Expect(err).NotTo(HaveOccurred())
+	})
+
+	Context("FilePresent", func() {
+		It("should return true if the file exists", func() {
+			Expect(FilePresent(etfp)).To(BeTrue())
+		})
+	})
+
+	Context("FileNotPresent", func() {
+		It("should return true if the file does not exist", func() {
+			nonExistingFilePath := "path/to/nonexisting/file"
+			Expect(FileNotPresent(nonExistingFilePath)).To(BeTrue())
+		})
+	})
+})
+
 var _ = Describe("GetContentLength", func() {
 	var (
 		ts *httptest.Server
