@@ -2,12 +2,14 @@ package utils
 
 import (
 	"fmt"
+	"net/url"
 	"os"
 	"os/exec"
 	"sync"
 	"testing"
 	"time"
 
+	"github.com/ed3899/kumo/host"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -16,6 +18,34 @@ func TestUtils(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Utils Suite")
 }
+
+var _ = Describe("GetDependencyURL", func() {
+	isValidURL := func(input string) bool {
+		_, err := url.ParseRequestURI(input)
+		return err == nil
+	}
+
+	type TestCase struct {
+		specs       *host.Specs
+		name        string
+		expectedURL string
+	}
+
+	DescribeTable("returns the correct dependency URL with valid format", func(tc *TestCase) {
+		url, err := GetDependencyURL(tc.name, tc.specs)
+		Expect(err).ToNot(HaveOccurred())
+		Expect(url).To(Equal(tc.expectedURL))
+		Expect(isValidURL(url)).To(BeTrue())
+	},
+		Entry("packer", &TestCase{
+			specs: &host.Specs{
+				OS:   "windows",
+				ARCH: "amd64",
+			},
+			name:        "packer",
+			expectedURL: "https://releases.hashicorp.com/packer/1.9.1/packer_1.9.1_windows_amd64.zip",
+		}))
+})
 
 var _ = Describe("GetLastBuiltAmiId", func() {
 	var tmpFile *os.File
