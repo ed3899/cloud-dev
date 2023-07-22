@@ -38,7 +38,7 @@ func CraftCloudTerraformTfVarsFile(cloud string) (cloudTfVarsFilePath string, er
 			return utils.MaskIp(utils.GetDefaultIp(), 32)
 		}).Default(publicIp)
 
-	generalTerraformEnv := templates_terraform_general.GeneralTerraformEnvironment{
+	generalTerraformEnv := templates_terraform_general.VarsFile{
 		AMI_ID:     pickedAmiId,
 		ALLOWED_IP: pickedIp,
 	}
