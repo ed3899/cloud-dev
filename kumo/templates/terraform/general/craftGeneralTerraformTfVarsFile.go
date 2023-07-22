@@ -1,16 +1,9 @@
 package templates
 
 import (
-	"log"
-	"os"
-	"path/filepath"
-	"text/template"
-
 	templates_terraform_aws "github.com/ed3899/kumo/templates/terraform/aws"
-	templates_terraform_utils "github.com/ed3899/kumo/templates/terraform/utils"
 	"github.com/ed3899/kumo/utils"
 	"github.com/pkg/errors"
-	"github.com/spf13/viper"
 )
 
 type GeneralTerraformEnvironment struct {
@@ -21,37 +14,36 @@ type GeneralTerraformEnvironment struct {
 
 func CraftGeneralTerraformTfVarsFile(gte *GeneralTerraformEnvironment) (generalTerraformVarsPath string, err error) {
 	// Get template
-	generalTmplName := "GeneralTerraformTfVars.tmpl"
-	templatePath, err := filepath.Abs(filepath.Join("templates", "terraform", "general", generalTmplName))
-	tmpl, err := template.ParseFiles(templatePath)
+	tmpl, err := utils.CreateTemplate(&utils.TemplateProps{
+		Tool: utils.Terraform,
+		Kind: utils.General,
+	})
 	if err != nil {
-		err = errors.Wrapf(err, "Error occurred while crafting absolute path to %s template file", generalTmplName)
+		err = errors.Wrapf(err, "Error occurred while getting template for terraform")
 		return "", err
 	}
 
 	// Create vars file
-	generalTerraformVarsFileName := "general.auto.tfvars"
-	generalTerraformVarsPath, err = filepath.Abs(filepath.Join("terraform", cloud, generalTerraformVarsFileName))
+	varsFile, err := utils.CreateVarsFile(&utils.TemplateProps{
+		Tool: utils.Terraform,
+		Kind: utils.General,
+	})
 	if err != nil {
-		err = errors.Wrapf(err, "Error occurred while crafting absolute path to %s file", generalTerraformVarsFileName)
+		err = errors.Wrapf(err, "Error occurred while creating vars file")
 		return "", err
 	}
 
-	file, err := os.Create(generalTerraformVarsPath)
+	err = utils.ExecuteTemplate(&utils.ExecuteTemplateProps{
+		Template:        tmpl,
+		VarsFileAbsPath: varsFile.Name(),
+		Environment:     gte,
+	})
 	if err != nil {
-		err = errors.Wrapf(err, "Error occurred while creating %s file", generalTerraformVarsFileName)
-		return "", err
-	}
-	defer file.Close()
-
-	// Execute template file
-	err = tmpl.Execute(file, *gte)
-	if err != nil {
-		err = errors.Wrapf(err, "Error occurred while executing %s template file", generalTmplName)
+		err = errors.Wrapf(err, "Error occurred while executing template")
 		return "", err
 	}
 
-	// Return path to vars file
-	return generalTerraformVarsPath, nil
+	generalTerraformVarsPath = varsFile.Name()
 
+	return
 }
