@@ -6,7 +6,6 @@ import (
 	"text/template"
 
 	templates_terraform_aws "github.com/ed3899/kumo/templates/terraform/aws"
-	"github.com/ed3899/kumo/utils"
 	"github.com/pkg/errors"
 )
 
@@ -30,88 +29,102 @@ type ComputedProps struct {
 	Name string
 }
 
-type VarsFile struct {
-	Tool          Tool
-	Kind          Kind
-	ComputedProps *ComputedProps
-	Template      *template.Template
-	Instance      *os.File
-
+type Environment struct {
 	*templates_terraform_aws.AWS_TerraformEnvironment
 	AMI_ID     string
 	ALLOWED_IP string
 }
 
-func NewVars(tool Tool, kind Kind) (*VarsFile, error) {
-	t := &VarsFile{
+type VarsFile struct {
+	Tool          Tool
+	Kind          Kind
+	Environment   *Environment
+	computedProps *ComputedProps
+	template      *template.Template
+	instance      *os.File
+}
+
+func NewVarsFile(tool Tool, kind Kind, env *Environment) (*VarsFile, error) {
+	vf := &VarsFile{
 		Tool: tool,
 		Kind: kind,
+		Environment: env,
 	}
 
-	if err := t.setComputedTool(); err != nil {
+	if err := vf.setComputedTool(); err != nil {
 		err = errors.Wrapf(err, "Error occurred while picking tool")
 		return nil, err
 	}
 
-	if err := t.setComputedKind(); err != nil {
+	if err := vf.setComputedKind(); err != nil {
 		err = errors.Wrapf(err, "Error occurred while picking kind")
 		return nil, err
 	}
 
-	if err := t.setComputedName(); err != nil {
+	if err := vf.setComputedName(); err != nil {
 		err = errors.Wrapf(err, "Error occurred while picking name")
 		return nil, err
 	}
 
-	if err := t.parseTemplate(); err != nil {
+	if err := vf.parseTemplate(); err != nil {
 		err = errors.Wrapf(err, "Error occurred while parsing template")
 		return nil, err
 	}
 
-	return t, nil
+	if err := vf.create(); err != nil {
+		err = errors.Wrapf(err, "Error occurred while creating vars file")
+		return nil, err
+	}
+
+	if err := vf.executeTemplate(); err != nil {
+		err = errors.Wrapf(err, "Error occurred while executing template")
+		return nil, err
+	}
+
+	return vf, nil
 }
 
-func (t *VarsFile) setComputedTool() (err error) {
-	switch t.Tool {
+func (vf *VarsFile) setComputedTool() (err error) {
+	switch vf.Tool {
 	case Packer:
-		t.ComputedProps.Tool = "packer"
+		vf.computedProps.Tool = "packer"
 	case Terraform:
-		t.ComputedProps.Tool = "terraform"
+		vf.computedProps.Tool = "terraform"
 	default:
 		err = errors.New("Invalid tool")
 	}
 	return
 }
 
-func (t *VarsFile) setComputedKind() (err error) {
-	switch t.Kind {
+func (vf *VarsFile) setComputedKind() (err error) {
+	switch vf.Kind {
 	case General:
-		t.ComputedProps.Kind = "general"
+		vf.computedProps.Kind = "general"
 	case AWS:
-		t.ComputedProps.Kind = "aws"
+		vf.computedProps.Kind = "aws"
 	default:
 		err = errors.New("Invalid kind")
 	}
 	return
 }
 
-func (t *VarsFile) setComputedName() (err error) {
-	switch t.Tool {
+func (vf *VarsFile) setComputedName() (err error) {
+	switch vf.Tool {
 	case Packer:
-		switch t.Kind {
+		switch vf.Kind {
 		case General:
-			t.ComputedProps.Name = "GeneralPackerVars.tmpl"
+			vf.computedProps.Name = "GeneralPackerVars.tmpl"
 		case AWS:
-			t.ComputedProps.Name = "AWS_PackerVars.tmpl"
+			vf.computedProps.Name = "AWS_PackerVars.tmpl"
 		default:
 			err = errors.New("Invalid kind")
 		}
 	case Terraform:
-		switch t.Kind {
+		switch vf.Kind {
 		case General:
-			t.ComputedProps.Name = "GeneralTerraformTfVars.tmpl"
+			vf.computedProps.Name = "GeneralTerraformTfVars.tmpl"
 		case AWS:
-			t.ComputedProps.Name = "AWS_TerraformTfVars.tmpl"
+			vf.computedProps.Name = "AWS_TerraformTfVars.tmpl"
 		default:
 			err = errors.New("Invalid kind")
 		}
@@ -121,15 +134,15 @@ func (t *VarsFile) setComputedName() (err error) {
 	return
 }
 
-func (t *VarsFile) parseTemplate() (err error) {
-	if t.ComputedProps.Tool == "" || t.ComputedProps.Kind == "" || t.ComputedProps.Name == "" {
+func (vf *VarsFile) parseTemplate() (err error) {
+	if vf.computedProps.Tool == "" || vf.computedProps.Kind == "" || vf.computedProps.Name == "" {
 		err = errors.New("Computed props not set")
 		return err
 	}
 
-	templatePath, err := filepath.Abs(filepath.Join("templates", t.ComputedProps.Tool, t.ComputedProps.Kind, t.ComputedProps.Name))
+	templatePath, err := filepath.Abs(filepath.Join("templates", vf.computedProps.Tool, vf.computedProps.Kind, vf.computedProps.Name))
 	if err != nil {
-		err = errors.Wrapf(err, "Error occurred while crafting absolute path to %s template file", t.ComputedProps.Name)
+		err = errors.Wrapf(err, "Error occurred while crafting absolute path to %s template file", vf.computedProps.Name)
 		return err
 	}
 
@@ -139,38 +152,61 @@ func (t *VarsFile) parseTemplate() (err error) {
 		return err
 	}
 
-	t.Template = tmpl
+	vf.template = tmpl
 
-	return nil
+	return
 }
 
-func (t *VarsFile) create() (varsFilePath string, err error) {
+func (vf *VarsFile) create() (err error) {
+	if vf.computedProps.Tool == "" || vf.computedProps.Kind == "" || vf.computedProps.Name == "" {
+		err = errors.New("Computed props not set")
+		return err
+	}
 
+	varsFileAbsPath, err := filepath.Abs(filepath.Join(vf.computedProps.Tool, vf.computedProps.Kind, vf.computedProps.Name))
+	if err != nil {
+		err = errors.Wrapf(err, "Error occurred while crafting absolute path to %s file", vf.computedProps.Name)
+		return err
+	}
+
+	varsFile, err := os.Create(varsFileAbsPath)
+	if err != nil {
+		err = errors.Wrapf(err, "Error occurred while creating %s file", vf.computedProps.Name)
+		return err
+	}
+	varsFile.Close()
+
+	vf.instance = varsFile
+
+	return
 }
 
-func CraftGeneralTerraformTfVarsFile(gte *VarsFile) (generalTerraformVarsPath string, err error) {
-
-	// Create vars file
-	varsFile, err := utils.CreateVarsFile(&utils.TemplateProps{
-		Tool: utils.Terraform,
-		Kind: utils.General,
-	})
-	if err != nil {
-		err = errors.Wrapf(err, "Error occurred while creating vars file")
-		return "", err
+func (t *VarsFile) executeTemplate() (err error) {
+	if t.template == nil {
+		err = errors.New("Template not set")
+		return
 	}
 
-	err = utils.ExecuteTemplate(&utils.ExecuteTemplateProps{
-		Template:        tmpl,
-		VarsFileAbsPath: varsFile.Name(),
-		Environment:     gte,
-	})
+	varsFile, err := os.Open(t.instance.Name())
 	if err != nil {
-		err = errors.Wrapf(err, "Error occurred while executing template")
-		return "", err
+		err = errors.Wrapf(err, "Error occurred while opening %s file", t.instance.Name())
+		return
 	}
+	defer varsFile.Close()
 
-	generalTerraformVarsPath = varsFile.Name()
+	err = t.template.Execute(varsFile, t.Environment)
+	if err != nil {
+		err = errors.Wrapf(err, "Error occurred while executing %s template file", t.template.Name())
+		return
+	}
+	return
+}
 
+func (t *VarsFile) GetPath() (absPath string, err error) {
+	if t.instance == nil {
+		err = errors.New("Instance not set")
+		return
+	}
+	absPath = t.instance.Name()
 	return
 }
