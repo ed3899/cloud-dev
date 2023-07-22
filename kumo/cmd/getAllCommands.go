@@ -18,7 +18,7 @@ func GetAllCommands(bins *download.Binaries) *CobraCommands {
 		log.Fatal(err)
 	}
 
-	terraform, err := binz.GetTerraformInstance(bins)
+	terraform, err := binz.NewTerraform(bins)
 	if err != nil {
 		err = errors.Wrap(err, "Error occurred while getting Terraform instance")
 		log.Fatal(err)

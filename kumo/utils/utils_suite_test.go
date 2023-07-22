@@ -163,7 +163,7 @@ var _ = Describe("GetDependencyURL", func() {
 	latestTerraformVersion := GetLatestTerraformVersion()
 
 	DescribeTable("returns the correct dependency URL with valid format", func(tc *TestCase) {
-		url, err := GetDependencyURL(tc.name, tc.specs)
+		url, err := CreateDependencyURL(tc.name, tc.specs)
 		Expect(err).ToNot(HaveOccurred())
 		Expect(url).To(Equal(tc.expectedURL))
 		Expect(isValidURL(url)).To(BeTrue())
