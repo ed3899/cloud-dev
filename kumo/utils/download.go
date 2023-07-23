@@ -9,7 +9,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func Download(url string, destName string) (bytesDownloadedChan chan int, err error) {
+func Download(url, destPath string, bytesDownloadedChan chan<- int) (err error) {
 	response, err := http.Get(url)
 	if err != nil {
 		err = errors.Wrapf(err, "failed to download from: %s", url)
@@ -17,18 +17,18 @@ func Download(url string, destName string) (bytesDownloadedChan chan int, err er
 	}
 	defer response.Body.Close()
 
-	destDir := filepath.Dir(destName)
+	destDir := filepath.Dir(destPath)
 
 	// Create the destination along with all the necessary directories
 	err = os.MkdirAll(destDir, 0755)
 	if err != nil {
-		err = errors.Wrapf(err, "failed to create destination directory for: %s", destName)
+		err = errors.Wrapf(err, "failed to create destination directory for: %s", destPath)
 		return
 	}
 
-	file, err := os.OpenFile(destName, os.O_CREATE|os.O_WRONLY, 0744)
+	file, err := os.OpenFile(destPath, os.O_CREATE|os.O_WRONLY, 0744)
 	if err != nil {
-		err = errors.Wrapf(err, "failed to create file for: %s", destName)
+		err = errors.Wrapf(err, "failed to create file for: %s", destPath)
 		return
 	}
 	defer file.Close()
@@ -41,7 +41,7 @@ func Download(url string, destName string) (bytesDownloadedChan chan int, err er
 
 		if err != nil && err != io.EOF {
 			err = errors.Wrap(err, "failed to read response body")
-			return nil, err
+			return err
 		}
 
 		if bytesDownloaded == 0 {
@@ -51,12 +51,10 @@ func Download(url string, destName string) (bytesDownloadedChan chan int, err er
 		bytesDownloadedChan <- bytesDownloaded
 
 		_, err = file.Write(buffer[:bytesDownloaded])
-
 		if err != nil {
 			err = errors.Wrap(err, "failed to write to file")
-			return nil, err
+			return err
 		}
-
 	}
 
 	return

@@ -2,7 +2,8 @@ package binaries
 
 import (
 	"fmt"
-	"sync"
+	"os"
+	"path/filepath"
 
 	"github.com/ed3899/kumo/utils"
 	"github.com/pkg/errors"
@@ -28,11 +29,11 @@ type Terraform2 struct {
 }
 
 func (t *Terraform2) Up() (err error) {
-
+	return
 }
 
 func (t *Terraform2) Down() (err error) {
-
+	return
 }
 
 type Packer2I interface {
@@ -42,18 +43,34 @@ type Packer2I interface {
 type Packer2 struct {
 	ID   Tool
 	Name string
-	Path string
+	AbsPathToExecutable string
 	Zip  *Zip
 }
 
 func NewPacker() (packer *Packer2, err error) {
-	name := "packer"
-	version := utils.GetLatestPackerVersion()
-	os, arch := utils.GetCurrentHostSpecs()
-	depDirName := utils.GetDependenciesDirName()
-	binaryPath, err := utils.CreateBinaryPath([]string{depDirName, name, "packer.exe"})
-	zipPath, err := utils.CreateZipPath([]string{depDirName, name, "packer.zip"})
-	url := utils.CreateHashicorpURL(name, version, os, arch)
+	const (
+		name = "packer"
+		version = "1.9.1"
+	)
+
+	var (
+		executableName = fmt.Sprintf("%s.exe", name)
+		zipName = fmt.Sprintf("%s.zip", name)
+		os, arch = utils.GetCurrentHostSpecs()
+		url = utils.CreateHashicorpURL(name, version, os, arch)
+		depDirName = utils.GetDependenciesDirName()
+	)
+
+	absPathToExecutable, err := filepath.Abs(filepath.Join(depDirName, name, executableName))
+	if err != nil {
+		err = errors.Wrapf(err, "failed to create binary path to: %v", executableName)
+		return
+	}
+	zipPath, err := filepath.Abs(filepath.Join(depDirName, name, zipName))
+	if err != nil {
+		err = errors.Wrapf(err, "failed to craft zip path to: %v", zipName)
+		return
+	}
 	contentLength, err := utils.GetContentLength(url)
 	if err != nil {
 		err = errors.Wrapf(err, "failed to get content length for: %v", url)
@@ -62,10 +79,9 @@ func NewPacker() (packer *Packer2, err error) {
 
 	packer = &Packer2{
 		ID:   PackerID,
-		Name: name,
-		Path: binaryPath,
+		AbsPathToExecutable: absPathToExecutable,
 		Zip: &Zip{
-			Name : name,
+			Name:          zipName,
 			Path:          zipPath,
 			URL:           url,
 			ContentLength: contentLength,
@@ -75,8 +91,8 @@ func NewPacker() (packer *Packer2, err error) {
 	return
 }
 
-
 func (p *Packer2) Build() (err error) {
+	return
 }
 
 type ZipI interface {
@@ -86,7 +102,7 @@ type ZipI interface {
 }
 
 type Zip struct {
-	Name string
+	Name          string
 	Path          string
 	URL           string
 	ContentLength int64
@@ -122,13 +138,11 @@ func (z *Zip) SetExtractionBar(p *mpb.Progress) (err error) {
 		return
 	}
 
-	barName := fmt.Sprintf("%s.zip", z.Name)
-
 	z.ExtractionBar = p.AddBar(zipSize,
 		mpb.BarQueueAfter(z.DownloadBar),
 		mpb.BarFillerClearOnComplete(),
 		mpb.PrependDecorators(
-			decor.Name(barName),
+			decor.Name(z.Name),
 			decor.Counters(decor.SizeB1024(0), " % .2f / % .2f"),
 		),
 		mpb.AppendDecorators(
@@ -142,12 +156,46 @@ func (z *Zip) SetExtractionBar(p *mpb.Progress) (err error) {
 	return
 }
 
-func (z *Zip) Download() (err error) {
-	
+func (z *Zip) Download(downloadedBytesChan chan<- int) (err error) {
+	if utils.FilePresent(z.Path) {
+		err = errors.New("zip file already present")
+		return
+	}
+
+	if z.DownloadBar == nil {
+		err = errors.New("download bar not set")
+		return
+	}
+
+	if err = utils.Download(z.URL, z.Path, downloadedBytesChan); err != nil {
+		err = errors.Wrapf(err, "failed to download: %v", z.URL)
+		return
+	}
+	return
 }
 
-func (z *Zip) Extract(path string) (err error) {
+func (z *Zip) Extract(extractToPath string, extractedBytesChan chan<- int) (err error) {
+	if utils.FileNotPresent(z.Path) {
+		err = errors.New("zip file not present")
+		return
+	}
+
+	if z.ExtractionBar == nil {
+		err = errors.New("extraction bar not set")
+		return
+	}
+
+	if err = utils.Unzip(z.Path, extractToPath, extractedBytesChan); err != nil {
+		err = errors.Wrapf(err, "failed to unzip: %v", z.Path)
+		return
+	}
+	return
 }
 
 func (z *Zip) Remove() (err error) {
+	if err = os.Remove(z.Path); err != nil {
+		err = errors.Wrapf(err, "failed to remove: %v", z.Path)
+		return
+	}
+	return
 }

@@ -4,10 +4,6 @@ import (
 	"fmt"
 )
 
-func GetLatestPackerVersion() string {
-	return "1.9.1"
-}
-
 func GetLatestTerraformVersion() string {
 	return "1.5.3"
 }
