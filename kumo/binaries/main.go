@@ -1,12 +1,12 @@
 package binaries
 
 import (
-	"os"
-	"path/filepath"
+	"sync"
 
 	"github.com/ed3899/kumo/utils"
 	"github.com/pkg/errors"
 	"github.com/vbauerster/mpb/v8"
+	"github.com/vbauerster/mpb/v8/decor"
 )
 
 type Tool int
@@ -46,25 +46,44 @@ type Packer2 struct {
 }
 
 func NewPacker() (packer *Packer2, err error) {
+	name := "packer"
+	version := utils.GetLatestPackerVersion()
+	os, arch := utils.GetCurrentHostSpecs()
 	depDirName := utils.GetDependenciesDirName()
-	binaryPath, err := utils.CreateBinaryPath([]string{depDirName, "packer", "packer.exe"})
-
-
-	zipPath, err := filepath.Abs(filepath.Join("deps", "packer.zip"))
+	binaryPath, err := utils.CreateBinaryPath([]string{depDirName, name, "packer.exe"})
+	zipPath, err := utils.CreateZipPath([]string{depDirName, name, "packer.zip"})
+	url := utils.CreateHashicorpURL(name, version, os, arch)
+	contentLength, err := utils.GetContentLength(url)
 	if err != nil {
-		err = errors.Wrap(err, "failed to get absolute path for packer zip")
+		err = errors.Wrapf(err, "failed to get content length for: %v", url)
 		return
 	}
-
-	url := utils.CreateHashicorpURL()
+	bwg := sync.WaitGroup{}
+	progress := mpb.New(mpb.WithWaitGroup(&bwg), mpb.WithWidth(60), mpb.WithAutoRefresh())
+	downloadBar := progress.AddBar(int64(contentLength),
+		mpb.BarFillerClearOnComplete(),
+		mpb.PrependDecorators(
+			decor.Name(name),
+			decor.Counters(decor.SizeB1024(0), " % .2f / % .2f"),
+		),
+		mpb.AppendDecorators(
+			decor.OnComplete(
+				decor.Percentage(decor.WCSyncSpace),
+				"downloaded",
+			),
+		),
+	)
 
 	packer = &Packer2{
-		ID: PackerID,
-		Name: "packer",
+		ID:   PackerID,
+		Name: name,
 		Path: binaryPath,
 		Zip: &Zip{
-
-		}
+			Path:          zipPath,
+			URL:           url,
+			ContentLength: contentLength,
+			DownloadBar:   downloadBar,
+		},
 	}
 }
 
@@ -79,11 +98,11 @@ type ZipI interface {
 }
 
 type Zip struct {
-	Path          string // will be crafted by util
-	URL           string // will be crafted by util
-	ContentLength int64  // will be crafted by util
+	Path          string   // will be crafted by util
+	URL           string   // will be crafted by util
+	ContentLength int64    // will be crafted by util
 	DownloadBar   *mpb.Bar // will be crafted by util
-	ExtractionBar *mpb.Bar  // wil be crafted by util
+	ExtractionBar *mpb.Bar // wil be crafted by util
 }
 
 func (z *Zip) Download() (err error) {
