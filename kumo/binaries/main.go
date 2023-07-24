@@ -66,8 +66,16 @@ type PackerEnvironment struct {
 	General *PackerGeneralEnvironment
 }
 
+type Kind int
+
+const (
+	General Kind = iota
+	AWS
+)
+
 type Template struct {
-	Name     string
+	Kind     Kind
+	AbsPath  string
 	Instance *template.Template
 }
 
@@ -78,6 +86,44 @@ type VarsFile struct {
 	Environment any
 }
 
+func NewVarsFile(tool Tool, Kind Kind) (vf *VarsFile, err error) {
+	const (
+		generalVarsName     = "general.auto.tfvars"
+		generalTemplateName = "GeneralPackerVars.tmpl"
+		awsVarsName         = "aws_ami.auto.pkrvars.hcl"
+		awsTemplateName     = "AWS_PackerVars.tmpl"
+	)
+
+	vf = &VarsFile{}
+	switch tool {
+		case PackerID:
+			const (
+				generalVarsName     = "general_ami.auto.pkrvars.hcl"
+				generalTemplateName = "GeneralPackerVars.tmpl"
+				awsVarsName         = "aws_ami.auto.pkrvars.hcl"
+				awsTemplateName     = "AWS_PackerVars.tmpl"
+			)
+		case TerraformID:
+			const (
+				generalTerraformVarsName     = "general.auto.tfvars"
+				generalTerraformTemplateName = "GeneralTerraformTfVars.tmpl"
+				awsTerraformVarsName         = "aws.auto.tfvars"
+				awsTerraformTemplateName     = "AWS_TerraformTfVars.tmpl"
+			)
+	}
+}
+
+func (vf *VarsFile) ParseTemplate(absPathToCloudDir string) {
+	template.ParseFiles(vf.Template.AbsPath)
+}
+
+func (vf *VarsFile) CreateFile(absPathToCloudDir string) {
+
+}
+
+func (vf *VarsFile) ExecuteTemplate(absPathToCloudDir string) {
+
+}
 
 type Packer2I interface {
 	Build() (err error)
@@ -91,7 +137,7 @@ type Packer2 struct {
 	AbsPathToCloudDir   string
 	AbsPathToPluginsDir string
 	Zip                 *Zip
-	VarsFile						*VarsFile
+	VarsFiles           []*VarsFile
 }
 
 func NewPacker(cloud string) (packer *Packer2, err error) {
