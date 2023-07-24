@@ -74,43 +74,86 @@ const (
 )
 
 type Template struct {
-	Kind     Kind
-	AbsPath  string
-	Instance *template.Template
+	Kind        Kind
+	AbsPath     string
+	Instance    *template.Template
+	Environment any
 }
 
 type VarsFile struct {
-	Name        string
-	Template    *Template
-	AbsPath     string
-	Environment any
+	Name     string
+	AbsPath  string
+	Template *Template
 }
 
 func NewVarsFile(tool Tool, Kind Kind) (vf *VarsFile, err error) {
 	const (
-		generalVarsName     = "general.auto.tfvars"
-		generalTemplateName = "GeneralPackerVars.tmpl"
-		awsVarsName         = "aws_ami.auto.pkrvars.hcl"
-		awsTemplateName     = "AWS_PackerVars.tmpl"
+		packerSubDirName          = "packer"
+		packerGeneralVarsFileName = "general_ami.auto.pkrvars.hcl"
+		packerGeneralTemplateName = "GeneralPackerVars.tmpl"
+		packerAwsVarsFileName     = "aws_ami.auto.pkrvars.hcl"
+		packerAwsTemplateName     = "AWS_PackerVars.tmpl"
+	)
+	const (
+		terraformSubDirName          = "terraform"
+		terraformGeneralVarsFileName = "general.auto.tfvars"
+		terraformGeneralTemplateName = "GeneralTerraformTfVars.tmpl"
+		terraformAwsVarsFileName     = "aws.auto.tfvars"
+		terraformAwsTemplateName     = "AWS_TerraformTfVars.tmpl"
+	)
+	const (
+		generalSubDirName = "general"
+		awsSubDirName     = "aws"
 	)
 
-	vf = &VarsFile{}
-	switch tool {
-		case PackerID:
-			const (
-				generalVarsName     = "general_ami.auto.pkrvars.hcl"
-				generalTemplateName = "GeneralPackerVars.tmpl"
-				awsVarsName         = "aws_ami.auto.pkrvars.hcl"
-				awsTemplateName     = "AWS_PackerVars.tmpl"
-			)
-		case TerraformID:
-			const (
-				generalTerraformVarsName     = "general.auto.tfvars"
-				generalTerraformTemplateName = "GeneralTerraformTfVars.tmpl"
-				awsTerraformVarsName         = "aws.auto.tfvars"
-				awsTerraformTemplateName     = "AWS_TerraformTfVars.tmpl"
-			)
+	absPathToTemplatesDir, err := filepath.Abs(filepath.Join("templates"))
+	if err != nil {
+		err = errors.Wrap(err, "failed to create path to templates")
+		return nil, err
 	}
+
+	var (
+		absPathToPackerGeneralTemplate    = filepath.Join(absPathToTemplatesDir, packerSubDirName, packerGeneralTemplateName)
+		absPathToPackerAWSTemplate        = filepath.Join(absPathToTemplatesDir, packerSubDirName, packerAwsTemplateName)
+		absPathToTerraformGeneralTemplate = filepath.Join(absPathToTemplatesDir, terraformSubDirName, terraformGeneralTemplateName)
+		absPathToTerraformAWSTemplate     = filepath.Join(absPathToTemplatesDir, terraformSubDirName, terraformAwsTemplateName)
+	)
+
+	absPathToPackerDir, err := filepath.Abs(filepath.Join(packerSubDirName))
+	if err != nil {
+		err = errors.Wrap(err, "failed to create path to packer directory")
+		return nil, err
+	}
+	absPathToTerraformDir, err := filepath.Abs(filepath.Join(terraformSubDirName))
+	if err != nil {
+		err = errors.Wrap(err, "failed to create path to terraform directory")
+		return nil, err
+	}
+
+	switch tool {
+	case PackerID:
+		switch Kind {
+		case General:
+			vf.Name = packerGeneralVarsFileName
+			vf.AbsPath = filepath.Join(absPathToPackerDir, generalSubDirName, packerGeneralVarsFileName)
+
+		case AWS:
+			absPathToPackerAWSTemplate := filepath.Join(absPathToTemplatesDir, packerSubDirName, packerAwsTemplateName)
+		default:
+			err = errors.Errorf("Kind '%s' not supported", Kind)
+			return
+		}
+	case TerraformID:
+		switch Kind {
+		case General:
+		case AWS:
+		}
+	default:
+		err = errors.Errorf("Tool '%s' not supported", tool)
+		return
+	}
+
+	return
 }
 
 func (vf *VarsFile) ParseTemplate(absPathToCloudDir string) {

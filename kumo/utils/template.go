@@ -175,3 +175,26 @@ func ExecuteTemplate(props *ExecuteTemplateProps) (err error) {
 	}
 	return nil
 }
+
+func ParseTemplate(absPathToTmpl string) (template *template.Template, err error) {
+	template, err = template.ParseFiles(absPathToTmpl)
+	if err != nil {
+		err = errors.Wrapf(err, "Error occurred while parsing template for %s", absPathToTmpl)
+		return
+	}
+	return
+}
+
+func CreateFile(absPathToFile string) (file *os.File, err error) {
+	file, err = os.Create(absPathToFile)
+	if err != nil {
+		err = errors.Wrapf(err, "Error occurred while creating %s file", absPathToFile)
+		return
+	}
+	defer file.Close()
+	return
+}
+
+func ()  {
+	
+}
