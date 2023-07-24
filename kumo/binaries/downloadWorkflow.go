@@ -7,7 +7,7 @@ import (
 	"github.com/vbauerster/mpb/v8"
 )
 
-func DownloadWorkflow[Z ZipI](d Z, multiProgressBar *mpb.Progress) (err error) {
+func DownloadWorkflow[Z ZipI](z Z, multiProgressBar *mpb.Progress) (err error) {
 	var (
 		downloadedBytesChan = make(chan int, 1024)
 		errChan             = make(chan error, 1)
@@ -19,8 +19,8 @@ func DownloadWorkflow[Z ZipI](d Z, multiProgressBar *mpb.Progress) (err error) {
 		defer close(errChan)
 		defer close(done)
 
-		d.SetDownloadBar(multiProgressBar)
-		if err = d.Download(downloadedBytesChan); err != nil {
+		z.SetDownloadBar(multiProgressBar)
+		if err = z.Download(downloadedBytesChan); err != nil {
 			errChan <- err
 			return
 		}
@@ -35,7 +35,7 @@ OuterLoop:
 				continue OuterLoop
 			}
 
-			if err = d.IncrementDownloadBar(downloadedBytes); err != nil {
+			if err = z.IncrementDownloadBar(downloadedBytes); err != nil {
 				log.Print(err)
 				continue OuterLoop
 			}
@@ -44,11 +44,11 @@ OuterLoop:
 				continue OuterLoop
 			}
 
-			if err = d.Remove(); err != nil {
-				err = errors.Wrapf(err, "Error occurred while removing %s", d.GetName())
+			if err = z.Remove(); err != nil {
+				err = errors.Wrapf(err, "Error occurred while removing %s", z.GetName())
 			}
 
-			err = errors.Wrapf(err, "Error occurred while downloading %s", d.GetName())
+			err = errors.Wrapf(err, "Error occurred while downloading %s", z.GetName())
 			break OuterLoop
 
 		case d := <-done:

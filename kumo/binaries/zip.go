@@ -11,6 +11,7 @@ import (
 
 type ZipI interface {
 	GetName() string
+	GetPath()	string
 
 	SetDownloadBar(p *mpb.Progress)
 	Download(chan<- int) error
@@ -34,6 +35,10 @@ type Zip struct {
 
 func (z *Zip) GetName() string {
 	return z.Name
+}
+
+func (z *Zip) GetPath() string {
+	return z.Path
 }
 
 func (z *Zip) SetDownloadBar(p *mpb.Progress) {
