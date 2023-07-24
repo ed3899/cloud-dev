@@ -11,19 +11,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-type Tool int
-
-const (
-	PackerID Tool = iota
-	TerraformID
-)
-
-type Cloud int
-
-const (
-	AWS Cloud = iota
-)
-
 type PackerGeneralEnvironment struct {
 	GIT_USERNAME                          string
 	GIT_EMAIL                             string
