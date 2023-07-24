@@ -2,63 +2,62 @@ package binaries
 
 import (
 	"log"
-	"sync"
 
 	"github.com/pkg/errors"
 	"github.com/vbauerster/mpb/v8"
 )
 
-func DownloadAndExtractWorkflow[Z ZipI](d Z) (err error) {
+func DownloadWorkflow[Z ZipI](d Z, multiProgressBar *mpb.Progress) (err error) {
 	var (
 		downloadedBytesChan = make(chan int, 1024)
-		extractedBytesChan	= make(chan int, 1024)
 		errChan             = make(chan error, 1)
-		progressGroup       = &sync.WaitGroup{}
-		progressBar         = mpb.New(mpb.WithWaitGroup(progressGroup), mpb.WithWidth(60), mpb.WithAutoRefresh())
+		done                = make(chan bool, 1)
 	)
 
-	progressGroup.Add(1)
 	go func() {
-		defer progressGroup.Done()
 		defer close(downloadedBytesChan)
 		defer close(errChan)
+		defer close(done)
 
-		d.SetDownloadBar(progressBar)
+		d.SetDownloadBar(multiProgressBar)
 		if err = d.Download(downloadedBytesChan); err != nil {
 			errChan <- err
 			return
 		}
+		done <- true
 	}()
 
+OuterLoop:
 	for {
 		select {
 		case downloadedBytes := <-downloadedBytesChan:
 			if downloadedBytes <= 0 {
-				break
+				continue OuterLoop
 			}
 
 			if err = d.IncrementDownloadBar(downloadedBytes); err != nil {
 				log.Print(err)
-				continue
+				continue OuterLoop
 			}
 		case err = <-errChan:
+			if err == nil {
+				continue OuterLoop
+			}
+
 			if err = d.Remove(); err != nil {
 				err = errors.Wrapf(err, "Error occurred while removing %s", d.GetName())
-				return
 			}
-			continue
-		default:
-			continue
+
+			err = errors.Wrapf(err, "Error occurred while downloading %s", d.GetName())
+			break OuterLoop
+
+		case d := <-done:
+			if d {
+				break OuterLoop
+			}
+			continue OuterLoop
 		}
 	}
 
-	// progressGroup.Add(1)
-	// go func() {
-	// 	defer progressGroup.Done()
-	// 	defer close(extractedBytesChan)
-	// 	defer close(errChan)
-
-
-	// }()
-
+	return
 }
