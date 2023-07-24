@@ -23,9 +23,9 @@ type Packer struct {
 }
 
 const (
-	pluginsDirName     = "plugins"
+	PLUGINS_DIR_NAME     = "plugins"
 	PACKER_PLUGIN_PATH = "PACKER_PLUGIN_PATH"
-	awsSubDirName      = "aws"
+	AWS_SUBDIR_NAME      = "aws"
 )
 
 var (
@@ -99,7 +99,7 @@ func (p *Packer) Init(cloud Cloud) (err error) {
 	switch cloud {
 	case AWS:
 		// Change directory to where packer will be run
-		absPathToRunLocation := filepath.Join(p.AbsPathToRunDir, awsSubDirName)
+		absPathToRunLocation := filepath.Join(p.AbsPathToRunDir, AWS_SUBDIR_NAME)
 		if err = os.Chdir(absPathToRunLocation); err != nil {
 			err = errors.Wrapf(err, "Error occurred while changing directory to %s", absPathToRunLocation)
 			return
@@ -107,7 +107,7 @@ func (p *Packer) Init(cloud Cloud) (err error) {
 		defer os.Chdir(initialLocation)
 
 		// Set PACKER_PLUGIN_PATH environment variable
-		err = os.Setenv(PACKER_PLUGIN_PATH, filepath.Join(absPathToRunLocation, pluginsDirName))
+		err = os.Setenv(PACKER_PLUGIN_PATH, filepath.Join(absPathToRunLocation, PLUGINS_DIR_NAME))
 		if err != nil {
 			err = errors.Wrapf(err, "Error occurred while setting %s environment variable", PACKER_PLUGIN_PATH)
 			return
@@ -142,7 +142,7 @@ func (p *Packer) Build(cloud Cloud) (err error) {
 	switch cloud {
 	case AWS:
 		// Change directory to where packer will be run
-		absPathToRunLocation := filepath.Join(p.AbsPathToRunDir, awsSubDirName)
+		absPathToRunLocation := filepath.Join(p.AbsPathToRunDir, AWS_SUBDIR_NAME)
 		if err := os.Chdir(absPathToRunLocation); err != nil {
 			err = errors.Wrapf(err, "Error occurred while changing directory to %s", absPathToRunLocation)
 			return err

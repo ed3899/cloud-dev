@@ -15,9 +15,6 @@ func init() {
 	if host.IsNotCompatible() {
 		log.Fatal("Host is not compatible with kumo :/")
 	}
-	// Binaries
-
-	// Templates
 }
 
 func main() {

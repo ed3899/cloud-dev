@@ -10,9 +10,17 @@ import (
 )
 
 type ZipI interface {
-	Download() (err error)
-	Extract() (err error)
-	Remove() (err error)
+	GetName() string
+
+	SetDownloadBar(p *mpb.Progress)
+	Download(chan<- int) error
+	IncrementDownloadBar(int) error
+
+	SetExtractionBar(p *mpb.Progress) error
+	Extract(string, chan<- int) error
+	IncrementExtractionBar(int) error
+
+	Remove() error
 }
 
 type Zip struct {
@@ -22,6 +30,10 @@ type Zip struct {
 	ContentLength int64
 	DownloadBar   *mpb.Bar
 	ExtractionBar *mpb.Bar
+}
+
+func (z *Zip) GetName() string {
+	return z.Name
 }
 
 func (z *Zip) SetDownloadBar(p *mpb.Progress) {
@@ -38,6 +50,17 @@ func (z *Zip) SetDownloadBar(p *mpb.Progress) {
 			),
 		),
 	)
+}
+
+func (z *Zip) IncrementDownloadBar(downloadedBytes int) (err error) {
+	if z.DownloadBar == nil {
+		err = errors.New("download bar not set")
+		return
+	}
+
+	z.DownloadBar.IncrBy(downloadedBytes)
+
+	return
 }
 
 func (z *Zip) SetExtractionBar(p *mpb.Progress) (err error) {
@@ -66,6 +89,17 @@ func (z *Zip) SetExtractionBar(p *mpb.Progress) (err error) {
 			),
 		),
 	)
+
+	return
+}
+
+func (z *Zip) IncrementExtractionBar(extractedBytes int) (err error) {
+	if z.ExtractionBar == nil {
+		err = errors.New("extraction bar not set")
+		return
+	}
+
+	z.ExtractionBar.IncrBy(extractedBytes)
 
 	return
 }
