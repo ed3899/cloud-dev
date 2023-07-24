@@ -194,7 +194,3 @@ func CreateFile(absPathToFile string) (file *os.File, err error) {
 	defer file.Close()
 	return
 }
-
-func ()  {
-	
-}
