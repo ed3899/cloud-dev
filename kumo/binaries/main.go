@@ -2,6 +2,7 @@ package binaries
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -9,6 +10,7 @@ import (
 
 	"github.com/ed3899/kumo/utils"
 	"github.com/pkg/errors"
+	"github.com/spf13/viper"
 )
 
 type Tool int
@@ -61,9 +63,16 @@ type PackerGeneralEnvironment struct {
 	GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC string
 }
 
-type PackerEnvironment struct {
-	AWS     *PackerAWSEnvironment
-	General *PackerGeneralEnvironment
+type TerraformAWSEnvironment struct {
+	AWS_REGION                   string
+	AWS_INSTANCE_TYPE            string
+	AWS_EC2_INSTANCE_VOLUME_TYPE string
+	AWS_EC2_INSTANCE_VOLUME_SIZE int
+	AMI_ID                       string
+}
+
+type TerraformGeneralEnvironment struct {
+	ALLOWED_IP string
 }
 
 type Kind int
@@ -89,6 +98,7 @@ type VarsFile struct {
 func NewVarsFile(tool Tool, Kind Kind) (vf *VarsFile, err error) {
 	const (
 		packerSubDirName          = "packer"
+		packerManifestName        = "manifest.json"
 		packerGeneralVarsFileName = "general_ami.auto.pkrvars.hcl"
 		packerGeneralTemplateName = "GeneralPackerVars.tmpl"
 		packerAwsVarsFileName     = "aws_ami.auto.pkrvars.hcl"
@@ -104,6 +114,15 @@ func NewVarsFile(tool Tool, Kind Kind) (vf *VarsFile, err error) {
 	const (
 		generalSubDirName = "general"
 		awsSubDirName     = "aws"
+	)
+
+	const (
+		defaulIp = "0.0.0.0"
+	)
+
+	var (
+		pickedIp    string
+		pickedAmiId string
 	)
 
 	absPathToTemplatesDir, err := filepath.Abs(filepath.Join("templates"))
@@ -136,9 +155,40 @@ func NewVarsFile(tool Tool, Kind Kind) (vf *VarsFile, err error) {
 		case General:
 			vf.Name = packerGeneralVarsFileName
 			vf.AbsPath = filepath.Join(absPathToPackerDir, generalSubDirName, packerGeneralVarsFileName)
-
+			vf.Template = &Template{
+				Kind:    Kind,
+				AbsPath: absPathToPackerGeneralTemplate,
+				Environment: &PackerGeneralEnvironment{
+					GIT_USERNAME:                          viper.GetString("Git.Username"),
+					GIT_EMAIL:                             viper.GetString("Git.Email"),
+					ANSIBLE_TAGS:                          viper.GetStringSlice("AMI.Tools"),
+					GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC: viper.GetString("GitHub.PersonalAccessTokenClassic"),
+				},
+			}
 		case AWS:
-			absPathToPackerAWSTemplate := filepath.Join(absPathToTemplatesDir, packerSubDirName, packerAwsTemplateName)
+			vf.Name = packerAwsVarsFileName
+			vf.AbsPath = filepath.Join(absPathToPackerDir, awsSubDirName, packerAwsVarsFileName)
+			vf.Template = &Template{
+				Kind:    Kind,
+				AbsPath: absPathToPackerAWSTemplate,
+				Environment: &PackerAWSEnvironment{
+					AWS_ACCESS_KEY:                     viper.GetString("AWS.AccessKeyId"),
+					AWS_SECRET_KEY:                     viper.GetString("AWS.SecretAccessKey"),
+					AWS_IAM_PROFILE:                    viper.GetString("AWS.IamProfile"),
+					AWS_USER_IDS:                       viper.GetStringSlice("AWS.UserIds"),
+					AWS_AMI_NAME:                       viper.GetString("AMI.Name"),
+					AWS_INSTANCE_TYPE:                  viper.GetString("AWS.EC2.Instance.Type"),
+					AWS_REGION:                         viper.GetString("AWS.Region"),
+					AWS_EC2_AMI_NAME_FILTER:            viper.GetString("AMI.Base.Filter"),
+					AWS_EC2_AMI_ROOT_DEVICE_TYPE:       viper.GetString("AMI.Base.RootDeviceType"),
+					AWS_EC2_AMI_VIRTUALIZATION_TYPE:    viper.GetString("AMI.Base.VirtualizationType"),
+					AWS_EC2_AMI_OWNERS:                 viper.GetStringSlice("AMI.Base.Owners"),
+					AWS_EC2_SSH_USERNAME:               viper.GetString("AMI.Base.User"),
+					AWS_EC2_INSTANCE_USERNAME:          viper.GetString("AMI.User"),
+					AWS_EC2_INSTANCE_USERNAME_HOME:     viper.GetString("AMI.Home"),
+					AWS_EC2_INSTANCE_USERNAME_PASSWORD: viper.GetString("AMI.Password"),
+				},
+			}
 		default:
 			err = errors.Errorf("Kind '%s' not supported", Kind)
 			return
@@ -146,7 +196,51 @@ func NewVarsFile(tool Tool, Kind Kind) (vf *VarsFile, err error) {
 	case TerraformID:
 		switch Kind {
 		case General:
+			vf.Name = terraformGeneralVarsFileName
+			vf.AbsPath = filepath.Join(absPathToTerraformDir, generalSubDirName, terraformGeneralVarsFileName)
+			publicIp, err := utils.GetPublicIp()
+			if err != nil {
+				err = errors.Wrapf(err, "failed to get public IP, using default: %s", defaulIp)
+				log.Print(err)
+				pickedIp = defaulIp
+			}
+			pickedIp = publicIp
+			vf.Template = &Template{
+				Kind:    Kind,
+				AbsPath: absPathToTerraformGeneralTemplate,
+				Environment: &TerraformGeneralEnvironment{
+					ALLOWED_IP: pickedIp,
+				},
+			}
 		case AWS:
+			absPathToAwsSubDir := filepath.Join(absPathToTerraformDir, awsSubDirName)
+
+			vf.Name = terraformAwsVarsFileName
+			vf.AbsPath = filepath.Join(absPathToAwsSubDir, terraformAwsVarsFileName)
+			lastBuiltAmiId, err := utils.GetLastBuiltAmiId(filepath.Join(absPathToAwsSubDir, packerManifestName))
+			if err != nil {
+				err = errors.Wrap(err, "failed to get last built AMI ID")
+				return nil, err
+			}
+			pickedAmiId, err = utils.PickAmiIdToBeUsed(lastBuiltAmiId, utils.GetAmiIdFromConfig())
+			if err != nil {
+				err = errors.Wrap(err, "failed to pick AMI ID to be used")
+				return nil, err
+			}
+			vf.Template = &Template{
+				Kind:    Kind,
+				AbsPath: absPathToTerraformAWSTemplate,
+				Environment: &TerraformAWSEnvironment{
+					AWS_REGION:                   viper.GetString("AWS.Region"),
+					AWS_INSTANCE_TYPE:            viper.GetString("AWS.EC2.Instance.Type"),
+					AWS_EC2_INSTANCE_VOLUME_TYPE: viper.GetString("AWS.EC2.Volume.Type"),
+					AWS_EC2_INSTANCE_VOLUME_SIZE: viper.GetInt("AWS.EC2.Volume.Size"),
+					AMI_ID:                       pickedAmiId,
+				},
+			}
+		default:
+			err = errors.Errorf("Kind '%s' not supported", Kind)
+			return
 		}
 	default:
 		err = errors.Errorf("Tool '%s' not supported", tool)
@@ -156,16 +250,35 @@ func NewVarsFile(tool Tool, Kind Kind) (vf *VarsFile, err error) {
 	return
 }
 
-func (vf *VarsFile) ParseTemplate(absPathToCloudDir string) {
-	template.ParseFiles(vf.Template.AbsPath)
+func (vf *VarsFile) ParseAndSetTemplate() (err error) {
+	template, err := template.ParseFiles(vf.Template.AbsPath)
+	if err != nil {
+		err = errors.Wrapf(err, "Error occurred while crafting absolute path to %s", vf.Template.AbsPath)
+		return
+	}
+	vf.Template.Instance = template
+	return
 }
 
-func (vf *VarsFile) CreateFile(absPathToCloudDir string) {
-
+func (vf *VarsFile) CreateFile() (err error) {
+	file, err := os.Create(vf.AbsPath)
+	if err != nil {
+		err = errors.Wrapf(err, "Error occurred while creating %s", vf.AbsPath)
+		return
+	}
+	defer file.Close()
+	return
 }
 
-func (vf *VarsFile) ExecuteTemplate(absPathToCloudDir string) {
-
+func (vf *VarsFile) ExecuteTemplate() (err error) {
+	file, err := os.Open(vf.AbsPath)
+	defer file.Close()
+	err = vf.Template.Instance.Execute(file, vf.Template.Environment)
+	if err != nil {
+		err = errors.Wrapf(err, "Error occurred while executing template kind %s", vf.Template.Kind)
+		return
+	}
+	return
 }
 
 type Packer2I interface {
