@@ -6,8 +6,6 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"github.com/ed3899/kumo/binz/download"
-	templates_terraform "github.com/ed3899/kumo/templates/terraform"
 	"github.com/ed3899/kumo/utils"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"

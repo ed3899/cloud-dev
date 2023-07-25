@@ -1,12 +1,11 @@
 package cmd
 
 import (
-	"github.com/ed3899/kumo/binz"
+	"github.com/ed3899/kumo/binaries"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
-func GetBuildCommand(p *binz.Packer) *cobra.Command {
+func GetBuildCommand() *cobra.Command {
 	cc := &cobra.Command{
 		Use:   "build",
 		Short: "Build an AMI with ready to use tools",
@@ -14,7 +13,7 @@ func GetBuildCommand(p *binz.Packer) *cobra.Command {
 		to your root directory. Please keep these keys safe. If you lose them, you will not be able
 		to SSH into your instance.`,
 		Run: func(cmd *cobra.Command, args []string) {
-			p.Build(viper.GetString("cloud"))
+			binaries.PackerBuildWorkflow()
 		},
 	}
 
