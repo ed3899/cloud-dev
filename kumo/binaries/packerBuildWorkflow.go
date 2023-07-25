@@ -13,13 +13,16 @@ func PackerBuildWorkflow() (err error) {
 		packer                   *Packer
 		absPathToInitialLocation string
 		absPathToCloudRunDir     string
+		varsFile                 *HashicorpVars
 	)
 
+	// Instantiate packer
 	if packer, err = NewPacker(); err != nil {
 		err = errors.Wrap(err, "Error occurred while creating new packer")
 		return
 	}
 
+	// Download and extract if not installed
 	if packer.IsNotInstalled() {
 		err = DownloadAndExtractWorkflow(packer.Zip, filepath.Dir(packer.AbsPathToExecutable))
 		if err != nil {
@@ -31,6 +34,18 @@ func PackerBuildWorkflow() (err error) {
 	// Set cloud
 	if cloud, err = GetCloud(); err != nil {
 		err = errors.Wrap(err, "Error occurred while getting cloud")
+		return
+	}
+
+	// Instantiate vars file
+	if varsFile, err = NewHashicorpVars(packer.ID, cloud); err != nil {
+		err = errors.Wrap(err, "Error occurred while instantiating hashicorp vars")
+		return
+	}
+
+	// Create vars file
+	if err = varsFile.Create(); err != nil {
+		err = errors.Wrap(err, "Error occurred while creating vars file")
 		return
 	}
 

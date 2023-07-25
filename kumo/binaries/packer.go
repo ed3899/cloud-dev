@@ -124,7 +124,7 @@ func (p *Packer) UnsetPluginPath(cloud Cloud) (err error) {
 
 func (p *Packer) Init(cloud Cloud) (err error) {
 	var (
-		cmd    = exec.Command(p.AbsPathToExecutable, "init", ".")
+		cmd    = exec.Command(p.AbsPathToExecutable, "init", "-upgrade", ".")
 		cmdErr error
 	)
 

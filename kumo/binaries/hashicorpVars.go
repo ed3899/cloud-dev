@@ -220,7 +220,7 @@ func NewHashicorpVars(tool Tool, cloud Cloud) (vf *HashicorpVars, err error) {
 	return
 }
 
-func (hv *HashicorpVars) CreateFile() (err error) {
+func (hv *HashicorpVars) Create() (err error) {
 	// Create vars file to be filled with values
 	varsFile, err := os.Create(hv.AbsPath)
 	if err != nil {
