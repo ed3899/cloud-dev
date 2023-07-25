@@ -105,10 +105,10 @@ func NewHashicorpVars(tool Tool, cloud Cloud) (vf *HashicorpVars, err error) {
 	}
 
 	var (
-		absPathToPackerGeneralTemplate    = filepath.Join(absPathToTemplatesDir, packerSubDirName, packerGeneralTemplateName)
-		absPathToPackerAWSTemplate        = filepath.Join(absPathToTemplatesDir, packerSubDirName, packerAwsTemplateName)
-		absPathToTerraformGeneralTemplate = filepath.Join(absPathToTemplatesDir, terraformSubDirName, terraformGeneralTemplateName)
-		absPathToTerraformAWSTemplate     = filepath.Join(absPathToTemplatesDir, terraformSubDirName, terraformAwsTemplateName)
+		absPathToPackerGeneralTemplate    = filepath.Join(absPathToTemplatesDir, packerSubDirName, generalSubDirName, packerGeneralTemplateName)
+		absPathToPackerAWSTemplate        = filepath.Join(absPathToTemplatesDir, packerSubDirName, awsSubDirName, packerAwsTemplateName)
+		absPathToTerraformGeneralTemplate = filepath.Join(absPathToTemplatesDir, terraformSubDirName, generalSubDirName, terraformGeneralTemplateName)
+		absPathToTerraformAWSTemplate     = filepath.Join(absPathToTemplatesDir, terraformSubDirName, awsSubDirName, terraformAwsTemplateName)
 	)
 
 	absPathToPackerDir, err := filepath.Abs(filepath.Join(packerSubDirName))
@@ -127,6 +127,7 @@ func NewHashicorpVars(tool Tool, cloud Cloud) (vf *HashicorpVars, err error) {
 		}
 		switch cloud {
 		case AWS:
+			// TODO change merge
 			mergedTemplateAbsPath, err = utils.MergeFiles(absPathToPackerGeneralTemplate, absPathToPackerAWSTemplate)
 			if err != nil {
 				err = errors.Wrap(err, "failed to merge files")
