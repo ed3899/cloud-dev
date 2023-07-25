@@ -1,8 +1,6 @@
 package config
 
 import (
-	"log"
-
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 )
@@ -13,13 +11,13 @@ type KumoConfig struct {
 	Path string
 }
 
-func ReadKumoConfig(kc *KumoConfig) {
+func ReadKumoConfig(kc *KumoConfig) (err error) {
 	viper.SetConfigName(kc.Name)
 	viper.SetConfigType(kc.Type)
 	viper.AddConfigPath(kc.Path)
-	err := viper.ReadInConfig()
-	if err != nil {
-		err = errors.Wrap(err, "Error reading config file")
-		log.Fatal(err)
+
+	if err = viper.ReadInConfig(); err != nil {
+		return errors.Wrap(err, "Error reading config file")
 	}
+	return
 }

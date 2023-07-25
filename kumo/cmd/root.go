@@ -14,11 +14,14 @@ var rootCmd = &cobra.Command{
 
 func init() {
 	// Read the config
-	config.ReadKumoConfig(&config.KumoConfig{
+	if err := config.ReadKumoConfig(&config.KumoConfig{
 		Name: "kumo.config",
 		Type: "yaml",
 		Path: ".",
-	})
+	}); err != nil {
+		err = errors.Wrapf(err, "Error occurred while reading kumo config")
+		log.Fatal(err)
+	}
 
 	// Assemble commands
 	ccmds := GetAllCommands()
