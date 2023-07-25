@@ -7,7 +7,7 @@ import (
 	"github.com/vbauerster/mpb/v8"
 )
 
-func DownloadWorkflow[Z ZipI](z Z, multiProgressBar *mpb.Progress) (err error) {
+func DownloadWorkflow(z ZipI, multiProgressBar *mpb.Progress) (err error) {
 	var (
 		downloadedBytesChan = make(chan int, 1024)
 		errChan             = make(chan error, 1)
