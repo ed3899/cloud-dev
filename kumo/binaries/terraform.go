@@ -77,6 +77,7 @@ func NewTerraform() (terraform *Terraform, err error) {
 			ContentLength: contentLength,
 		},
 	}
+
 	return
 }
 
@@ -93,11 +94,11 @@ func (t *Terraform) SetCloudCredentials(cloud Cloud) (err error) {
 			return err
 		}
 
-		return
 	default:
 		err = errors.Errorf("Cloud '%v' is not supported", cloud)
-		return
 	}
+
+	return
 }
 
 func (t *Terraform) UnsetCloudCredentials(cloud Cloud) (err error) {
@@ -113,11 +114,11 @@ func (t *Terraform) UnsetCloudCredentials(cloud Cloud) (err error) {
 			return err
 		}
 
-		return
 	default:
 		err = errors.Errorf("Cloud '%v' is not supported", cloud)
-		return
 	}
+
+	return
 }
 
 func (t *Terraform) GetAbsPathToCloudRunDir(cloud Cloud) (cloudRunDir string, err error) {
@@ -152,12 +153,11 @@ func (t *Terraform) Init(cloud Cloud) (err error) {
 			return
 		}
 
-		return
-
 	default:
 		err = errors.Errorf("Cloud '%v' not supported", cloud)
-		return
 	}
+
+	return
 }
 
 func (t *Terraform) Up(cloud Cloud) (err error) {
@@ -173,12 +173,12 @@ func (t *Terraform) Up(cloud Cloud) (err error) {
 			err = errors.Wrapf(cmdErr, "Error occured while deploying for %v", cloud)
 			return
 		}
-		return
 
 	default:
 		err = errors.Errorf("Cloud '%v' not supported", cloud)
-		return
 	}
+
+	return
 }
 
 func (t *Terraform) Destroy(cloud Cloud) (err error) {
@@ -194,10 +194,10 @@ func (t *Terraform) Destroy(cloud Cloud) (err error) {
 			err = errors.Wrapf(cmdErr, "Error occured while destroying for %v", cloud)
 			return
 		}
-		return
 
 	default:
 		err = errors.Errorf("Cloud '%v' not supported", cloud)
-		return
 	}
+
+	return
 }
