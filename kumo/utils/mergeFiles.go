@@ -4,11 +4,12 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"path/filepath"
 )
 
-func MergeFiles(outputAbsFilePath string, inputAbsFilePaths ...string) (mergedFileAbsPath string, err error) {
+func MergeFilesTo(outputAbsFilePath string, inputAbsFilePaths ...string) (mergedFileAbsPath string, err error) {
 	// Create a new file to write the merged content
-	mergedFile, err := os.Create(outputAbsFilePath)
+	mergedFile, err := os.CreateTemp(filepath.Dir(outputAbsFilePath), filepath.Base(outputAbsFilePath))
 	if err != nil {
 		err = fmt.Errorf("error creating merged file: %v", err)
 		return
