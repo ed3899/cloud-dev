@@ -31,29 +31,38 @@ func PackerBuildWorkflow() (err error) {
 	absPathToExecutableDir = filepath.Dir(packer.AbsPathToExecutable)
 	absPathToZipDir = filepath.Dir(packer.Zip.AbsPath)
 
-	if err := os.RemoveAll(absPathToExecutableDir); err != nil {
+	if err = os.RemoveAll(absPathToExecutableDir); err != nil {
 		err = errors.Wrapf(err, "Error occurred while removing %s", absPathToExecutableDir)
 		return err
 	}
 
-	if err := os.RemoveAll(absPathToZipDir); err != nil {
+	if err = os.RemoveAll(absPathToZipDir); err != nil {
 		err = errors.Wrapf(err, "Error occurred while removing %s", absPathToZipDir)
 		return err
 	}
 
 	// Download
-	if DownloadAndShowProgress(packer.Zip, progress); err != nil {
+	err = DownloadAndShowProgress(packer.Zip, progress)
+	if err != nil {
 		err = errors.Wrapf(err, "Error occurred while downloading %s", packer.Zip.GetName())
 		return
 	}
 
 	// Extract
-	if ExtractAndShowProgress(packer.Zip, progress); err != nil {
+	err = ExtractAndShowProgress(packer.Zip, absPathToExecutableDir, progress)
+	if err != nil {
 		err = errors.Wrapf(err, "Error occurred while extracting %s", packer.Zip.GetName())
 		return
 	}
 
 	progress.Shutdown()
+
+	// Remove zip
+	err = packer.Zip.Remove()
+	if err != nil {
+		err = errors.Wrapf(err, "Error occurred while removing %s", packer.Zip.GetName())
+		return
+	}
 
 	// Set cloud
 	if cloud, err = GetCloud(); err != nil {

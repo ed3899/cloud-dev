@@ -13,17 +13,26 @@ import (
 )
 
 func Unzip(pathToZip, extractToPath string, bytesUnzipped chan<- int) (err error) {
+	var (
+		reader *zip.ReadCloser
+		errChan chan error
+		unzipGroup = new(sync.WaitGroup)
+	)
+
 	// Open the zip file
-	reader, err := zip.OpenReader(pathToZip)
-	if err != nil {
+	if reader, err = zip.OpenReader(pathToZip); err != nil {
 		err = errors.Wrap(err, "failed to open zip file")
 		return
 	}
-	defer reader.Close()
+	defer func() {
+		if err = reader.Close(); err != nil {
+			err = errors.Wrap(err, "failed to close zip file")
+			return
+		}
+	}()
 
-	// Wait group for unzipping goroutines
-	unzipGroup := new(sync.WaitGroup)
-	errChan := make(chan error, len(reader.File))
+	// Declare error channel
+	errChan = make(chan error, len(reader.File))
 
 	// Unzip each file concurrently
 	for _, f := range reader.File {

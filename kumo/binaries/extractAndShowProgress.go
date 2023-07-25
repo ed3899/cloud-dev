@@ -1,6 +1,7 @@
 package binaries
 
 import (
+	"log"
 	"os"
 
 	"github.com/ed3899/kumo/utils"
@@ -14,7 +15,7 @@ type ExtractableByWorkflow interface {
 	Retrivable
 }
 
-func ExtractAndShowProgress[E ExtractableByWorkflow](e E, multiProgressBar *mpb.Progress) (err error) {
+func ExtractAndShowProgress[E ExtractableByWorkflow](e E, absPathToExtraction string, multiProgressBar *mpb.Progress) (err error) {
 	var (
 		extractedBytesChan = make(chan int, 1024)
 		errChan            = make(chan error, 1)
@@ -29,12 +30,12 @@ func ExtractAndShowProgress[E ExtractableByWorkflow](e E, multiProgressBar *mpb.
 	}
 
 	go func(zipSize int64) {
-		defer close(extractedBytesChan)
 		defer close(errChan)
 		defer close(done)
 
 		e.SetExtractionBar(multiProgressBar, zipSize)
-		if err = e.Extract(absPathToZip, extractedBytesChan); err != nil {
+		log.Print(absPathToExtraction)
+		if err = e.ExtractTo(absPathToExtraction, extractedBytesChan); err != nil {
 			errChan <- err
 			return
 		}

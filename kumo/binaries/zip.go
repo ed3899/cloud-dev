@@ -26,7 +26,7 @@ type Downloadable interface {
 
 type Extractable interface {
 	SetExtractionBar(*mpb.Progress, int64)
-	Extract(string, chan<- int) error
+	ExtractTo(string, chan<- int) error
 	IncrementExtractionBar(int)
 }
 
@@ -111,7 +111,7 @@ func (z *Zip) Download(downloadedBytesChan chan<- int) (err error) {
 	return
 }
 
-func (z *Zip) Extract(extractToPath string, extractedBytesChan chan<- int) (err error) {
+func (z *Zip) ExtractTo(extractToPath string, extractedBytesChan chan<- int) (err error) {
 	if err = utils.Unzip(z.AbsPath, extractToPath, extractedBytesChan); err != nil {
 		err = errors.Wrapf(err, "failed to unzip: %v", z.AbsPath)
 		return
