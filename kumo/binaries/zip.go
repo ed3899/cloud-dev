@@ -80,7 +80,6 @@ func (z *Zip) SetDownloadBar(p *mpb.Progress) {
 
 func (z *Zip) IncrementDownloadBar(downloadedBytes int) {
 	z.DownloadBar.IncrBy(downloadedBytes)
-	return
 }
 
 func (z *Zip) SetExtractionBar(p *mpb.Progress, zipSize int64) {
@@ -103,14 +102,7 @@ func (z *Zip) SetExtractionBar(p *mpb.Progress, zipSize int64) {
 }
 
 func (z *Zip) IncrementExtractionBar(extractedBytes int) {
-	// if z.ExtractionBar == nil {
-	// 	err = errors.New("extraction bar not set")
-	// 	return
-	// }
-
 	z.ExtractionBar.IncrBy(extractedBytes)
-
-	return
 }
 
 func (z *Zip) Download(downloadedBytesChan chan<- int) (err error) {
