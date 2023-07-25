@@ -131,7 +131,7 @@ func (p *Packer) Init(cloud Cloud) (err error) {
 	switch cloud {
 	case AWS:
 		// Initialize
-		if cmdErr = utils.AttachCliToProcess(cmd); cmdErr != nil {
+		if cmdErr = utils.RunCmdAndStream(cmd); cmdErr != nil {
 			err = errors.Wrap(cmdErr, "Error occured while initializing packer")
 			return
 		}
@@ -152,7 +152,7 @@ func (p *Packer) Build(cloud Cloud) (err error) {
 	switch cloud {
 	case AWS:
 		// Build
-		if cmdErr = utils.AttachCliToProcess(cmd); cmdErr != nil {
+		if cmdErr = utils.RunCmdAndStream(cmd); cmdErr != nil {
 			err = errors.Wrapf(cmdErr, "Error occured while building packer")
 			return
 		}

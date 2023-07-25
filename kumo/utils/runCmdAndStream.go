@@ -19,12 +19,14 @@ import (
 // That way, the command will not keep running in the background.
 //
 // Example:
-//	AttachCliToProcess(exec.Command("packer.exe", "build", "."))
+//
+//	RunCmdAndStream(exec.Command("packer.exe", "build", "."))
 //
 //	`==> test.amazon-ebs.ubuntu: Prevalidating AMI Name: test`
 //	`==> test.amazon-ebs.ubuntu: Found Image ID: ami-03f65b8614a860c29`
 //	`==> test.amazon-ebs.ubuntu: Creating temporary keypair: packer_64b824bb-026f-af2c-184e-7097c138d520`
-func AttachCliToProcess(cmd *exec.Cmd) (err error) {
+func RunCmdAndStream(cmd *exec.Cmd) (err error) {
+	// TODO refactor
 	// Get StdoutPipe
 	cmdStdout, err := cmd.StdoutPipe()
 	if err != nil {

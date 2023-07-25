@@ -216,7 +216,7 @@ func NewHashicorpVars(tool Tool, cloud Cloud) (hv *HashicorpVars, err error) {
 			pickedIp = defaulIp
 		}
 		pickedIp = publicIp
-		
+
 		terraformGeneralEnvironment = &TerraformGeneralEnvironment{
 			ALLOWED_IP: utils.MaskIp(pickedIp, 32),
 		}
@@ -239,7 +239,7 @@ func NewHashicorpVars(tool Tool, cloud Cloud) (hv *HashicorpVars, err error) {
 				return nil, err
 			}
 
-			pickedAmiId, err = utils.PickAmiIdToBeUsed(lastBuiltAmiId, utils.GetAmiIdFromConfig())
+			pickedAmiId, err = utils.PickAmiIdToBeUsed(lastBuiltAmiId, viper.GetString("Up.AMI_Id"))
 			if err != nil {
 				err = errors.Wrap(err, "failed to pick AMI ID to be used")
 				return nil, err

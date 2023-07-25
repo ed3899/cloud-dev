@@ -148,7 +148,7 @@ func (t *Terraform) Init(cloud Cloud) (err error) {
 	switch cloud {
 	case AWS:
 		// Run cmd
-		if cmdErr = utils.AttachCliToProcess(cmd); cmdErr != nil {
+		if cmdErr = utils.RunCmdAndStream(cmd); cmdErr != nil {
 			err = errors.Wrapf(cmdErr, "Error occured while initializing terraform for %v", cloud)
 			return
 		}
@@ -169,7 +169,7 @@ func (t *Terraform) Up(cloud Cloud) (err error) {
 	switch cloud {
 	case AWS:
 		// Run cmd
-		if cmdErr = utils.AttachCliToProcess(cmd); cmdErr != nil {
+		if cmdErr = utils.RunCmdAndStream(cmd); cmdErr != nil {
 			err = errors.Wrapf(cmdErr, "Error occured while deploying for %v", cloud)
 			return
 		}
@@ -190,7 +190,7 @@ func (t *Terraform) Destroy(cloud Cloud) (err error) {
 	switch cloud {
 	case AWS:
 		// Run cmd
-		if cmdErr = utils.AttachCliToProcess(cmd); cmdErr != nil {
+		if cmdErr = utils.RunCmdAndStream(cmd); cmdErr != nil {
 			err = errors.Wrapf(cmdErr, "Error occured while destroying for %v", cloud)
 			return
 		}
