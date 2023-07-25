@@ -25,7 +25,6 @@ type Packer struct {
 const (
 	PLUGINS_DIR_NAME     = "plugins"
 	PACKER_PLUGIN_PATH = "PACKER_PLUGIN_PATH"
-	AWS_SUBDIR_NAME      = "aws"
 )
 
 var (

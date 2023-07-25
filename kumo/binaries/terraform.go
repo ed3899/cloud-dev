@@ -216,19 +216,4 @@ func (t *Terraform) Destroy(cloud string) {
 	}
 }
 
-func NewTerraform(bins *download.Binaries) (terraform *Terraform, err error) {
-	// Create the absolute path to the executable
-	ep := filepath.Join(bins.Terraform.Dependency.ExtractionPath, "terraform.exe")
 
-	// Validate existence
-	if utils.FileNotPresent(ep) {
-		err = errors.New("Terraform executable not found")
-		return nil, err
-	}
-
-	terraform = &Terraform{
-		ExecutableAbsPath: ep,
-	}
-
-	return terraform, nil
-}

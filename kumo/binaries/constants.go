@@ -12,3 +12,7 @@ type Cloud int
 const (
 	AWS Cloud = iota
 )
+
+const (
+	AWS_SUBDIR_NAME = "aws"
+)
