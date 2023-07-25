@@ -39,7 +39,7 @@ type ZipI interface {
 
 type Zip struct {
 	Name          string
-	Path          string
+	AbsPath       string
 	URL           string
 	ContentLength int64
 	DownloadBar   *mpb.Bar
@@ -51,7 +51,15 @@ func (z *Zip) GetName() string {
 }
 
 func (z *Zip) GetPath() string {
-	return z.Path
+	return z.AbsPath
+}
+
+func (z *Zip) IsPresent() bool {
+	return utils.FilePresent(z.AbsPath)
+}
+
+func (z *Zip) IsNotPresent() bool {
+	return utils.FileNotPresent(z.AbsPath)
 }
 
 func (z *Zip) SetDownloadBar(p *mpb.Progress) {
@@ -76,11 +84,6 @@ func (z *Zip) IncrementDownloadBar(downloadedBytes int) {
 }
 
 func (z *Zip) SetExtractionBar(p *mpb.Progress, zipSize int64) {
-	// if utils.FileNotPresent(z.Path) {
-	// 	err = errors.New("zip file not present")
-	// 	return
-	// }
-
 	z.ExtractionBar = p.AddBar(zipSize,
 		mpb.BarQueueAfter(z.DownloadBar),
 		mpb.BarFillerClearOnComplete(),
@@ -111,7 +114,7 @@ func (z *Zip) IncrementExtractionBar(extractedBytes int) {
 }
 
 func (z *Zip) Download(downloadedBytesChan chan<- int) (err error) {
-	if err = utils.Download(z.URL, z.Path, downloadedBytesChan); err != nil {
+	if err = utils.Download(z.URL, z.AbsPath, downloadedBytesChan); err != nil {
 		err = errors.Wrapf(err, "failed to download: %v", z.URL)
 		return
 	}
@@ -119,16 +122,16 @@ func (z *Zip) Download(downloadedBytesChan chan<- int) (err error) {
 }
 
 func (z *Zip) Extract(extractToPath string, extractedBytesChan chan<- int) (err error) {
-	if err = utils.Unzip(z.Path, extractToPath, extractedBytesChan); err != nil {
-		err = errors.Wrapf(err, "failed to unzip: %v", z.Path)
+	if err = utils.Unzip(z.AbsPath, extractToPath, extractedBytesChan); err != nil {
+		err = errors.Wrapf(err, "failed to unzip: %v", z.AbsPath)
 		return
 	}
 	return
 }
 
 func (z *Zip) Remove() (err error) {
-	if err = os.Remove(z.Path); err != nil {
-		err = errors.Wrapf(err, "failed to remove: %v", z.Path)
+	if err = os.Remove(z.AbsPath); err != nil {
+		err = errors.Wrapf(err, "failed to remove: %v", z.AbsPath)
 		return
 	}
 	return

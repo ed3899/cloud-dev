@@ -73,7 +73,7 @@ func NewTerraform() (terraform *Terraform, err error) {
 		AbsPathToRunDir:     absPathToRunDir,
 		Zip: &Zip{
 			Name:          zipName,
-			Path:          zipPath,
+			AbsPath:       zipPath,
 			URL:           url,
 			ContentLength: contentLength,
 		},

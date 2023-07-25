@@ -57,7 +57,6 @@ OuterLoop:
 
 			if err = os.RemoveAll(e.GetPath()); err != nil {
 				err = errors.Wrapf(err, "Error occurred while removing %s", e.GetName())
-				break OuterLoop
 			}
 
 			break OuterLoop

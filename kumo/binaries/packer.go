@@ -71,7 +71,7 @@ func NewPacker() (packer *Packer, err error) {
 		AbsPathToRunDir:     absPathToRunDir,
 		Zip: &Zip{
 			Name:          zipName,
-			Path:          zipPath,
+			AbsPath:       zipPath,
 			URL:           url,
 			ContentLength: contentLength,
 		},
@@ -79,36 +79,33 @@ func NewPacker() (packer *Packer, err error) {
 	return
 }
 
+func (p *Packer) IsInstalled() bool {
+	return utils.FilePresent(p.AbsPathToExecutable)
+}
+
+func (p *Packer) IsNotInstalled() bool {
+	return utils.FileNotPresent(p.AbsPathToExecutable)
+}
+
 func (p *Packer) Init(cloud Cloud) (err error) {
 	var (
-		cmd             = exec.Command(p.AbsPathToExecutable, "init", ".")
-		cmdErr          error
-		initialLocation string
+		cmd    = exec.Command(p.AbsPathToExecutable, "init", ".")
+		cmdErr error
 	)
-
-	// Store current working directory
-	if initialLocation, err = os.Getwd(); err != nil {
-		err = errors.Wrapf(err, "Error occurred while getting current working directory")
-		return
-	}
 
 	switch cloud {
 	case AWS:
-		// Change directory to where packer will be run
-		absPathToRunLocation := filepath.Join(p.AbsPathToRunDir, AWS_SUBDIR_NAME)
-		if err = os.Chdir(absPathToRunLocation); err != nil {
-			err = errors.Wrapf(err, "Error occurred while changing directory to %s", absPathToRunLocation)
-			return
-		}
-		defer os.Chdir(initialLocation)
-
 		// Set PACKER_PLUGIN_PATH environment variable
-		err = os.Setenv(PACKER_PLUGIN_PATH, filepath.Join(absPathToRunLocation, PLUGINS_DIR_NAME))
-		if err != nil {
+		if err = os.Setenv(PACKER_PLUGIN_PATH, filepath.Join(p.AbsPathToRunDir, AWS_SUBDIR_NAME, PLUGINS_DIR_NAME)); err != nil {
 			err = errors.Wrapf(err, "Error occurred while setting %s environment variable", PACKER_PLUGIN_PATH)
 			return
 		}
-		defer os.Unsetenv(PACKER_PLUGIN_PATH)
+		defer func() {
+			if err = os.Unsetenv(PACKER_PLUGIN_PATH); err != nil {
+				err = errors.Wrapf(err, "Error occurred while unsetting %s environment variable", PACKER_PLUGIN_PATH)
+				return
+			}
+		}()
 
 		// Initialize
 		if cmdErr = utils.AttachCliToProcess(cmd); cmdErr != nil {
