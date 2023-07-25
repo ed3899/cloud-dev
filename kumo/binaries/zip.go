@@ -25,7 +25,7 @@ type Downloadable interface {
 }
 
 type Extractable interface {
-	SetExtractionBar(*mpb.Progress, int64) error
+	SetExtractionBar(*mpb.Progress, int64)
 	Extract(string, chan<- int) error
 	IncrementExtractionBar(int)
 }
