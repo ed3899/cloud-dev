@@ -60,7 +60,25 @@ func TerraformDestroyWorkflow() (err error) {
 		}
 	}()
 
-	// E. Destroy
+	// E. Set cloud credentials and defer unsetting
+	if err = terraform.SetCloudCredentials(cloud); err != nil {
+		err = errors.Wrap(err, "Error occurred while setting cloud credentials")
+		return
+	}
+	defer func() {
+		if err = terraform.UnsetCloudCredentials(cloud); err != nil {
+			err = errors.Wrap(err, "Error occurred while unsetting cloud credentials")
+			return
+		}
+	}()
+
+	// F. Initialize
+	if err = terraform.Init(cloud); err != nil {
+		err = errors.Wrap(err, "Error occurred while initializing terraform")
+		return
+	}
+
+	// G. Destroy
 	if err = terraform.Destroy(cloud); err != nil {
 		err = errors.Wrap(err, "Error occurred while destroying")
 		return

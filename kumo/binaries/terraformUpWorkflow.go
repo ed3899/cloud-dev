@@ -91,7 +91,7 @@ func TerraformUpWorkflow() (err error) {
 		return
 	}
 
-	// F. Up
+	// G. Up
 	if err = terraform.Up(cloud); err != nil {
 		err = errors.Wrap(err, "Error occurred while running terraform up")
 		return
