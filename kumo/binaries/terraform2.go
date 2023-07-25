@@ -3,6 +3,7 @@ package binaries
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 
 	"github.com/ed3899/kumo/utils"
@@ -121,7 +122,39 @@ func (t *Terraform2) UnsetCloudCredentials(cloud Cloud) (err error) {
 }
 
 func (t *Terraform2) Init(cloud Cloud) (err error) {
-	return
+	var (
+		cmd    = exec.Command(t.AbsPathToExecutable, "init", ".")
+		cmdErr error
+	)
+
+	// Store current working directory
+	if initialLocation, err = os.Getwd(); err != nil {
+		err = errors.Wrapf(err, "Error occurred while getting current working directory")
+		return
+	}
+
+	switch cloud {
+	case AWS:
+		// Change directory to where packer will be run
+		absPathToRunLocation := filepath.Join(t.AbsPathToRunDir, AWS_SUBDIR_NAME)
+		if err = os.Chdir(absPathToRunLocation); err != nil {
+			err = errors.Wrapf(err, "Error occurred while changing directory to %s", absPathToRunLocation)
+			return
+		}
+		defer os.Chdir(initialLocation)
+
+		// Initialize
+		if cmdErr = utils.AttachCliToProcess(cmd); cmdErr != nil {
+			err = errors.Wrapf(cmdErr, "Error occured while initializing terraform for %v", cloud)
+			return
+		}
+
+		return
+
+	default:
+		err = errors.Errorf("Cloud '%v' not supported", cloud)
+		return
+	}
 }
 
 func (t *Terraform2) Up(cloud Cloud) (err error) {

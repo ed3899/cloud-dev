@@ -115,7 +115,7 @@ func (p *Packer) Init(cloud Cloud) (err error) {
 
 		// Initialize
 		if cmdErr = utils.AttachCliToProcess(cmd); cmdErr != nil {
-			err = errors.Wrapf(cmdErr, "Error occured while initializing packer")
+			err = errors.Wrap(cmdErr, "Error occured while initializing packer")
 			return
 		}
 		return
