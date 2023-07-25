@@ -52,7 +52,6 @@ type TerraformAWSEnvironment struct {
 
 type Template struct {
 	AbsPath     string
-	Instance    *template.Template
 	Environment any
 }
 
@@ -270,21 +269,23 @@ func (hv *HashicorpVars) Create() (err error) {
 	}
 	defer varsFile.Close()
 
-	// Get template
+	// Get template and defer deletion
 	template, err := template.ParseFiles(hv.Template.AbsPath)
 	if err != nil {
 		return errors.Wrapf(err, "Error occurred while crafting absolute path to %s", hv.Template.AbsPath)
 	}
+	defer func() {
+		if err = hv.Template.Remove(); err != nil {
+			err = errors.Wrapf(err, "Error occurred while removing %s", hv.Template.AbsPath)
+			return
+		}
+	}()
 
 	// Execute template
-	err = hv.Template.Instance.Execute(varsFile, template)
+	err = template.Execute(varsFile, hv.Template.Environment)
 	if err != nil {
 		return errors.Wrapf(err, "Error occurred while executing template: %s", hv.Template.AbsPath)
 	}
 
-	// Remove temporary merged template
-	if hv.Template.Remove(); err != nil {
-		return errors.Wrapf(err, "Error occurred while removing %s", hv.Template.AbsPath)
-	}
 	return
 }
