@@ -29,7 +29,7 @@ const (
 
 func NewPacker() (packer *Packer, err error) {
 	const (
-		PACKER    = "packer"
+		PACKER  = "packer"
 		VERSION = "1.9.1"
 	)
 
@@ -86,6 +86,42 @@ func (p *Packer) IsNotInstalled() bool {
 	return utils.FileNotPresent(p.AbsPathToExecutable)
 }
 
+func (p *Packer) GetAbsPathToCloudRunDir(cloud Cloud) (cloudRunDir string, err error) {
+	switch cloud {
+	case AWS:
+		cloudRunDir = filepath.Join(p.AbsPathToRunDir, AWS_SUBDIR_NAME)
+	default:
+		err = errors.Errorf("Cloud '%v' not supported", cloud)
+	}
+	return
+}
+
+func (p *Packer) SetPluginPath(cloud Cloud) (err error) {
+	switch cloud {
+	case AWS:
+		if err = os.Setenv(PACKER_PLUGIN_PATH, filepath.Join(p.AbsPathToRunDir, AWS_SUBDIR_NAME, PLUGINS_DIR_NAME)); err != nil {
+			err = errors.Wrapf(err, "Error occurred while setting %s environment variable", PACKER_PLUGIN_PATH)
+			return
+		}
+	default:
+		err = errors.Errorf("Cloud '%v' not supported", cloud)
+	}
+	return
+}
+
+func (p *Packer) UnsetPluginPath(cloud Cloud) (err error) {
+	switch cloud {
+	case AWS:
+		if err = os.Unsetenv(PACKER_PLUGIN_PATH); err != nil {
+			err = errors.Wrapf(err, "Error occurred while unsetting %s environment variable", PACKER_PLUGIN_PATH)
+			return
+		}
+	default:
+		err = errors.Errorf("Cloud '%v' not supported", cloud)
+	}
+	return
+}
+
 func (p *Packer) Init(cloud Cloud) (err error) {
 	var (
 		cmd    = exec.Command(p.AbsPathToExecutable, "init", ".")
@@ -94,18 +130,6 @@ func (p *Packer) Init(cloud Cloud) (err error) {
 
 	switch cloud {
 	case AWS:
-		// Set PACKER_PLUGIN_PATH environment variable
-		if err = os.Setenv(PACKER_PLUGIN_PATH, filepath.Join(p.AbsPathToRunDir, AWS_SUBDIR_NAME, PLUGINS_DIR_NAME)); err != nil {
-			err = errors.Wrapf(err, "Error occurred while setting %s environment variable", PACKER_PLUGIN_PATH)
-			return
-		}
-		defer func() {
-			if err = os.Unsetenv(PACKER_PLUGIN_PATH); err != nil {
-				err = errors.Wrapf(err, "Error occurred while unsetting %s environment variable", PACKER_PLUGIN_PATH)
-				return
-			}
-		}()
-
 		// Initialize
 		if cmdErr = utils.AttachCliToProcess(cmd); cmdErr != nil {
 			err = errors.Wrap(cmdErr, "Error occured while initializing packer")
