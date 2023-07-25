@@ -97,8 +97,6 @@ func (z *Zip) SetExtractionBar(p *mpb.Progress, zipSize int64) {
 			),
 		),
 	)
-
-	return
 }
 
 func (z *Zip) IncrementExtractionBar(extractedBytes int) {
