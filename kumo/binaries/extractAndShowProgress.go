@@ -14,7 +14,7 @@ type ExtractableByWorkflow interface {
 	Retrivable
 }
 
-func ExtractWorkflow[E ExtractableByWorkflow](e E, multiProgressBar *mpb.Progress) (err error) {
+func ExtractAndShowProgress[E ExtractableByWorkflow](e E, multiProgressBar *mpb.Progress) (err error) {
 	var (
 		extractedBytesChan = make(chan int, 1024)
 		errChan            = make(chan error, 1)

@@ -7,14 +7,13 @@ import (
 	"github.com/vbauerster/mpb/v8"
 )
 
-
 type DownloadableByWorkflow interface {
 	Downloadable
 	Removable
 	Retrivable
 }
 
-func DownloadWorkflow[D DownloadableByWorkflow](d D, multiProgressBar *mpb.Progress) (err error) {
+func DownloadAndShowProgress[D DownloadableByWorkflow](d D, multiProgressBar *mpb.Progress) (err error) {
 	var (
 		downloadedBytesChan = make(chan int, 1024)
 		errChan             = make(chan error, 1)
