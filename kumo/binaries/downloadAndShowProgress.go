@@ -1,8 +1,6 @@
 package binaries
 
 import (
-	"log"
-
 	"github.com/pkg/errors"
 	"github.com/vbauerster/mpb/v8"
 )
@@ -41,10 +39,7 @@ OuterLoop:
 				continue OuterLoop
 			}
 
-			if err = d.IncrementDownloadBar(downloadedBytes); err != nil {
-				log.Print(err)
-				continue OuterLoop
-			}
+			d.IncrementDownloadBar(downloadedBytes)
 		case err = <-errChan:
 			if err == nil {
 				continue OuterLoop

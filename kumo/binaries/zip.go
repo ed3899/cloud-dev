@@ -19,15 +19,15 @@ type Retrivable interface {
 }
 
 type Downloadable interface {
-	SetDownloadBar(p *mpb.Progress)
+	SetDownloadBar(*mpb.Progress)
 	Download(chan<- int) error
-	IncrementDownloadBar(int) error
+	IncrementDownloadBar(int)
 }
 
 type Extractable interface {
-	SetExtractionBar(p *mpb.Progress) error
+	SetExtractionBar(*mpb.Progress, int64) error
 	Extract(string, chan<- int) error
-	IncrementExtractionBar(int) error
+	IncrementExtractionBar(int)
 }
 
 type ZipI interface {
@@ -70,28 +70,16 @@ func (z *Zip) SetDownloadBar(p *mpb.Progress) {
 	)
 }
 
-func (z *Zip) IncrementDownloadBar(downloadedBytes int) (err error) {
-	if z.DownloadBar == nil {
-		err = errors.New("download bar not set")
-		return
-	}
-
+func (z *Zip) IncrementDownloadBar(downloadedBytes int) {
 	z.DownloadBar.IncrBy(downloadedBytes)
-
 	return
 }
 
-func (z *Zip) SetExtractionBar(p *mpb.Progress) (err error) {
-	if utils.FileNotPresent(z.Path) {
-		err = errors.New("zip file not present")
-		return
-	}
-
-	zipSize, err := utils.GetZipSize(z.Path)
-	if err != nil {
-		err = errors.Wrapf(err, "failed to get zip size for: %v", z.Path)
-		return
-	}
+func (z *Zip) SetExtractionBar(p *mpb.Progress, zipSize int64) {
+	// if utils.FileNotPresent(z.Path) {
+	// 	err = errors.New("zip file not present")
+	// 	return
+	// }
 
 	z.ExtractionBar = p.AddBar(zipSize,
 		mpb.BarQueueAfter(z.DownloadBar),
@@ -111,11 +99,11 @@ func (z *Zip) SetExtractionBar(p *mpb.Progress) (err error) {
 	return
 }
 
-func (z *Zip) IncrementExtractionBar(extractedBytes int) (err error) {
-	if z.ExtractionBar == nil {
-		err = errors.New("extraction bar not set")
-		return
-	}
+func (z *Zip) IncrementExtractionBar(extractedBytes int) {
+	// if z.ExtractionBar == nil {
+	// 	err = errors.New("extraction bar not set")
+	// 	return
+	// }
 
 	z.ExtractionBar.IncrBy(extractedBytes)
 
@@ -123,16 +111,6 @@ func (z *Zip) IncrementExtractionBar(extractedBytes int) (err error) {
 }
 
 func (z *Zip) Download(downloadedBytesChan chan<- int) (err error) {
-	if utils.FilePresent(z.Path) {
-		err = errors.New("zip file already present")
-		return
-	}
-
-	if z.DownloadBar == nil {
-		err = errors.New("download bar not set")
-		return
-	}
-
 	if err = utils.Download(z.URL, z.Path, downloadedBytesChan); err != nil {
 		err = errors.Wrapf(err, "failed to download: %v", z.URL)
 		return
@@ -141,16 +119,6 @@ func (z *Zip) Download(downloadedBytesChan chan<- int) (err error) {
 }
 
 func (z *Zip) Extract(extractToPath string, extractedBytesChan chan<- int) (err error) {
-	if utils.FileNotPresent(z.Path) {
-		err = errors.New("zip file not present")
-		return
-	}
-
-	if z.ExtractionBar == nil {
-		err = errors.New("extraction bar not set")
-		return
-	}
-
 	if err = utils.Unzip(z.Path, extractToPath, extractedBytesChan); err != nil {
 		err = errors.Wrapf(err, "failed to unzip: %v", z.Path)
 		return
