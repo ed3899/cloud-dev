@@ -141,7 +141,7 @@ func (t *Terraform) IsNotInstalled() bool {
 
 func (t *Terraform) Init(cloud Cloud) (err error) {
 	var (
-		cmd    = exec.Command(t.AbsPathToExecutable, "init", ".")
+		cmd    = exec.Command(t.AbsPathToExecutable, "init")
 		cmdErr error
 	)
 
@@ -162,7 +162,7 @@ func (t *Terraform) Init(cloud Cloud) (err error) {
 
 func (t *Terraform) Up(cloud Cloud) (err error) {
 	var (
-		cmd    = exec.Command(t.AbsPathToExecutable, "apply", "-auto-approve", ".")
+		cmd    = exec.Command(t.AbsPathToExecutable, "apply", "-auto-approve")
 		cmdErr error
 	)
 
@@ -183,7 +183,7 @@ func (t *Terraform) Up(cloud Cloud) (err error) {
 
 func (t *Terraform) Destroy(cloud Cloud) (err error) {
 	var (
-		cmd    = exec.Command(t.AbsPathToExecutable, "destroy", "-auto-approve", ".")
+		cmd    = exec.Command(t.AbsPathToExecutable, "destroy", "-auto-approve")
 		cmdErr error
 	)
 

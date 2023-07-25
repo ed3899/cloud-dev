@@ -215,10 +215,10 @@ func NewHashicorpVars(tool Tool, cloud Cloud) (hv *HashicorpVars, err error) {
 			log.Print(err)
 			pickedIp = defaulIp
 		}
-
 		pickedIp = publicIp
+		
 		terraformGeneralEnvironment = &TerraformGeneralEnvironment{
-			ALLOWED_IP: pickedIp,
+			ALLOWED_IP: utils.MaskIp(pickedIp, 32),
 		}
 
 		switch cloud {

@@ -9,7 +9,7 @@ import (
 )
 
 func GetBuildCommand() *cobra.Command {
-	cc := &cobra.Command{
+	return &cobra.Command{
 		Use:   "build",
 		Short: "Build an AMI with ready to use tools",
 		Long: `Build an AMI with ready to use tools. Any AMI you build with Kumo will have a set of SSH keys downloaded
@@ -22,6 +22,4 @@ func GetBuildCommand() *cobra.Command {
 			}
 		},
 	}
-
-	return cc
 }
