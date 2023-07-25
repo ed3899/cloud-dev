@@ -31,33 +31,32 @@ const (
 
 func NewTerraform() (terraform *Terraform, err error) {
 	const (
-		name    = "terraform"
-		version = "0.14.7"
+		NAME    = "terraform"
+		VERSION = "1.5.3"
 	)
 
 	var (
-		executableName      = fmt.Sprintf("%s.exe", name)
-		zipName             = fmt.Sprintf("%s.zip", name)
+		executableName      = fmt.Sprintf("%s.exe", NAME)
+		zipName             = fmt.Sprintf("%s.zip", NAME)
 		os, arch            = utils.GetCurrentHostSpecs()
-		url                 = utils.CreateHashicorpURL(name, version, os, arch)
-		depDirName          = utils.GetDependenciesDirName()
+		url                 = utils.CreateHashicorpURL(NAME, VERSION, os, arch)
 		absPathToExecutable string
 		absPathToRunDir     string
 		contentLength       int64
 		zipPath             string
 	)
 
-	if absPathToExecutable, err = filepath.Abs(filepath.Join(depDirName, name, executableName)); err != nil {
+	if absPathToExecutable, err = filepath.Abs(filepath.Join(DEPENDENCIES_DIR_NAME, NAME, executableName)); err != nil {
 		err = errors.Wrapf(err, "failed to create executable path to: %s", executableName)
 		return
 	}
 
-	if absPathToRunDir, err = filepath.Abs(name); err != nil {
-		err = errors.Wrapf(err, "failed to create run path to: %s", name)
+	if absPathToRunDir, err = filepath.Abs(NAME); err != nil {
+		err = errors.Wrapf(err, "failed to create run path to: %s", NAME)
 		return
 	}
 
-	if zipPath, err = filepath.Abs(filepath.Join(depDirName, name, zipName)); err != nil {
+	if zipPath, err = filepath.Abs(filepath.Join(DEPENDENCIES_DIR_NAME, NAME, zipName)); err != nil {
 		err = errors.Wrapf(err, "failed to craft zip path to: %s", zipName)
 		return
 	}

@@ -29,31 +29,30 @@ const (
 
 func NewPacker() (packer *Packer, err error) {
 	const (
-		name    = "packer"
-		version = "1.9.1"
+		PACKER    = "packer"
+		VERSION = "1.9.1"
 	)
 
 	var (
-		executableName = fmt.Sprintf("%s.exe", name)
-		zipName        = fmt.Sprintf("%s.zip", name)
+		executableName = fmt.Sprintf("%s.exe", PACKER)
+		zipName        = fmt.Sprintf("%s.zip", PACKER)
 		os, arch       = utils.GetCurrentHostSpecs()
-		url            = utils.CreateHashicorpURL(name, version, os, arch)
-		depDirName     = utils.GetDependenciesDirName()
+		url            = utils.CreateHashicorpURL(PACKER, VERSION, os, arch)
 	)
 
-	absPathToExecutable, err := filepath.Abs(filepath.Join(depDirName, name, executableName))
+	absPathToExecutable, err := filepath.Abs(filepath.Join(DEPENDENCIES_DIR_NAME, PACKER, executableName))
 	if err != nil {
 		err = errors.Wrapf(err, "failed to create executable path to: %s", executableName)
 		return
 	}
 
-	absPathToRunDir, err := filepath.Abs(name)
+	absPathToRunDir, err := filepath.Abs(PACKER)
 	if err != nil {
-		err = errors.Wrapf(err, "failed to create run path to: %s", name)
+		err = errors.Wrapf(err, "failed to create run path to: %s", PACKER)
 		return
 	}
 
-	zipPath, err := filepath.Abs(filepath.Join(depDirName, name, zipName))
+	zipPath, err := filepath.Abs(filepath.Join(DEPENDENCIES_DIR_NAME, PACKER, zipName))
 	if err != nil {
 		err = errors.Wrapf(err, "failed to craft zip path to: %s", zipName)
 		return

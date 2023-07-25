@@ -14,5 +14,9 @@ const (
 )
 
 const (
+	DEPENDENCIES_DIR_NAME = "deps"
+)
+
+const (
 	AWS_SUBDIR_NAME = "aws"
 )
