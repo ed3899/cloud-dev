@@ -77,7 +77,6 @@ build {
     "source.amazon-ebs.ubuntu"
   ]
 
-// TODO change relative dirs
   provisioner "shell" {
     env = {
       AWS_EC2_PUBLIC_DIRECTORY_INTERNAL : local.AWS_EC2_PUBLIC_DIRECTORY_INTERNAL,
