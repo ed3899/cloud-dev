@@ -213,7 +213,7 @@ func NewHashicorpVars(tool Tool, cloud Cloud) (vf *HashicorpVars, err error) {
 			return nil, err
 		}
 	default:
-		err = errors.Errorf("Tool '%s' not supported", tool)
+		err = errors.Errorf("Tool '%v' not supported", tool)
 		return
 	}
 

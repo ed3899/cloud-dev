@@ -96,7 +96,7 @@ func (t *Terraform) SetCloudCredentials(cloud Cloud) (err error) {
 
 		return
 	default:
-		err = errors.Errorf("Cloud '%s' is not supported", cloud)
+		err = errors.Errorf("Cloud '%v' is not supported", cloud)
 		return
 	}
 }
@@ -116,7 +116,7 @@ func (t *Terraform) UnsetCloudCredentials(cloud Cloud) (err error) {
 
 		return
 	default:
-		err = errors.Errorf("Cloud '%s' is not supported", cloud)
+		err = errors.Errorf("Cloud '%v' is not supported", cloud)
 		return
 	}
 }
