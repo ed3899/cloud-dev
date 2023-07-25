@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/ed3899/kumo/cmd"
-	"github.com/ed3899/kumo/host"
+	"github.com/ed3899/kumo/utils"
 )
 
 // TODO Set ssh key file permissions to 600
@@ -12,7 +12,7 @@ import (
 // TODO add cleanup functions for both terraform and packer
 // TODO remove utils.craftabsolutepath in exchange for filepath.Abs
 func init() {
-	if host.IsNotCompatible() {
+	if utils.HostIsNotCompatible() {
 		log.Fatal("Host is not compatible with kumo :/")
 	}
 }

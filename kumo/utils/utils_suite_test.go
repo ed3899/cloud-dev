@@ -138,12 +138,6 @@ var _ = Describe("GetContentLength", func() {
 	})
 })
 
-var _ = Describe("GetDependenciesDirName", func() {
-	It("should return the correct dependencies directory name", func() {
-		Expect(GetDependenciesDirName()).To(Equal("deps"))
-	})
-})
-
 var _ = Describe("GetPublicIp", func() {
 	It("should return the public IP", func(ctx SpecContext) {
 		ip, err := GetPublicIp()

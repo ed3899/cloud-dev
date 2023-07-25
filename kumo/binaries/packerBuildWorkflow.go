@@ -53,6 +53,8 @@ func PackerBuildWorkflow() (err error) {
 		return
 	}
 
+	progress.Shutdown()
+
 	// Set cloud
 	if cloud, err = GetCloud(); err != nil {
 		err = errors.Wrap(err, "Error occurred while getting cloud")
