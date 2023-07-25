@@ -5,16 +5,12 @@ import (
 	"path/filepath"
 
 	"github.com/pkg/errors"
-	"github.com/vbauerster/mpb/v8"
 )
 
 func PackerBuildWorkflow() (err error) {
 	var (
 		cloud                    Cloud
 		packer                   *Packer
-		progress                 = mpb.New(mpb.WithWidth(64), mpb.WithAutoRefresh())
-		absPathToExecutableDir   string
-		absPathToZipDir          string
 		absPathToInitialLocation string
 	)
 
@@ -23,45 +19,8 @@ func PackerBuildWorkflow() (err error) {
 		return
 	}
 
-	if packer.IsInstalled() && packer.Zip.IsNotPresent() {
-		return
-	}
-
-	// Start with a clean slate
-	absPathToExecutableDir = filepath.Dir(packer.AbsPathToExecutable)
-	absPathToZipDir = filepath.Dir(packer.Zip.AbsPath)
-
-	if err = os.RemoveAll(absPathToExecutableDir); err != nil {
-		err = errors.Wrapf(err, "Error occurred while removing %s", absPathToExecutableDir)
-		return err
-	}
-
-	if err = os.RemoveAll(absPathToZipDir); err != nil {
-		err = errors.Wrapf(err, "Error occurred while removing %s", absPathToZipDir)
-		return err
-	}
-
-	// Download
-	err = DownloadAndShowProgress(packer.Zip, progress)
-	if err != nil {
-		err = errors.Wrapf(err, "Error occurred while downloading %s", packer.Zip.GetName())
-		return
-	}
-
-	// Extract
-	err = ExtractAndShowProgress(packer.Zip, absPathToExecutableDir, progress)
-	if err != nil {
-		err = errors.Wrapf(err, "Error occurred while extracting %s", packer.Zip.GetName())
-		return
-	}
-
-	progress.Shutdown()
-
-	// Remove zip
-	err = packer.Zip.Remove()
-	if err != nil {
-		err = errors.Wrapf(err, "Error occurred while removing %s", packer.Zip.GetName())
-		return
+	if packer.IsNotInstalled() {
+		DownloadAndExtractWorkflow(packer.Zip, filepath.Dir(packer.AbsPathToExecutable))
 	}
 
 	// Set cloud
