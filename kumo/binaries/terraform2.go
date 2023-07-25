@@ -11,13 +11,13 @@ import (
 	"github.com/spf13/viper"
 )
 
-type Terraform2I interface {
+type TerraformI interface {
 	Init(Cloud) error
 	Up(Cloud) error
 	Destroy(Cloud) error
 }
 
-type Terraform2 struct {
+type Terraform struct {
 	ID                  Tool
 	AbsPathToExecutable string
 	AbsPathToRunDir     string
@@ -29,7 +29,7 @@ const (
 	AWS_SECRET_ACCESS_KEY = "AWS_SECRET_ACCESS_KEY"
 )
 
-func NewTerraform() (terraform *Terraform2, err error) {
+func NewTerraform() (terraform *Terraform, err error) {
 	const (
 		name    = "terraform"
 		version = "0.14.7"
@@ -67,7 +67,7 @@ func NewTerraform() (terraform *Terraform2, err error) {
 		return
 	}
 
-	terraform = &Terraform2{
+	terraform = &Terraform{
 		ID:                  TerraformID,
 		AbsPathToExecutable: absPathToExecutable,
 		AbsPathToRunDir:     absPathToRunDir,
@@ -81,7 +81,7 @@ func NewTerraform() (terraform *Terraform2, err error) {
 	return
 }
 
-func (t *Terraform2) SetCloudCredentials(cloud Cloud) (err error) {
+func (t *Terraform) SetCloudCredentials(cloud Cloud) (err error) {
 	switch cloud {
 	case AWS:
 		if err = os.Setenv(AWS_ACCESS_KEY_ID, viper.GetString("AWS.AccessKeyId")); err != nil {
@@ -101,7 +101,7 @@ func (t *Terraform2) SetCloudCredentials(cloud Cloud) (err error) {
 	}
 }
 
-func (t *Terraform2) UnsetCloudCredentials(cloud Cloud) (err error) {
+func (t *Terraform) UnsetCloudCredentials(cloud Cloud) (err error) {
 	switch cloud {
 	case AWS:
 		if err = os.Unsetenv(AWS_ACCESS_KEY_ID); err != nil {
@@ -121,7 +121,7 @@ func (t *Terraform2) UnsetCloudCredentials(cloud Cloud) (err error) {
 	}
 }
 
-func (t *Terraform2) Init(cloud Cloud) (err error) {
+func (t *Terraform) Init(cloud Cloud) (err error) {
 	var (
 		cmd             = exec.Command(t.AbsPathToExecutable, "init", ".")
 		cmdErr          error
@@ -158,7 +158,7 @@ func (t *Terraform2) Init(cloud Cloud) (err error) {
 	}
 }
 
-func (t *Terraform2) Up(cloud Cloud) (err error) {
+func (t *Terraform) Up(cloud Cloud) (err error) {
 	var (
 		cmd             = exec.Command(t.AbsPathToExecutable, "apply", "-auto-approve", ".")
 		cmdErr          error
@@ -194,7 +194,7 @@ func (t *Terraform2) Up(cloud Cloud) (err error) {
 	}
 }
 
-func (t *Terraform2) Destroy(cloud Cloud) (err error) {
+func (t *Terraform) Destroy(cloud Cloud) (err error) {
 	var (
 		cmd             = exec.Command(t.AbsPathToExecutable, "destroy", "-auto-approve", ".")
 		cmdErr          error

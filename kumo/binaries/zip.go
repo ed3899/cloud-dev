@@ -9,19 +9,32 @@ import (
 	"github.com/vbauerster/mpb/v8/decor"
 )
 
-type ZipI interface {
-	GetName() string
-	GetPath()	string
+type Removable interface {
+	Remove() error
+}
 
+type Retrivable interface {
+	GetName() string
+	GetPath() string
+}
+
+type Downloadable interface {
 	SetDownloadBar(p *mpb.Progress)
 	Download(chan<- int) error
 	IncrementDownloadBar(int) error
+}
 
+type Extractable interface {
 	SetExtractionBar(p *mpb.Progress) error
 	Extract(string, chan<- int) error
 	IncrementExtractionBar(int) error
+}
 
-	Remove() error
+type ZipI interface {
+	Retrivable
+	Downloadable
+	Extractable
+	Removable
 }
 
 type Zip struct {

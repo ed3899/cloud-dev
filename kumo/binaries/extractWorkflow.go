@@ -8,7 +8,13 @@ import (
 	"github.com/vbauerster/mpb/v8"
 )
 
-func ExtractWorkflow[Z ZipI](z Z, multiProgressBar *mpb.Progress) (err error) {
+type ExtractableByWorkflow interface {
+	Extractable
+	Removable
+	Retrivable
+}
+
+func ExtractWorkflow[E ExtractableByWorkflow](e E, multiProgressBar *mpb.Progress) (err error) {
 	var (
 		extractedBytesChan = make(chan int, 1024)
 		errChan            = make(chan error, 1)
@@ -20,8 +26,8 @@ func ExtractWorkflow[Z ZipI](z Z, multiProgressBar *mpb.Progress) (err error) {
 		defer close(errChan)
 		defer close(done)
 
-		z.SetExtractionBar(multiProgressBar)
-		if err = z.Extract(z.GetPath(), extractedBytesChan); err != nil {
+		e.SetExtractionBar(multiProgressBar)
+		if err = e.Extract(e.GetPath(), extractedBytesChan); err != nil {
 			errChan <- err
 			return
 		}
@@ -36,7 +42,7 @@ OuterLoop:
 				continue OuterLoop
 			}
 
-			if err = z.IncrementExtractionBar(extractedBytes); err != nil {
+			if err = e.IncrementExtractionBar(extractedBytes); err != nil {
 				log.Print(err)
 				continue OuterLoop
 			}
@@ -45,8 +51,8 @@ OuterLoop:
 				continue OuterLoop
 			}
 
-			if err := os.RemoveAll(z.GetPath()); err != nil {
-				err = errors.Wrapf(err, "Error occurred while removing %s", z.GetName())
+			if err = os.RemoveAll(e.GetPath()); err != nil {
+				err = errors.Wrapf(err, "Error occurred while removing %s", e.GetName())
 				break OuterLoop
 			}
 
