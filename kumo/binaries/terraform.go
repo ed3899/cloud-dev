@@ -120,6 +120,24 @@ func (t *Terraform) UnsetCloudCredentials(cloud Cloud) (err error) {
 	}
 }
 
+func (t *Terraform) GetAbsPathToCloudRunDir(cloud Cloud) (cloudRunDir string, err error) {
+	switch cloud {
+	case AWS:
+		cloudRunDir = filepath.Join(t.AbsPathToRunDir, AWS_SUBDIR_NAME)
+	default:
+		err = errors.Errorf("Cloud '%v' not supported", cloud)
+	}
+	return
+}
+
+func (t *Terraform) IsInstalled() bool {
+	return utils.FilePresent(t.AbsPathToExecutable)
+}
+
+func (t *Terraform) IsNotInstalled() bool {
+	return utils.FileNotPresent(t.AbsPathToExecutable)
+}
+
 func (t *Terraform) Init(cloud Cloud) (err error) {
 	var (
 		cmd             = exec.Command(t.AbsPathToExecutable, "init", ".")
