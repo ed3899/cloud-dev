@@ -29,5 +29,7 @@ func GetPackerWorkflow() (err error) {
 		return
 	}
 
+	multiProgressBar.Shutdown()
+
 	return
 }
