@@ -2,10 +2,12 @@ package binaries
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 
 	"github.com/ed3899/kumo/utils"
 	"github.com/pkg/errors"
+	"github.com/spf13/viper"
 )
 
 type Terraform2I interface {
@@ -20,6 +22,11 @@ type Terraform2 struct {
 	AbsPathToRunDir     string
 	Zip                 *Zip
 }
+
+const (
+	AWS_ACCESS_KEY_ID     = "AWS_ACCESS_KEY_ID"
+	AWS_SECRET_ACCESS_KEY = "AWS_SECRET_ACCESS_KEY"
+)
 
 func NewTerraform() (terraform *Terraform2, err error) {
 	const (
@@ -71,6 +78,46 @@ func NewTerraform() (terraform *Terraform2, err error) {
 		},
 	}
 	return
+}
+
+func (t *Terraform2) SetCloudCredentials(cloud Cloud) (err error) {
+	switch cloud {
+	case AWS:
+		if err = os.Setenv(AWS_ACCESS_KEY_ID, viper.GetString("AWS.AccessKeyId")); err != nil {
+			err = errors.Wrapf(err, "Error occurred while setting %s environment variable", AWS_ACCESS_KEY_ID)
+			return err
+		}
+
+		if err = os.Setenv(AWS_SECRET_ACCESS_KEY, viper.GetString("AWS.SecretAccessKey")); err != nil {
+			err = errors.Wrapf(err, "Error occurred while setting %s environment variable", AWS_SECRET_ACCESS_KEY)
+			return err
+		}
+
+		return
+	default:
+		err = errors.Errorf("Cloud '%s' is not supported", cloud)
+		return
+	}
+}
+
+func (t *Terraform2) UnsetCloudCredentials(cloud Cloud) (err error) {
+	switch cloud {
+	case AWS:
+		if err = os.Unsetenv(AWS_ACCESS_KEY_ID); err != nil {
+			err = errors.Wrapf(err, "Error occurred while unsetting %s environment variable", AWS_ACCESS_KEY_ID)
+			return err
+		}
+
+		if err = os.Unsetenv(AWS_SECRET_ACCESS_KEY); err != nil {
+			err = errors.Wrapf(err, "Error occurred while unsetting %s environment variable", AWS_SECRET_ACCESS_KEY)
+			return err
+		}
+
+		return
+	default:
+		err = errors.Errorf("Cloud '%s' is not supported", cloud)
+		return
+	}
 }
 
 func (t *Terraform2) Init(cloud Cloud) (err error) {
