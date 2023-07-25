@@ -122,27 +122,12 @@ func (p *Packer) Init(cloud Cloud) (err error) {
 
 func (p *Packer) Build(cloud Cloud) (err error) {
 	var (
-		cmd             = exec.Command(p.AbsPathToExecutable, "build", ".")
-		cmdErr          error
-		initialLocation string
+		cmd    = exec.Command(p.AbsPathToExecutable, "build", ".")
+		cmdErr error
 	)
-
-	// Store current working directory
-	if initialLocation, err = os.Getwd(); err != nil {
-		err = errors.Wrapf(err, "Error occurred while getting current working directory")
-		return
-	}
 
 	switch cloud {
 	case AWS:
-		// Change directory to where packer will be run
-		absPathToRunLocation := filepath.Join(p.AbsPathToRunDir, AWS_SUBDIR_NAME)
-		if err := os.Chdir(absPathToRunLocation); err != nil {
-			err = errors.Wrapf(err, "Error occurred while changing directory to %s", absPathToRunLocation)
-			return err
-		}
-		defer os.Chdir(initialLocation)
-
 		// Build
 		if cmdErr = utils.AttachCliToProcess(cmd); cmdErr != nil {
 			err = errors.Wrapf(cmdErr, "Error occured while building packer")

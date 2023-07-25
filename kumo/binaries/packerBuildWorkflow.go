@@ -16,7 +16,6 @@ func PackerBuildWorkflow() (err error) {
 		absPathToExecutableDir   string
 		absPathToZipDir          string
 		absPathToInitialLocation string
-		absPathToRunDir          string
 	)
 
 	if packer, err = NewPacker(); err != nil {
@@ -60,11 +59,13 @@ func PackerBuildWorkflow() (err error) {
 		return
 	}
 
+	// Set initial location
 	if absPathToInitialLocation, err = os.Getwd(); err != nil {
 		err = errors.Wrap(err, "Error occurred while getting current working directory")
 		return
 	}
 
+	// Change directory to packer run directory and defer changing back to initial location
 	if err = os.Chdir(packer.AbsPathToRunDir); err != nil {
 		err = errors.Wrap(err, "Error occurred while changing directory to packer run directory")
 		return
@@ -76,7 +77,17 @@ func PackerBuildWorkflow() (err error) {
 		}
 	}()
 
-	packer.Init(cloud)
+	// Initialize
+	if err = packer.Init(cloud); err != nil {
+		err = errors.Wrap(err, "Error occurred while initializing packer")
+		return
+	}
+
+	// Build
+	if err = packer.Build(cloud); err != nil {
+		err = errors.Wrap(err, "Error occurred while building packer")
+		return
+	}
 
 	return
 }
