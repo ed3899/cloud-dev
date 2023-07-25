@@ -90,12 +90,15 @@ func NewHashicorpVars(tool Tool, cloud Cloud) (hv *HashicorpVars, err error) {
 		// AWS
 		terraformAwsVarsFileName = "aws.auto.tfvars"
 		terraformAwsTemplateName = "AWS_TerraformTfVars.tmpl"
+		// Merged
+		terraformMergedTemplateName = "temp_merged_terraform_template"
 
 		// Subdirectory names
 		generalSubDirName = "general"
 		awsSubDirName     = "aws"
 
-		defaulIp = "0.0.0.0"
+		defaulIp        = "0.0.0.0"
+		templateDirName = "templates"
 	)
 
 	var (
@@ -104,9 +107,10 @@ func NewHashicorpVars(tool Tool, cloud Cloud) (hv *HashicorpVars, err error) {
 		terraformGeneralEnvironment *TerraformGeneralEnvironment
 
 		// Choices
-		publicIp    string
-		pickedIp    string
-		pickedAmiId string
+		publicIp       string
+		pickedIp       string
+		lastBuiltAmiId string
+		pickedAmiId    string
 
 		// Resulting merged template
 		mergedTemplateAbsPath string
@@ -126,13 +130,15 @@ func NewHashicorpVars(tool Tool, cloud Cloud) (hv *HashicorpVars, err error) {
 		return nil, err
 	}
 
+	// Var file paths
 	var (
 		absPathToPackerAwsVarsFile = filepath.Join(absPathToPackerRunDir, awsSubDirName, packerAwsVarsFileName)
 
-		_ = filepath.Join(absPathToTerraformRunDir, awsSubDirName)
+		absPathToTerraformAwsVarsFile = filepath.Join(absPathToTerraformRunDir, awsSubDirName, terraformAwsVarsFileName)
 	)
 
-	absPathToTemplatesDir, err := filepath.Abs(filepath.Join("templates"))
+	// Template paths
+	absPathToTemplatesDir, err := filepath.Abs(templateDirName)
 	if err != nil {
 		err = errors.Wrap(err, "failed to create path to templates")
 		return nil, err
@@ -142,15 +148,16 @@ func NewHashicorpVars(tool Tool, cloud Cloud) (hv *HashicorpVars, err error) {
 		absPathToPackerGeneralTemplate    = filepath.Join(absPathToTemplatesDir, packerSubDirName, generalSubDirName, packerGeneralTemplateName)
 		absPathToPackerAWSTemplate        = filepath.Join(absPathToTemplatesDir, packerSubDirName, awsSubDirName, packerAwsTemplateName)
 		absPathToTempPackerMergedTemplate = filepath.Join(absPathToTemplatesDir, packerSubDirName, packerMergedTemplateName)
-		absPathToTerraformGeneralTemplate = filepath.Join(absPathToTemplatesDir, terraformSubDirName, generalSubDirName, terraformGeneralTemplateName)
-		absPathToTerraformAWSTemplate     = filepath.Join(absPathToTemplatesDir, terraformSubDirName, awsSubDirName, terraformAwsTemplateName)
+
+		absPathToTerraformGeneralTemplate    = filepath.Join(absPathToTemplatesDir, terraformSubDirName, generalSubDirName, terraformGeneralTemplateName)
+		absPathToTerraformAWSTemplate        = filepath.Join(absPathToTemplatesDir, terraformSubDirName, awsSubDirName, terraformAwsTemplateName)
+		absPathToTempTerraformMergedTemplate = filepath.Join(absPathToTemplatesDir, terraformSubDirName, terraformMergedTemplateName)
 	)
 
-	absPathToPackerDir, err := filepath.Abs(filepath.Join(packerSubDirName))
-	if err != nil {
-		err = errors.Wrap(err, "failed to create path to packer directory")
-		return nil, err
-	}
+	// Packer manifest paths
+	var (
+		absPathToPackerAwsManifest = filepath.Join(absPathToPackerRunDir, awsSubDirName, packerManifestName)
+	)
 
 	switch tool {
 	case PackerID:
@@ -216,15 +223,17 @@ func NewHashicorpVars(tool Tool, cloud Cloud) (hv *HashicorpVars, err error) {
 
 		switch cloud {
 		case AWS:
-			mergedTemplateAbsPath, err = utils.MergeFilesTo(absPathToTerraformGeneralTemplate, absPathToTerraformAWSTemplate)
+			mergedTemplateAbsPath, err = utils.MergeFilesTo(
+				absPathToTempTerraformMergedTemplate,
+				absPathToTerraformGeneralTemplate,
+				absPathToTerraformAWSTemplate,
+			)
 			if err != nil {
 				err = errors.Wrap(err, "failed to merge files")
 				return nil, err
 			}
 
-			absPathToPackerManifestForAws := filepath.Join(absPathToPackerDir, awsSubDirName, packerManifestName)
-
-			lastBuiltAmiId, err := utils.GetLastBuiltAmiId(absPathToPackerManifestForAws)
+			lastBuiltAmiId, err = utils.GetLastBuiltAmiId(absPathToPackerAwsManifest)
 			if err != nil {
 				err = errors.Wrap(err, "failed to get last built AMI ID")
 				return nil, err
@@ -238,9 +247,9 @@ func NewHashicorpVars(tool Tool, cloud Cloud) (hv *HashicorpVars, err error) {
 
 			hv = &HashicorpVars{
 				Name:    terraformAwsVarsFileName,
-				AbsPath: mergedTemplateAbsPath,
+				AbsPath: absPathToTerraformAwsVarsFile,
 				Template: &Template{
-					AbsPath: absPathToTerraformAWSTemplate,
+					AbsPath: mergedTemplateAbsPath,
 					Environment: &TerraformAWSEnvironment{
 						AWS_REGION:                   viper.GetString("AWS.Region"),
 						AWS_INSTANCE_TYPE:            viper.GetString("AWS.EC2.Instance.Type"),
