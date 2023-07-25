@@ -10,50 +10,49 @@ import (
 )
 
 func Download(url, destPath string, bytesDownloadedChan chan<- int) (err error) {
-	response, err := http.Get(url)
-	if err != nil {
-		err = errors.Wrapf(err, "failed to download from: %s", url)
-		return
+	var (
+		destDir     = filepath.Dir(destPath)
+		bytesBuffer = make([]byte, 4096)
+
+		response        *http.Response
+		file            *os.File
+		bytesDownloaded int
+	)
+
+	// Initiate download
+	if response, err = http.Get(url); err != nil {
+		return errors.Wrapf(err, "failed to download from: %s", url)
 	}
 	defer response.Body.Close()
 
-	destDir := filepath.Dir(destPath)
-
-	// Create the destination along with all the necessary directories
-	err = os.MkdirAll(destDir, 0755)
-	if err != nil {
-		err = errors.Wrapf(err, "failed to create destination directory for: %s", destPath)
-		return
+	// Create the destination dir
+	if err = os.MkdirAll(destDir, 0755); err != nil {
+		return errors.Wrapf(err, "failed to create destination directory for: %s", destPath)
 	}
 
-	file, err := os.OpenFile(destPath, os.O_CREATE|os.O_WRONLY, 0744)
-	if err != nil {
-		err = errors.Wrapf(err, "failed to create file for: %s", destPath)
-		return
+	// Create the file to write to
+	if file, err = os.OpenFile(destPath, os.O_CREATE|os.O_WRONLY, 0744); err != nil {
+		return errors.Wrapf(err, "failed to create file for: %s", destPath)
 	}
 	defer file.Close()
 
-	buffer := make([]byte, 4096)
-
-	// Iterate over the response body and sned downloaded bytes to channel
+	// Iterate over the response body
 	for {
-		bytesDownloaded, err := response.Body.Read(buffer)
-
-		if err != nil && err != io.EOF {
-			err = errors.Wrap(err, "failed to read response body")
-			return err
+		// Read the response body into the bytes buffer
+		if bytesDownloaded, err = response.Body.Read(bytesBuffer); err != nil && err != io.EOF {
+			return errors.Wrap(err, "failed to read response body")
 		}
 
 		if bytesDownloaded == 0 {
 			break
 		}
 
+		// Send the number of bytes downloaded to the channel
 		bytesDownloadedChan <- bytesDownloaded
 
-		_, err = file.Write(buffer[:bytesDownloaded])
-		if err != nil {
-			err = errors.Wrap(err, "failed to write to file")
-			return err
+		// Write the bytes to the file
+		if _, err = file.Write(bytesBuffer[:bytesDownloaded]); err != nil {
+			return errors.Wrap(err, "failed to write to file")
 		}
 	}
 

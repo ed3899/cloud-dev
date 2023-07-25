@@ -6,8 +6,11 @@ import (
 
 // Returns true if the file at the given absolute path exists, false otherwise.
 func FilePresent(absolutePath string) bool {
+	var (
+		err error
+	)
 	// Check if the file at the given absolute path exists
-	_, err := os.Stat(absolutePath)
+	_, err = os.Stat(absolutePath)
 	// If there is no error, it means the file exists
 	if err == nil {
 		return true

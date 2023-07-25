@@ -26,7 +26,6 @@ import (
 //	`==> test.amazon-ebs.ubuntu: Found Image ID: ami-03f65b8614a860c29`
 //	`==> test.amazon-ebs.ubuntu: Creating temporary keypair: packer_64b824bb-026f-af2c-184e-7097c138d520`
 func RunCmdAndStream(cmd *exec.Cmd) (err error) {
-	// TODO refactor
 	var (
 		cmdStdout io.ReadCloser
 		cmdStderr io.ReadCloser
