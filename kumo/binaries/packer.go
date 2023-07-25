@@ -23,12 +23,8 @@ type Packer struct {
 }
 
 const (
-	PLUGINS_DIR_NAME     = "plugins"
+	PLUGINS_DIR_NAME   = "plugins"
 	PACKER_PLUGIN_PATH = "PACKER_PLUGIN_PATH"
-)
-
-var (
-	initialLocation string
 )
 
 func NewPacker() (packer *Packer, err error) {
@@ -85,8 +81,9 @@ func NewPacker() (packer *Packer, err error) {
 
 func (p *Packer) Init(cloud Cloud) (err error) {
 	var (
-		cmd    = exec.Command(p.AbsPathToExecutable, "init", ".")
-		cmdErr error
+		cmd             = exec.Command(p.AbsPathToExecutable, "init", ".")
+		cmdErr          error
+		initialLocation string
 	)
 
 	// Store current working directory
@@ -128,8 +125,9 @@ func (p *Packer) Init(cloud Cloud) (err error) {
 
 func (p *Packer) Build(cloud Cloud) (err error) {
 	var (
-		cmd    = exec.Command(p.AbsPathToExecutable, "build", ".")
-		cmdErr error
+		cmd             = exec.Command(p.AbsPathToExecutable, "build", ".")
+		cmdErr          error
+		initialLocation string
 	)
 
 	// Store current working directory

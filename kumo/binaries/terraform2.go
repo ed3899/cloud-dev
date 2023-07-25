@@ -123,8 +123,9 @@ func (t *Terraform2) UnsetCloudCredentials(cloud Cloud) (err error) {
 
 func (t *Terraform2) Init(cloud Cloud) (err error) {
 	var (
-		cmd    = exec.Command(t.AbsPathToExecutable, "init", ".")
-		cmdErr error
+		cmd             = exec.Command(t.AbsPathToExecutable, "init", ".")
+		cmdErr          error
+		initialLocation string
 	)
 
 	// Store current working directory
@@ -158,9 +159,73 @@ func (t *Terraform2) Init(cloud Cloud) (err error) {
 }
 
 func (t *Terraform2) Up(cloud Cloud) (err error) {
-	return
+	var (
+		cmd             = exec.Command(t.AbsPathToExecutable, "apply", "-auto-approve", ".")
+		cmdErr          error
+		initialLocation string
+	)
+
+	// Store current working directory
+	if initialLocation, err = os.Getwd(); err != nil {
+		err = errors.Wrapf(err, "Error occurred while getting current working directory")
+		return
+	}
+
+	switch cloud {
+	case AWS:
+		// Change to run directory
+		absPathToRunLocation := filepath.Join(t.AbsPathToRunDir, AWS_SUBDIR_NAME)
+		if err = os.Chdir(absPathToRunLocation); err != nil {
+			err = errors.Wrapf(err, "Error occurred while changing directory to %s", absPathToRunLocation)
+			return err
+		}
+		defer os.Chdir(initialLocation)
+
+		// Run cmd
+		if cmdErr = utils.AttachCliToProcess(cmd); cmdErr != nil {
+			err = errors.Wrapf(cmdErr, "Error occured while deploying for %v", cloud)
+			return
+		}
+		return
+
+	default:
+		err = errors.Errorf("Cloud '%v' not supported", cloud)
+		return
+	}
 }
 
 func (t *Terraform2) Destroy(cloud Cloud) (err error) {
-	return
+	var (
+		cmd             = exec.Command(t.AbsPathToExecutable, "destroy", "-auto-approve", ".")
+		cmdErr          error
+		initialLocation string
+	)
+
+	// Store current working directory
+	if initialLocation, err = os.Getwd(); err != nil {
+		err = errors.Wrapf(err, "Error occurred while getting current working directory")
+		return
+	}
+
+	switch cloud {
+	case AWS:
+		// Change to run directory
+		absPathToRunLocation := filepath.Join(t.AbsPathToRunDir, AWS_SUBDIR_NAME)
+		if err = os.Chdir(absPathToRunLocation); err != nil {
+			err = errors.Wrapf(err, "Error occurred while changing directory to %s", absPathToRunLocation)
+			return err
+		}
+		defer os.Chdir(initialLocation)
+
+		// Run cmd
+		if cmdErr = utils.AttachCliToProcess(cmd); cmdErr != nil {
+			err = errors.Wrapf(cmdErr, "Error occured while destroying for %v", cloud)
+			return
+		}
+		return
+
+	default:
+		err = errors.Errorf("Cloud '%v' not supported", cloud)
+		return
+	}
 }
