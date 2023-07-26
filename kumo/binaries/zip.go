@@ -105,24 +105,21 @@ func (z *Zip) IncrementExtractionBar(extractedBytes int) {
 
 func (z *Zip) Download(downloadedBytesChan chan<- int) (err error) {
 	if err = utils.Download(z.URL, z.AbsPath, downloadedBytesChan); err != nil {
-		err = errors.Wrapf(err, "failed to download: %v", z.URL)
-		return
+		return errors.Wrapf(err, "failed to download: %v", z.URL)
 	}
 	return
 }
 
 func (z *Zip) ExtractTo(extractToPath string, extractedBytesChan chan<- int) (err error) {
 	if err = utils.Unzip(z.AbsPath, extractToPath, extractedBytesChan); err != nil {
-		err = errors.Wrapf(err, "failed to unzip: %v", z.AbsPath)
-		return
+		return errors.Wrapf(err, "failed to unzip: %v", z.AbsPath)
 	}
 	return
 }
 
 func (z *Zip) Remove() (err error) {
 	if err = os.Remove(z.AbsPath); err != nil {
-		err = errors.Wrapf(err, "failed to remove: %v", z.AbsPath)
-		return
+		return errors.Wrapf(err, "failed to remove: %v", z.AbsPath)
 	}
 	return
 }
