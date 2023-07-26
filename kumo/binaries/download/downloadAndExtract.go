@@ -1,14 +1,15 @@
-package binaries
+package download
 
 import (
 	"os"
 	"path/filepath"
 
+	"github.com/ed3899/kumo/binaries"
 	"github.com/pkg/errors"
 	"github.com/vbauerster/mpb/v8"
 )
 
-func DownloadAndExtractWorkflow(z ZipI, extractToAbsPathDir string) (err error) {
+func DownloadAndExtract(z binaries.ZipI, extractToAbsPathDir string) (err error) {
 	var (
 		absPathToZipDir = filepath.Dir(z.GetPath())
 		progress        = mpb.New(mpb.WithWidth(64), mpb.WithAutoRefresh())

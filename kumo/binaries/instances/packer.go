@@ -1,4 +1,4 @@
-package binaries
+package instances
 
 import (
 	"fmt"
@@ -6,17 +6,18 @@ import (
 	"os/exec"
 	"path/filepath"
 
+	"github.com/ed3899/kumo/binaries"
 	"github.com/ed3899/kumo/utils"
 	"github.com/pkg/errors"
 )
 
 type PackerI interface {
-	Init(cloud Cloud) (err error)
+	Init(cloud binaries.Cloud) (err error)
 	Build() (err error)
 }
 
 type Packer struct {
-	ID                  Tool
+	ID                  binaries.Tool
 	AbsPathToExecutable string
 	AbsPathToRunDir     string
 	Zip                 *Zip
@@ -45,7 +46,7 @@ func NewPacker() (packer *Packer, err error) {
 		contentLength       int64
 	)
 
-	if absPathToExecutable, err = filepath.Abs(filepath.Join(DEPENDENCIES_DIR_NAME, PACKER, executableName)); err != nil {
+	if absPathToExecutable, err = filepath.Abs(filepath.Join(binaries.DEPENDENCIES_DIR_NAME, PACKER, executableName)); err != nil {
 		err = errors.Wrapf(err, "failed to create executable path to: %s", executableName)
 		return
 	}
@@ -55,7 +56,7 @@ func NewPacker() (packer *Packer, err error) {
 		return
 	}
 
-	if zipPath, err = filepath.Abs(filepath.Join(DEPENDENCIES_DIR_NAME, PACKER, zipName)); err != nil {
+	if zipPath, err = filepath.Abs(filepath.Join(binaries.DEPENDENCIES_DIR_NAME, PACKER, zipName)); err != nil {
 		err = errors.Wrapf(err, "failed to craft zip path to: %s", zipName)
 		return
 	}
@@ -66,7 +67,7 @@ func NewPacker() (packer *Packer, err error) {
 	}
 
 	packer = &Packer{
-		ID:                  PackerID,
+		ID:                  binaries.PackerID,
 		AbsPathToExecutable: absPathToExecutable,
 		AbsPathToRunDir:     absPathToRunDir,
 		Zip: &Zip{
@@ -88,10 +89,10 @@ func (p *Packer) IsNotInstalled() bool {
 	return utils.FileNotPresent(p.AbsPathToExecutable)
 }
 
-func (p *Packer) GetAbsPathToCloudRunDir(cloud Cloud) (cloudRunDir string, err error) {
+func (p *Packer) GetAbsPathToCloudRunDir(cloud binaries.Cloud) (cloudRunDir string, err error) {
 	switch cloud {
-	case AWS:
-		cloudRunDir = filepath.Join(p.AbsPathToRunDir, AWS_SUBDIR_NAME)
+	case binaries.AWS:
+		cloudRunDir = filepath.Join(p.AbsPathToRunDir, binaries.AWS_SUBDIR_NAME)
 
 	default:
 		err = errors.Errorf("Cloud '%v' not supported", cloud)
@@ -100,10 +101,10 @@ func (p *Packer) GetAbsPathToCloudRunDir(cloud Cloud) (cloudRunDir string, err e
 	return
 }
 
-func (p *Packer) SetPluginPath(cloud Cloud) (err error) {
+func (p *Packer) SetPluginPath(cloud binaries.Cloud) (err error) {
 	switch cloud {
-	case AWS:
-		if err = os.Setenv(PACKER_PLUGIN_PATH, filepath.Join(p.AbsPathToRunDir, AWS_SUBDIR_NAME, PLUGINS_DIR_NAME)); err != nil {
+	case binaries.AWS:
+		if err = os.Setenv(PACKER_PLUGIN_PATH, filepath.Join(p.AbsPathToRunDir, binaries.AWS_SUBDIR_NAME, PLUGINS_DIR_NAME)); err != nil {
 			err = errors.Wrapf(err, "Error occurred while setting %s environment variable", PACKER_PLUGIN_PATH)
 		}
 
@@ -114,9 +115,9 @@ func (p *Packer) SetPluginPath(cloud Cloud) (err error) {
 	return
 }
 
-func (p *Packer) UnsetPluginPath(cloud Cloud) (err error) {
+func (p *Packer) UnsetPluginPath(cloud binaries.Cloud) (err error) {
 	switch cloud {
-	case AWS:
+	case binaries.AWS:
 		if err = os.Unsetenv(PACKER_PLUGIN_PATH); err != nil {
 			err = errors.Wrapf(err, "Error occurred while unsetting %s environment variable", PACKER_PLUGIN_PATH)
 		}
@@ -128,14 +129,14 @@ func (p *Packer) UnsetPluginPath(cloud Cloud) (err error) {
 	return
 }
 
-func (p *Packer) Init(cloud Cloud) (err error) {
+func (p *Packer) Init(cloud binaries.Cloud) (err error) {
 	var (
 		cmd    = exec.Command(p.AbsPathToExecutable, "init", "-upgrade", ".")
 		cmdErr error
 	)
 
 	switch cloud {
-	case AWS:
+	case binaries.AWS:
 		if cmdErr = utils.RunCmdAndStream(cmd); cmdErr != nil {
 			err = errors.Wrap(cmdErr, "Error occured while initializing packer")
 		}
@@ -147,14 +148,14 @@ func (p *Packer) Init(cloud Cloud) (err error) {
 	return
 }
 
-func (p *Packer) Build(cloud Cloud) (err error) {
+func (p *Packer) Build(cloud binaries.Cloud) (err error) {
 	var (
 		cmd    = exec.Command(p.AbsPathToExecutable, "build", ".")
 		cmdErr error
 	)
 
 	switch cloud {
-	case AWS:
+	case binaries.AWS:
 		if cmdErr = utils.RunCmdAndStream(cmd); cmdErr != nil {
 			err = errors.Wrapf(cmdErr, "Error occured while building packer")
 		}

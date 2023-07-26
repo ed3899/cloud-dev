@@ -1,17 +1,19 @@
-package binaries
+package download
 
 import (
+
+	"github.com/ed3899/kumo/binaries"
 	"github.com/pkg/errors"
 	"github.com/vbauerster/mpb/v8"
 )
 
-type DownloadableByWorkflow interface {
-	Downloadable
-	Removable
-	Retrivable
+type DownloadableAndProgressive interface {
+	binaries.Downloadable
+	binaries.Removable
+	binaries.Retrivable
 }
 
-func DownloadAndShowProgress[D DownloadableByWorkflow](d D, multiProgressBar *mpb.Progress) (err error) {
+func DownloadAndShowProgress[D DownloadableAndProgressive](d D, multiProgressBar *mpb.Progress) (err error) {
 	var (
 		downloadedBytesChan = make(chan int, 1024)
 		downloadedBytes     int

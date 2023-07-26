@@ -9,6 +9,7 @@ import (
 	"github.com/pkg/errors"
 )
 
+// TODO add context
 func Download(url, destPath string, bytesDownloadedChan chan<- int) (err error) {
 	var (
 		destDir     = filepath.Dir(destPath)

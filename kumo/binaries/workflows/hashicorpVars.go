@@ -1,4 +1,4 @@
-package binaries
+package workflows
 
 import (
 	"log"
@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"text/template"
 
+	"github.com/ed3899/kumo/binaries"
 	"github.com/ed3899/kumo/utils"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
@@ -68,7 +69,7 @@ type HashicorpVars struct {
 	Template *Template
 }
 
-func NewHashicorpVars(tool Tool, cloud Cloud) (hv *HashicorpVars, err error) {
+func NewHashicorpVars(tool binaries.Tool, cloud binaries.Cloud) (hv *HashicorpVars, err error) {
 	const (
 		//% Packer
 		packerSubDirName   = "packer"
@@ -163,7 +164,7 @@ func NewHashicorpVars(tool Tool, cloud Cloud) (hv *HashicorpVars, err error) {
 	)
 
 	switch tool {
-	case PackerID:
+	case binaries.PackerID:
 		// Set general environment
 		packerGeneralEnvironment = &PackerGeneralEnvironment{
 			GIT_USERNAME:                          viper.GetString("Git.Username"),
@@ -173,7 +174,7 @@ func NewHashicorpVars(tool Tool, cloud Cloud) (hv *HashicorpVars, err error) {
 		}
 
 		switch cloud {
-		case AWS:
+		case binaries.AWS:
 			// Create merged template
 			mergedTemplateAbsPath, err = utils.MergeFilesTo(
 				absPathToTempPackerMergedTemplate,
@@ -217,7 +218,7 @@ func NewHashicorpVars(tool Tool, cloud Cloud) (hv *HashicorpVars, err error) {
 			err = errors.Errorf("Kind '%v' not supported", cloud)
 		}
 
-	case TerraformID:
+	case binaries.TerraformID:
 		// Get public IP
 		if publicIp, err = utils.GetPublicIp(); err != nil {
 			log.Print(errors.Wrapf(err, "failed to get public IP, using default: %s", defaulIp))
@@ -232,7 +233,7 @@ func NewHashicorpVars(tool Tool, cloud Cloud) (hv *HashicorpVars, err error) {
 		}
 
 		switch cloud {
-		case AWS:
+		case binaries.AWS:
 			// Create merged template
 			mergedTemplateAbsPath, err = utils.MergeFilesTo(
 				absPathToTempTerraformMergedTemplate,
@@ -286,7 +287,7 @@ func NewHashicorpVars(tool Tool, cloud Cloud) (hv *HashicorpVars, err error) {
 
 func (hv *HashicorpVars) Create() (err error) {
 	var (
-		varsFile *os.File
+		varsFile          *os.File
 		hashicorpTemplate *template.Template
 	)
 

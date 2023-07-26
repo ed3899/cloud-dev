@@ -1,40 +1,44 @@
-package binaries
+package packer
 
 import (
 	"os"
 	"path/filepath"
 
+	"github.com/ed3899/kumo/binaries"
+	"github.com/ed3899/kumo/binaries/download"
+	"github.com/ed3899/kumo/binaries/instances"
+	"github.com/ed3899/kumo/binaries/workflows"
 	"github.com/pkg/errors"
 )
 
-func PackerBuildWorkflow() (err error) {
+func BuildWorkflow() (err error) {
 	var (
-		cloud                    Cloud
-		packer                   *Packer
+		cloud                    binaries.Cloud
+		packer                   *instances.Packer
 		absPathToInitialLocation string
 		absPathToCloudRunDir     string
-		varsFile                 *HashicorpVars
+		varsFile                 *workflows.HashicorpVars
 	)
 
 	// A. Instantiate packer
-	if packer, err = NewPacker(); err != nil {
+	if packer, err = instances.NewPacker(); err != nil {
 		return errors.Wrap(err, "Error occurred while creating new packer")
 	}
 
 	// Download and extract if not installed
 	if packer.IsNotInstalled() {
-		if err = DownloadAndExtractWorkflow(packer.Zip, filepath.Dir(packer.AbsPathToExecutable)); err != nil {
+		if err = download.DownloadAndExtract(packer.Zip, filepath.Dir(packer.AbsPathToExecutable)); err != nil {
 			return errors.Wrap(err, "Error occurred while downloading and extracting packer")
 		}
 	}
 
 	// B. Set cloud
-	if cloud, err = GetCloud(); err != nil {
+	if cloud, err = workflows.GetCloud(); err != nil {
 		return errors.Wrap(err, "Error occurred while getting cloud")
 	}
 
 	// C. Instantiate vars file
-	if varsFile, err = NewHashicorpVars(packer.ID, cloud); err != nil {
+	if varsFile, err = workflows.NewHashicorpVars(packer.ID, cloud); err != nil {
 		return errors.Wrap(err, "Error occurred while instantiating hashicorp vars")
 	}
 

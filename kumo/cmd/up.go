@@ -3,7 +3,7 @@ package cmd
 import (
 	"log"
 
-	"github.com/ed3899/kumo/binaries"
+	"github.com/ed3899/kumo/binaries/workflows/terraform"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
@@ -16,7 +16,7 @@ func GetUpCommand() *cobra.Command {
 		deploy the latest AMI built. It generates an SSH config file for you to easily SSH into your
 		instances from VSCode.`,
 		Run: func(cmd *cobra.Command, args []string) {
-			if err := binaries.TerraformUpWorkflow(); err != nil {
+			if err := terraform.UpWorkflow(); err != nil {
 				log.Fatal(errors.Wrap(err, "Error occurred while running terraform up workflow"))
 			}
 		},

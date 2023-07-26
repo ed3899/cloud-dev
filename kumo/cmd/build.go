@@ -1,10 +1,11 @@
 package cmd
 
 import (
-	"github.com/pkg/errors"
 	"log"
 
-	"github.com/ed3899/kumo/binaries"
+	"github.com/pkg/errors"
+
+	"github.com/ed3899/kumo/binaries/workflows/packer"
 	"github.com/spf13/cobra"
 )
 
@@ -16,7 +17,7 @@ func GetBuildCommand() *cobra.Command {
 		to your root directory. Please keep these keys safe. If you lose them, you will not be able
 		to SSH into your instance.`,
 		Run: func(cmd *cobra.Command, args []string) {
-			if err := binaries.PackerBuildWorkflow(); err != nil {
+			if err := packer.BuildWorkflow(); err != nil {
 				log.Fatal(errors.Wrap(err, "Error occurred running packer build workflow"))
 			}
 		},

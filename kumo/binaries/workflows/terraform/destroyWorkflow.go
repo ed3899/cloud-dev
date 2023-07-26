@@ -1,49 +1,42 @@
-package binaries
+package terraform
 
 import (
 	"os"
 	"path/filepath"
 
+	"github.com/ed3899/kumo/binaries"
+	"github.com/ed3899/kumo/binaries/download"
+	"github.com/ed3899/kumo/binaries/instances"
+	"github.com/ed3899/kumo/binaries/workflows"
 	"github.com/pkg/errors"
 )
 
-func TerraformUpWorkflow() (err error) {
+func DestroyWorkflow() (err error) {
 	var (
-		cloud                    Cloud
-		terraform                *Terraform
+		cloud                    binaries.Cloud
+		terraform                *instances.Terraform
 		absPathToInitialLocation string
 		absPathToCloudRunDir     string
-		varsFile                 *HashicorpVars
 	)
 
 	// A. Instantiate terraform
-	if terraform, err = NewTerraform(); err != nil {
+	if terraform, err = instances.NewTerraform(); err != nil {
 		return errors.Wrap(err, "Error occurred while creating new terraform")
 	}
 
 	// Download and extract if not installed
 	if terraform.IsNotInstalled() {
-		if err = DownloadAndExtractWorkflow(terraform.Zip, filepath.Dir(terraform.AbsPathToExecutable)); err != nil {
+		if err = download.DownloadAndExtract(terraform.Zip, filepath.Dir(terraform.AbsPathToExecutable)); err != nil {
 			return errors.Wrap(err, "Error occurred while downloading and extracting terraform")
 		}
 	}
 
 	// B. Set cloud
-	if cloud, err = GetCloud(); err != nil {
+	if cloud, err = workflows.GetCloud(); err != nil {
 		return errors.Wrap(err, "Error occurred while getting cloud")
 	}
 
-	// C. Instantiate vars file
-	if varsFile, err = NewHashicorpVars(terraform.ID, cloud); err != nil {
-		return errors.Wrap(err, "Error occurred while instantiating hashicorp vars")
-	}
-
-	// Create vars file
-	if err = varsFile.Create(); err != nil {
-		return errors.Wrap(err, "Error occurred while creating vars file")
-	}
-
-	// D. Get abs path to cloud run directory
+	// C. Get abs path to cloud run directory
 	if absPathToCloudRunDir, err = terraform.GetAbsPathToCloudRunDir(cloud); err != nil {
 		return errors.Wrap(err, "Error occurred while getting absolute path to cloud run directory")
 	}
@@ -58,29 +51,29 @@ func TerraformUpWorkflow() (err error) {
 		return errors.Wrap(err, "Error occurred while changing directory to packer run directory")
 	}
 	defer func() {
-		if chDirError := os.Chdir(absPathToInitialLocation); chDirError != nil {
-			err = errors.Wrap(chDirError, "Error occurred while changing directory back to initial location")
+		if err = os.Chdir(absPathToInitialLocation); err != nil {
+			err = errors.Wrap(err, "Error occurred while changing directory back to initial location")
 		}
 	}()
 
-	// E. Set cloud credentials and defer unsetting
+	// D. Set cloud credentials and defer unsetting
 	if err = terraform.SetCloudCredentials(cloud); err != nil {
 		return errors.Wrap(err, "Error occurred while setting cloud credentials")
 	}
 	defer func() {
-		if unsetCloudErr := terraform.UnsetCloudCredentials(cloud); unsetCloudErr != nil {
-			err = errors.Wrap(unsetCloudErr, "Error occurred while unsetting cloud credentials")
+		if err = terraform.UnsetCloudCredentials(cloud); err != nil {
+			err = errors.Wrap(err, "Error occurred while unsetting cloud credentials")
 		}
 	}()
 
-	// F. Initialize
+	// E. Initialize
 	if err = terraform.Init(cloud); err != nil {
 		return errors.Wrap(err, "Error occurred while initializing terraform")
 	}
 
-	// G. Up
-	if err = terraform.Up(cloud); err != nil {
-		return errors.Wrap(err, "Error occurred while running terraform up")
+	// F. Destroy
+	if err = terraform.Destroy(cloud); err != nil {
+		return errors.Wrap(err, "Error occurred while destroying")
 	}
 
 	return

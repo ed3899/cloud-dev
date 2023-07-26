@@ -1,20 +1,21 @@
-package binaries
+package download
 
 import (
 	"os"
 
+	"github.com/ed3899/kumo/binaries"
 	"github.com/ed3899/kumo/utils"
 	"github.com/pkg/errors"
 	"github.com/vbauerster/mpb/v8"
 )
 
-type ExtractableByWorkflow interface {
-	Extractable
-	Removable
-	Retrivable
+type ExtractableAndProgressive interface {
+	binaries.Extractable
+	binaries.Removable
+	binaries.Retrivable
 }
 
-func ExtractAndShowProgress[E ExtractableByWorkflow](e E, absPathToExtraction string, multiProgressBar *mpb.Progress) (err error) {
+func ExtractAndShowProgress[E ExtractableAndProgressive](e E, absPathToExtraction string, multiProgressBar *mpb.Progress) (err error) {
 	var (
 		extractedBytesChan = make(chan int, 1024)
 		extractedBytes     int
@@ -53,7 +54,7 @@ OuterLoop:
 			}
 
 			e.IncrementExtractionBar(extractedBytes)
-			
+
 		case err = <-errChan:
 			if err == nil {
 				continue OuterLoop
