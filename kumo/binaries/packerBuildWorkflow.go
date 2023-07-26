@@ -18,83 +18,69 @@ func PackerBuildWorkflow() (err error) {
 
 	// A. Instantiate packer
 	if packer, err = NewPacker(); err != nil {
-		err = errors.Wrap(err, "Error occurred while creating new packer")
-		return
+		return errors.Wrap(err, "Error occurred while creating new packer")
 	}
 
 	// A. Download and extract if not installed
 	if packer.IsNotInstalled() {
-		err = DownloadAndExtractWorkflow(packer.Zip, filepath.Dir(packer.AbsPathToExecutable))
-		if err != nil {
-			err = errors.Wrap(err, "Error occurred while downloading and extracting packer")
-			return
+		if err = DownloadAndExtractWorkflow(packer.Zip, filepath.Dir(packer.AbsPathToExecutable)); err != nil {
+			return errors.Wrap(err, "Error occurred while downloading and extracting packer")
 		}
 	}
 
 	// B. Set cloud
 	if cloud, err = GetCloud(); err != nil {
-		err = errors.Wrap(err, "Error occurred while getting cloud")
-		return
+		return errors.Wrap(err, "Error occurred while getting cloud")
 	}
 
 	// C. Instantiate vars file
 	if varsFile, err = NewHashicorpVars(packer.ID, cloud); err != nil {
-		err = errors.Wrap(err, "Error occurred while instantiating hashicorp vars")
-		return
+		return errors.Wrap(err, "Error occurred while instantiating hashicorp vars")
 	}
 
 	// C. Create vars file
 	if err = varsFile.Create(); err != nil {
-		err = errors.Wrap(err, "Error occurred while creating vars file")
-		return
+		return errors.Wrap(err, "Error occurred while creating vars file")
 	}
 
 	// D. Get abs path to cloud run directory
 	if absPathToCloudRunDir, err = packer.GetAbsPathToCloudRunDir(cloud); err != nil {
-		err = errors.Wrap(err, "Error occurred while getting absolute path to cloud run directory")
-		return
+		return errors.Wrap(err, "Error occurred while getting absolute path to cloud run directory")
 	}
 
 	// D. Set initial location
 	if absPathToInitialLocation, err = os.Getwd(); err != nil {
-		err = errors.Wrap(err, "Error occurred while getting current working directory")
-		return
+		return errors.Wrap(err, "Error occurred while getting current working directory")
 	}
 
 	// D. Change directory to packer run directory and defer changing back to initial location
 	if err = os.Chdir(absPathToCloudRunDir); err != nil {
-		err = errors.Wrap(err, "Error occurred while changing directory to packer run directory")
-		return
+		return errors.Wrap(err, "Error occurred while changing directory to packer run directory")
 	}
 	defer func() {
-		if err = os.Chdir(absPathToInitialLocation); err != nil {
-			err = errors.Wrap(err, "Error occurred while changing directory back to initial location")
-			return
+		if chdirErr := os.Chdir(absPathToInitialLocation); err != nil {
+			err = errors.Wrap(chdirErr, "Error occurred while changing directory back to initial location")
 		}
 	}()
 
 	// E. Set plugin path
 	if err = packer.SetPluginPath(cloud); err != nil {
-		err = errors.Wrap(err, "Error occurred while setting plugin path")
-		return
+		return errors.Wrap(err, "Error occurred while setting plugin path")
 	}
 	defer func() {
-		if err = packer.UnsetPluginPath(cloud); err != nil {
-			err = errors.Wrap(err, "Error occurred while unsetting plugin path")
-			return
+		if unsetError := packer.UnsetPluginPath(cloud); err != nil {
+			err = errors.Wrap(unsetError, "Error occurred while unsetting plugin path")
 		}
 	}()
 
 	// F. Initialize
 	if err = packer.Init(cloud); err != nil {
-		err = errors.Wrap(err, "Error occurred while initializing packer")
-		return
+		return errors.Wrap(err, "Error occurred while initializing packer")
 	}
 
 	// G. Build
 	if err = packer.Build(cloud); err != nil {
-		err = errors.Wrap(err, "Error occurred while building packer")
-		return
+		return errors.Wrap(err, "Error occurred while building packer")
 	}
 
 	return

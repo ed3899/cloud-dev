@@ -76,6 +76,7 @@ func NewPacker() (packer *Packer, err error) {
 			ContentLength: contentLength,
 		},
 	}
+
 	return
 }
 
@@ -91,9 +92,11 @@ func (p *Packer) GetAbsPathToCloudRunDir(cloud Cloud) (cloudRunDir string, err e
 	switch cloud {
 	case AWS:
 		cloudRunDir = filepath.Join(p.AbsPathToRunDir, AWS_SUBDIR_NAME)
+		
 	default:
 		err = errors.Errorf("Cloud '%v' not supported", cloud)
 	}
+
 	return
 }
 
@@ -103,9 +106,11 @@ func (p *Packer) SetPluginPath(cloud Cloud) (err error) {
 		if err = os.Setenv(PACKER_PLUGIN_PATH, filepath.Join(p.AbsPathToRunDir, AWS_SUBDIR_NAME, PLUGINS_DIR_NAME)); err != nil {
 			err = errors.Wrapf(err, "Error occurred while setting %s environment variable", PACKER_PLUGIN_PATH)
 		}
+
 	default:
 		err = errors.Errorf("Cloud '%v' not supported", cloud)
 	}
+
 	return
 }
 
@@ -115,9 +120,11 @@ func (p *Packer) UnsetPluginPath(cloud Cloud) (err error) {
 		if err = os.Unsetenv(PACKER_PLUGIN_PATH); err != nil {
 			err = errors.Wrapf(err, "Error occurred while unsetting %s environment variable", PACKER_PLUGIN_PATH)
 		}
+
 	default:
 		err = errors.Errorf("Cloud '%v' not supported", cloud)
 	}
+
 	return
 }
 
