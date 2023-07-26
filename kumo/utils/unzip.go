@@ -2,22 +2,20 @@ package utils
 
 import (
 	"archive/zip"
-	"fmt"
 	"io"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
 
 	"github.com/samber/oops"
-	"go.uber.org/zap"
 )
 
 func Unzip(pathToZip, extractToPath string, bytesUnzipped chan<- int) (err error) {
 	var (
-		unzipGroup     = new(sync.WaitGroup)
-		logger, zapErr = zap.NewProduction()
-		oopsBuilder    = oops.Code("unzip_failed").
+		unzipGroup  = new(sync.WaitGroup)
+		oopsBuilder = oops.Code("unzip_failed").
 				With("pathToZip", pathToZip).
 				With("extractToPath", extractToPath).
 				With("bytesUnzipped", bytesUnzipped)
@@ -27,10 +25,6 @@ func Unzip(pathToZip, extractToPath string, bytesUnzipped chan<- int) (err error
 		zipFile *zip.File
 	)
 
-	if zapErr != nil {
-		return oopsBuilder.Errorf("failed to create zap logger: %v", zapErr)
-	}
-
 	// Open the zip file and defer closing it
 	if reader, err = zip.OpenReader(pathToZip); err != nil {
 		return oopsBuilder.
@@ -38,7 +32,8 @@ func Unzip(pathToZip, extractToPath string, bytesUnzipped chan<- int) (err error
 	}
 	defer func() {
 		if err := reader.Close(); err != nil {
-			logger.With(zap.Error(err)).Fatal("failed to close zip reader")
+			err = oopsBuilder.Wrapf(err, "failed to close zip reader: %#v", reader.File)
+			log.Fatalf("failed to close zip reader: %+v", err)
 		}
 	}()
 
@@ -88,8 +83,7 @@ func Unzip(pathToZip, extractToPath string, bytesUnzipped chan<- int) (err error
 
 func unzipFile(zf *zip.File, extractToPath string) (bytesCopied int64, err error) {
 	var (
-		logger, zapErr = zap.NewProduction()
-		oopsBuilder    = oops.Code("unzipFile_failed").
+		oopsBuilder = oops.Code("unzipFile_failed").
 				With("zipFile", zf).
 				With("extractToPath", extractToPath)
 
@@ -97,10 +91,6 @@ func unzipFile(zf *zip.File, extractToPath string) (bytesCopied int64, err error
 		destinationFile *os.File
 		zippedFile      io.ReadCloser
 	)
-
-	if zapErr != nil {
-		return 0, oopsBuilder.Errorf("failed to create zap logger: %v", zapErr)
-	}
 
 	// Check if file path is not vulnerable to Zip Slip
 	filePath = filepath.Join(extractToPath, zf.Name)
@@ -128,8 +118,9 @@ func unzipFile(zf *zip.File, extractToPath string) (bytesCopied int64, err error
 			Wrapf(err, "failed to create destination file: %s", filePath)
 	}
 	defer func() {
-		if err = destinationFile.Close(); err != nil {
-			logger.With(zap.Error(err)).Fatal("failed to close destination file")
+		if err := destinationFile.Close(); err != nil {
+			err = oopsBuilder.Wrapf(err, "failed to close destination file: %#v", destinationFile.Name())
+			log.Fatalf("failed to close destination file: %+v", err)
 		}
 	}()
 
@@ -139,8 +130,9 @@ func unzipFile(zf *zip.File, extractToPath string) (bytesCopied int64, err error
 			Wrapf(err, "failed to open zipped file: %s", zf.Name)
 	}
 	defer func() {
-		if err = zippedFile.Close(); err != nil {
-			logger.With(zap.Error(err)).Fatal(fmt.Sprintf("failed to close zipped file: %s", zf.Name))
+		if err := zippedFile.Close(); err != nil {
+			err = oopsBuilder.Wrapf(err, "failed to close zipped file: %#v", zippedFile)
+			log.Fatalf("failed to close zipped file: %+v", err)
 		}
 	}()
 
