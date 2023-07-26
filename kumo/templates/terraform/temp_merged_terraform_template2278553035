@@ -1,6 +1,0 @@
-allowed_ip                   = "{{.TerraformGeneralEnvironment.ALLOWED_IP}}"
-AWS_REGION                   = "{{.AWS_REGION}}"
-AWS_INSTANCE_TYPE            = "{{.AWS_INSTANCE_TYPE}}"
-AWS_EC2_INSTANCE_VOLUME_TYPE = "{{.AWS_EC2_INSTANCE_VOLUME_TYPE}}"
-AWS_EC2_INSTANCE_VOLUME_SIZE = {{.AWS_EC2_INSTANCE_VOLUME_SIZE}}
-AMI_ID                       = "{{.AMI_ID}}"

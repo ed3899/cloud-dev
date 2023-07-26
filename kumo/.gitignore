@@ -58,3 +58,5 @@ kumokey*
 *.tfstate*
 
 ginkgo.report
+
+*_merged_*
