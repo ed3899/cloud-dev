@@ -19,18 +19,15 @@ func init() {
 		Type: "yaml",
 		Path: ".",
 	}); err != nil {
-		err = errors.Wrapf(err, "Error occurred while reading kumo config")
-		log.Fatal(err)
+		log.Fatal(errors.Wrapf(err, "Error occurred while reading kumo config"))
 	}
 
 	// Assemble commands
-	ccmds := GetAllCommands()
-	rootCmd.AddCommand(*ccmds...)
+	rootCmd.AddCommand(*GetAllCommands()...)
 }
 
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		err = errors.Wrapf(err, "Error occurred while running kumo")
-		log.Fatal(err)
+		log.Fatal(errors.Wrapf(err, "Error occurred while running kumo"))
 	}
 }

@@ -7,11 +7,9 @@ import (
 type CobraCommands = []*cobra.Command
 
 func GetAllCommands() *CobraCommands {
-	ccmds := []*cobra.Command{
+	return &CobraCommands{
 		GetBuildCommand(),
 		GetUpCommand(),
 		GetDestroyCommand(),
 	}
-
-	return &ccmds
 }

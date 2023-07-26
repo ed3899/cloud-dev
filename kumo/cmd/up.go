@@ -17,8 +17,7 @@ func GetUpCommand() *cobra.Command {
 		instances from VSCode.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			if err := binaries.TerraformUpWorkflow(); err != nil {
-				err = errors.Wrap(err, "Error occurred while running terraform up workflow")
-				log.Fatal(err)
+				log.Fatal(errors.Wrap(err, "Error occurred while running terraform up workflow"))
 			}
 		},
 	}

@@ -17,8 +17,7 @@ func GetBuildCommand() *cobra.Command {
 		to SSH into your instance.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			if err := binaries.PackerBuildWorkflow(); err != nil {
-				err = errors.Wrap(err, "Error occurred running packer build workflow")
-				log.Fatal(err)
+				log.Fatal(errors.Wrap(err, "Error occurred running packer build workflow"))
 			}
 		},
 	}
