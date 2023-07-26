@@ -85,13 +85,11 @@ func (t *Terraform) SetCloudCredentials(cloud Cloud) (err error) {
 	switch cloud {
 	case AWS:
 		if err = os.Setenv(AWS_ACCESS_KEY_ID, viper.GetString("AWS.AccessKeyId")); err != nil {
-			err = errors.Wrapf(err, "Error occurred while setting %s environment variable", AWS_ACCESS_KEY_ID)
-			return err
+			return errors.Wrapf(err, "Error occurred while setting %s environment variable", AWS_ACCESS_KEY_ID)
 		}
 
 		if err = os.Setenv(AWS_SECRET_ACCESS_KEY, viper.GetString("AWS.SecretAccessKey")); err != nil {
-			err = errors.Wrapf(err, "Error occurred while setting %s environment variable", AWS_SECRET_ACCESS_KEY)
-			return err
+			return errors.Wrapf(err, "Error occurred while setting %s environment variable", AWS_SECRET_ACCESS_KEY)
 		}
 
 	default:
@@ -105,13 +103,11 @@ func (t *Terraform) UnsetCloudCredentials(cloud Cloud) (err error) {
 	switch cloud {
 	case AWS:
 		if err = os.Unsetenv(AWS_ACCESS_KEY_ID); err != nil {
-			err = errors.Wrapf(err, "Error occurred while unsetting %s environment variable", AWS_ACCESS_KEY_ID)
-			return err
+			return errors.Wrapf(err, "Error occurred while unsetting %s environment variable", AWS_ACCESS_KEY_ID)
 		}
 
 		if err = os.Unsetenv(AWS_SECRET_ACCESS_KEY); err != nil {
-			err = errors.Wrapf(err, "Error occurred while unsetting %s environment variable", AWS_SECRET_ACCESS_KEY)
-			return err
+			return errors.Wrapf(err, "Error occurred while unsetting %s environment variable", AWS_SECRET_ACCESS_KEY)
 		}
 
 	default:
@@ -125,9 +121,11 @@ func (t *Terraform) GetAbsPathToCloudRunDir(cloud Cloud) (cloudRunDir string, er
 	switch cloud {
 	case AWS:
 		cloudRunDir = filepath.Join(t.AbsPathToRunDir, AWS_SUBDIR_NAME)
+
 	default:
 		err = errors.Errorf("Cloud '%v' not supported", cloud)
 	}
+
 	return
 }
 
@@ -147,10 +145,8 @@ func (t *Terraform) Init(cloud Cloud) (err error) {
 
 	switch cloud {
 	case AWS:
-		// Run cmd
 		if cmdErr = utils.RunCmdAndStream(cmd); cmdErr != nil {
 			err = errors.Wrapf(cmdErr, "Error occured while initializing terraform for %v", cloud)
-			return
 		}
 
 	default:
@@ -168,10 +164,8 @@ func (t *Terraform) Up(cloud Cloud) (err error) {
 
 	switch cloud {
 	case AWS:
-		// Run cmd
 		if cmdErr = utils.RunCmdAndStream(cmd); cmdErr != nil {
 			err = errors.Wrapf(cmdErr, "Error occured while deploying for %v", cloud)
-			return
 		}
 
 	default:
@@ -189,10 +183,8 @@ func (t *Terraform) Destroy(cloud Cloud) (err error) {
 
 	switch cloud {
 	case AWS:
-		// Run cmd
 		if cmdErr = utils.RunCmdAndStream(cmd); cmdErr != nil {
 			err = errors.Wrapf(cmdErr, "Error occured while destroying for %v", cloud)
-			return
 		}
 
 	default:

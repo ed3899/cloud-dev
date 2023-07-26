@@ -92,7 +92,7 @@ func (p *Packer) GetAbsPathToCloudRunDir(cloud Cloud) (cloudRunDir string, err e
 	switch cloud {
 	case AWS:
 		cloudRunDir = filepath.Join(p.AbsPathToRunDir, AWS_SUBDIR_NAME)
-		
+
 	default:
 		err = errors.Errorf("Cloud '%v' not supported", cloud)
 	}
@@ -136,7 +136,6 @@ func (p *Packer) Init(cloud Cloud) (err error) {
 
 	switch cloud {
 	case AWS:
-		// Run cmd
 		if cmdErr = utils.RunCmdAndStream(cmd); cmdErr != nil {
 			err = errors.Wrap(cmdErr, "Error occured while initializing packer")
 		}
@@ -156,7 +155,6 @@ func (p *Packer) Build(cloud Cloud) (err error) {
 
 	switch cloud {
 	case AWS:
-		// Run cmd
 		if cmdErr = utils.RunCmdAndStream(cmd); cmdErr != nil {
 			err = errors.Wrapf(cmdErr, "Error occured while building packer")
 		}

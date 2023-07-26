@@ -17,71 +17,59 @@ func TerraformDestroyWorkflow() (err error) {
 
 	// A. Instantiate terraform
 	if terraform, err = NewTerraform(); err != nil {
-		err = errors.Wrap(err, "Error occurred while creating new terraform")
-		return
+		return errors.Wrap(err, "Error occurred while creating new terraform")
 	}
 
 	// Download and extract if not installed
 	if terraform.IsNotInstalled() {
-		err = DownloadAndExtractWorkflow(terraform.Zip, filepath.Dir(terraform.AbsPathToExecutable))
-		if err != nil {
-			err = errors.Wrap(err, "Error occurred while downloading and extracting terraform")
-			return
+		if err = DownloadAndExtractWorkflow(terraform.Zip, filepath.Dir(terraform.AbsPathToExecutable)); err != nil {
+			return errors.Wrap(err, "Error occurred while downloading and extracting terraform")
 		}
 	}
 
 	// B. Set cloud
 	if cloud, err = GetCloud(); err != nil {
-		err = errors.Wrap(err, "Error occurred while getting cloud")
-		return
+		return errors.Wrap(err, "Error occurred while getting cloud")
 	}
 
-	// D. Get abs path to cloud run directory
+	// C. Get abs path to cloud run directory
 	if absPathToCloudRunDir, err = terraform.GetAbsPathToCloudRunDir(cloud); err != nil {
-		err = errors.Wrap(err, "Error occurred while getting absolute path to cloud run directory")
-		return
+		return errors.Wrap(err, "Error occurred while getting absolute path to cloud run directory")
 	}
 
 	// Set initial location
 	if absPathToInitialLocation, err = os.Getwd(); err != nil {
-		err = errors.Wrap(err, "Error occurred while getting current working directory")
-		return
+		return errors.Wrap(err, "Error occurred while getting current working directory")
 	}
 
 	// Change directory to terraform run directory and defer changing back to initial location
 	if err = os.Chdir(absPathToCloudRunDir); err != nil {
-		err = errors.Wrap(err, "Error occurred while changing directory to packer run directory")
-		return
+		return errors.Wrap(err, "Error occurred while changing directory to packer run directory")
 	}
 	defer func() {
 		if err = os.Chdir(absPathToInitialLocation); err != nil {
 			err = errors.Wrap(err, "Error occurred while changing directory back to initial location")
-			return
 		}
 	}()
 
-	// E. Set cloud credentials and defer unsetting
+	// D. Set cloud credentials and defer unsetting
 	if err = terraform.SetCloudCredentials(cloud); err != nil {
-		err = errors.Wrap(err, "Error occurred while setting cloud credentials")
-		return
+		return errors.Wrap(err, "Error occurred while setting cloud credentials")
 	}
 	defer func() {
 		if err = terraform.UnsetCloudCredentials(cloud); err != nil {
 			err = errors.Wrap(err, "Error occurred while unsetting cloud credentials")
-			return
 		}
 	}()
 
-	// F. Initialize
+	// E. Initialize
 	if err = terraform.Init(cloud); err != nil {
-		err = errors.Wrap(err, "Error occurred while initializing terraform")
-		return
+		return errors.Wrap(err, "Error occurred while initializing terraform")
 	}
 
-	// G. Destroy
+	// F. Destroy
 	if err = terraform.Destroy(cloud); err != nil {
-		err = errors.Wrap(err, "Error occurred while destroying")
-		return
+		return errors.Wrap(err, "Error occurred while destroying")
 	}
 
 	return

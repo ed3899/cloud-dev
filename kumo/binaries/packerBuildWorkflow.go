@@ -21,7 +21,7 @@ func PackerBuildWorkflow() (err error) {
 		return errors.Wrap(err, "Error occurred while creating new packer")
 	}
 
-	// A. Download and extract if not installed
+	// Download and extract if not installed
 	if packer.IsNotInstalled() {
 		if err = DownloadAndExtractWorkflow(packer.Zip, filepath.Dir(packer.AbsPathToExecutable)); err != nil {
 			return errors.Wrap(err, "Error occurred while downloading and extracting packer")
@@ -38,7 +38,7 @@ func PackerBuildWorkflow() (err error) {
 		return errors.Wrap(err, "Error occurred while instantiating hashicorp vars")
 	}
 
-	// C. Create vars file
+	// Create vars file
 	if err = varsFile.Create(); err != nil {
 		return errors.Wrap(err, "Error occurred while creating vars file")
 	}
@@ -48,12 +48,12 @@ func PackerBuildWorkflow() (err error) {
 		return errors.Wrap(err, "Error occurred while getting absolute path to cloud run directory")
 	}
 
-	// D. Set initial location
+	// Set initial location
 	if absPathToInitialLocation, err = os.Getwd(); err != nil {
 		return errors.Wrap(err, "Error occurred while getting current working directory")
 	}
 
-	// D. Change directory to packer run directory and defer changing back to initial location
+	// Change directory to packer run directory and defer changing back to initial location
 	if err = os.Chdir(absPathToCloudRunDir); err != nil {
 		return errors.Wrap(err, "Error occurred while changing directory to packer run directory")
 	}
