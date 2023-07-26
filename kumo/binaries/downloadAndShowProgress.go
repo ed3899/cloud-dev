@@ -14,32 +14,37 @@ type DownloadableByWorkflow interface {
 func DownloadAndShowProgress[D DownloadableByWorkflow](d D, multiProgressBar *mpb.Progress) (err error) {
 	var (
 		downloadedBytesChan = make(chan int, 1024)
-		errChan             = make(chan error, 1)
-		done                = make(chan bool, 1)
+		downloadedBytes     int
+
+		errChan = make(chan error, 1)
+
+		doneChan = make(chan bool, 1)
+		done     bool
 	)
 
 	go func() {
 		defer close(downloadedBytesChan)
 		defer close(errChan)
-		defer close(done)
+		defer close(doneChan)
 
 		d.SetDownloadBar(multiProgressBar)
 		if err = d.Download(downloadedBytesChan); err != nil {
 			errChan <- err
 			return
 		}
-		done <- true
+		doneChan <- true
 	}()
 
 OuterLoop:
 	for {
 		select {
-		case downloadedBytes := <-downloadedBytesChan:
+		case downloadedBytes = <-downloadedBytesChan:
 			if downloadedBytes <= 0 {
 				continue OuterLoop
 			}
 
 			d.IncrementDownloadBar(downloadedBytes)
+
 		case err = <-errChan:
 			if err == nil {
 				continue OuterLoop
@@ -52,8 +57,8 @@ OuterLoop:
 			err = errors.Wrapf(err, "Error occurred while downloading %s", d.GetName())
 			break OuterLoop
 
-		case d := <-done:
-			if d {
+		case done = <-doneChan:
+			if done {
 				break OuterLoop
 			}
 			continue OuterLoop

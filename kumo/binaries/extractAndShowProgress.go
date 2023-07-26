@@ -17,10 +17,14 @@ type ExtractableByWorkflow interface {
 func ExtractAndShowProgress[E ExtractableByWorkflow](e E, absPathToExtraction string, multiProgressBar *mpb.Progress) (err error) {
 	var (
 		extractedBytesChan = make(chan int, 1024)
-		errChan            = make(chan error, 1)
-		done               = make(chan bool, 1)
-		zipSize            int64
-		absPathToZip       = e.GetPath()
+		extractedBytes     int
+
+		errChan = make(chan error, 1)
+
+		doneChan     = make(chan bool, 1)
+		done         bool
+		zipSize      int64
+		absPathToZip = e.GetPath()
 	)
 
 	if zipSize, err = utils.GetZipSize(absPathToZip); err != nil {
@@ -30,25 +34,26 @@ func ExtractAndShowProgress[E ExtractableByWorkflow](e E, absPathToExtraction st
 
 	go func(zipSize int64) {
 		defer close(errChan)
-		defer close(done)
+		defer close(doneChan)
 
 		e.SetExtractionBar(multiProgressBar, zipSize)
 		if err = e.ExtractTo(absPathToExtraction, extractedBytesChan); err != nil {
 			errChan <- err
 			return
 		}
-		done <- true
+		doneChan <- true
 	}(zipSize)
 
 OuterLoop:
 	for {
 		select {
-		case extractedBytes := <-extractedBytesChan:
+		case extractedBytes = <-extractedBytesChan:
 			if extractedBytes <= 0 {
 				continue OuterLoop
 			}
 
 			e.IncrementExtractionBar(extractedBytes)
+			
 		case err = <-errChan:
 			if err == nil {
 				continue OuterLoop
@@ -58,10 +63,11 @@ OuterLoop:
 				err = errors.Wrapf(err, "Error occurred while removing %s", e.GetName())
 			}
 
+			err = errors.Wrapf(err, "Error occurred while extracting %s", e.GetName())
 			break OuterLoop
 
-		case d := <-done:
-			if d {
+		case done = <-doneChan:
+			if done {
 				break OuterLoop
 			}
 			continue OuterLoop
