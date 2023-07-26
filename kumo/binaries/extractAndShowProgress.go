@@ -1,7 +1,6 @@
 package binaries
 
 import (
-	"log"
 	"os"
 
 	"github.com/ed3899/kumo/utils"
@@ -34,7 +33,6 @@ func ExtractAndShowProgress[E ExtractableByWorkflow](e E, absPathToExtraction st
 		defer close(done)
 
 		e.SetExtractionBar(multiProgressBar, zipSize)
-		log.Print(absPathToExtraction)
 		if err = e.ExtractTo(absPathToExtraction, extractedBytesChan); err != nil {
 			errChan <- err
 			return

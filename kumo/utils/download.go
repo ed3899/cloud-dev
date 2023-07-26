@@ -2,6 +2,7 @@ package utils
 
 import (
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -55,6 +56,9 @@ func Download(url, destPath string, bytesDownloadedChan chan<- int) (err error) 
 			return errors.Wrap(err, "failed to write to file")
 		}
 	}
+	info, err := file.Stat()
+
+	log.Fatalf("Downloaded %s (%d bytes)", info.Name(), info.Size())
 
 	return
 }
