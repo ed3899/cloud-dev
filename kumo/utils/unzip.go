@@ -9,26 +9,36 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/pkg/errors"
+	"github.com/samber/oops"
+	"go.uber.org/zap"
 )
 
 func Unzip(pathToZip, extractToPath string, bytesUnzipped chan<- int) (err error) {
 	var (
+		unzipGroup     = new(sync.WaitGroup)
+		logger, zapErr = zap.NewProduction()
+		oopsBuilder    = oops.Code("unzip_failed").
+				With("pathToZip", pathToZip).
+				With("extractToPath", extractToPath).
+				With("bytesUnzipped", bytesUnzipped)
+
 		reader  *zip.ReadCloser
 		errChan chan error
 		zipFile *zip.File
-
-		unzipGroup = new(sync.WaitGroup)
 	)
 
-	// Open the zip file
+	if zapErr != nil {
+		return oopsBuilder.Errorf("failed to create zap logger: %v", zapErr)
+	}
+
+	// Open the zip file and defer closing it
 	if reader, err = zip.OpenReader(pathToZip); err != nil {
-		return errors.Wrap(err, "failed to open zip file")
+		return oopsBuilder.
+			Wrapf(err, "failed to open zip file: %s", pathToZip)
 	}
 	defer func() {
-		if err = reader.Close(); err != nil {
-			err = errors.Wrap(err, "failed to close zip file")
-			return
+		if err := reader.Close(); err != nil {
+			logger.With(zap.Error(err)).Fatal("failed to close zip reader")
 		}
 	}()
 
@@ -46,7 +56,12 @@ func Unzip(pathToZip, extractToPath string, bytesUnzipped chan<- int) (err error
 			)
 
 			if bytesCopied, err = unzipFile(zf, extractToPath); err != nil {
-				errChan <- errors.Wrapf(err, "failed to unzip file: %s", zf.Name)
+				err = oopsBuilder.
+					With("bytesCopied", bytesCopied).
+					With("zipFile", zf.Name).
+					With("extractToPath", extractToPath).
+					Wrapf(err, "failed to unzip file: %s", zf.Name)
+				errChan <- err
 				return
 			}
 
@@ -54,7 +69,7 @@ func Unzip(pathToZip, extractToPath string, bytesUnzipped chan<- int) (err error
 		}(zipFile)
 	}
 
-	// Close channels when all goroutines are done
+	// Wait for all files to be unzipped
 	go func() {
 		unzipGroup.Wait()
 		close(errChan)
@@ -71,50 +86,70 @@ func Unzip(pathToZip, extractToPath string, bytesUnzipped chan<- int) (err error
 	return
 }
 
-func unzipFile(f *zip.File, extractToPath string) (bytesCopied int64, err error) {
+func unzipFile(zf *zip.File, extractToPath string) (bytesCopied int64, err error) {
 	var (
+		logger, zapErr = zap.NewProduction()
+		oopsBuilder    = oops.Code("unzipFile_failed").
+				With("zipFile", zf).
+				With("extractToPath", extractToPath)
+
 		filePath        string
 		destinationFile *os.File
 		zippedFile      io.ReadCloser
 	)
-	
-	// Check if file paths are not vulnerable to Zip Slip
-	filePath = filepath.Join(extractToPath, f.Name)
+
+	if zapErr != nil {
+		return 0, oopsBuilder.Errorf("failed to create zap logger: %v", zapErr)
+	}
+
+	// Check if file path is not vulnerable to Zip Slip
+	filePath = filepath.Join(extractToPath, zf.Name)
 	if !strings.HasPrefix(filePath, filepath.Clean(extractToPath)+string(os.PathSeparator)) {
-		return 0, fmt.Errorf("%s: illegal file path", filePath)
+		return 0, oopsBuilder.
+			Wrapf(err, "illegal file path: %s", filePath)
+	}
+
+	// Check if file is a directory
+	if zf.FileInfo().IsDir() {
+		return 0, oopsBuilder.
+			Errorf("is a directory: %s", zf.Name)
 	}
 
 	// Create directory tree
-	if f.FileInfo().IsDir() {
-		return 0, nil
-	}
-
 	if err = os.MkdirAll(filepath.Dir(filePath), os.ModePerm); err != nil {
-		return 0, err
+		return 0, oopsBuilder.
+			Wrapf(err, "failed to create directory tree for: %s", filePath)
 	}
 
-	// Create a destination file for unzipped content
-	if destinationFile, err = os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode()); err != nil {
-		return 0, err
+	// Create a destination file for unzipped content and defer closing it
+	if destinationFile, err = os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, zf.Mode()); err != nil {
+		return 0, oopsBuilder.
+			With("filePath", filePath).
+			Wrapf(err, "failed to create destination file: %s", filePath)
 	}
 	defer func() {
-		if errorClosingDestFile := destinationFile.Close(); errorClosingDestFile != nil {
-			err = errors.Wrap(errorClosingDestFile, "Error occurred while closing destination file")
+		if err = destinationFile.Close(); err != nil {
+			logger.With(zap.Error(err)).Fatal("failed to close destination file")
 		}
 	}()
 
-	// Unzip the content of a file and copy it to the destination file
-	if zippedFile, err = f.Open(); err != nil {
-		return 0, err
+	// Unzip the content of a file and copy it to the destination file. Defer closing the zipped file
+	if zippedFile, err = zf.Open(); err != nil {
+		return 0, oopsBuilder.
+			Wrapf(err, "failed to open zipped file: %s", zf.Name)
 	}
 	defer func() {
-		if errorClosingZippedFile := zippedFile.Close(); errorClosingZippedFile != nil {
-			err = errors.Wrap(errorClosingZippedFile, "Error occurred while closing zipped file")
+		if err = zippedFile.Close(); err != nil {
+			logger.With(zap.Error(err)).Fatal(fmt.Sprintf("failed to close zipped file: %s", zf.Name))
 		}
 	}()
 
 	if bytesCopied, err = io.Copy(destinationFile, zippedFile); err != nil {
-		return 0, err
+		return 0, oopsBuilder.
+			With("bytesCopied", bytesCopied).
+			With("zippedFile", zippedFile).
+			With("destinationFile", destinationFile).
+			Wrapf(err, "failed to copy zipped file to destination file: %s", zf.Name)
 	}
 
 	return
