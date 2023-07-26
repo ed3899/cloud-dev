@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/pkg/errors"
+	"github.com/samber/oops"
 )
 
 // TODO add context
@@ -14,38 +14,67 @@ func Download(url, destPath string, bytesDownloadedChan chan<- int) (err error) 
 	var (
 		destDir     = filepath.Dir(destPath)
 		bytesBuffer = make([]byte, 4096)
+		oopsBuilder = oops.Code("download_failed").
+				With("url", url).
+				With("destPath", destPath).
+				With("bytesDownloadedChan", bytesDownloadedChan).
+				With("destDir", destDir).
+				With("bytesBuffer", bytesBuffer)
 
 		response        *http.Response
-		file            *os.File
+		downloadFile    *os.File
 		bytesDownloaded int
+		bytesWritten    int
 	)
 
 	// Initiate download and defer closing the response body
 	if response, err = http.Get(url); err != nil {
-		return errors.Wrapf(err, "failed to download from: %s", url)
+		return oopsBuilder.
+			With("err", err).
+			Errorf("failed to download from: %s", url)
 	}
-	defer func() {
+	defer func() (err error) {
 		if err = response.Body.Close(); err != nil {
-			err = errors.Wrap(err, "failed to close response body")
+			return oopsBuilder.
+				With("err", err).
+				With("response", response).
+				Errorf("failed to close response body")
 		}
+		return
 	}()
 
 	// Create the destination dir
 	if err = os.MkdirAll(destDir, 0755); err != nil {
-		return errors.Wrapf(err, "failed to create destination directory for: %s", destPath)
+		return oopsBuilder.
+			With("err", err).
+			Errorf("failed to create destination directory for: %s", destPath)
 	}
 
 	// Create the file to write to
-	if file, err = os.Create(destPath); err != nil {
-		return errors.Wrapf(err, "failed to create file for: %s", destPath)
+	if downloadFile, err = os.Create(destPath); err != nil {
+		return oopsBuilder.
+			With("err", err).
+			Errorf("failed to create file for: %s", destPath)
 	}
-	defer file.Close()
+	defer func() (err error) {
+		if err = downloadFile.Close(); err != nil {
+			return oopsBuilder.
+				With("err", err).
+				With("file", downloadFile).
+				Errorf("failed to close file")
+		}
+		return
+	}()
 
 	// Iterate over the response body
 	for {
 		// Read the response body into the bytes buffer
 		if bytesDownloaded, err = response.Body.Read(bytesBuffer); err != nil && err != io.EOF {
-			return errors.Wrap(err, "failed to read response body")
+			return oopsBuilder.
+				With("err", err).
+				With("bytesDownloaded", bytesDownloaded).
+				With("bytesBuffer", bytesBuffer).
+				Errorf("failed to read response body")
 		}
 
 		if bytesDownloaded == 0 {
@@ -56,8 +85,13 @@ func Download(url, destPath string, bytesDownloadedChan chan<- int) (err error) 
 		bytesDownloadedChan <- bytesDownloaded
 
 		// Write the bytes to the file
-		if _, err = file.Write(bytesBuffer[:bytesDownloaded]); err != nil {
-			return errors.Wrap(err, "failed to write to file")
+		if bytesWritten, err = downloadFile.Write(bytesBuffer[:bytesDownloaded]); err != nil {
+			return oopsBuilder.
+				With("err", err).
+				With("bytesWritten", bytesWritten).
+				With("bytesBuffer", bytesBuffer).
+				With("bytesDownloaded", bytesDownloaded).
+				Errorf("failed to write to file")
 		}
 	}
 

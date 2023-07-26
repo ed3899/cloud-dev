@@ -20,7 +20,8 @@ func init() {
 
 		err = oops.Code("host_is_not_compatible").
 			With("os", os).
-			With("arch", arch).Errorf("Host is not compatible with kumo :/")
+			With("arch", arch).
+			Errorf("Host is not compatible with kumo :/")
 		log.Fatalf("%+v", err)
 	}
 }
