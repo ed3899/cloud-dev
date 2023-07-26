@@ -112,6 +112,8 @@ func NewHashicorpVars(tool Tool, cloud Cloud) (hv *HashicorpVars, err error) {
 		lastBuiltAmiId string
 		pickedAmiId    string
 
+		// Templates dir
+		absPathToTemplatesDir string
 		// Resulting merged template
 		mergedTemplateAbsPath string
 
@@ -138,17 +140,18 @@ func NewHashicorpVars(tool Tool, cloud Cloud) (hv *HashicorpVars, err error) {
 	)
 
 	// Template paths
-	absPathToTemplatesDir, err := filepath.Abs(templateDirName)
-	if err != nil {
+	if absPathToTemplatesDir, err = filepath.Abs(templateDirName); err != nil {
 		err = errors.Wrap(err, "failed to create path to templates")
 		return nil, err
 	}
 
 	var (
+		// Packer
 		absPathToPackerGeneralTemplate    = filepath.Join(absPathToTemplatesDir, packerSubDirName, generalSubDirName, packerGeneralTemplateName)
 		absPathToPackerAWSTemplate        = filepath.Join(absPathToTemplatesDir, packerSubDirName, awsSubDirName, packerAwsTemplateName)
 		absPathToTempPackerMergedTemplate = filepath.Join(absPathToTemplatesDir, packerSubDirName, packerMergedTemplateName)
 
+		// Terraform
 		absPathToTerraformGeneralTemplate    = filepath.Join(absPathToTemplatesDir, terraformSubDirName, generalSubDirName, terraformGeneralTemplateName)
 		absPathToTerraformAWSTemplate        = filepath.Join(absPathToTemplatesDir, terraformSubDirName, awsSubDirName, terraformAwsTemplateName)
 		absPathToTempTerraformMergedTemplate = filepath.Join(absPathToTemplatesDir, terraformSubDirName, terraformMergedTemplateName)
@@ -161,12 +164,14 @@ func NewHashicorpVars(tool Tool, cloud Cloud) (hv *HashicorpVars, err error) {
 
 	switch tool {
 	case PackerID:
+		// Set general environment
 		packerGeneralEnvironment = &PackerGeneralEnvironment{
 			GIT_USERNAME:                          viper.GetString("Git.Username"),
 			GIT_EMAIL:                             viper.GetString("Git.Email"),
 			ANSIBLE_TAGS:                          viper.GetStringSlice("AMI.Tools"),
 			GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC: viper.GetString("GitHub.PersonalAccessTokenClassic"),
 		}
+
 		switch cloud {
 		case AWS:
 			// Create merged template
@@ -180,11 +185,13 @@ func NewHashicorpVars(tool Tool, cloud Cloud) (hv *HashicorpVars, err error) {
 				return nil, err
 			}
 
+			// Create vars file instance
 			hv = &HashicorpVars{
 				Name:    packerGeneralVarsFileName,
 				AbsPath: absPathToPackerAwsVarsFile,
 				Template: &Template{
 					AbsPath: mergedTemplateAbsPath,
+					// Set environment
 					Environment: &PackerAWSEnvironment{
 						AWS_ACCESS_KEY:                     viper.GetString("AWS.AccessKeyId"),
 						AWS_SECRET_KEY:                     viper.GetString("AWS.SecretAccessKey"),
@@ -205,24 +212,28 @@ func NewHashicorpVars(tool Tool, cloud Cloud) (hv *HashicorpVars, err error) {
 					},
 				},
 			}
+
 		default:
 			err = errors.Errorf("Kind '%v' not supported", cloud)
 		}
-	case TerraformID:
-		publicIp, err = utils.GetPublicIp()
-		if err != nil {
-			err = errors.Wrapf(err, "failed to get public IP, using default: %s", defaulIp)
-			log.Print(err)
-			pickedIp = defaulIp
-		}
-		pickedIp = publicIp
 
+	case TerraformID:
+		// Get public IP
+		if publicIp, err = utils.GetPublicIp(); err != nil {
+			log.Print(errors.Wrapf(err, "failed to get public IP, using default: %s", defaulIp))
+			pickedIp = defaulIp
+		} else {
+			pickedIp = publicIp
+		}
+
+		// Set general environment
 		terraformGeneralEnvironment = &TerraformGeneralEnvironment{
 			ALLOWED_IP: utils.MaskIp(pickedIp, 32),
 		}
 
 		switch cloud {
 		case AWS:
+			// Create merged template
 			mergedTemplateAbsPath, err = utils.MergeFilesTo(
 				absPathToTempTerraformMergedTemplate,
 				absPathToTerraformGeneralTemplate,
@@ -233,23 +244,25 @@ func NewHashicorpVars(tool Tool, cloud Cloud) (hv *HashicorpVars, err error) {
 				return nil, err
 			}
 
-			lastBuiltAmiId, err = utils.GetLastBuiltAmiId(absPathToPackerAwsManifest)
-			if err != nil {
+			// Get last built AMI ID
+			if lastBuiltAmiId, err = utils.GetLastBuiltAmiId(absPathToPackerAwsManifest); err != nil {
 				err = errors.Wrap(err, "failed to get last built AMI ID")
 				return nil, err
 			}
 
-			pickedAmiId, err = utils.PickAmiIdToBeUsed(lastBuiltAmiId, viper.GetString("Up.AMI_Id"))
-			if err != nil {
+			// Pick AMI ID to be used
+			if pickedAmiId, err = utils.PickAmiIdToBeUsed(lastBuiltAmiId, viper.GetString("Up.AMI_Id")); err != nil {
 				err = errors.Wrap(err, "failed to pick AMI ID to be used")
 				return nil, err
 			}
 
+			// Create vars file instance
 			hv = &HashicorpVars{
 				Name:    terraformAwsVarsFileName,
 				AbsPath: absPathToTerraformAwsVarsFile,
 				Template: &Template{
 					AbsPath: mergedTemplateAbsPath,
+					// Set environment
 					Environment: &TerraformAWSEnvironment{
 						AWS_REGION:                   viper.GetString("AWS.Region"),
 						AWS_INSTANCE_TYPE:            viper.GetString("AWS.EC2.Instance.Type"),
@@ -260,9 +273,11 @@ func NewHashicorpVars(tool Tool, cloud Cloud) (hv *HashicorpVars, err error) {
 					},
 				},
 			}
+
 		default:
 			err = errors.Errorf("Kind '%v' not supported", cloud)
 		}
+
 	default:
 		err = errors.Errorf("Tool '%v' not supported", tool)
 	}
@@ -271,28 +286,33 @@ func NewHashicorpVars(tool Tool, cloud Cloud) (hv *HashicorpVars, err error) {
 }
 
 func (hv *HashicorpVars) Create() (err error) {
-	// Create vars file to be filled with values
-	varsFile, err := os.Create(hv.AbsPath)
-	if err != nil {
+	var (
+		varsFile *os.File
+		hashicorpTemplate *template.Template
+	)
+
+	// Create vars file to be filled with values and defer closing
+	if varsFile, err = os.Create(hv.AbsPath); err != nil {
 		return errors.Wrapf(err, "Error occurred while creating %s", hv.AbsPath)
 	}
-	defer varsFile.Close()
+	defer func() {
+		if err = varsFile.Close(); err != nil {
+			err = errors.Wrapf(err, "Error occurred while closing %s", hv.AbsPath)
+		}
+	}()
 
 	// Get template and defer deletion
-	template, err := template.ParseFiles(hv.Template.AbsPath)
-	if err != nil {
+	if hashicorpTemplate, err = template.ParseFiles(hv.Template.AbsPath); err != nil {
 		return errors.Wrapf(err, "Error occurred while crafting absolute path to %s", hv.Template.AbsPath)
 	}
 	defer func() {
 		if err = hv.Template.Remove(); err != nil {
 			err = errors.Wrapf(err, "Error occurred while removing %s", hv.Template.AbsPath)
-			return
 		}
 	}()
 
 	// Execute template
-	err = template.Execute(varsFile, hv.Template.Environment)
-	if err != nil {
+	if err = hashicorpTemplate.Execute(varsFile, hv.Template.Environment); err != nil {
 		return errors.Wrapf(err, "Error occurred while executing template: %s", hv.Template.AbsPath)
 	}
 
