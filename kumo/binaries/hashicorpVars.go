@@ -246,8 +246,7 @@ func NewHashicorpVars(tool Tool, cloud Cloud) (hv *HashicorpVars, err error) {
 
 			// Get last built AMI ID
 			if lastBuiltAmiId, err = utils.GetLastBuiltAmiId(absPathToPackerAwsManifest); err != nil {
-				err = errors.Wrap(err, "failed to get last built AMI ID")
-				return nil, err
+				return nil, errors.Wrap(err, "failed to get last built AMI ID")
 			}
 
 			// Pick AMI ID to be used

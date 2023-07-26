@@ -28,10 +28,11 @@ type PackerManifest struct {
 //	("packer/aws/manifest.json") -> ("ami-0c3fd0f5d33134a76", nil)
 func GetLastBuiltAmiId(packerManifestAbsPath string) (amiId string, err error) {
 	var (
-		packerManifest      *PackerManifest
-		lastBuildArtifactId []*PackerBuild
+		lastBuildArtifact []*PackerBuild
 		packerManifestFile  *os.File
 		jsonDecoder         *json.Decoder
+		
+		packerManifest      = new(PackerManifest)
 	)
 
 	// Check if packer manifest path is absolute
@@ -44,7 +45,7 @@ func GetLastBuiltAmiId(packerManifestAbsPath string) (amiId string, err error) {
 		return "", errors.Wrapf(err, "Error occurred while opening packer manifest file '%s'", packerManifestAbsPath)
 	}
 	defer func() {
-		if errClosingPackerManifest := packerManifestFile.Close(); err != nil {
+		if errClosingPackerManifest := packerManifestFile.Close(); errClosingPackerManifest != nil {
 			err = errors.Wrapf(errClosingPackerManifest, "Error occurred while closing packer manifest file '%s'", packerManifestAbsPath)
 		}
 	}()
@@ -56,16 +57,16 @@ func GetLastBuiltAmiId(packerManifestAbsPath string) (amiId string, err error) {
 	}
 
 	// Get last built artifact id for last Packer build
-	lastBuildArtifactId = lo.Filter(packerManifest.Builds, func(pb *PackerBuild, index int) bool {
+	lastBuildArtifact = lo.Filter(packerManifest.Builds, func(pb *PackerBuild, index int) bool {
 		return pb.PackerRunUUID == packerManifest.LastRunUUID
 	})
 
-	if len(lastBuildArtifactId) == 0 {
+	if len(lastBuildArtifact) == 0 {
 		return "", errors.New("No AMI ID found for last Packer build")
 	}
 
 	// Extract only the AMI ID
-	amiId = strings.Split(lastBuildArtifactId[0].ArtifactId, ":")[1]
+	amiId = strings.Split(lastBuildArtifact[0].ArtifactId, ":")[1]
 
 	return
 }

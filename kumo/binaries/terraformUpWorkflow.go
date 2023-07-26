@@ -58,8 +58,8 @@ func TerraformUpWorkflow() (err error) {
 		return errors.Wrap(err, "Error occurred while changing directory to packer run directory")
 	}
 	defer func() {
-		if err = os.Chdir(absPathToInitialLocation); err != nil {
-			err = errors.Wrap(err, "Error occurred while changing directory back to initial location")
+		if chDirError := os.Chdir(absPathToInitialLocation); chDirError != nil {
+			err = errors.Wrap(chDirError, "Error occurred while changing directory back to initial location")
 		}
 	}()
 
@@ -68,8 +68,8 @@ func TerraformUpWorkflow() (err error) {
 		return errors.Wrap(err, "Error occurred while setting cloud credentials")
 	}
 	defer func() {
-		if err = terraform.UnsetCloudCredentials(cloud); err != nil {
-			err = errors.Wrap(err, "Error occurred while unsetting cloud credentials")
+		if unsetCloudErr := terraform.UnsetCloudCredentials(cloud); unsetCloudErr != nil {
+			err = errors.Wrap(unsetCloudErr, "Error occurred while unsetting cloud credentials")
 		}
 	}()
 
