@@ -38,28 +38,29 @@ func NewPacker() (packer *Packer, err error) {
 		zipName        = fmt.Sprintf("%s.zip", PACKER)
 		os, arch       = utils.GetCurrentHostSpecs()
 		url            = utils.CreateHashicorpURL(PACKER, VERSION, os, arch)
+
+		absPathToExecutable string
+		absPathToRunDir     string
+		zipPath             string
+		contentLength       int64
 	)
 
-	absPathToExecutable, err := filepath.Abs(filepath.Join(DEPENDENCIES_DIR_NAME, PACKER, executableName))
-	if err != nil {
+	if absPathToExecutable, err = filepath.Abs(filepath.Join(DEPENDENCIES_DIR_NAME, PACKER, executableName)); err != nil {
 		err = errors.Wrapf(err, "failed to create executable path to: %s", executableName)
 		return
 	}
 
-	absPathToRunDir, err := filepath.Abs(PACKER)
-	if err != nil {
+	if absPathToRunDir, err = filepath.Abs(PACKER); err != nil {
 		err = errors.Wrapf(err, "failed to create run path to: %s", PACKER)
 		return
 	}
 
-	zipPath, err := filepath.Abs(filepath.Join(DEPENDENCIES_DIR_NAME, PACKER, zipName))
-	if err != nil {
+	if zipPath, err = filepath.Abs(filepath.Join(DEPENDENCIES_DIR_NAME, PACKER, zipName)); err != nil {
 		err = errors.Wrapf(err, "failed to craft zip path to: %s", zipName)
 		return
 	}
 
-	contentLength, err := utils.GetContentLength(url)
-	if err != nil {
+	if contentLength, err = utils.GetContentLength(url); err != nil {
 		err = errors.Wrapf(err, "failed to get content length for: %s", url)
 		return
 	}
@@ -101,7 +102,6 @@ func (p *Packer) SetPluginPath(cloud Cloud) (err error) {
 	case AWS:
 		if err = os.Setenv(PACKER_PLUGIN_PATH, filepath.Join(p.AbsPathToRunDir, AWS_SUBDIR_NAME, PLUGINS_DIR_NAME)); err != nil {
 			err = errors.Wrapf(err, "Error occurred while setting %s environment variable", PACKER_PLUGIN_PATH)
-			return
 		}
 	default:
 		err = errors.Errorf("Cloud '%v' not supported", cloud)
@@ -114,7 +114,6 @@ func (p *Packer) UnsetPluginPath(cloud Cloud) (err error) {
 	case AWS:
 		if err = os.Unsetenv(PACKER_PLUGIN_PATH); err != nil {
 			err = errors.Wrapf(err, "Error occurred while unsetting %s environment variable", PACKER_PLUGIN_PATH)
-			return
 		}
 	default:
 		err = errors.Errorf("Cloud '%v' not supported", cloud)
@@ -130,17 +129,16 @@ func (p *Packer) Init(cloud Cloud) (err error) {
 
 	switch cloud {
 	case AWS:
-		// Initialize
+		// Run cmd
 		if cmdErr = utils.RunCmdAndStream(cmd); cmdErr != nil {
 			err = errors.Wrap(cmdErr, "Error occured while initializing packer")
-			return
 		}
-		return
 
 	default:
 		err = errors.Errorf("Cloud '%v' not supported", cloud)
-		return
 	}
+
+	return
 }
 
 func (p *Packer) Build(cloud Cloud) (err error) {
@@ -151,15 +149,14 @@ func (p *Packer) Build(cloud Cloud) (err error) {
 
 	switch cloud {
 	case AWS:
-		// Build
+		// Run cmd
 		if cmdErr = utils.RunCmdAndStream(cmd); cmdErr != nil {
 			err = errors.Wrapf(cmdErr, "Error occured while building packer")
-			return
 		}
-		return
 
 	default:
 		err = errors.Errorf("Cloud '%v' not supported", cloud)
-		return
 	}
+
+	return
 }
