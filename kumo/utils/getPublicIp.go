@@ -14,26 +14,30 @@ import (
 //
 // Example:
 //
-// 	() -> ("123.456.789.012", nil)
+//	() -> ("123.456.789.012", nil)
 func GetPublicIp() (ip string, err error) {
+	var (
+		response      *http.Response
+		bytesResponse []byte
+	)
+	
 	// Send GET request to retrieve public IP
-	resp, err := http.Get("https://api.ipify.org?format=text")
-	if err != nil {
-		err = errors.Wrap(err, "Error occurred while getting public IP")
-		return "", err
+	if response, err = http.Get("https://api.ipify.org?format=text"); err != nil {
+		return "", errors.Wrap(err, "Error occurred while getting public IP")
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if errClosingBody := response.Body.Close(); err != nil {
+			err = errors.Wrap(errClosingBody, "Error occurred while closing response body")
+		}
+	}()
 
 	// Read the response body
-	bytesResp, err := io.ReadAll(resp.Body)
-	if err != nil {
-		err = errors.Wrap(err, "Error occurred while reading response body")
-		return "", err
+	if bytesResponse, err = io.ReadAll(response.Body); err != nil {
+		return "", errors.Wrap(err, "Error occurred while reading response body")
 	}
 
 	// Convert the response body to a string
-	ip = string(bytesResp)
+	ip = string(bytesResponse)
 
-	// Return the public IP and no error
-	return ip, nil
+	return
 }

@@ -6,13 +6,21 @@ import (
 	"github.com/pkg/errors"
 )
 
-func GetContentLength(url string) (int64, error) {
-	response, err := http.Head(url)
-	if err != nil {
-		err = errors.Wrap(err, "failed to get head response")
-		return 0, err
-	}
-	defer response.Body.Close()
+func GetContentLength(url string) (contentLength int64, err error) {
+	var (
+		response *http.Response
+	)
 
-	return response.ContentLength, nil
+	if response, err = http.Head(url); err != nil {
+		return 0, errors.Wrap(err, "failed to get head response")
+	}
+	defer func() {
+		if errClosingBody := response.Body.Close(); err != nil {
+			err = errors.Wrap(errClosingBody, "failed to close response body")
+		}
+	}()
+
+	contentLength = response.ContentLength
+
+	return
 }

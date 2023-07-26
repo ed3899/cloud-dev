@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"io/fs"
 	"os"
 	"path/filepath"
 
@@ -8,24 +9,32 @@ import (
 )
 
 func GetZipSize(absPathToZip string) (size int64, err error) {
+	var (
+		zipFile *os.File
+		zipInfo fs.FileInfo
+	)
+
 	if filepath.IsLocal(absPathToZip) {
 		err = errors.New("path to zip is not absolute")
 		return
 	}
 
-	zipfile, err := os.Open(absPathToZip)
-	if err != nil {
+	if zipFile, err = os.Open(absPathToZip); err != nil {
 		err = errors.Wrapf(err, "failed to open zip file: %v", absPathToZip)
 		return
 	}
-	defer zipfile.Close()
+	defer func() {
+		if errClosingZipFile := zipFile.Close(); errClosingZipFile != nil {
+			err = errors.Wrapf(errClosingZipFile, "failed to close zip file: %v", absPathToZip)
+		}
+	}()
 
-	info, err := zipfile.Stat()
-	if err != nil {
+	if zipInfo, err = zipFile.Stat(); err != nil {
 		err = errors.Wrapf(err, "failed to get zip file info: %v", absPathToZip)
 		return
 	}
 
-	size = info.Size()
+	size = zipInfo.Size()
+
 	return
 }

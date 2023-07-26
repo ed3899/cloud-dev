@@ -35,43 +35,40 @@ func RunCmdAndStream(cmd *exec.Cmd) (err error) {
 		cmdDoneChan = make(chan bool, 1)
 
 		aggregatorGroup = new(sync.WaitGroup)
-		// The main error channel. This will be used to aggregate all errors from all cmd goroutines
-		mainErrChan    = make(chan error, 1)
-		signalChan     = make(chan os.Signal, 1)
-		totalErr       error
-		done           bool
-		signalReceived os.Signal
+		mainErrChan     = make(chan error, 1)
+		signalChan      = make(chan os.Signal, 1)
 	)
 	// Get StdoutPipe
-	cmdStdout, err = cmd.StdoutPipe()
-	if err != nil {
-		err = errors.Wrap(err, "Error occurred while getting StdoutPipe")
-		return err
+	if cmdStdout, err = cmd.StdoutPipe(); err != nil {
+		return errors.Wrap(err, "Error occurred while getting StdoutPipe")
 	}
-	defer cmdStdout.Close()
+	defer func() {
+		if errClosingStdout := cmdStdout.Close(); errClosingStdout != nil {
+			err = errors.Wrap(errClosingStdout, "Error occurred while closing StdoutPipe")
+		}
+	}()
 
 	// Get StderrPipe
-	cmdStderr, err = cmd.StderrPipe()
-	if err != nil {
-		err = errors.Wrap(err, "Error occurred while getting StderrPipe")
-		return err
+	if cmdStderr, err = cmd.StderrPipe(); err != nil {
+		return errors.Wrap(err, "Error occurred while getting StderrPipe")
 	}
-	defer cmdStderr.Close()
+	defer func() {
+		if errClosingStderr := cmdStderr.Close(); errClosingStderr != nil {
+			err = errors.Wrap(errClosingStderr, "Error occurred while closing StderrPipe")
+		}
+	}()
 
 	// Start command
 	if err = cmd.Start(); err != nil {
-		err = errors.Wrap(err, "Error occurred while starting command")
-		return err
+		return errors.Wrap(err, "Error occurred while starting command")
 	}
 
 	// Stream command StdoutPipe to our Stdout
 	cmdWg.Add(1)
 	go func(src *io.ReadCloser, dest *os.File) {
 		defer cmdWg.Done()
-		if _, err := io.Copy(dest, *src); err != nil {
-			// In case of any streaming error, send the error to the error channel
-			totalErr := errors.Wrap(err, "Error occurred while copying StdoutPipe to Stdout")
-			cmdErrChan <- totalErr
+		if _, stdoutStreamError := io.Copy(dest, *src); stdoutStreamError != nil {
+			cmdErrChan <- errors.Wrap(stdoutStreamError, "Error occurred while copying StdoutPipe to Stdout")
 			return
 		}
 	}(&cmdStdout, os.Stdout)
@@ -80,10 +77,8 @@ func RunCmdAndStream(cmd *exec.Cmd) (err error) {
 	cmdWg.Add(1)
 	go func(src *io.ReadCloser, dest *os.File) {
 		defer cmdWg.Done()
-		if _, err := io.Copy(dest, *src); err != nil {
-			// In case of any streaming error, send the error to the error channel
-			totalErr = errors.Wrap(err, "Error occurred while copying StderrPipe to Stderr")
-			cmdErrChan <- totalErr
+		if _, stdErrStreamError := io.Copy(dest, *src); stdErrStreamError != nil {
+			cmdErrChan <- errors.Wrap(stdErrStreamError, "Error occurred while copying StderrPipe to Stderr")
 			return
 		}
 	}(&cmdStderr, os.Stderr)
@@ -92,11 +87,8 @@ func RunCmdAndStream(cmd *exec.Cmd) (err error) {
 	cmdWg.Add(1)
 	go func() {
 		defer cmdWg.Done()
-		if err := cmd.Wait(); err != nil {
-			// In case of any error while waiting for the command to finish, send the error to the error channel and send false to the done channel
-			totalErr = errors.Wrap(err, "Error occurred while waiting for command to finish")
-			cmdErrChan <- totalErr
-			cmdDoneChan <- false
+		if cmdError := cmd.Wait(); cmdError != nil {
+			cmdErrChan <- errors.Wrap(cmdError, "Error occurred while waiting for command to finish")
 			return
 		}
 	}()
@@ -116,13 +108,18 @@ func RunCmdAndStream(cmd *exec.Cmd) (err error) {
 	go func() {
 		defer aggregatorGroup.Done()
 		defer close(mainErrChan)
+
+		var (
+			done bool
+			signalReceived os.Signal
+		)
+
 		for {
 			select {
 			// If an error occurred while copying std, send it to the main error channel and terminate the command
 			case err = <-cmdErrChan:
 				if err != nil {
-					err = errors.Wrap(err, "Error occurred while copying std")
-					mainErrChan <- err
+					mainErrChan <- errors.Wrap(err, "Error occurred while copying std")
 					TerminateCommand(cmd)
 					return
 				}
@@ -140,6 +137,7 @@ func RunCmdAndStream(cmd *exec.Cmd) (err error) {
 					TerminateCommand(cmd)
 					return
 				}
+
 			default:
 				continue
 			}
@@ -161,14 +159,18 @@ func RunCmdAndStream(cmd *exec.Cmd) (err error) {
 // Terminates the specified command. This command should not return an error.
 // It is the end of the line.
 func TerminateCommand(cmd *exec.Cmd) {
+	var (
+		err error
+	)
+
 	// Attempt to send a SIGTERM signal to the process
-	if err := cmd.Process.Signal(syscall.SIGTERM); err != nil {
+	if err = cmd.Process.Signal(syscall.SIGTERM); err != nil {
 		totalErr := errors.Wrap(err, "Sending interrupt signal not supported")
 		log.Print(totalErr)
 
 		// Log that a kill signal will be sent instead
 		log.Print("Sending kill signal instead")
-		if err := cmd.Process.Kill(); err != nil {
+		if err = cmd.Process.Kill(); err != nil {
 			totalErr := errors.Wrap(err, "Sending kill signal not supported")
 			log.Print(totalErr)
 			return
