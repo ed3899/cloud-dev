@@ -10,42 +10,34 @@ import (
 
 func DownloadAndExtractWorkflow(z ZipI, extractToAbsPathDir string) (err error) {
 	var (
-		absPathToZipDir        = filepath.Dir(z.GetPath())
-		progress                 = mpb.New(mpb.WithWidth(64), mpb.WithAutoRefresh())
+		absPathToZipDir = filepath.Dir(z.GetPath())
+		progress        = mpb.New(mpb.WithWidth(64), mpb.WithAutoRefresh())
 	)
 
 	// Start with a clean slate
 	if err = os.RemoveAll(extractToAbsPathDir); err != nil {
-		err = errors.Wrapf(err, "Error occurred while removing %s", extractToAbsPathDir)
-		return err
+		return errors.Wrapf(err, "Error occurred while removing %s", extractToAbsPathDir)
 	}
 
 	if err = os.RemoveAll(absPathToZipDir); err != nil {
-		err = errors.Wrapf(err, "Error occurred while removing %s", absPathToZipDir)
-		return err
+		return errors.Wrapf(err, "Error occurred while removing %s", absPathToZipDir)
 	}
 
 	// Download
-	err = DownloadAndShowProgress(z, progress)
-	if err != nil {
-		err = errors.Wrapf(err, "Error occurred while downloading %s", z.GetName())
-		return
+	if err = DownloadAndShowProgress(z, progress); err != nil {
+		return errors.Wrapf(err, "Error occurred while downloading %s", z.GetName())
 	}
 
 	// Extract
-	err = ExtractAndShowProgress(z, extractToAbsPathDir, progress)
-	if err != nil {
-		err = errors.Wrapf(err, "Error occurred while extracting %s", z.GetName())
-		return
+	if err = ExtractAndShowProgress(z, extractToAbsPathDir, progress); err != nil {
+		return errors.Wrapf(err, "Error occurred while extracting %s", z.GetName())
 	}
 
 	progress.Shutdown()
 
 	// Remove zip
-	err = z.Remove()
-	if err != nil {
-		err = errors.Wrapf(err, "Error occurred while removing %s", z.GetName())
-		return
+	if err = z.Remove(); err != nil {
+		return errors.Wrapf(err, "Error occurred while removing %s", z.GetName())
 	}
 
 	return
