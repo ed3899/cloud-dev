@@ -58,7 +58,7 @@ func PackerBuildWorkflow() (err error) {
 		return errors.Wrap(err, "Error occurred while changing directory to packer run directory")
 	}
 	defer func() {
-		if chdirErr := os.Chdir(absPathToInitialLocation); err != nil {
+		if chdirErr := os.Chdir(absPathToInitialLocation); chdirErr != nil {
 			err = errors.Wrap(chdirErr, "Error occurred while changing directory back to initial location")
 		}
 	}()
@@ -68,7 +68,7 @@ func PackerBuildWorkflow() (err error) {
 		return errors.Wrap(err, "Error occurred while setting plugin path")
 	}
 	defer func() {
-		if unsetError := packer.UnsetPluginPath(cloud); err != nil {
+		if unsetError := packer.UnsetPluginPath(cloud); unsetError != nil {
 			err = errors.Wrap(unsetError, "Error occurred while unsetting plugin path")
 		}
 	}()

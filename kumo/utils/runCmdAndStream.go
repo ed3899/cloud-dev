@@ -42,21 +42,11 @@ func RunCmdAndStream(cmd *exec.Cmd) (err error) {
 	if cmdStdout, err = cmd.StdoutPipe(); err != nil {
 		return errors.Wrap(err, "Error occurred while getting StdoutPipe")
 	}
-	defer func() {
-		if errClosingStdout := cmdStdout.Close(); errClosingStdout != nil {
-			err = errors.Wrap(errClosingStdout, "Error occurred while closing StdoutPipe")
-		}
-	}()
 
 	// Get StderrPipe
 	if cmdStderr, err = cmd.StderrPipe(); err != nil {
 		return errors.Wrap(err, "Error occurred while getting StderrPipe")
 	}
-	defer func() {
-		if errClosingStderr := cmdStderr.Close(); errClosingStderr != nil {
-			err = errors.Wrap(errClosingStderr, "Error occurred while closing StderrPipe")
-		}
-	}()
 
 	// Start command
 	if err = cmd.Start(); err != nil {
