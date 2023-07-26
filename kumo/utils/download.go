@@ -2,7 +2,6 @@ package utils
 
 import (
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -20,11 +19,15 @@ func Download(url, destPath string, bytesDownloadedChan chan<- int) (err error) 
 		bytesDownloaded int
 	)
 
-	// Initiate download
+	// Initiate download and defer closing the response body
 	if response, err = http.Get(url); err != nil {
 		return errors.Wrapf(err, "failed to download from: %s", url)
 	}
-	defer response.Body.Close()
+	defer func() {
+		if err = response.Body.Close(); err != nil {
+			err = errors.Wrap(err, "failed to close response body")
+		}
+	}()
 
 	// Create the destination dir
 	if err = os.MkdirAll(destDir, 0755); err != nil {
@@ -32,7 +35,7 @@ func Download(url, destPath string, bytesDownloadedChan chan<- int) (err error) 
 	}
 
 	// Create the file to write to
-	if file, err = os.OpenFile(destPath, os.O_CREATE|os.O_WRONLY, 0744); err != nil {
+	if file, err = os.Create(destPath); err != nil {
 		return errors.Wrapf(err, "failed to create file for: %s", destPath)
 	}
 	defer file.Close()
@@ -56,9 +59,6 @@ func Download(url, destPath string, bytesDownloadedChan chan<- int) (err error) 
 			return errors.Wrap(err, "failed to write to file")
 		}
 	}
-	info, err := file.Stat()
-
-	log.Fatalf("Downloaded %s (%d bytes)", info.Name(), info.Size())
 
 	return
 }
