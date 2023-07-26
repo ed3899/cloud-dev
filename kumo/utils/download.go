@@ -2,6 +2,7 @@ package utils
 
 import (
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -30,40 +31,39 @@ func Download(url, destPath string, bytesDownloadedChan chan<- int) (err error) 
 	// Initiate download and defer closing the response body
 	if response, err = http.Get(url); err != nil {
 		return oopsBuilder.
-			With("err", err).
-			Errorf("failed to download from: %s", url)
+			Wrapf(err, "failed to initiate download from: %s", url)
 	}
-	defer func() (err error) {
-		if err = response.Body.Close(); err != nil {
-			return oopsBuilder.
-				With("err", err).
-				With("response", response).
-				Errorf("failed to close response body")
+	defer func() {
+		if err := response.Body.Close(); err != nil {
+			log.Fatalf(
+				"%+v",
+				oopsBuilder.
+					With("response", response).
+					Wrapf(err, "failed to close response body: %#v", response.Body),
+			)
 		}
-		return
 	}()
 
 	// Create the destination dir
 	if err = os.MkdirAll(destDir, 0755); err != nil {
 		return oopsBuilder.
-			With("err", err).
-			Errorf("failed to create destination directory for: %s", destPath)
+			Wrapf(err, "failed to create destination directory for: %s", destPath)
 	}
 
 	// Create the file to write to
 	if downloadFile, err = os.Create(destPath); err != nil {
 		return oopsBuilder.
-			With("err", err).
-			Errorf("failed to create file for: %s", destPath)
+			Wrapf(err, "failed to create file for: %s", destPath)
 	}
-	defer func() (err error) {
+	defer func() {
 		if err = downloadFile.Close(); err != nil {
-			return oopsBuilder.
-				With("err", err).
-				With("file", downloadFile).
-				Errorf("failed to close file")
+			log.Fatalf(
+				"%+v",
+				oopsBuilder.
+					With("file", downloadFile).
+					Wrapf(err, "failed to close file: %s", downloadFile.Name()),
+			)
 		}
-		return
 	}()
 
 	// Iterate over the response body
@@ -71,10 +71,9 @@ func Download(url, destPath string, bytesDownloadedChan chan<- int) (err error) 
 		// Read the response body into the bytes buffer
 		if bytesDownloaded, err = response.Body.Read(bytesBuffer); err != nil && err != io.EOF {
 			return oopsBuilder.
-				With("err", err).
 				With("bytesDownloaded", bytesDownloaded).
 				With("bytesBuffer", bytesBuffer).
-				Errorf("failed to read response body")
+				Wrapf(err, "failed to read response body of: %s", url)
 		}
 
 		if bytesDownloaded == 0 {
@@ -87,11 +86,10 @@ func Download(url, destPath string, bytesDownloadedChan chan<- int) (err error) 
 		// Write the bytes to the file
 		if bytesWritten, err = downloadFile.Write(bytesBuffer[:bytesDownloaded]); err != nil {
 			return oopsBuilder.
-				With("err", err).
 				With("bytesWritten", bytesWritten).
 				With("bytesBuffer", bytesBuffer).
 				With("bytesDownloaded", bytesDownloaded).
-				Errorf("failed to write to file")
+				Wrapf(err, "failed to write to file: %s", downloadFile.Name())
 		}
 	}
 

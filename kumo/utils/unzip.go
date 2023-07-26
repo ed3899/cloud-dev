@@ -32,8 +32,11 @@ func Unzip(pathToZip, extractToPath string, bytesUnzipped chan<- int) (err error
 	}
 	defer func() {
 		if err := reader.Close(); err != nil {
-			err = oopsBuilder.Wrapf(err, "failed to close zip reader: %#v", reader.File)
-			log.Fatalf("failed to close zip reader: %+v", err)
+			log.Fatalf(
+				"%+v",
+				oopsBuilder.
+					Wrapf(err, "failed to close zip reader: %#v", reader.File),
+			)
 		}
 	}()
 
@@ -119,8 +122,11 @@ func unzipFile(zf *zip.File, extractToPath string) (bytesCopied int64, err error
 	}
 	defer func() {
 		if err := destinationFile.Close(); err != nil {
-			err = oopsBuilder.Wrapf(err, "failed to close destination file: %#v", destinationFile.Name())
-			log.Fatalf("failed to close destination file: %+v", err)
+			log.Fatalf(
+				"%+v",
+				oopsBuilder.
+					Wrapf(err, "failed to close destination file: %#v", destinationFile.Name()),
+			)
 		}
 	}()
 
@@ -131,8 +137,11 @@ func unzipFile(zf *zip.File, extractToPath string) (bytesCopied int64, err error
 	}
 	defer func() {
 		if err := zippedFile.Close(); err != nil {
-			err = oopsBuilder.Wrapf(err, "failed to close zipped file: %#v", zippedFile)
-			log.Fatalf("failed to close zipped file: %+v", err)
+			log.Fatalf(
+				"%+v",
+				oopsBuilder.
+					Wrapf(err, "failed to close zipped file: %#v", zippedFile),
+			)
 		}
 	}()
 
