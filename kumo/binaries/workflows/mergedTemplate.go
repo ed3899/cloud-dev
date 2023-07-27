@@ -1,6 +1,7 @@
 package workflows
 
 import (
+	"os"
 	"path/filepath"
 
 	"github.com/ed3899/kumo/binaries"
@@ -292,10 +293,18 @@ func NewTemplate2(tool binaries.Tool, cloud binaries.Cloud) (mergedTemplate *Tem
 	return
 }
 
-func (mt *MergedTemplate) Create() (err error) {
-	return
-}
+func (t *Template2) Remove() (err error) {
+	var (
+		oopsBuilder = oops.
+			Code("template_remove_failed")
+	)
 
-func (mt *MergedTemplate) Remove() (err error) {
+	if os.RemoveAll(t.AbsPath); err != nil {
+		err = oopsBuilder.
+			With("t.AbsPath", t.AbsPath).
+			Wrapf(err, "Error occurred while removing %s", t.AbsPath)
+		return
+	}
+
 	return
 }
