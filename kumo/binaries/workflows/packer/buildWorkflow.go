@@ -11,6 +11,7 @@ import (
 	"github.com/pkg/errors"
 )
 
+// TODO remove errors for ooops
 func BuildWorkflow() (err error) {
 	var (
 		cloud                    binaries.Cloud

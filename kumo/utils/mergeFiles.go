@@ -10,7 +10,7 @@ import (
 	"github.com/samber/oops"
 )
 
-func MergeFilesTo(outputAbsFilePath string, inputAbsFilePaths ...string) (mergedFileAbsPath string, err error) {
+func MergeFilesTo(outputAbsFilePath string, inputAbsFilePaths ...string) (err error) {
 	var (
 		oopsBuilder = oops.Code("merge_files_failed").
 				With("outputAbsFilePath", outputAbsFilePath).
@@ -69,8 +69,6 @@ func MergeFilesTo(outputAbsFilePath string, inputAbsFilePaths ...string) (merged
 			return
 		}
 	}
-
-	mergedFileAbsPath = mergedFile.Name()
 
 	return
 }
