@@ -24,6 +24,6 @@ func HostIsCompatible() (compatible bool) {
 	return
 }
 
-func HostIsNotCompatible() bool {
+func HostIsNotCompatible() (notCompatible bool) {
 	return !HostIsCompatible()
 }

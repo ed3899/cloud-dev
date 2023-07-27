@@ -30,8 +30,9 @@ func Download(url, destPath string, bytesDownloadedChan chan<- int) (err error) 
 
 	// Initiate download and defer closing the response body
 	if response, err = http.Get(url); err != nil {
-		return oopsBuilder.
+		err = oopsBuilder.
 			Wrapf(err, "failed to initiate download from: %s", url)
+		return
 	}
 	defer func() {
 		if err := response.Body.Close(); err != nil {
@@ -46,14 +47,16 @@ func Download(url, destPath string, bytesDownloadedChan chan<- int) (err error) 
 
 	// Create the destination dir
 	if err = os.MkdirAll(destDir, 0755); err != nil {
-		return oopsBuilder.
+		err = oopsBuilder.
 			Wrapf(err, "failed to create destination directory for: %s", destPath)
+		return
 	}
 
 	// Create the file to write to
 	if downloadFile, err = os.Create(destPath); err != nil {
-		return oopsBuilder.
+		err = oopsBuilder.
 			Wrapf(err, "failed to create file for: %s", destPath)
+		return
 	}
 	defer func() {
 		if err = downloadFile.Close(); err != nil {
@@ -70,10 +73,11 @@ func Download(url, destPath string, bytesDownloadedChan chan<- int) (err error) 
 	for {
 		// Read the response body into the bytes buffer
 		if bytesDownloaded, err = response.Body.Read(bytesBuffer); err != nil && err != io.EOF {
-			return oopsBuilder.
+			err = oopsBuilder.
 				With("bytesDownloaded", bytesDownloaded).
 				With("bytesBuffer", bytesBuffer).
 				Wrapf(err, "failed to read response body of: %s", url)
+			return
 		}
 
 		if bytesDownloaded == 0 {
@@ -85,11 +89,12 @@ func Download(url, destPath string, bytesDownloadedChan chan<- int) (err error) 
 
 		// Write the bytes to the file
 		if bytesWritten, err = downloadFile.Write(bytesBuffer[:bytesDownloaded]); err != nil {
-			return oopsBuilder.
+			err = oopsBuilder.
 				With("bytesWritten", bytesWritten).
 				With("bytesBuffer", bytesBuffer).
 				With("bytesDownloaded", bytesDownloaded).
 				Wrapf(err, "failed to write to file: %s", downloadFile.Name())
+			return
 		}
 	}
 
