@@ -34,7 +34,7 @@ func Download(url, destPath string, bytesDownloadedChan chan<- int) (err error) 
 			Wrapf(err, "failed to initiate download from: %s", url)
 		return
 	}
-	defer func() {
+	defer func(response *http.Response) {
 		if err := response.Body.Close(); err != nil {
 			log.Fatalf(
 				"%+v",
@@ -43,7 +43,7 @@ func Download(url, destPath string, bytesDownloadedChan chan<- int) (err error) 
 					Wrapf(err, "failed to close response body"),
 			)
 		}
-	}()
+	}(response)
 
 	// Create the destination dir
 	if err = os.MkdirAll(destDir, 0755); err != nil {
@@ -58,7 +58,7 @@ func Download(url, destPath string, bytesDownloadedChan chan<- int) (err error) 
 			Wrapf(err, "failed to create file for: %s", destPath)
 		return
 	}
-	defer func() {
+	defer func(downloadFile *os.File) {
 		if err = downloadFile.Close(); err != nil {
 			log.Fatalf(
 				"%+v",
@@ -67,7 +67,7 @@ func Download(url, destPath string, bytesDownloadedChan chan<- int) (err error) 
 					Wrapf(err, "failed to close downloadFile: %s", downloadFile.Name()),
 			)
 		}
-	}()
+	}(downloadFile)
 
 	// Iterate over the response body
 	for {
