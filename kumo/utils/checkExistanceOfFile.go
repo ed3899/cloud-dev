@@ -5,7 +5,7 @@ import (
 )
 
 // Returns true if the file at the given absolute path exists, false otherwise.
-func FilePresent(absolutePath string) bool {
+func FilePresent(absolutePath string) (present bool) {
 	var (
 		err error
 	)
@@ -24,6 +24,6 @@ func FilePresent(absolutePath string) bool {
 }
 
 // Returns true if the file at the given absolute path does not exist, false otherwise.
-func FileNotPresent(absolutePath string) bool {
+func FileNotPresent(absolutePath string) (notPresent bool) {
 	return !FilePresent(absolutePath)
 }

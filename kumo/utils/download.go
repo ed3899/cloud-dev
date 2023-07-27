@@ -38,8 +38,8 @@ func Download(url, destPath string, bytesDownloadedChan chan<- int) (err error) 
 			log.Fatalf(
 				"%+v",
 				oopsBuilder.
-					With("response", response).
-					Wrapf(err, "failed to close response body: %#v", response.Body),
+					With("responseStatus", response.Status).
+					Wrapf(err, "failed to close response body"),
 			)
 		}
 	}()
@@ -60,8 +60,8 @@ func Download(url, destPath string, bytesDownloadedChan chan<- int) (err error) 
 			log.Fatalf(
 				"%+v",
 				oopsBuilder.
-					With("file", downloadFile).
-					Wrapf(err, "failed to close file: %s", downloadFile.Name()),
+					With("downloadFile", downloadFile).
+					Wrapf(err, "failed to close downloadFile: %s", downloadFile.Name()),
 			)
 		}
 	}()
