@@ -31,7 +31,7 @@ func Unzip(pathToZip, extractToPath string, bytesUnzipped chan<- int) (err error
 			Wrapf(err, "failed to open zip file: %s", pathToZip)
 		return
 	}
-	defer func() {
+	defer func(reader *zip.ReadCloser) {
 		if err := reader.Close(); err != nil {
 			log.Fatalf(
 				"%+v",
@@ -39,7 +39,7 @@ func Unzip(pathToZip, extractToPath string, bytesUnzipped chan<- int) (err error
 					Wrapf(err, "failed to close zip reader: %#v", reader.File),
 			)
 		}
-	}()
+	}(reader)
 
 	// Declare error channel
 	errChan = make(chan error, len(reader.File))
@@ -125,7 +125,7 @@ func unzipFile(zf *zip.File, extractToPath string) (bytesCopied int64, err error
 			Wrapf(err, "failed to create destination file: %s", filePath)
 		return
 	}
-	defer func() {
+	defer func(destinationFile *os.File) {
 		if err := destinationFile.Close(); err != nil {
 			log.Fatalf(
 				"%+v",
@@ -133,7 +133,7 @@ func unzipFile(zf *zip.File, extractToPath string) (bytesCopied int64, err error
 					Wrapf(err, "failed to close destination file: %#v", destinationFile.Name()),
 			)
 		}
-	}()
+	}(destinationFile)
 
 	// Unzip the content of a file and copy it to the destination file. Defer closing the zipped file
 	if zippedFile, err = zf.Open(); err != nil {
@@ -141,7 +141,7 @@ func unzipFile(zf *zip.File, extractToPath string) (bytesCopied int64, err error
 			Wrapf(err, "failed to open zipped file: %s", zf.Name)
 		return
 	}
-	defer func() {
+	defer func(zippedFile io.ReadCloser) {
 		if err := zippedFile.Close(); err != nil {
 			log.Fatalf(
 				"%+v",
@@ -149,7 +149,7 @@ func unzipFile(zf *zip.File, extractToPath string) (bytesCopied int64, err error
 					Wrapf(err, "failed to close zipped file: %#v", zippedFile),
 			)
 		}
-	}()
+	}(zippedFile)
 
 	if bytesCopied, err = io.Copy(destinationFile, zippedFile); err != nil {
 		err = oopsBuilder.
