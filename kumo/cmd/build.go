@@ -3,13 +3,16 @@ package cmd
 import (
 	"log"
 
-	"github.com/pkg/errors"
-
 	"github.com/ed3899/kumo/binaries/workflows/packer"
+	"github.com/samber/oops"
 	"github.com/spf13/cobra"
 )
 
 func GetBuildCommand() *cobra.Command {
+	var (
+		oopsBuilder = oops.Code("get_build_cmd_failed")
+	)
+	
 	return &cobra.Command{
 		Use:   "build",
 		Short: "Build an AMI with ready to use tools",
@@ -18,7 +21,11 @@ func GetBuildCommand() *cobra.Command {
 		to SSH into your instance.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			if err := packer.BuildWorkflow(); err != nil {
-				log.Fatal(errors.Wrap(err, "Error occurred running packer build workflow"))
+				log.Fatalf(
+					"%+v",
+					oopsBuilder.
+						Wrapf(err, "Error occurred running packer build workflow"),
+				)
 			}
 		},
 	}
