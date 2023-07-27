@@ -9,10 +9,6 @@ import (
 )
 
 func GetBuildCommand() *cobra.Command {
-	var (
-		oopsBuilder = oops.Code("get_build_cmd_failed")
-	)
-	
 	return &cobra.Command{
 		Use:   "build",
 		Short: "Build an AMI with ready to use tools",
@@ -23,7 +19,7 @@ func GetBuildCommand() *cobra.Command {
 			if err := packer.BuildWorkflow(); err != nil {
 				log.Fatalf(
 					"%+v",
-					oopsBuilder.
+					oops.Code("get_build_cmd_failed").
 						Wrapf(err, "Error occurred running packer build workflow"),
 				)
 			}

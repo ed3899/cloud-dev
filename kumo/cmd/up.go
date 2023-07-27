@@ -9,10 +9,6 @@ import (
 )
 
 func GetUpCommand() *cobra.Command {
-	var (
-		oopsBuilder = oops.Code("get_up_command_failed")
-	)
-
 	return &cobra.Command{
 		Use:   "up",
 		Short: "Deploy your AMI to the cloud",
@@ -22,7 +18,7 @@ func GetUpCommand() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			if err := terraform.UpWorkflow(); err != nil {
 				log.Fatalf("%+v",
-					oopsBuilder.
+					oops.Code("get_up_command_failed").
 						Wrapf(err, "Error occurred while running terraform up workflow"),
 				)
 			}

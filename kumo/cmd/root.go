@@ -13,10 +13,6 @@ var rootCmd = &cobra.Command{
 }
 
 func init() {
-	var (
-		oopsBuilder = oops.Code("root_cmd_init_failed")
-	)
-
 	// Read the config
 	if err := config.ReadKumoConfig(&config.KumoConfig{
 		Name: "kumo.config",
@@ -25,7 +21,7 @@ func init() {
 	}); err != nil {
 		log.Fatalf(
 			"%+v",
-			oopsBuilder.
+			oops.Code("root_cmd_init_failed").
 				Wrapf(err, "Error occurred while reading kumo config"),
 		)
 	}
@@ -35,14 +31,10 @@ func init() {
 }
 
 func Execute() {
-	var (
-		oopsBuilder = oops.Code("root_cmd_execute_failed")
-	)
-
 	if err := rootCmd.Execute(); err != nil {
 		log.Fatalf(
 			"%+v",
-			oopsBuilder.
+			oops.Code("root_cmd_execute_failed").
 				Wrapf(err, "Error occurred while running kumo"),
 		)
 	}
