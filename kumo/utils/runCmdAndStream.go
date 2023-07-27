@@ -48,15 +48,7 @@ func RunCmdAndStream(cmd *exec.Cmd) (err error) {
 		return oopsBuilder.
 			Wrapf(zapErr, "Error occurred while creating zap logger")
 	}
-	defer func() {
-		if err := logger.Sync(); err != nil {
-			log.Fatalf(
-				"%+v",
-				oopsBuilder.
-					Wrapf(err, "Error occurred while syncing zap logger"),
-			)
-		}
-	}()
+	defer logger.Sync()
 
 	// Get StdoutPipe
 	if cmdStdout, err = cmd.StdoutPipe(); err != nil {
@@ -171,10 +163,10 @@ func RunCmdAndStream(cmd *exec.Cmd) (err error) {
 func TerminateCommand(cmd *exec.Cmd) {
 	// Attempt to send a SIGTERM signal to the process
 	if signalErr := cmd.Process.Signal(syscall.SIGTERM); signalErr != nil {
-		log.Printf("Sending interrupt signal failed with error: %#v\n", signalErr)
+		log.Printf("Sending interrupt signal failed with error: %v\n", signalErr)
 		log.Println("Sending kill signal instead")
 		if killErr := cmd.Process.Kill(); killErr != nil {
-			log.Printf("Sending kill signal failed with error: %#v\n", killErr)
+			log.Printf("Sending kill signal failed with error: %v\n", killErr)
 			log.Fatal("Failed to terminate command")
 		}
 	}
