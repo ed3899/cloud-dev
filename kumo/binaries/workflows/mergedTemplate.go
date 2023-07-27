@@ -6,6 +6,8 @@ import (
 	"github.com/ed3899/kumo/binaries"
 	"github.com/ed3899/kumo/utils"
 	"github.com/samber/oops"
+	"github.com/spf13/viper"
+	"go.uber.org/zap"
 )
 
 type PackerGeneralEnvironment struct {
@@ -47,9 +49,9 @@ type TerraformAWSEnvironment struct {
 	TerraformGeneralEnvironment  *TerraformGeneralEnvironment
 }
 
-type Template2 struct {
-	AbsPath     string
-	Environment any
+type PackerManifest struct {
+	Name    string
+	AbsPath string
 }
 
 type GeneralTemplate struct {
@@ -63,52 +65,68 @@ type AwsTemplate struct {
 }
 
 type MergedTemplate struct {
-	Name		string
+	Name    string
 	AbsPath string
 }
 
 type PackerTemplates struct {
-	General *GeneralTemplate
-	Aws     *AwsTemplate
+	General        *GeneralTemplate
+	Aws            *AwsTemplate
 	MergedTemplate *MergedTemplate
 }
 
 type TerraformTemplates struct {
-	General *GeneralTemplate
-	Aws     *AwsTemplate
+	General        *GeneralTemplate
+	Aws            *AwsTemplate
 	MergedTemplate *MergedTemplate
+}
+
+type Template2 struct {
+	AbsPath     string
+	Environment any
 }
 
 func NewTemplate2(tool binaries.Tool, cloud binaries.Cloud) (mergedTemplate *Template2, err error) {
 	const (
+		// Packer
 		packerSubDirName          = "packer"
+		packerManifestName        = "manifest.json"
 		packerGeneralTemplateName = "GeneralPackerVars.tmpl"
-
-		// Cloud
-		packerAwsTemplateName    = "AWS_PackerVars.tmpl"
-		packerMergedTemplateName = "temp_merged_packer_template"
-
+		packerAwsTemplateName     = "AWS_PackerVars.tmpl"
+		packerMergedTemplateName  = "temp_merged_packer_template"
+		// Terraform
 		terraformSubDirName          = "terraform"
 		terraformGeneralTemplateName = "GeneralTerraformTfVars.tmpl"
 		terraformAwsTemplateName     = "AWS_TerraformTfVars.tmpl"
 		terraformMergedTemplateName  = "temp_merged_terraform_template"
-
+		// Subdirectory names
 		generalSubDirName = "general"
 		awsSubDirName     = "aws"
-
-		templateDirName = "templates"
+		templateDirName   = "templates"
+		// Default IP
+		defaulIp = "0.0.0.0"
 	)
 
 	var (
-		// absPathToPackerMergedTemplate    = filepath.Join(absPathToTemplatesDir, packerSubDirName, packerMergedTemplateName)
-		// absPathToTerraformMergedTemplate = filepath.Join(absPathToTemplatesDir, terraformSubDirName, terraformMergedTemplateName)
-		oopsBuilder                      = oops.
-							Code("new_merged_template_failed").
-							With("tool", tool).
-							With("cloud", cloud)
+		oopsBuilder = oops.
+				Code("new_merged_template_failed").
+				With("tool", tool).
+				With("cloud", cloud)
+		logger, _ = zap.NewProduction()
 
-		absPathToTemplatesDir string
+		packerGeneralEnvironment    *PackerGeneralEnvironment
+		packerManifest              *PackerManifest
+		packerTemplates             *PackerTemplates
+		terraformGeneralEnvironment *TerraformGeneralEnvironment
+		terraformTemplates          *TerraformTemplates
+		absPathToTemplatesDir       string
+		publicIp                    string
+		pickedIp                    string
+		lastBuiltAmiId              string
+		pickedAmiId                 string
 	)
+
+	defer logger.Sync()
 
 	// Template paths
 	if absPathToTemplatesDir, err = filepath.Abs(templateDirName); err != nil {
@@ -117,10 +135,15 @@ func NewTemplate2(tool binaries.Tool, cloud binaries.Cloud) (mergedTemplate *Tem
 		return
 	}
 
-	packerTemplates := &PackerTemplates{
+	packerManifest = &PackerManifest{
+		Name:    packerManifestName,
+		AbsPath: filepath.Join(absPathToTemplatesDir, packerSubDirName, packerManifestName),
+	}
+
+	packerTemplates = &PackerTemplates{
 		General: &GeneralTemplate{
 			Name:    packerGeneralTemplateName,
-			AbsPath: filepath.Join(absPathToTemplatesDir, packerSubDirName, packerGeneralTemplateName),
+			AbsPath: filepath.Join(absPathToTemplatesDir, packerSubDirName, generalSubDirName, packerGeneralTemplateName),
 		},
 		Aws: &AwsTemplate{
 			Name:    packerAwsTemplateName,
@@ -132,7 +155,7 @@ func NewTemplate2(tool binaries.Tool, cloud binaries.Cloud) (mergedTemplate *Tem
 		},
 	}
 
-	terraformTemplates := &TerraformTemplates{
+	terraformTemplates = &TerraformTemplates{
 		General: &GeneralTemplate{
 			Name:    terraformGeneralTemplateName,
 			AbsPath: filepath.Join(absPathToTemplatesDir, terraformSubDirName, generalSubDirName, terraformGeneralTemplateName),
@@ -149,22 +172,48 @@ func NewTemplate2(tool binaries.Tool, cloud binaries.Cloud) (mergedTemplate *Tem
 
 	switch tool {
 	case binaries.PackerID:
+		packerGeneralEnvironment = &PackerGeneralEnvironment{
+			GIT_USERNAME:                          viper.GetString("Git.Username"),
+			GIT_EMAIL:                             viper.GetString("Git.Email"),
+			ANSIBLE_TAGS:                          viper.GetStringSlice("AMI.Tools"),
+			GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC: viper.GetString("GitHub.PersonalAccessTokenClassic"),
+		}
+
 		switch cloud {
 		case binaries.AWS:
+			// Merge templates
 			if err = utils.MergeFilesTo(
-				absPathToPackerMergedTemplate,
+				packerTemplates.MergedTemplate.AbsPath,
 				packerTemplates.General.AbsPath,
 				packerTemplates.Aws.AbsPath,
 			); err != nil {
 				err = oopsBuilder.
 					With("packerTemplates.General.AbsPath", packerTemplates.General.AbsPath).
 					With("packerTemplates.Aws.AbsPath", packerTemplates.Aws.AbsPath).
-					Wrapf(err, "failed to merge files to: %s", absPathToPackerMergedTemplate)
+					Wrapf(err, "failed to merge files to: %s", packerTemplates.MergedTemplate.AbsPath)
 				return
 			}
 
-			mergedTemplate = &MergedTemplate{
-				AbsPath: mergedTemplateAbsPath,
+			mergedTemplate = &Template2{
+				AbsPath: packerTemplates.MergedTemplate.AbsPath,
+				Environment: &PackerAWSEnvironment{
+					AWS_ACCESS_KEY:                     viper.GetString("AWS.AccessKeyId"),
+					AWS_SECRET_KEY:                     viper.GetString("AWS.SecretAccessKey"),
+					AWS_IAM_PROFILE:                    viper.GetString("AWS.IamProfile"),
+					AWS_USER_IDS:                       viper.GetStringSlice("AWS.UserIds"),
+					AWS_AMI_NAME:                       viper.GetString("AMI.Name"),
+					AWS_INSTANCE_TYPE:                  viper.GetString("AWS.EC2.Instance.Type"),
+					AWS_REGION:                         viper.GetString("AWS.Region"),
+					AWS_EC2_AMI_NAME_FILTER:            viper.GetString("AMI.Base.Filter"),
+					AWS_EC2_AMI_ROOT_DEVICE_TYPE:       viper.GetString("AMI.Base.RootDeviceType"),
+					AWS_EC2_AMI_VIRTUALIZATION_TYPE:    viper.GetString("AMI.Base.VirtualizationType"),
+					AWS_EC2_AMI_OWNERS:                 viper.GetStringSlice("AMI.Base.Owners"),
+					AWS_EC2_SSH_USERNAME:               viper.GetString("AMI.Base.User"),
+					AWS_EC2_INSTANCE_USERNAME:          viper.GetString("AMI.User"),
+					AWS_EC2_INSTANCE_USERNAME_HOME:     viper.GetString("AMI.Home"),
+					AWS_EC2_INSTANCE_USERNAME_PASSWORD: viper.GetString("AMI.Password"),
+					PackerGeneralEnvironment:           packerGeneralEnvironment,
+				},
 			}
 
 		default:
@@ -172,14 +221,68 @@ func NewTemplate2(tool binaries.Tool, cloud binaries.Cloud) (mergedTemplate *Tem
 				Wrapf(err, "Cloud '%v' not supported", cloud)
 			return
 		}
+
 	case binaries.TerraformID:
+		// Get public IP
+		if publicIp, err = utils.GetPublicIp(); err != nil {
+			logger.Sugar().Warnf("failed to get public IP, using default: %s", defaulIp)
+			pickedIp = defaulIp
+		} else {
+			pickedIp = publicIp
+		}
+
+		// Set general environment
+		terraformGeneralEnvironment = &TerraformGeneralEnvironment{
+			ALLOWED_IP: utils.MaskIp(pickedIp, 32),
+		}
+
 		switch cloud {
 		case binaries.AWS:
+			// Get last built AMI ID
+			if lastBuiltAmiId, err = utils.GetLastBuiltAmiId(packerManifest.AbsPath); err != nil {
+				err = oopsBuilder.
+					Wrapf(err, "failed to get last built AMI ID")
+				return
+			}
+
+			// Pick AMI ID to be used
+			if pickedAmiId, err = utils.PickAmiIdToBeUsed(lastBuiltAmiId, viper.GetString("Up.AMI_Id")); err != nil {
+				err = oopsBuilder.
+					Wrapf(err, "failed to get picked AMI ID")
+				return
+			}
+
+			// Merge templates
+			if err = utils.MergeFilesTo(
+				terraformTemplates.MergedTemplate.AbsPath,
+				terraformTemplates.General.AbsPath,
+				terraformTemplates.Aws.AbsPath,
+			); err != nil {
+				err = oopsBuilder.
+					With("terraformTemplates.General.AbsPath", terraformTemplates.General.AbsPath).
+					With("terraformTemplates.Aws.AbsPath", terraformTemplates.Aws.AbsPath).
+					Wrapf(err, "failed to merge files to: %s", terraformTemplates.MergedTemplate.AbsPath)
+				return
+			}
+
+			mergedTemplate = &Template2{
+				AbsPath: terraformTemplates.MergedTemplate.AbsPath,
+				Environment: &TerraformAWSEnvironment{
+					AWS_REGION:                   viper.GetString("AWS.Region"),
+					AWS_INSTANCE_TYPE:            viper.GetString("AWS.EC2.Instance.Type"),
+					AWS_EC2_INSTANCE_VOLUME_TYPE: viper.GetString("AWS.EC2.Volume.Type"),
+					AWS_EC2_INSTANCE_VOLUME_SIZE: viper.GetInt("AWS.EC2.Volume.Size"),
+					AMI_ID:                       pickedAmiId,
+					TerraformGeneralEnvironment:  terraformGeneralEnvironment,
+				},
+			}
+
 		default:
 			err = oopsBuilder.
 				Wrapf(err, "Cloud '%v' not supported", cloud)
 			return
 		}
+
 	default:
 		err = oopsBuilder.
 			Wrapf(err, "Tool '%v' not supported", tool)
