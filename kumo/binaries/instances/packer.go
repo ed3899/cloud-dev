@@ -8,7 +8,7 @@ import (
 
 	"github.com/ed3899/kumo/binaries"
 	"github.com/ed3899/kumo/utils"
-	"github.com/pkg/errors"
+	"github.com/samber/oops"
 )
 
 type PackerI interface {
@@ -39,6 +39,8 @@ func NewPacker() (packer *Packer, err error) {
 		zipName        = fmt.Sprintf("%s.zip", PACKER)
 		os, arch       = utils.GetCurrentHostSpecs()
 		url            = utils.CreateHashicorpURL(PACKER, VERSION, os, arch)
+		oopsBuilder    = oops.
+				Code("new_packer_failed")
 
 		absPathToExecutable string
 		absPathToRunDir     string
@@ -47,22 +49,31 @@ func NewPacker() (packer *Packer, err error) {
 	)
 
 	if absPathToExecutable, err = filepath.Abs(filepath.Join(binaries.DEPENDENCIES_DIR_NAME, PACKER, executableName)); err != nil {
-		err = errors.Wrapf(err, "failed to create executable path to: %s", executableName)
+		err = oopsBuilder.
+			With("DEPENDENCIES_DIR_NAME", binaries.DEPENDENCIES_DIR_NAME).
+			With("PACKER", PACKER).
+			Wrapf(err, "failed to create absolute path to: %s", executableName)
 		return
 	}
 
 	if absPathToRunDir, err = filepath.Abs(PACKER); err != nil {
-		err = errors.Wrapf(err, "failed to create run path to: %s", PACKER)
+		err = oopsBuilder.
+			With("PACKER", PACKER).
+			Wrapf(err, "failed to create absolute path to run dir")
 		return
 	}
 
 	if zipPath, err = filepath.Abs(filepath.Join(binaries.DEPENDENCIES_DIR_NAME, PACKER, zipName)); err != nil {
-		err = errors.Wrapf(err, "failed to craft zip path to: %s", zipName)
+		err = oopsBuilder.
+			With("DEPENDENCIES_DIR_NAME", binaries.DEPENDENCIES_DIR_NAME).
+			With("PACKER", PACKER).
+			Wrapf(err, "failed to create absolute path to: %s", zipName)
 		return
 	}
 
 	if contentLength, err = utils.GetContentLength(url); err != nil {
-		err = errors.Wrapf(err, "failed to get content length for: %s", url)
+		err = oopsBuilder.
+			Wrapf(err, "failed to get content length for: %s", url)
 		return
 	}
 
@@ -81,49 +92,82 @@ func NewPacker() (packer *Packer, err error) {
 	return
 }
 
-func (p *Packer) IsInstalled() bool {
+func (p *Packer) IsInstalled() (isInstalled bool) {
 	return utils.FilePresent(p.AbsPathToExecutable)
 }
 
-func (p *Packer) IsNotInstalled() bool {
+func (p *Packer) IsNotInstalled() (isNotInstalled bool) {
 	return utils.FileNotPresent(p.AbsPathToExecutable)
 }
 
 func (p *Packer) GetAbsPathToCloudRunDir(cloud binaries.Cloud) (cloudRunDir string, err error) {
+	var (
+		oopsBuilder = oops.
+			Code("packer_get_abs_path_to_cloud_run_dir_failed").
+			With("cloud", cloud)
+	)
+
 	switch cloud {
 	case binaries.AWS:
 		cloudRunDir = filepath.Join(p.AbsPathToRunDir, binaries.AWS_SUBDIR_NAME)
 
 	default:
-		err = errors.Errorf("Cloud '%v' not supported", cloud)
+		err = oopsBuilder.
+			Wrapf(err, "Cloud '%v' not supported", cloud)
+		return
 	}
 
 	return
 }
 
 func (p *Packer) SetPluginPath(cloud binaries.Cloud) (err error) {
+	var (
+		oopsBuilder = oops.
+				Code("packer_set_plugin_path_failed").
+				With("cloud", cloud)
+
+		absPluginPath string
+	)
+
 	switch cloud {
 	case binaries.AWS:
-		if err = os.Setenv(PACKER_PLUGIN_PATH, filepath.Join(p.AbsPathToRunDir, binaries.AWS_SUBDIR_NAME, PLUGINS_DIR_NAME)); err != nil {
-			err = errors.Wrapf(err, "Error occurred while setting %s environment variable", PACKER_PLUGIN_PATH)
+		absPluginPath = filepath.Join(p.AbsPathToRunDir, binaries.AWS_SUBDIR_NAME, PLUGINS_DIR_NAME)
+
+		if err = os.Setenv(PACKER_PLUGIN_PATH, absPluginPath); err != nil {
+			err = oopsBuilder.
+				With("absPluginPath", absPluginPath).
+				Wrapf(err, "Error occurred while setting %s environment variable", PACKER_PLUGIN_PATH)
+			return
 		}
 
 	default:
-		err = errors.Errorf("Cloud '%v' not supported", cloud)
+		err = oopsBuilder.
+			Errorf("Cloud '%v' not supported", cloud)
+		return
 	}
 
 	return
 }
 
 func (p *Packer) UnsetPluginPath(cloud binaries.Cloud) (err error) {
+	var (
+		oopsBuilder = oops.
+			Code("packer_unset_plugin_path_failed").
+			With("cloud", cloud)
+	)
+
 	switch cloud {
 	case binaries.AWS:
 		if err = os.Unsetenv(PACKER_PLUGIN_PATH); err != nil {
-			err = errors.Wrapf(err, "Error occurred while unsetting %s environment variable", PACKER_PLUGIN_PATH)
+			err = oopsBuilder.
+				Wrapf(err, "Error occurred while unsetting %s environment variable", PACKER_PLUGIN_PATH)
+			return
 		}
 
 	default:
-		err = errors.Errorf("Cloud '%v' not supported", cloud)
+		err = oopsBuilder.
+			Errorf("Cloud '%v' not supported", cloud)
+		return
 	}
 
 	return
@@ -131,18 +175,26 @@ func (p *Packer) UnsetPluginPath(cloud binaries.Cloud) (err error) {
 
 func (p *Packer) Init(cloud binaries.Cloud) (err error) {
 	var (
-		cmd    = exec.Command(p.AbsPathToExecutable, "init", "-upgrade", ".")
+		cmd         = exec.Command(p.AbsPathToExecutable, "init", "-upgrade", ".")
+		oopsBuilder = oops.
+				Code("packer_init_failed").
+				With("cloud", cloud)
+
 		cmdErr error
 	)
 
 	switch cloud {
 	case binaries.AWS:
 		if cmdErr = utils.RunCmdAndStream(cmd); cmdErr != nil {
-			err = errors.Wrap(cmdErr, "Error occured while initializing packer")
+			err = oopsBuilder.
+				Wrapf(cmdErr, "Error occured while initializing packer")
+			return
 		}
 
 	default:
-		err = errors.Errorf("Cloud '%v' not supported", cloud)
+		err = oopsBuilder.
+			Errorf("Cloud '%v' not supported", cloud)
+		return
 	}
 
 	return
@@ -150,18 +202,26 @@ func (p *Packer) Init(cloud binaries.Cloud) (err error) {
 
 func (p *Packer) Build(cloud binaries.Cloud) (err error) {
 	var (
-		cmd    = exec.Command(p.AbsPathToExecutable, "build", ".")
+		cmd         = exec.Command(p.AbsPathToExecutable, "build", ".")
+		oopsBuilder = oops.
+				Code("packer_build_failed").
+				With("cloud", cloud)
+
 		cmdErr error
 	)
 
 	switch cloud {
 	case binaries.AWS:
 		if cmdErr = utils.RunCmdAndStream(cmd); cmdErr != nil {
-			err = errors.Wrapf(cmdErr, "Error occured while building packer")
+			err = oopsBuilder.
+				Wrapf(cmdErr, "Error occured while building packer")
+			return
 		}
 
 	default:
-		err = errors.Errorf("Cloud '%v' not supported", cloud)
+		err = oopsBuilder.
+			Errorf("Cloud '%v' not supported", cloud)
+		return
 	}
 
 	return
