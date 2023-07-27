@@ -4,11 +4,15 @@ import (
 	"log"
 
 	"github.com/ed3899/kumo/binaries/workflows/terraform"
-	"github.com/pkg/errors"
+	"github.com/samber/oops"
 	"github.com/spf13/cobra"
 )
 
 func GetUpCommand() *cobra.Command {
+	var (
+		oopsBuilder = oops.Code("get_up_command_failed")
+	)
+
 	return &cobra.Command{
 		Use:   "up",
 		Short: "Deploy your AMI to the cloud",
@@ -17,7 +21,10 @@ func GetUpCommand() *cobra.Command {
 		instances from VSCode.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			if err := terraform.UpWorkflow(); err != nil {
-				log.Fatal(errors.Wrap(err, "Error occurred while running terraform up workflow"))
+				log.Fatalf("%+v",
+					oopsBuilder.
+						Wrapf(err, "Error occurred while running terraform up workflow"),
+				)
 			}
 		},
 	}
