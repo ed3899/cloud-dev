@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/ed3899/kumo/config"
-	"github.com/pkg/errors"
+	"github.com/samber/oops"
 	"github.com/spf13/cobra"
 )
 
@@ -13,13 +13,21 @@ var rootCmd = &cobra.Command{
 }
 
 func init() {
+	var (
+		oopsBuilder = oops.Code("root_cmd_init_failed")
+	)
+
 	// Read the config
 	if err := config.ReadKumoConfig(&config.KumoConfig{
 		Name: "kumo.config",
 		Type: "yaml",
 		Path: ".",
 	}); err != nil {
-		log.Fatal(errors.Wrapf(err, "Error occurred while reading kumo config"))
+		log.Fatalf(
+			"%+v",
+			oopsBuilder.
+				Wrapf(err, "Error occurred while reading kumo config"),
+		)
 	}
 
 	// Assemble commands
@@ -27,7 +35,15 @@ func init() {
 }
 
 func Execute() {
+	var (
+		oopsBuilder = oops.Code("root_cmd_execute_failed")
+	)
+
 	if err := rootCmd.Execute(); err != nil {
-		log.Fatal(errors.Wrapf(err, "Error occurred while running kumo"))
+		log.Fatalf(
+			"%+v",
+			oopsBuilder.
+				Wrapf(err, "Error occurred while running kumo"),
+		)
 	}
 }
