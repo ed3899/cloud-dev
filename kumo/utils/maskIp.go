@@ -6,7 +6,7 @@ import "fmt"
 //
 // Example:
 //
-// ("0.0.0.0", 32) -> "0.0.0.0/32"
+//	("0.0.0.0", 32) -> "0.0.0.0/32"
 func MaskIp(ip string, mask int) (maskedIp string) {
 	return fmt.Sprintf("%s/%d", ip, mask)
 }

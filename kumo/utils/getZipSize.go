@@ -2,35 +2,46 @@ package utils
 
 import (
 	"io/fs"
+	"log"
 	"os"
 	"path/filepath"
 
-	"github.com/pkg/errors"
+	"github.com/samber/oops"
 )
 
 func GetZipSize(absPathToZip string) (size int64, err error) {
 	var (
+		oopsBuilder = oops.Code("get_zip_size_failed").
+				With("absPathToZip", absPathToZip)
+
 		zipFile *os.File
 		zipInfo fs.FileInfo
 	)
 
 	if filepath.IsLocal(absPathToZip) {
-		err = errors.New("path to zip is not absolute")
+		err = oopsBuilder.
+			Wrapf(err, "path to zip is not absolute: %s", absPathToZip)
 		return
 	}
 
 	if zipFile, err = os.Open(absPathToZip); err != nil {
-		err = errors.Wrapf(err, "failed to open zip file: %v", absPathToZip)
+		err = oopsBuilder.
+			Wrapf(err, "failed to open zip file: %s", absPathToZip)
 		return
 	}
 	defer func() {
-		if errClosingZipFile := zipFile.Close(); errClosingZipFile != nil {
-			err = errors.Wrapf(errClosingZipFile, "failed to close zip file: %v", absPathToZip)
+		if err := zipFile.Close(); err != nil {
+			log.Fatalf(
+				"%+v",
+				oopsBuilder.
+					Wrapf(err, "failed to close zip file: %s", zipFile.Name()),
+			)
 		}
 	}()
 
 	if zipInfo, err = zipFile.Stat(); err != nil {
-		err = errors.Wrapf(err, "failed to get zip file info: %v", absPathToZip)
+		err = oopsBuilder.
+			Wrapf(err, "failed to get zip file info: %v", absPathToZip)
 		return
 	}
 

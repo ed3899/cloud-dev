@@ -6,6 +6,7 @@ func GetCurrentHostSpecs() (os, arch string) {
 	return runtime.GOOS, runtime.GOARCH
 }
 
+// TODO add darwin
 func HostIsCompatible() (compatible bool) {
 	switch runtime.GOOS {
 	case "windows":
