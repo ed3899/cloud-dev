@@ -16,9 +16,16 @@ func GetUpCommand() *cobra.Command {
 		deploy the latest AMI built. It generates an SSH config file for you to easily SSH into your
 		instances from VSCode.`,
 		Run: func(cmd *cobra.Command, args []string) {
+			var (
+				oopsBuilder = oops.Code("get_up_command_failed").
+					With("command", cmd.Name()).
+					With("args", args)
+			)
+
 			if err := terraform.UpWorkflow(); err != nil {
-				log.Fatalf("%+v",
-					oops.Code("get_up_command_failed").
+				log.Fatalf(
+					"%+v",
+					oopsBuilder.
 						Wrapf(err, "Error occurred while running terraform up workflow"),
 				)
 			}

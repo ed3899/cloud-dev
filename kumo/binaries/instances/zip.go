@@ -4,7 +4,7 @@ import (
 	"os"
 
 	"github.com/ed3899/kumo/utils"
-	"github.com/pkg/errors"
+	"github.com/samber/oops"
 	"github.com/vbauerster/mpb/v8"
 	"github.com/vbauerster/mpb/v8/decor"
 )
@@ -18,19 +18,19 @@ type Zip struct {
 	ExtractionBar *mpb.Bar
 }
 
-func (z *Zip) GetName() string {
+func (z *Zip) GetName() (name string) {
 	return z.Name
 }
 
-func (z *Zip) GetPath() string {
+func (z *Zip) GetPath() (path string) {
 	return z.AbsPath
 }
 
-func (z *Zip) IsPresent() bool {
+func (z *Zip) IsPresent() (present bool) {
 	return utils.FilePresent(z.AbsPath)
 }
 
-func (z *Zip) IsNotPresent() bool {
+func (z *Zip) IsNotPresent() (notPresent bool) {
 	return utils.FileNotPresent(z.AbsPath)
 }
 
@@ -76,22 +76,50 @@ func (z *Zip) IncrementExtractionBar(extractedBytes int) {
 }
 
 func (z *Zip) Download(downloadedBytesChan chan<- int) (err error) {
+	var (
+		oopsBuilder = oops.Code("zip_download_failed").
+			With("downloadedBytesChan", downloadedBytesChan)
+	)
+
 	if err = utils.Download(z.URL, z.AbsPath, downloadedBytesChan); err != nil {
-		return errors.Wrapf(err, "failed to download: %v", z.URL)
+		err = oopsBuilder.
+			With("url", z.URL).
+			With("absPath", z.AbsPath).
+			Wrapf(err, "failed to download: %v", z.URL)
+		return
 	}
+
 	return
 }
 
 func (z *Zip) ExtractTo(extractToPath string, extractedBytesChan chan<- int) (err error) {
+	var (
+		oopsBuilder = oops.Code("zip_extract_to_failed").
+			With("extractToPath", extractToPath).
+			With("extractedBytesChan", extractedBytesChan)
+	)
+
 	if err = utils.Unzip(z.AbsPath, extractToPath, extractedBytesChan); err != nil {
-		return errors.Wrapf(err, "failed to unzip: %v", z.AbsPath)
+		err = oopsBuilder.
+			With("absPath", z.AbsPath).
+			Wrapf(err, "failed to unzip: %v", z.AbsPath)
+		return
 	}
+
 	return
 }
 
 func (z *Zip) Remove() (err error) {
+	var (
+		oopsBuilder = oops.Code("zip_remove_failed")
+	)
+
 	if err = os.Remove(z.AbsPath); err != nil {
-		return errors.Wrapf(err, "failed to remove: %v", z.AbsPath)
+		err = oopsBuilder.
+			With("absPath", z.AbsPath).
+			Wrapf(err, "failed to remove: %v", z.AbsPath)
+		return
 	}
+
 	return
 }

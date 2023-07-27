@@ -16,10 +16,16 @@ func GetBuildCommand() *cobra.Command {
 		to your root directory. Please keep these keys safe. If you lose them, you will not be able
 		to SSH into your instance.`,
 		Run: func(cmd *cobra.Command, args []string) {
+			var (
+				oopsBuilder = oops.Code("get_build_command_failed").
+					With("command", cmd.Name()).
+					With("args", args)
+			)
+
 			if err := packer.BuildWorkflow(); err != nil {
 				log.Fatalf(
 					"%+v",
-					oops.Code("get_build_cmd_failed").
+					oopsBuilder.
 						Wrapf(err, "Error occurred running packer build workflow"),
 				)
 			}
