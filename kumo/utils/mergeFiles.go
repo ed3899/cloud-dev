@@ -44,7 +44,7 @@ func MergeFilesTo(outputAbsFilePath string, inputAbsFilePaths ...string) (merged
 			err = oopsBuilder.Wrapf(err, "error opening file %s", inputFilePath)
 			return
 		}
-		defer func() {
+		defer func(inputFile *os.File) {
 			if err := inputFile.Close(); err != nil {
 				log.Fatalf(
 					"%+v",
@@ -52,7 +52,7 @@ func MergeFilesTo(outputAbsFilePath string, inputAbsFilePaths ...string) (merged
 						Wrapf(err, "error closing file: %s", inputFile.Name()),
 				)
 			}
-		}()
+		}(inputFile)
 
 		scanner = bufio.NewScanner(inputFile)
 		for scanner.Scan() {
