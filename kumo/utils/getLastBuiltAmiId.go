@@ -50,7 +50,7 @@ func GetLastBuiltAmiId(packerManifestAbsPath string) (amiId string, err error) {
 			Wrapf(err, "Error occurred while opening packer manifest file '%s'", packerManifestAbsPath)
 		return
 	}
-	defer func() {
+	defer func(packerManifestFile *os.File) {
 		if err := packerManifestFile.Close(); err != nil {
 			log.Fatalf(
 				"%+v",
@@ -58,7 +58,7 @@ func GetLastBuiltAmiId(packerManifestAbsPath string) (amiId string, err error) {
 					Wrapf(err, "Error occurred while closing packer manifest file: '%s'", packerManifestFile.Name()),
 			)
 		}
-	}()
+	}(packerManifestFile)
 
 	// Decode packer manifest
 	jsonDecoder = json.NewDecoder(packerManifestFile)

@@ -31,7 +31,7 @@ func GetPublicIp() (ip string, err error) {
 			Wrapf(err, "Error occurred while sending GET request to '%s'", URL)
 		return
 	}
-	defer func() {
+	defer func(response *http.Response) {
 		if err := response.Body.Close(); err != nil {
 			log.Fatalf(
 				"%+v",
@@ -40,7 +40,7 @@ func GetPublicIp() (ip string, err error) {
 					Wrapf(err, "Error occurred while closing response body"),
 			)
 		}
-	}()
+	}(response)
 
 	// Read the response body
 	if bytesResponse, err = io.ReadAll(response.Body); err != nil {

@@ -20,7 +20,7 @@ func GetContentLength(url string) (contentLength int64, err error) {
 			Wrapf(err, "failed to get head response from: %s", url)
 		return
 	}
-	defer func() {
+	defer func(response *http.Response) {
 		if err := response.Body.Close(); err != nil {
 			log.Fatalf(
 				"%+v",
@@ -29,7 +29,7 @@ func GetContentLength(url string) (contentLength int64, err error) {
 					Wrapf(err, "failed to close response body"),
 			)
 		}
-	}()
+	}(response)
 
 	contentLength = response.ContentLength
 

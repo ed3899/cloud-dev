@@ -29,7 +29,7 @@ func GetZipSize(absPathToZip string) (size int64, err error) {
 			Wrapf(err, "failed to open zip file: %s", absPathToZip)
 		return
 	}
-	defer func() {
+	defer func(zipClose *os.File) {
 		if err := zipFile.Close(); err != nil {
 			log.Fatalf(
 				"%+v",
@@ -37,7 +37,7 @@ func GetZipSize(absPathToZip string) (size int64, err error) {
 					Wrapf(err, "failed to close zip file: %s", zipFile.Name()),
 			)
 		}
-	}()
+	}(zipFile)
 
 	if zipInfo, err = zipFile.Stat(); err != nil {
 		err = oopsBuilder.
