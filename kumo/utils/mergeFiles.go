@@ -28,7 +28,7 @@ func MergeFilesTo(outputAbsFilePath string, inputAbsFilePaths ...string) (merged
 		err = oopsBuilder.Wrapf(err, "error creating merged file")
 		return
 	}
-	defer func() {
+	defer func(mergedFile *os.File) {
 		if err := mergedFile.Close(); err != nil {
 			log.Fatalf(
 				"%+v",
@@ -36,7 +36,7 @@ func MergeFilesTo(outputAbsFilePath string, inputAbsFilePaths ...string) (merged
 					Wrapf(err, "error closing merged file: %s", mergedFile.Name()),
 			)
 		}
-	}()
+	}(mergedFile)
 
 	for _, inputFilePath = range inputAbsFilePaths {
 		// Open each file and append its content to the merged file
