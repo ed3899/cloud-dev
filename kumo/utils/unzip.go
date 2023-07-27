@@ -27,8 +27,9 @@ func Unzip(pathToZip, extractToPath string, bytesUnzipped chan<- int) (err error
 
 	// Open the zip file and defer closing it
 	if reader, err = zip.OpenReader(pathToZip); err != nil {
-		return oopsBuilder.
+		err = oopsBuilder.
 			Wrapf(err, "failed to open zip file: %s", pathToZip)
+		return
 	}
 	defer func() {
 		if err := reader.Close(); err != nil {
@@ -98,27 +99,31 @@ func unzipFile(zf *zip.File, extractToPath string) (bytesCopied int64, err error
 	// Check if file path is not vulnerable to Zip Slip
 	filePath = filepath.Join(extractToPath, zf.Name)
 	if !strings.HasPrefix(filePath, filepath.Clean(extractToPath)+string(os.PathSeparator)) {
-		return 0, oopsBuilder.
+		err = oopsBuilder.
 			Wrapf(err, "illegal file path: %s", filePath)
+		return
 	}
 
 	// Check if file is a directory
 	if zf.FileInfo().IsDir() {
-		return 0, oopsBuilder.
+		err = oopsBuilder.
 			Errorf("is a directory: %s", zf.Name)
+		return
 	}
 
 	// Create directory tree
 	if err = os.MkdirAll(filepath.Dir(filePath), os.ModePerm); err != nil {
-		return 0, oopsBuilder.
+		err = oopsBuilder.
 			Wrapf(err, "failed to create directory tree for: %s", filePath)
+		return
 	}
 
 	// Create a destination file for unzipped content and defer closing it
 	if destinationFile, err = os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, zf.Mode()); err != nil {
-		return 0, oopsBuilder.
+		err = oopsBuilder.
 			With("filePath", filePath).
 			Wrapf(err, "failed to create destination file: %s", filePath)
+		return
 	}
 	defer func() {
 		if err := destinationFile.Close(); err != nil {
@@ -132,8 +137,9 @@ func unzipFile(zf *zip.File, extractToPath string) (bytesCopied int64, err error
 
 	// Unzip the content of a file and copy it to the destination file. Defer closing the zipped file
 	if zippedFile, err = zf.Open(); err != nil {
-		return 0, oopsBuilder.
+		err = oopsBuilder.
 			Wrapf(err, "failed to open zipped file: %s", zf.Name)
+		return
 	}
 	defer func() {
 		if err := zippedFile.Close(); err != nil {
@@ -146,11 +152,12 @@ func unzipFile(zf *zip.File, extractToPath string) (bytesCopied int64, err error
 	}()
 
 	if bytesCopied, err = io.Copy(destinationFile, zippedFile); err != nil {
-		return 0, oopsBuilder.
+		err = oopsBuilder.
 			With("bytesCopied", bytesCopied).
 			With("zippedFile", zippedFile).
 			With("destinationFile", destinationFile).
 			Wrapf(err, "failed to copy zipped file to destination file: %s", zf.Name)
+		return
 	}
 
 	return
