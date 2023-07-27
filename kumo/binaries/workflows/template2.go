@@ -11,32 +11,6 @@ import (
 	"go.uber.org/zap"
 )
 
-type PackerGeneralEnvironment struct {
-	GIT_USERNAME                          string
-	GIT_EMAIL                             string
-	ANSIBLE_TAGS                          []string
-	GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC string
-}
-
-type PackerAWSEnvironment struct {
-	AWS_ACCESS_KEY                     string
-	AWS_SECRET_KEY                     string
-	AWS_IAM_PROFILE                    string
-	AWS_USER_IDS                       []string
-	AWS_AMI_NAME                       string
-	AWS_INSTANCE_TYPE                  string
-	AWS_REGION                         string
-	AWS_EC2_AMI_NAME_FILTER            string
-	AWS_EC2_AMI_ROOT_DEVICE_TYPE       string
-	AWS_EC2_AMI_VIRTUALIZATION_TYPE    string
-	AWS_EC2_AMI_OWNERS                 []string
-	AWS_EC2_SSH_USERNAME               string
-	AWS_EC2_INSTANCE_USERNAME          string
-	AWS_EC2_INSTANCE_USERNAME_HOME     string
-	AWS_EC2_INSTANCE_USERNAME_PASSWORD string
-	PackerGeneralEnvironment           *PackerGeneralEnvironment
-}
-
 type TerraformGeneralEnvironment struct {
 	ALLOWED_IP string
 }
@@ -48,11 +22,6 @@ type TerraformAWSEnvironment struct {
 	AWS_EC2_INSTANCE_VOLUME_SIZE int
 	AMI_ID                       string
 	TerraformGeneralEnvironment  *TerraformGeneralEnvironment
-}
-
-type PackerManifest struct {
-	Name    string
-	AbsPath string
 }
 
 type GeneralTemplate struct {
@@ -70,19 +39,20 @@ type MergedTemplate struct {
 	AbsPath string
 }
 
-type PackerTemplates struct {
-	General        *GeneralTemplate
-	Aws            *AwsTemplate
-	MergedTemplate *MergedTemplate
-}
-
 type TerraformTemplates struct {
 	General        *GeneralTemplate
 	Aws            *AwsTemplate
 	MergedTemplate *MergedTemplate
 }
 
+type PackerManifest struct {
+	Name    string
+	AbsPath string
+}
+
 type Template2 struct {
+	Tool        binaries.Tool
+	Cloud       binaries.Cloud
 	AbsPath     string
 	Environment any
 }
@@ -196,6 +166,8 @@ func NewTemplate2(tool binaries.Tool, cloud binaries.Cloud) (mergedTemplate *Tem
 			}
 
 			mergedTemplate = &Template2{
+				Tool:    binaries.PackerID,
+				Cloud:   binaries.AWS,
 				AbsPath: packerTemplates.MergedTemplate.AbsPath,
 				Environment: &PackerAWSEnvironment{
 					AWS_ACCESS_KEY:                     viper.GetString("AWS.AccessKeyId"),
@@ -267,6 +239,8 @@ func NewTemplate2(tool binaries.Tool, cloud binaries.Cloud) (mergedTemplate *Tem
 			}
 
 			mergedTemplate = &Template2{
+				Tool:    binaries.TerraformID,
+				Cloud:   binaries.AWS,
 				AbsPath: terraformTemplates.MergedTemplate.AbsPath,
 				Environment: &TerraformAWSEnvironment{
 					AWS_REGION:                   viper.GetString("AWS.Region"),
