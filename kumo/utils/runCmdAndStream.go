@@ -30,10 +30,10 @@ func RunCmdAndStream(cmd *exec.Cmd) (err error) {
 	var (
 		oopsBuilder = oops.Code("run_cmd_and_stream_failed").
 				With("cmd", cmd.Path)
-		logger, zapErr = zap.NewProduction()
-		cmdWg          = new(sync.WaitGroup)
-		cmdErrChan     = make(chan error, 1)
-		cmdDoneChan    = make(chan bool, 1)
+		logger, _   = zap.NewProduction()
+		cmdWg       = new(sync.WaitGroup)
+		cmdErrChan  = make(chan error, 1)
+		cmdDoneChan = make(chan bool, 1)
 
 		aggregatorGroup = new(sync.WaitGroup)
 		mainErrChan     = make(chan error, 1)
@@ -44,25 +44,27 @@ func RunCmdAndStream(cmd *exec.Cmd) (err error) {
 	)
 
 	// Zap logger setup
-	if zapErr != nil {
-		return oopsBuilder.
-			Wrapf(zapErr, "Error occurred while creating zap logger")
-	}
 	defer logger.Sync()
 
 	// Get StdoutPipe
 	if cmdStdout, err = cmd.StdoutPipe(); err != nil {
-		return oopsBuilder.Wrapf(err, "Error occurred while getting StdoutPipe for command '%s'", cmd.Path)
+		err = oopsBuilder.
+			Wrapf(err, "Error occurred while getting StdoutPipe for command '%s'", cmd.Path)
+		return
 	}
 
 	// Get StderrPipe
 	if cmdStderr, err = cmd.StderrPipe(); err != nil {
-		return oopsBuilder.Wrapf(err, "Error occurred while getting StderrPipe for command '%s'", cmd.Path)
+		err = oopsBuilder.
+			Wrapf(err, "Error occurred while getting StderrPipe for command '%s'", cmd.Path)
+		return
 	}
 
 	// Start command
 	if err = cmd.Start(); err != nil {
-		return oopsBuilder.Wrapf(err, "Error occurred while starting command '%s'", cmd.Path)
+		err = oopsBuilder.
+			Wrapf(err, "Error occurred while starting command '%s'", cmd.Path)
+		return
 	}
 
 	// Stream command StdoutPipe to our Stdout
@@ -70,8 +72,9 @@ func RunCmdAndStream(cmd *exec.Cmd) (err error) {
 	go func(src *io.ReadCloser, dest *os.File) {
 		defer cmdWg.Done()
 		if _, err := io.Copy(dest, *src); err != nil {
-			cmdErrChan <- oopsBuilder.
+			err = oopsBuilder.
 				Wrapf(err, "Error occurred while copying StdoutPipe to Stdout for command '%s'", cmd.Path)
+			cmdErrChan <- err
 			return
 		}
 	}(&cmdStdout, os.Stdout)
@@ -81,8 +84,9 @@ func RunCmdAndStream(cmd *exec.Cmd) (err error) {
 	go func(src *io.ReadCloser, dest *os.File) {
 		defer cmdWg.Done()
 		if _, err := io.Copy(dest, *src); err != nil {
-			cmdErrChan <- oopsBuilder.
+			err = oopsBuilder.
 				Wrapf(err, "Error occurred while copying StderrPipe to Stderr for command '%s'", cmd.Path)
+			cmdErrChan <- err
 			return
 		}
 	}(&cmdStderr, os.Stderr)
@@ -92,8 +96,9 @@ func RunCmdAndStream(cmd *exec.Cmd) (err error) {
 	go func() {
 		defer cmdWg.Done()
 		if err := cmd.Wait(); err != nil {
-			cmdErrChan <- oopsBuilder.
+			err = oopsBuilder.
 				Wrapf(err, "Error occurred while waiting for command '%s' to finish", cmd.Path)
+			cmdErrChan <- err
 			return
 		}
 	}()
@@ -119,8 +124,9 @@ func RunCmdAndStream(cmd *exec.Cmd) (err error) {
 			// If an error occurred while copying std, send it to the main error channel and terminate the command
 			case err := <-cmdErrChan:
 				if err != nil {
-					mainErrChan <- oopsBuilder.
+					err = oopsBuilder.
 						Wrapf(err, "Error occurred while copying std for command '%s'", cmd.Path)
+					mainErrChan <- err
 					TerminateCommand(cmd)
 					return
 				}
