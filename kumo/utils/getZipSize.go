@@ -18,7 +18,7 @@ func GetZipSize(absPathToZip string) (size int64, err error) {
 		zipInfo fs.FileInfo
 	)
 
-	if filepath.IsLocal(absPathToZip) {
+	if !filepath.IsAbs(absPathToZip) {
 		err = oopsBuilder.
 			Wrapf(err, "path to zip is not absolute: %s", absPathToZip)
 		return
