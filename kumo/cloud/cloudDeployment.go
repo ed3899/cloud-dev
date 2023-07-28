@@ -13,27 +13,9 @@ type Credentials interface {
 	Unset() error
 }
 
-type AwsCredentials struct {
-	AccessKeyId     string
-	SecretAccessKey string
-}
-
-func (ac *AwsCredentials) Set() (err error) {
-	return
-}
-
-func (ac *AwsCredentials) Unset() (err error) {
-	return
-}
-
-type RunDirs struct {
-	Initial string
-	Target  string
-}
-
 type CloudDeployment struct {
-	Credentials Credentials
-	RunDirs     *RunDirs
+	credentials Credentials
+	runDir      *RunDir
 }
 
 func newCloudDeployment(cloud, tool string) (cloudDeployment *CloudDeployment, err error) {
@@ -51,8 +33,8 @@ func newCloudDeployment(cloud, tool string) (cloudDeployment *CloudDeployment, e
 		credentials           Credentials
 		pickedToolRunDirName  string
 		pickedCloudRunDirName string
-		initialRunDir            string
-		targetRunDir             string
+		initialRunDir         string
+		targetRunDir          string
 	)
 
 	switch tool {
@@ -97,10 +79,10 @@ func newCloudDeployment(cloud, tool string) (cloudDeployment *CloudDeployment, e
 	}
 
 	cloudDeployment = &CloudDeployment{
-		Credentials: credentials,
-		RunDirs: &RunDirs{
-			Initial: initialRunDir,
-			Target:  targetRunDir,
+		credentials: credentials,
+		runDir: &RunDir{
+			initial: initialRunDir,
+			target:  targetRunDir,
 		},
 	}
 
