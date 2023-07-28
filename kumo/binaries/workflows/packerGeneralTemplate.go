@@ -4,6 +4,7 @@ import (
 	"path/filepath"
 	"text/template"
 
+	"github.com/ed3899/kumo/binaries"
 	"github.com/samber/oops"
 	"github.com/spf13/viper"
 )
@@ -20,20 +21,21 @@ type PackerGeneralTemplate struct {
 	environment *PackerGeneralEnvironment
 }
 
-func newPackerGeneralTemplate() (generalTemplate *PackerGeneralTemplate, err error) {
+func newPackerGeneralTemplate() (packerGeneralTemplate *PackerGeneralTemplate, err error) {
 	const (
 		PACKER_GENERAL_TEMPLATE_NAME = "GeneralPackerVars.tmpl"
 	)
 
 	var (
 		oopsBuilder = oops.
-				Code("new_general_template_failed")
+				Code("new_packer_general_template_failed")
 		packerGeneralTemplateInstance  *template.Template
 		absPathToPackerGeneralTemplate string
 	)
 
-	if absPathToPackerGeneralTemplate, err = filepath.Abs(filepath.Join(PACKER_SUBDIR_NAME, PACKER_GENERAL_TEMPLATE_NAME)); err != nil {
+	if absPathToPackerGeneralTemplate, err = filepath.Abs(filepath.Join(PACKER_SUBDIR_NAME, binaries.GENERAL_SUBDIR_NAME, PACKER_GENERAL_TEMPLATE_NAME)); err != nil {
 		err = oopsBuilder.
+			With("GENERAL_SUBDIR_NAME", binaries.GENERAL_SUBDIR_NAME).
 			With("PACKER_SUBDIR_NAME", PACKER_SUBDIR_NAME).
 			Wrapf(err, "Error occurred while crafting absolute path to %s", PACKER_GENERAL_TEMPLATE_NAME)
 		return
@@ -45,7 +47,7 @@ func newPackerGeneralTemplate() (generalTemplate *PackerGeneralTemplate, err err
 		return
 	}
 
-	generalTemplate = &PackerGeneralTemplate{
+	packerGeneralTemplate = &PackerGeneralTemplate{
 		instance: packerGeneralTemplateInstance,
 		environment: &PackerGeneralEnvironment{
 			GIT_USERNAME:                          viper.GetString("Git.Username"),
