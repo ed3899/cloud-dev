@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"text/template"
 
-	"github.com/ed3899/kumo/binaries"
+	"github.com/ed3899/kumo/templates"
 	"github.com/samber/oops"
 	"github.com/spf13/viper"
 )
@@ -33,10 +33,10 @@ func NewPackerGeneralTemplate() (packerGeneralTemplate *PackerGeneralTemplate, e
 		absPathToPackerGeneralTemplate string
 	)
 
-	if absPathToPackerGeneralTemplate, err = filepath.Abs(filepath.Join(PACKER_SUBDIR_NAME, binaries.GENERAL_SUBDIR_NAME, PACKER_GENERAL_TEMPLATE_NAME)); err != nil {
+	if absPathToPackerGeneralTemplate, err = filepath.Abs(filepath.Join(templates.PACKER_TEMPLATES_DIR_NAME, templates.GENERAL_TEMPLATES_DIR_NAME, PACKER_GENERAL_TEMPLATE_NAME)); err != nil {
 		err = oopsBuilder.
-			With("GENERAL_SUBDIR_NAME", binaries.GENERAL_SUBDIR_NAME).
-			With("PACKER_SUBDIR_NAME", PACKER_SUBDIR_NAME).
+			With("templates.PACKER_TEMPLATES_DIR_NAME", templates.PACKER_TEMPLATES_DIR_NAME).
+			With("templates.GENERAL_TEMPLATES_DIR_NAME", templates.GENERAL_TEMPLATES_DIR_NAME).
 			Wrapf(err, "Error occurred while crafting absolute path to %s", PACKER_GENERAL_TEMPLATE_NAME)
 		return
 	}
