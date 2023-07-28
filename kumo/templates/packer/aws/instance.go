@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"text/template"
 
-	"github.com/ed3899/kumo/templates/packer"
+	"github.com/ed3899/kumo/templates"
 	"github.com/samber/oops"
 	"github.com/spf13/viper"
 )
@@ -44,11 +44,11 @@ func NewPackerAwsTemplate() (packerAwsTemplate *PackerAwsTemplate, err error) {
 		absPathToPackerAwsTemplate string
 	)
 
-	if absPathToPackerAwsTemplate, err = filepath.Abs(filepath.Join(packer.SUBDIR_NAME, AWS_SUBDIR_NAME, AWS_TEMPLATE_NAME)); err != nil {
+	if absPathToPackerAwsTemplate, err = filepath.Abs(filepath.Join(templates.PACKER_TEMPLATES_DIR_NAME, templates.AWS_TEMPLATES_DIR_NAME, PACKER_AWS_TEMPLATE_NAME)); err != nil {
 		err = oopsBuilder.
-			With("AWS_SUBDIR_NAME", AWS_SUBDIR_NAME).
-			With("packer.SUBDIR_NAME", packer.SUBDIR_NAME).
-			Wrapf(err, "Error occurred while crafting absolute path to %s", AWS_TEMPLATE_NAME)
+			With("templates.PACKER_TEMPLATES_DIR_NAME", templates.PACKER_TEMPLATES_DIR_NAME).
+			With("templates.AWS_TEMPLATES_DIR_NAME", templates.AWS_TEMPLATES_DIR_NAME).
+			Wrapf(err, "Error occurred while crafting absolute path to %s", PACKER_AWS_TEMPLATE_NAME)
 		return
 	}
 
