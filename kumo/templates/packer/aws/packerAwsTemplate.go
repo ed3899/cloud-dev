@@ -1,15 +1,15 @@
-package workflows
+package aws
 
 import (
 	"path/filepath"
 	"text/template"
 
-	"github.com/ed3899/kumo/binaries"
+	"github.com/ed3899/kumo/templates/packer"
 	"github.com/samber/oops"
 	"github.com/spf13/viper"
 )
 
-type PackerAWSEnvironment struct {
+type Environment struct {
 	AWS_ACCESS_KEY                     string
 	AWS_SECRET_KEY                     string
 	AWS_IAM_PROFILE                    string
@@ -27,20 +27,16 @@ type PackerAWSEnvironment struct {
 	AWS_EC2_INSTANCE_USERNAME_PASSWORD string
 }
 
-func (pae *PackerAWSEnvironment) IsPackerCloudEnvironment() (isPackerCloudEnvironment bool) {
+func (pae *Environment) IsPackerCloudEnvironment() (isPackerCloudEnvironment bool) {
 	return true
 }
 
 type PackerAwsTemplate struct {
-	instance   *template.Template
-	enviroment *PackerAWSEnvironment
+	instance    *template.Template
+	environment *Environment
 }
 
 func NewPackerAwsTemplate() (packerAwsTemplate *PackerAwsTemplate, err error) {
-	const (
-		PACKER_AWS_TEMPLATE_NAME = "AWS_PackerVars.tmpl"
-	)
-
 	var (
 		oopsBuilder = oops.
 				Code("new_packer_aws_template_failed")
@@ -48,11 +44,11 @@ func NewPackerAwsTemplate() (packerAwsTemplate *PackerAwsTemplate, err error) {
 		absPathToPackerAwsTemplate string
 	)
 
-	if absPathToPackerAwsTemplate, err = filepath.Abs(filepath.Join(PACKER_SUBDIR_NAME, binaries.AWS_SUBDIR_NAME, PACKER_AWS_TEMPLATE_NAME)); err != nil {
+	if absPathToPackerAwsTemplate, err = filepath.Abs(filepath.Join(packer.SUBDIR_NAME, AWS_SUBDIR_NAME, AWS_TEMPLATE_NAME)); err != nil {
 		err = oopsBuilder.
-			With("AWS_SUBDIR_NAME", binaries.AWS_SUBDIR_NAME).
-			With("PACKER_SUBDIR_NAME", PACKER_SUBDIR_NAME).
-			Wrapf(err, "Error occurred while crafting absolute path to %s", PACKER_AWS_TEMPLATE_NAME)
+			With("AWS_SUBDIR_NAME", AWS_SUBDIR_NAME).
+			With("packer.SUBDIR_NAME", packer.SUBDIR_NAME).
+			Wrapf(err, "Error occurred while crafting absolute path to %s", AWS_TEMPLATE_NAME)
 		return
 	}
 
@@ -64,7 +60,7 @@ func NewPackerAwsTemplate() (packerAwsTemplate *PackerAwsTemplate, err error) {
 
 	packerAwsTemplate = &PackerAwsTemplate{
 		instance: packerAwsTemplateInstance,
-		enviroment: &PackerAWSEnvironment{
+		environment: &Environment{
 			AWS_ACCESS_KEY:                     viper.GetString("AWS.AccessKeyId"),
 			AWS_SECRET_KEY:                     viper.GetString("AWS.SecretAccessKey"),
 			AWS_IAM_PROFILE:                    viper.GetString("AWS.IamProfile"),
@@ -94,31 +90,6 @@ func (pat *PackerAwsTemplate) GetInstance() (instance *template.Template) {
 	return pat.instance
 }
 
-func (pat *PackerAwsTemplate) GetEnvironment() (environment *PackerAWSEnvironment) {
-	return pat.enviroment
+func (pat *PackerAwsTemplate) GetEnvironment() (environment *Environment) {
+	return pat.environment
 }
-
-// type PackerMergeCombo struct {
-// 	General *GeneralTemplateFile
-// 	Aws     *AwsTemplateFile
-// 	Merged  *MergedTemplateFile
-// }
-
-// func newPackerMergeCombo() (packerMergeCombo *PackerMergeCombo, err error) {
-// 	var (
-// 		oopsBuilder = oops.
-// 			Code("new_packer_merge_combo_failed")
-// 	)
-
-// 	return
-// }
-
-// func NewPackerAwsTemplate() (packerAwsTemplate *PackerAwsTemplate, err error) {
-// 	var (
-// 		oopsBuilder = oops.
-// 			Code("new_packer_aws_template_failed")
-// 	)
-
-// 	return
-
-// }

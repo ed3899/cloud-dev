@@ -1,4 +1,4 @@
-package workflows
+package general
 
 import (
 	"path/filepath"
@@ -21,7 +21,7 @@ type PackerGeneralTemplate struct {
 	environment *PackerGeneralEnvironment
 }
 
-func newPackerGeneralTemplate() (packerGeneralTemplate *PackerGeneralTemplate, err error) {
+func NewPackerGeneralTemplate() (packerGeneralTemplate *PackerGeneralTemplate, err error) {
 	const (
 		PACKER_GENERAL_TEMPLATE_NAME = "GeneralPackerVars.tmpl"
 	)
