@@ -17,6 +17,10 @@ type CloudSetup struct {
 	Credentials Credentials
 }
 
+func (cs *CloudSetup) GetCloudName() (cloudName string) {
+	return cs.cloudName
+}
+
 func NewCloudSetup(cloud string) (cloudSetup *CloudSetup, err error) {
 	var (
 		oopsBuilder = oops.
@@ -48,8 +52,4 @@ func NewCloudSetup(cloud string) (cloudSetup *CloudSetup, err error) {
 	}
 
 	return
-}
-
-func (cs *CloudSetup) GetCloudName() (cloudName string) {
-	return cs.cloudName
 }

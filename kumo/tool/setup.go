@@ -40,6 +40,7 @@ func (ts *ToolSetup) GoTargetDir() (err error) {
 	if err = os.Chdir(ts.targetDir); err != nil {
 		err = oopsBuilder.
 			Wrapf(err, "Error occurred while changing directory to %s", ts.targetDir)
+		return
 	}
 
 	return
@@ -55,6 +56,7 @@ func NewToolSetup(tool Tool, cloud CloudSetupI) (toolSetup *ToolSetup, err error
 		oopsBuilder = oops.
 				Code("new_tool_setup_failed").
 				With("tool", tool)
+
 		cwd string
 	)
 
