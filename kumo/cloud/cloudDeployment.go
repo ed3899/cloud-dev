@@ -14,11 +14,11 @@ type Credentials interface {
 }
 
 type CloudDeployment struct {
-	credentials Credentials
-	runDir      *RunDir
+	Credentials Credentials
+	RunDir      *RunDir
 }
 
-func newCloudDeployment(cloud, tool string) (cloudDeployment *CloudDeployment, err error) {
+func NewCloudDeployment(cloud Cloud, tool Tool) (cloudDeployment *CloudDeployment, err error) {
 	const (
 		PACKER_RUN_DIR_NAME    = "packer"
 		TERRAFORM_RUN_DIR_NAME = "terraform"
@@ -38,10 +38,10 @@ func newCloudDeployment(cloud, tool string) (cloudDeployment *CloudDeployment, e
 	)
 
 	switch tool {
-	case "packer":
+	case Packer:
 		pickedToolRunDirName = PACKER_RUN_DIR_NAME
 
-	case "terraform":
+	case Terraform:
 		pickedToolRunDirName = TERRAFORM_RUN_DIR_NAME
 
 	default:
@@ -51,7 +51,7 @@ func newCloudDeployment(cloud, tool string) (cloudDeployment *CloudDeployment, e
 	}
 
 	switch cloud {
-	case "aws":
+	case AWS:
 		pickedCloudRunDirName = AWS_RUN_DIR_NAME
 
 		credentials = &AwsCredentials{
@@ -79,44 +79,12 @@ func newCloudDeployment(cloud, tool string) (cloudDeployment *CloudDeployment, e
 	}
 
 	cloudDeployment = &CloudDeployment{
-		credentials: credentials,
-		runDir: &RunDir{
+		Credentials: credentials,
+		RunDir: &RunDir{
 			initial: initialRunDir,
 			target:  targetRunDir,
 		},
 	}
 
-	return
-}
-
-func (cd *CloudDeployment) SetRunDir() (err error) {
-	var (
-		oopsBuilder = oops.Code(
-			"cloud_deployment_set_run_dir_failed",
-		)
-	)
-
-	var (
-		absPathToRunDir string
-	)
-
-	switch cd.Kind {
-	case AWS:
-		if absPathToRunDir, err = filepath.Abs(filepath.Join(PACKER_RUN_DIR_NAME, AWS_RUN_DIR_NAME)); err != nil {
-			err = oopsBuilder.
-				With("PACKER_RUN_DIR_NAME", PACKER_RUN_DIR_NAME).
-				Wrapf(err, "Error occurred while crafting absolute path to %s", AWS_RUN_DIR_NAME)
-			return
-		}
-
-	default:
-		err = oopsBuilder.
-			Errorf("Cloud '%v' not supported", cd.Kind)
-		return
-	}
-	return
-}
-
-func (cd *CloudDeployment) UnsetRunDir() (err error) {
 	return
 }
