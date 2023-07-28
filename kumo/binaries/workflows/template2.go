@@ -11,16 +11,6 @@ import (
 	"go.uber.org/zap"
 )
 
-type GeneralTemplateFile struct {
-	Name    string
-	AbsPath string
-}
-
-type AwsTemplateFile struct {
-	Name    string
-	AbsPath string
-}
-
 type MergedTemplateFile struct {
 	Name    string
 	AbsPath string
