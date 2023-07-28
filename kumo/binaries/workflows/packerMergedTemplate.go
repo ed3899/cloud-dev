@@ -50,13 +50,7 @@ type PackerMergedTemplate struct {
 }
 
 func NewPackerMergedTemplate(cloud binaries.Cloud) (packerMergedTemplate *PackerMergedTemplate, err error) {
-	const (
-		subDirName          = "packer"
-		manifestName        = "manifest.json"
-		generalTemplateName = "GeneralPackerVars.tmpl"
-		awsTemplateName     = "AWS_PackerVars.tmpl"
-		mergedTemplateName  = "temp_merged_packer_template"
-	)
+
 
 	var (
 		oopsBuilder = oops.
@@ -79,16 +73,16 @@ func NewPackerMergedTemplate(cloud binaries.Cloud) (packerMergedTemplate *Packer
 
 	packerTemplates = &PackerTemplates{
 		General: &GeneralTemplate{
-			Name:    generalTemplateName,
-			AbsPath: filepath.Join(absPathToTemplatesDir, subDirName, binaries.GENERAL_SUBDIR_NAME, generalTemplateName),
+			Name:    PACKER_GENERAL_TEMPLATE_NAME,
+			AbsPath: filepath.Join(absPathToTemplatesDir, PACKER_SUBDIR_NAME, binaries.GENERAL_SUBDIR_NAME, PACKER_GENERAL_TEMPLATE_NAME),
 		},
 		Aws: &AwsTemplate{
-			Name:    awsTemplateName,
-			AbsPath: filepath.Join(absPathToTemplatesDir, subDirName, binaries.GENERAL_SUBDIR_NAME, generalTemplateName),
+			Name:    PACKER_AWS_TEMPLATE_NAME,
+			AbsPath: filepath.Join(absPathToTemplatesDir, PACKER_SUBDIR_NAME, binaries.AWS_SUBDIR_NAME, PACKER_AWS_TEMPLATE_NAME),
 		},
 		MergedTemplate: &MergedTemplate{
-			Name:    mergedTemplateName,
-			AbsPath: filepath.Join(absPathToTemplatesDir, subDirName, mergedTemplateName),
+			Name:    PACKER_MERGED_TEMPLATE_NAME,
+			AbsPath: filepath.Join(absPathToTemplatesDir, PACKER_SUBDIR_NAME, PACKER_MERGED_TEMPLATE_NAME),
 		},
 	}
 
@@ -114,7 +108,7 @@ func NewPackerMergedTemplate(cloud binaries.Cloud) (packerMergedTemplate *Packer
 		}
 
 		packerMergedTemplate = &PackerMergedTemplate{
-			Name:    mergedTemplateName,
+			Name:    PACKER_MERGED_TEMPLATE_NAME,
 			AbsPath: packerTemplates.MergedTemplate.AbsPath,
 			Environment: &PackerAWSEnvironment{
 				AWS_ACCESS_KEY:                     viper.GetString("AWS.AccessKeyId"),

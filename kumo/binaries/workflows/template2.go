@@ -11,19 +11,6 @@ import (
 	"go.uber.org/zap"
 )
 
-type TerraformGeneralEnvironment struct {
-	ALLOWED_IP string
-}
-
-type TerraformAWSEnvironment struct {
-	AWS_REGION                   string
-	AWS_INSTANCE_TYPE            string
-	AWS_EC2_INSTANCE_VOLUME_TYPE string
-	AWS_EC2_INSTANCE_VOLUME_SIZE int
-	AMI_ID                       string
-	TerraformGeneralEnvironment  *TerraformGeneralEnvironment
-}
-
 type GeneralTemplate struct {
 	Name    string
 	AbsPath string
@@ -35,17 +22,6 @@ type AwsTemplate struct {
 }
 
 type MergedTemplate struct {
-	Name    string
-	AbsPath string
-}
-
-type TerraformTemplates struct {
-	General        *GeneralTemplate
-	Aws            *AwsTemplate
-	MergedTemplate *MergedTemplate
-}
-
-type PackerManifest struct {
 	Name    string
 	AbsPath string
 }
