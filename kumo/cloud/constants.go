@@ -3,12 +3,12 @@ package cloud
 type Tool int
 
 const (
-	PackerID Tool = iota
-	TerraformID
+	Packer Tool = iota
+	Terraform
 )
 
-type Kind int
+type Cloud int
 
 const (
-	AWS Kind = iota
+	AWS Cloud = iota
 )
