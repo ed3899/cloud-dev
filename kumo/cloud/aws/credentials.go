@@ -1,4 +1,4 @@
-package cloud
+package aws
 
 import (
 	"os"
@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-type AwsCredentials struct {
+type Credentials struct {
 	AccessKeyId     string
 	SecretAccessKey string
 }
@@ -17,7 +17,7 @@ const (
 	AWS_SECRET_ACCESS_KEY = "AWS_SECRET_ACCESS_KEY"
 )
 
-func (ac *AwsCredentials) Set() (err error) {
+func (ac *Credentials) Set() (err error) {
 	var (
 		oopsBuilder = oops.
 			Code("aws_credentials_set_failed")
@@ -38,7 +38,7 @@ func (ac *AwsCredentials) Set() (err error) {
 	return
 }
 
-func (ac *AwsCredentials) Unset() (err error) {
+func (ac *Credentials) Unset() (err error) {
 	var (
 		oopsBuilder = oops.
 			Code("aws_credentials_unset_failed")

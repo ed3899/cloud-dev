@@ -1,6 +1,7 @@
 package cloud
 
 import (
+	"github.com/ed3899/kumo/cloud/aws"
 	"github.com/samber/oops"
 	"github.com/spf13/viper"
 )
@@ -16,7 +17,7 @@ type CloudSetup struct {
 	Credentials Credentials
 }
 
-func NewCloudSetup(cloud string, tool Tool) (cloudSetup *CloudSetup, err error) {
+func NewCloudSetup(cloud string) (cloudSetup *CloudSetup, err error) {
 	var (
 		oopsBuilder = oops.
 				Code("new_cloud_deployment_failed").
@@ -29,7 +30,7 @@ func NewCloudSetup(cloud string, tool Tool) (cloudSetup *CloudSetup, err error) 
 	switch cloud {
 	case "aws":
 		cloudName = "aws"
-		credentials = &AwsCredentials{
+		credentials = &aws.Credentials{
 			AccessKeyId:     viper.GetString("AWS.AccessKeyId"),
 			SecretAccessKey: viper.GetString("AWS.SecretAccessKey"),
 		}
