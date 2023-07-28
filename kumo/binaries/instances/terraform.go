@@ -11,7 +11,7 @@ import (
 )
 
 type Terraform struct {
-	ID                  binaries.Tool
+	ID                  binaries.ToolId
 	AbsPathToExecutable string
 	AbsPathToRunDir     string
 	Zip                 *Zip

@@ -30,7 +30,7 @@ type HashicorpVars struct {
 	Template *Template
 }
 
-func NewHashicorpVars(tool binaries.Tool, cloud binaries.Cloud) (hv *HashicorpVars, err error) {
+func NewHashicorpVars(tool binaries.ToolId, cloud binaries.Cloud) (hv *HashicorpVars, err error) {
 	const (
 		//% Packer
 		packerSubDirName   = "packer"

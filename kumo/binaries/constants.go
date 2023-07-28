@@ -1,9 +1,9 @@
 package binaries
 
-type Tool int
+type ToolId int
 
 const (
-	PackerID Tool = iota
+	PackerID ToolId = iota
 	TerraformID
 )
 

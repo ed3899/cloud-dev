@@ -12,7 +12,7 @@ import (
 )
 
 type Packer struct {
-	ID                  binaries.Tool
+	ToolId              binaries.ToolId
 	AbsPathToExecutable string
 	AbsPathToRunDir     string
 	Zip                 *Zip
@@ -73,7 +73,7 @@ func NewPacker() (packer *Packer, err error) {
 	}
 
 	packer = &Packer{
-		ID:                  binaries.PackerID,
+		ToolId:              binaries.PackerID,
 		AbsPathToExecutable: absPathToExecutable,
 		AbsPathToRunDir:     absPathToRunDir,
 		Zip: &Zip{

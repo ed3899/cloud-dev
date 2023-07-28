@@ -17,13 +17,13 @@ type MergedTemplateFile struct {
 }
 
 type Template2 struct {
-	Tool        binaries.Tool
+	Tool        binaries.ToolId
 	Cloud       binaries.Cloud
 	AbsPath     string
 	Environment any
 }
 
-func NewTemplate2(tool binaries.Tool, cloud binaries.Cloud) (mergedTemplate *Template2, err error) {
+func NewTemplate2(tool binaries.ToolId, cloud binaries.Cloud) (mergedTemplate *Template2, err error) {
 	const (
 		// Packer
 		packerSubDirName          = "packer"

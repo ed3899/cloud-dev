@@ -39,7 +39,7 @@ func BuildWorkflow() (err error) {
 	}
 
 	// C. Instantiate vars file
-	if varsFile, err = workflows.NewHashicorpVars(packer.ID, cloud); err != nil {
+	if varsFile, err = workflows.NewHashicorpVars(packer.ToolId, cloud); err != nil {
 		return errors.Wrap(err, "Error occurred while instantiating hashicorp vars")
 	}
 
