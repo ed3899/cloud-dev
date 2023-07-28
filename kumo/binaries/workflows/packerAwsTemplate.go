@@ -27,6 +27,10 @@ type PackerAWSEnvironment struct {
 	AWS_EC2_INSTANCE_USERNAME_PASSWORD string
 }
 
+func (pae *PackerAWSEnvironment) IsPackerCloudEnvironment() (isPackerCloudEnvironment bool) {
+	return true
+}
+
 type PackerAwsTemplate struct {
 	instance   *template.Template
 	enviroment *PackerAWSEnvironment
