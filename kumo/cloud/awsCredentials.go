@@ -18,7 +18,6 @@ const (
 )
 
 func (ac *AwsCredentials) Set() (err error) {
-
 	var (
 		oopsBuilder = oops.
 			Code("aws_credentials_set_failed")

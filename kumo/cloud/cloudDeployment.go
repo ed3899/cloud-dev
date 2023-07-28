@@ -13,8 +13,14 @@ type Credentials interface {
 	Unset() error
 }
 
+type Binary interface {
+	IsInstalled() bool
+	IsNotInstalled() bool
+}
+
 type CloudDeployment struct {
 	Credentials Credentials
+	Binary      Binary
 	RunDir      *RunDir
 }
 

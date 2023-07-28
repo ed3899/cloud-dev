@@ -95,26 +95,6 @@ func (p *Packer) IsNotInstalled() (isNotInstalled bool) {
 	return utils.FileNotPresent(p.AbsPathToExecutable)
 }
 
-func (p *Packer) GetAbsPathToCloudRunDir(cloud binaries.Cloud) (cloudRunDir string, err error) {
-	var (
-		oopsBuilder = oops.
-			Code("packer_get_abs_path_to_cloud_run_dir_failed").
-			With("cloud", cloud)
-	)
-
-	switch cloud {
-	case binaries.AWS:
-		cloudRunDir = filepath.Join(p.AbsPathToRunDir, binaries.AWS_SUBDIR_NAME)
-
-	default:
-		err = oopsBuilder.
-			Wrapf(err, "Cloud '%v' not supported", cloud)
-		return
-	}
-
-	return
-}
-
 func (p *Packer) SetPluginPath(cloud binaries.Cloud) (err error) {
 	var (
 		oopsBuilder = oops.

@@ -2,14 +2,12 @@ package instances
 
 import (
 	"fmt"
-	"os"
 	"os/exec"
 	"path/filepath"
 
 	"github.com/ed3899/kumo/binaries"
 	"github.com/ed3899/kumo/utils"
 	"github.com/samber/oops"
-	"github.com/spf13/viper"
 )
 
 type Terraform struct {
@@ -88,86 +86,6 @@ func NewTerraform() (terraform *Terraform, err error) {
 	return
 }
 
-func (t *Terraform) SetCloudCredentials(cloud binaries.Cloud) (err error) {
-	var (
-		oopsBuilder = oops.
-			Code("terraform_set_cloud_credentials_failed").
-			With("cloud", cloud)
-	)
-
-	switch cloud {
-	case binaries.AWS:
-		if err = os.Setenv(AWS_ACCESS_KEY_ID, viper.GetString("AWS.AccessKeyId")); err != nil {
-			err = oopsBuilder.
-				Wrapf(err, "Error occurred while setting %s environment variable", AWS_ACCESS_KEY_ID)
-			return
-		}
-
-		if err = os.Setenv(AWS_SECRET_ACCESS_KEY, viper.GetString("AWS.SecretAccessKey")); err != nil {
-			err = oopsBuilder.
-				Wrapf(err, "Error occurred while setting %s environment variable", AWS_SECRET_ACCESS_KEY)
-			return
-		}
-
-	default:
-		err = oopsBuilder.
-			Errorf("Cloud '%v' is not supported", cloud)
-		return
-	}
-
-	return
-}
-
-func (t *Terraform) UnsetCloudCredentials(cloud binaries.Cloud) (err error) {
-	var (
-		oopsBuilder = oops.
-			Code("terraform_unset_cloud_credentials_failed").
-			With("cloud", cloud)
-	)
-
-	switch cloud {
-	case binaries.AWS:
-		if err = os.Unsetenv(AWS_ACCESS_KEY_ID); err != nil {
-			err = oopsBuilder.
-				Wrapf(err, "Error occurred while unsetting %s environment variable", AWS_ACCESS_KEY_ID)
-			return
-		}
-
-		if err = os.Unsetenv(AWS_SECRET_ACCESS_KEY); err != nil {
-			err = oopsBuilder.
-				Wrapf(err, "Error occurred while unsetting %s environment variable", AWS_SECRET_ACCESS_KEY)
-			return
-		}
-
-	default:
-		err = oopsBuilder.
-			Errorf("Cloud '%v' is not supported", cloud)
-		return
-	}
-
-	return
-}
-
-func (t *Terraform) GetAbsPathToCloudRunDir(cloud binaries.Cloud) (cloudRunDir string, err error) {
-	var (
-		oopsBuilder = oops.
-			Code("terraform_get_abs_path_to_cloud_run_dir_failed").
-			With("cloud", cloud)
-	)
-
-	switch cloud {
-	case binaries.AWS:
-		cloudRunDir = filepath.Join(t.AbsPathToRunDir, binaries.AWS_SUBDIR_NAME)
-
-	default:
-		err = oopsBuilder.
-			Errorf("Cloud '%v' is not supported", cloud)
-		return
-	}
-
-	return
-}
-
 func (t *Terraform) IsInstalled() (isInstalled bool) {
 	return utils.FilePresent(t.AbsPathToExecutable)
 }
@@ -176,81 +94,54 @@ func (t *Terraform) IsNotInstalled() (isNotInstalled bool) {
 	return utils.FileNotPresent(t.AbsPathToExecutable)
 }
 
-func (t *Terraform) Init(cloud binaries.Cloud) (err error) {
+func (t *Terraform) Init() (err error) {
 	var (
 		cmd         = exec.Command(t.AbsPathToExecutable, "init")
 		oopsBuilder = oops.
-				Code("terraform_init_failed").
-				With("cloud", cloud)
+				Code("terraform_init_failed")
 
 		cmdErr error
 	)
 
-	switch cloud {
-	case binaries.AWS:
-		if cmdErr = utils.RunCmdAndStream(cmd); cmdErr != nil {
-			err = oopsBuilder.
-				Wrapf(cmdErr, "Error occured while initializing terraform for %v", cloud)
-			return
-		}
-
-	default:
+	if cmdErr = utils.RunCmdAndStream(cmd); cmdErr != nil {
 		err = oopsBuilder.
-			Errorf("Cloud '%v' not supported", cloud)
+			Wrapf(cmdErr, "Error occured while initializing terraform")
 		return
 	}
 
 	return
 }
 
-func (t *Terraform) Up(cloud binaries.Cloud) (err error) {
+func (t *Terraform) Up() (err error) {
 	var (
 		cmd         = exec.Command(t.AbsPathToExecutable, "apply", "-auto-approve")
 		oopsBuilder = oops.
-				Code("terraform_up_failed").
-				With("cloud", cloud)
+				Code("terraform_up_failed")
 
 		cmdErr error
 	)
 
-	switch cloud {
-	case binaries.AWS:
-		if cmdErr = utils.RunCmdAndStream(cmd); cmdErr != nil {
-			err = oopsBuilder.
-				Wrapf(cmdErr, "Error occured while deploying for %v", cloud)
-			return
-		}
-
-	default:
+	if cmdErr = utils.RunCmdAndStream(cmd); cmdErr != nil {
 		err = oopsBuilder.
-			Errorf("Cloud '%v' not supported", cloud)
+			Wrapf(cmdErr, "Error occured while deploying terraform resources")
 		return
 	}
 
 	return
 }
 
-func (t *Terraform) Destroy(cloud binaries.Cloud) (err error) {
+func (t *Terraform) Destroy() (err error) {
 	var (
 		cmd         = exec.Command(t.AbsPathToExecutable, "destroy", "-auto-approve")
 		oopsBuilder = oops.
-				Code("terraform_destroy_failed").
-				With("cloud", cloud)
+				Code("terraform_destroy_failed")
 
 		cmdErr error
 	)
 
-	switch cloud {
-	case binaries.AWS:
-		if cmdErr = utils.RunCmdAndStream(cmd); cmdErr != nil {
-			err = oopsBuilder.
-				Wrapf(cmdErr, "Error occured while destroying for %v", cloud)
-			return
-		}
-
-	default:
+	if cmdErr = utils.RunCmdAndStream(cmd); cmdErr != nil {
 		err = oopsBuilder.
-			Errorf("Cloud '%v' not supported", cloud)
+			Wrapf(cmdErr, "Error occured while destroying terraform resources")
 		return
 	}
 
