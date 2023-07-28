@@ -14,10 +14,14 @@ func NewPackerVars(template *PackerMergedTemplate) (packerVars *PackerVars, err 
 	var (
 		oopsBuilder = oops.
 			Code("new_packer_vars_failed").
-			With("template.Name", template.Name).
-			With("template.AbsPath", template.AbsPath).
-			With("template.Environment", template.Environment)
+			With("template.GetName()", template.GetName()).
+			With("template.GetEnvironment()", template.GetEnvironment())
+
+		packerVarsFile *os.File
+		absPathToPackerVarsFile string
 	)
+
+
 
 	return
 }

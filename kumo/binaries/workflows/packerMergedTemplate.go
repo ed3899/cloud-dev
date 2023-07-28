@@ -81,6 +81,18 @@ func NewPackerMergedTemplate(generalPackerTemplate *PackerGeneralTemplate, packe
 	return
 }
 
+func (pmt *PackerMergedTemplate) GetName() (name string) {
+	return pmt.instance.Name()
+}
+
+func (pmt *PackerMergedTemplate) GetInstance() (instance *template.Template) {
+	return pmt.instance
+}
+
+func (pmt *PackerMergedTemplate) GetEnvironment() (environment *PackerMergedEnvironment[PackerCloudEnvironment]) {
+	return pmt.environment
+}
+
 func (pmt *PackerMergedTemplate) Remove() (err error) {
 	var (
 		oopsBuilder = oops.

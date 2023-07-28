@@ -12,12 +12,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-type TerraformI interface {
-	Init(binaries.Cloud) error
-	Up(binaries.Cloud) error
-	Destroy(binaries.Cloud) error
-}
-
 type Terraform struct {
 	ID                  binaries.Tool
 	AbsPathToExecutable string

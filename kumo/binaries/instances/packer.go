@@ -11,11 +11,6 @@ import (
 	"github.com/samber/oops"
 )
 
-type PackerI interface {
-	Init(cloud binaries.Cloud) (err error)
-	Build() (err error)
-}
-
 type Packer struct {
 	ID                  binaries.Tool
 	AbsPathToExecutable string
@@ -173,54 +168,35 @@ func (p *Packer) UnsetPluginPath(cloud binaries.Cloud) (err error) {
 	return
 }
 
-func (p *Packer) Init(cloud binaries.Cloud) (err error) {
+func (p *Packer) Init() (err error) {
 	var (
 		cmd         = exec.Command(p.AbsPathToExecutable, "init", "-upgrade", ".")
 		oopsBuilder = oops.
-				Code("packer_init_failed").
-				With("cloud", cloud)
+				Code("packer_init_failed")
 
 		cmdErr error
 	)
 
-	switch cloud {
-	case binaries.AWS:
-		if cmdErr = utils.RunCmdAndStream(cmd); cmdErr != nil {
-			err = oopsBuilder.
-				Wrapf(cmdErr, "Error occured while initializing packer")
-			return
-		}
-
-	default:
+	if cmdErr = utils.RunCmdAndStream(cmd); cmdErr != nil {
 		err = oopsBuilder.
-			Errorf("Cloud '%v' not supported", cloud)
+			Wrapf(cmdErr, "Error occured while initializing packer")
 		return
 	}
 
 	return
 }
 
-func (p *Packer) Build(cloud binaries.Cloud) (err error) {
+func (p *Packer) Build() (err error) {
 	var (
 		cmd         = exec.Command(p.AbsPathToExecutable, "build", ".")
 		oopsBuilder = oops.
-				Code("packer_build_failed").
-				With("cloud", cloud)
-
+				Code("packer_build_failed")
 		cmdErr error
 	)
 
-	switch cloud {
-	case binaries.AWS:
-		if cmdErr = utils.RunCmdAndStream(cmd); cmdErr != nil {
-			err = oopsBuilder.
-				Wrapf(cmdErr, "Error occured while building packer")
-			return
-		}
-
-	default:
+	if cmdErr = utils.RunCmdAndStream(cmd); cmdErr != nil {
 		err = oopsBuilder.
-			Errorf("Cloud '%v' not supported", cloud)
+			Wrapf(cmdErr, "Error occured while building packer")
 		return
 	}
 
