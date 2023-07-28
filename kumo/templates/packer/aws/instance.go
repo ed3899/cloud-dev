@@ -27,16 +27,16 @@ type Environment struct {
 	AWS_EC2_INSTANCE_USERNAME_PASSWORD string
 }
 
-func (pae *Environment) IsPackerCloudEnvironment() (isPackerCloudEnvironment bool) {
+func (pae *Environment) IsCloudEnvironment() (isCloudEnvironment bool) {
 	return true
 }
 
-type PackerAwsTemplate struct {
+type Template struct {
 	instance    *template.Template
 	environment *Environment
 }
 
-func NewPackerAwsTemplate() (packerAwsTemplate *PackerAwsTemplate, err error) {
+func NewTemplate() (newTemplate *Template, err error) {
 	var (
 		oopsBuilder = oops.
 				Code("new_packer_aws_template_failed")
@@ -58,7 +58,7 @@ func NewPackerAwsTemplate() (packerAwsTemplate *PackerAwsTemplate, err error) {
 		return
 	}
 
-	packerAwsTemplate = &PackerAwsTemplate{
+	newTemplate = &Template{
 		instance: packerAwsTemplateInstance,
 		environment: &Environment{
 			AWS_ACCESS_KEY:                     viper.GetString("AWS.AccessKeyId"),
@@ -82,14 +82,14 @@ func NewPackerAwsTemplate() (packerAwsTemplate *PackerAwsTemplate, err error) {
 	return
 }
 
-func (pat *PackerAwsTemplate) GetName() (name string) {
+func (pat *Template) GetName() (name string) {
 	return pat.instance.Name()
 }
 
-func (pat *PackerAwsTemplate) GetInstance() (instance *template.Template) {
+func (pat *Template) GetInstance() (instance *template.Template) {
 	return pat.instance
 }
 
-func (pat *PackerAwsTemplate) GetEnvironment() (environment *Environment) {
+func (pat *Template) GetEnvironment() (environment *Environment) {
 	return pat.environment
 }

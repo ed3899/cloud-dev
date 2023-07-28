@@ -9,19 +9,23 @@ import (
 	"github.com/spf13/viper"
 )
 
-type PackerGeneralEnvironment struct {
+type Environment struct {
 	GIT_USERNAME                          string
 	GIT_EMAIL                             string
 	ANSIBLE_TAGS                          []string
 	GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC string
 }
 
-type PackerGeneralTemplate struct {
-	instance    *template.Template
-	environment *PackerGeneralEnvironment
+func (pge *Environment) IsGeneralEnvironment() (isGeneralEnvironment bool) {
+	return true
 }
 
-func NewPackerGeneralTemplate() (packerGeneralTemplate *PackerGeneralTemplate, err error) {
+type Template struct {
+	instance    *template.Template
+	environment *Environment
+}
+
+func NewTemplate() (newTemplate *Template, err error) {
 	const (
 		PACKER_GENERAL_TEMPLATE_NAME = "GeneralPackerVars.tmpl"
 	)
@@ -47,9 +51,9 @@ func NewPackerGeneralTemplate() (packerGeneralTemplate *PackerGeneralTemplate, e
 		return
 	}
 
-	packerGeneralTemplate = &PackerGeneralTemplate{
+	newTemplate = &Template{
 		instance: packerGeneralTemplateInstance,
-		environment: &PackerGeneralEnvironment{
+		environment: &Environment{
 			GIT_USERNAME:                          viper.GetString("Git.Username"),
 			GIT_EMAIL:                             viper.GetString("Git.Email"),
 			ANSIBLE_TAGS:                          viper.GetStringSlice("AMI.Tools"),
@@ -60,14 +64,14 @@ func NewPackerGeneralTemplate() (packerGeneralTemplate *PackerGeneralTemplate, e
 	return
 }
 
-func (pgt *PackerGeneralTemplate) GetName() (name string) {
+func (pgt *Template) GetName() (name string) {
 	return pgt.instance.Name()
 }
 
-func (pgt *PackerGeneralTemplate) GetInstance() (instance *template.Template) {
+func (pgt *Template) GetInstance() (instance *template.Template) {
 	return pgt.instance
 }
 
-func (pgt *PackerGeneralTemplate) GetEnvironment() (environment *PackerGeneralEnvironment) {
+func (pgt *Template) GetEnvironment() (environment *Environment) {
 	return pgt.environment
 }

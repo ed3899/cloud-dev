@@ -1,4 +1,4 @@
-package packer
+package templates
 
 import (
 	"io"
@@ -11,11 +11,11 @@ import (
 	"github.com/samber/oops"
 )
 
-type PackerCloudEnvironment interface {
-	IsPackerCloudEnvironment() bool
+type GeneralEnvironment interface {
+	IsGeneralEnvironment() bool
 }
 
-type PackerMergedEnvironment[PCE PackerCloudEnvironment] struct {
+type PackerMergedEnvironment[PCE GeneralEnvironment] struct {
 	PackerGeneralEnvironment *PackerGeneralEnvironment
 	PackerCloudEnvironment   PCE
 }
