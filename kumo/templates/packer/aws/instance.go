@@ -5,6 +5,7 @@ import (
 	"text/template"
 
 	"github.com/ed3899/kumo/templates"
+	"github.com/ed3899/kumo/templates/packer"
 	"github.com/samber/oops"
 	"github.com/spf13/viper"
 )
@@ -27,7 +28,7 @@ type Environment struct {
 	AWS_EC2_INSTANCE_USERNAME_PASSWORD string
 }
 
-func (pae *Environment) IsCloudEnvironment() (isCloudEnvironment bool) {
+func (pae *Environment) IsEnvironment() (isEnvironment bool) {
 	return true
 }
 
@@ -37,6 +38,10 @@ type Template struct {
 }
 
 func NewTemplate() (newTemplate *Template, err error) {
+	const (
+		PACKER_AWS_TEMPLATE_NAME = "AWS_PackerVars.tmpl"
+	)
+
 	var (
 		oopsBuilder = oops.
 				Code("new_packer_aws_template_failed")
@@ -44,7 +49,7 @@ func NewTemplate() (newTemplate *Template, err error) {
 		absPathToPackerAwsTemplate string
 	)
 
-	if absPathToPackerAwsTemplate, err = filepath.Abs(filepath.Join(templates.PACKER_TEMPLATES_DIR_NAME, templates.AWS_TEMPLATES_DIR_NAME, PACKER_AWS_TEMPLATE_NAME)); err != nil {
+	if absPathToPackerAwsTemplate, err = filepath.Abs(filepath.Join(packer.PACKER_TEMPLATES_DIR_NAME, templates.AWS_TEMPLATES_DIR_NAME, PACKER_AWS_TEMPLATE_NAME)); err != nil {
 		err = oopsBuilder.
 			With("templates.PACKER_TEMPLATES_DIR_NAME", templates.PACKER_TEMPLATES_DIR_NAME).
 			With("templates.AWS_TEMPLATES_DIR_NAME", templates.AWS_TEMPLATES_DIR_NAME).

@@ -5,6 +5,7 @@ import (
 	"text/template"
 
 	"github.com/ed3899/kumo/templates"
+	"github.com/ed3899/kumo/templates/packer"
 	"github.com/samber/oops"
 	"github.com/spf13/viper"
 )
@@ -16,7 +17,7 @@ type Environment struct {
 	GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC string
 }
 
-func (pge *Environment) IsGeneralEnvironment() (isGeneralEnvironment bool) {
+func (pge *Environment) IsEnvironment() (isEnvironment bool) {
 	return true
 }
 
@@ -37,7 +38,7 @@ func NewTemplate() (newTemplate *Template, err error) {
 		absPathToPackerGeneralTemplate string
 	)
 
-	if absPathToPackerGeneralTemplate, err = filepath.Abs(filepath.Join(templates.PACKER_TEMPLATES_DIR_NAME, templates.GENERAL_TEMPLATES_DIR_NAME, PACKER_GENERAL_TEMPLATE_NAME)); err != nil {
+	if absPathToPackerGeneralTemplate, err = filepath.Abs(filepath.Join(packer.PACKER_TEMPLATES_DIR_NAME, templates.GENERAL_TEMPLATES_DIR_NAME, PACKER_GENERAL_TEMPLATE_NAME)); err != nil {
 		err = oopsBuilder.
 			With("templates.PACKER_TEMPLATES_DIR_NAME", templates.PACKER_TEMPLATES_DIR_NAME).
 			With("templates.GENERAL_TEMPLATES_DIR_NAME", templates.GENERAL_TEMPLATES_DIR_NAME).

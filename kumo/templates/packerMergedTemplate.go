@@ -11,43 +11,44 @@ import (
 	"github.com/samber/oops"
 )
 
-type GeneralEnvironment interface {
-	IsGeneralEnvironment() bool
+type Environment interface {
+	IsEnvironment() bool
 }
 
-type PackerMergedEnvironment[PCE GeneralEnvironment] struct {
-	PackerGeneralEnvironment *PackerGeneralEnvironment
-	PackerCloudEnvironment   PCE
+type PackerMergedEnvironment[E Environment] struct {
+	EnvironmentOne E
+	EnvironmentTwo   E
 }
 
-type PackerMergedTemplate struct {
+type MergedTemplate struct {
 	instance    *template.Template
-	environment *PackerMergedEnvironment[PackerCloudEnvironment]
+	environment *PackerMergedEnvironment[Environment]
 }
 
-type PackerCloudTemplate interface {
+type TemplateI interface {
 	GetName() string
 	GetInstance() *template.Template
-	GetEnvironment() *PackerAWSEnvironment
+	GetEnvironment() Environment
 }
 
-func NewPackerMergedTemplate(generalPackerTemplate *PackerGeneralTemplate, packerCloudTemplate PackerCloudTemplate) (packerMergedTemplate *PackerMergedTemplate, err error) {
+func NewMergedTemplate(templateOne, templateTwo TemplateI) (packerMergedTemplate *MergedTemplate, err error) {
 	const (
+		TEMPLATE_DIR_NAME = "templates"
 		PACKER_MERGED_TEMPLATE_NAME = "temp_merged_packer_template"
 	)
 
 	var (
 		oopsBuilder = oops.
 				Code("new_packer_merged_template_failed").
-				With("generalPackerTemplateName", generalPackerTemplate.GetName()).
-				With("packerCloudTemplateName", packerCloudTemplate.GetName())
+				With("templateOne", templateOne.GetName()).
+				With("templateTwo", templateTwo.GetName())
 
 		packerMergedTemplateInstance      *template.Template
 		absPathToTemplatesDir             string
 		absPathToTempPackerMergedTemplate string
 	)
 
-	if absPathToTemplatesDir, err = filepath.Abs(binaries.TEMPLATE_DIR_NAME); err != nil {
+	if absPathToTemplatesDir, err = filepath.Abs(TEMPLATE_DIR_NAME); err != nil {
 		err = oopsBuilder.
 			Wrapf(err, "Error occurred while crafting absolute path to %s", binaries.TEMPLATE_DIR_NAME)
 		return
@@ -70,7 +71,7 @@ func NewPackerMergedTemplate(generalPackerTemplate *PackerGeneralTemplate, packe
 		return
 	}
 
-	packerMergedTemplate = &PackerMergedTemplate{
+	packerMergedTemplate = &MergedTemplate{
 		instance: packerMergedTemplateInstance,
 		environment: &PackerMergedEnvironment[PackerCloudEnvironment]{
 			PackerGeneralEnvironment: generalPackerTemplate.GetEnvironment(),
@@ -81,19 +82,19 @@ func NewPackerMergedTemplate(generalPackerTemplate *PackerGeneralTemplate, packe
 	return
 }
 
-func (pmt *PackerMergedTemplate) GetName() (name string) {
+func (pmt *MergedTemplate) GetName() (name string) {
 	return pmt.instance.Name()
 }
 
-func (pmt *PackerMergedTemplate) GetInstance() (instance *template.Template) {
+func (pmt *MergedTemplate) GetInstance() (instance *template.Template) {
 	return pmt.instance
 }
 
-func (pmt *PackerMergedTemplate) GetEnvironment() (environment *PackerMergedEnvironment[PackerCloudEnvironment]) {
+func (pmt *MergedTemplate) GetEnvironment() (environment *PackerMergedEnvironment[PackerCloudEnvironment]) {
 	return pmt.environment
 }
 
-func (pmt *PackerMergedTemplate) Remove() (err error) {
+func (pmt *MergedTemplate) Remove() (err error) {
 	var (
 		oopsBuilder = oops.
 			Code("template_remove_failed")
@@ -108,7 +109,7 @@ func (pmt *PackerMergedTemplate) Remove() (err error) {
 	return
 }
 
-func (pmt *PackerMergedTemplate) Execute(writer io.Writer) (err error) {
+func (pmt *MergedTemplate) Execute(writer io.Writer) (err error) {
 	var (
 		oopsBuilder = oops.
 			Code("template_execute_failed").
