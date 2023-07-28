@@ -11,17 +11,17 @@ import (
 	"go.uber.org/zap"
 )
 
-type GeneralTemplate struct {
+type GeneralTemplateFile struct {
 	Name    string
 	AbsPath string
 }
 
-type AwsTemplate struct {
+type AwsTemplateFile struct {
 	Name    string
 	AbsPath string
 }
 
-type MergedTemplate struct {
+type MergedTemplateFile struct {
 	Name    string
 	AbsPath string
 }
@@ -63,7 +63,7 @@ func NewTemplate2(tool binaries.Tool, cloud binaries.Cloud) (mergedTemplate *Tem
 
 		packerGeneralEnvironment    *PackerGeneralEnvironment
 		packerManifest              *PackerManifest
-		packerTemplates             *PackerTemplates
+		packerTemplates             *PackerTemplateFiles
 		terraformGeneralEnvironment *TerraformGeneralEnvironment
 		terraformTemplates          *TerraformTemplates
 		absPathToTemplatesDir       string
@@ -87,31 +87,31 @@ func NewTemplate2(tool binaries.Tool, cloud binaries.Cloud) (mergedTemplate *Tem
 		AbsPath: filepath.Join(absPathToTemplatesDir, packerSubDirName, packerManifestName),
 	}
 
-	packerTemplates = &PackerTemplates{
-		General: &GeneralTemplate{
+	packerTemplates = &PackerTemplateFiles{
+		General: &GeneralTemplateFile{
 			Name:    packerGeneralTemplateName,
 			AbsPath: filepath.Join(absPathToTemplatesDir, packerSubDirName, generalSubDirName, packerGeneralTemplateName),
 		},
-		Aws: &AwsTemplate{
+		Aws: &AwsTemplateFile{
 			Name:    packerAwsTemplateName,
 			AbsPath: filepath.Join(absPathToTemplatesDir, packerSubDirName, awsSubDirName, packerAwsTemplateName),
 		},
-		MergedTemplate: &MergedTemplate{
+		MergedTemplate: &MergedTemplateFile{
 			Name:    packerMergedTemplateName,
 			AbsPath: filepath.Join(absPathToTemplatesDir, packerSubDirName, packerMergedTemplateName),
 		},
 	}
 
 	terraformTemplates = &TerraformTemplates{
-		General: &GeneralTemplate{
+		General: &GeneralTemplateFile{
 			Name:    terraformGeneralTemplateName,
 			AbsPath: filepath.Join(absPathToTemplatesDir, terraformSubDirName, generalSubDirName, terraformGeneralTemplateName),
 		},
-		Aws: &AwsTemplate{
+		Aws: &AwsTemplateFile{
 			Name:    terraformAwsTemplateName,
 			AbsPath: filepath.Join(absPathToTemplatesDir, terraformSubDirName, awsSubDirName, terraformAwsTemplateName),
 		},
-		MergedTemplate: &MergedTemplate{
+		MergedTemplate: &MergedTemplateFile{
 			Name:    terraformMergedTemplateName,
 			AbsPath: filepath.Join(absPathToTemplatesDir, terraformSubDirName, terraformMergedTemplateName),
 		},

@@ -23,9 +23,9 @@ type TerraformAWSEnvironment struct {
 }
 
 type TerraformTemplates struct {
-	General        *GeneralTemplate
-	Aws            *AwsTemplate
-	MergedTemplate *MergedTemplate
+	General        *GeneralTemplateFile
+	Aws            *AwsTemplateFile
+	MergedTemplate *MergedTemplateFile
 }
 
 type PackerManifest struct {
@@ -64,15 +64,15 @@ func NewTerraformMergedTemplate(cloud binaries.Cloud) (terraformMergedTemplate *
 	}
 
 	terraformTemplates = &TerraformTemplates{
-		General: &GeneralTemplate{
+		General: &GeneralTemplateFile{
 			Name:    TERRAFORM_GENERAL_TEMPLATE_NAME,
 			AbsPath: filepath.Join(absPathToTemplatesDir, TERRAFORM_SUBDIR_NAME, binaries.GENERAL_SUBDIR_NAME, TERRAFORM_GENERAL_TEMPLATE_NAME),
 		},
-		Aws: &AwsTemplate{
+		Aws: &AwsTemplateFile{
 			Name:    TERRAFORM_AWS_TEMPLATE_NAME,
 			AbsPath: filepath.Join(absPathToTemplatesDir, TERRAFORM_SUBDIR_NAME, binaries.AWS_SUBDIR_NAME, TERRAFORM_AWS_TEMPLATE_NAME),
 		},
-		MergedTemplate: &MergedTemplate{
+		MergedTemplate: &MergedTemplateFile{
 			Name:    TERRAFORM_MERGED_TEMPLATE_NAME,
 			AbsPath: filepath.Join(absPathToTemplatesDir, TERRAFORM_SUBDIR_NAME, TERRAFORM_MERGED_TEMPLATE_NAME),
 		},

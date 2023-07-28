@@ -1,8 +1,10 @@
 package workflows
 
 import (
+	"io"
 	"os"
 	"path/filepath"
+	"text/template"
 
 	"github.com/ed3899/kumo/binaries"
 	"github.com/ed3899/kumo/utils"
@@ -37,20 +39,18 @@ type PackerAWSEnvironment struct {
 	PackerGeneralEnvironment           *PackerGeneralEnvironment
 }
 
-type PackerTemplates struct {
-	General        *GeneralTemplate
-	Aws            *AwsTemplate
-	MergedTemplate *MergedTemplate
+type PackerTemplateFiles struct {
+	General        *GeneralTemplateFile
+	Aws            *AwsTemplateFile
+	MergedTemplate *MergedTemplateFile
 }
 
 type PackerMergedTemplate struct {
-	Name        string
-	AbsPath     string
+	Instance    *template.Template
 	Environment any
 }
 
 func NewPackerMergedTemplate(cloud binaries.Cloud) (packerMergedTemplate *PackerMergedTemplate, err error) {
-
 
 	var (
 		oopsBuilder = oops.
@@ -59,7 +59,8 @@ func NewPackerMergedTemplate(cloud binaries.Cloud) (packerMergedTemplate *Packer
 		logger, _ = zap.NewProduction()
 
 		packerGeneralEnvironment *PackerGeneralEnvironment
-		packerTemplates          *PackerTemplates
+		packerTemplateFiles      *PackerTemplateFiles
+		packerTemplateInstance   *template.Template
 		absPathToTemplatesDir    string
 	)
 
@@ -71,16 +72,16 @@ func NewPackerMergedTemplate(cloud binaries.Cloud) (packerMergedTemplate *Packer
 		return
 	}
 
-	packerTemplates = &PackerTemplates{
-		General: &GeneralTemplate{
+	packerTemplateFiles = &PackerTemplateFiles{
+		General: &GeneralTemplateFile{
 			Name:    PACKER_GENERAL_TEMPLATE_NAME,
 			AbsPath: filepath.Join(absPathToTemplatesDir, PACKER_SUBDIR_NAME, binaries.GENERAL_SUBDIR_NAME, PACKER_GENERAL_TEMPLATE_NAME),
 		},
-		Aws: &AwsTemplate{
+		Aws: &AwsTemplateFile{
 			Name:    PACKER_AWS_TEMPLATE_NAME,
 			AbsPath: filepath.Join(absPathToTemplatesDir, PACKER_SUBDIR_NAME, binaries.AWS_SUBDIR_NAME, PACKER_AWS_TEMPLATE_NAME),
 		},
-		MergedTemplate: &MergedTemplate{
+		MergedTemplate: &MergedTemplateFile{
 			Name:    PACKER_MERGED_TEMPLATE_NAME,
 			AbsPath: filepath.Join(absPathToTemplatesDir, PACKER_SUBDIR_NAME, PACKER_MERGED_TEMPLATE_NAME),
 		},
@@ -96,20 +97,25 @@ func NewPackerMergedTemplate(cloud binaries.Cloud) (packerMergedTemplate *Packer
 	switch cloud {
 	case binaries.AWS:
 		if err = utils.MergeFilesTo(
-			packerTemplates.MergedTemplate.AbsPath,
-			packerTemplates.General.AbsPath,
-			packerTemplates.Aws.AbsPath,
+			packerTemplateFiles.MergedTemplate.AbsPath,
+			packerTemplateFiles.General.AbsPath,
+			packerTemplateFiles.Aws.AbsPath,
 		); err != nil {
 			err = oopsBuilder.
-				With("packerTemplates.General.AbsPath", packerTemplates.General.AbsPath).
-				With("packerTemplates.Aws.AbsPath", packerTemplates.Aws.AbsPath).
-				Wrapf(err, "failed to merge files to: %s", packerTemplates.MergedTemplate.AbsPath)
+				With("packerTemplates.General.AbsPath", packerTemplateFiles.General.AbsPath).
+				With("packerTemplates.Aws.AbsPath", packerTemplateFiles.Aws.AbsPath).
+				Wrapf(err, "failed to merge files to: %s", packerTemplateFiles.MergedTemplate.AbsPath)
+			return
+		}
+
+		if packerTemplateInstance, err = template.ParseFiles(packerTemplateFiles.MergedTemplate.AbsPath); err != nil {
+			err = oopsBuilder.
+				Wrapf(err, "Error occurred while parsing template %s", packerTemplateFiles.MergedTemplate.AbsPath)
 			return
 		}
 
 		packerMergedTemplate = &PackerMergedTemplate{
-			Name:    PACKER_MERGED_TEMPLATE_NAME,
-			AbsPath: packerTemplates.MergedTemplate.AbsPath,
+			Instance: packerTemplateInstance,
 			Environment: &PackerAWSEnvironment{
 				AWS_ACCESS_KEY:                     viper.GetString("AWS.AccessKeyId"),
 				AWS_SECRET_KEY:                     viper.GetString("AWS.SecretAccessKey"),
@@ -145,10 +151,25 @@ func (pmt *PackerMergedTemplate) Remove() (err error) {
 			Code("template_remove_failed")
 	)
 
-	if os.RemoveAll(pmt.AbsPath); err != nil {
+	if os.RemoveAll(pmt.Instance.Name()); err != nil {
 		err = oopsBuilder.
-			With("t.AbsPath", pmt.AbsPath).
-			Wrapf(err, "Error occurred while removing %s", pmt.AbsPath)
+			Wrapf(err, "Error occurred while removing %s", pmt.Instance.Name())
+		return
+	}
+
+	return
+}
+
+func (pmt *PackerMergedTemplate) Execute(writer io.Writer) (err error) {
+	var (
+		oopsBuilder = oops.
+			Code("template_execute_failed").
+			With("writer", writer)
+	)
+
+	if err = pmt.Instance.Execute(writer, pmt.Environment); err != nil {
+		err = oopsBuilder.
+			Wrapf(err, "Error occurred while executing template: %s", pmt.Instance.Name())
 		return
 	}
 
