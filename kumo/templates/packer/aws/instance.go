@@ -51,7 +51,7 @@ func NewTemplate() (newTemplate *Template, err error) {
 
 	if absPathToPackerAwsTemplate, err = filepath.Abs(filepath.Join(packer.PACKER_TEMPLATES_DIR_NAME, templates.AWS_TEMPLATES_DIR_NAME, PACKER_AWS_TEMPLATE_NAME)); err != nil {
 		err = oopsBuilder.
-			With("templates.PACKER_TEMPLATES_DIR_NAME", templates.PACKER_TEMPLATES_DIR_NAME).
+			With("packer.PACKER_TEMPLATES_DIR_NAME", packer.PACKER_TEMPLATES_DIR_NAME).
 			With("templates.AWS_TEMPLATES_DIR_NAME", templates.AWS_TEMPLATES_DIR_NAME).
 			Wrapf(err, "Error occurred while crafting absolute path to %s", PACKER_AWS_TEMPLATE_NAME)
 		return
