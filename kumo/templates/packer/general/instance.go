@@ -23,6 +23,7 @@ func (pge *Environment) IsEnvironment() (isEnvironment bool) {
 
 type Template struct {
 	instance    *template.Template
+	parentDirName         string
 	environment *Environment
 }
 
@@ -54,6 +55,7 @@ func NewTemplate() (newTemplate *Template, err error) {
 
 	newTemplate = &Template{
 		instance: packerGeneralTemplateInstance,
+		parentDirName:      packer.PACKER_TEMPLATES_DIR_NAME,
 		environment: &Environment{
 			GIT_USERNAME:                          viper.GetString("Git.Username"),
 			GIT_EMAIL:                             viper.GetString("Git.Email"),
@@ -65,14 +67,18 @@ func NewTemplate() (newTemplate *Template, err error) {
 	return
 }
 
-func (pgt *Template) GetName() (name string) {
-	return pgt.instance.Name()
+func (t *Template) GetParentDirName() (dir string) {
+	return t.parentDirName
 }
 
-func (pgt *Template) GetInstance() (instance *template.Template) {
-	return pgt.instance
+func (t *Template) GetName() (name string) {
+	return t.instance.Name()
 }
 
-func (pgt *Template) GetEnvironment() (environment *Environment) {
-	return pgt.environment
+func (t *Template) GetInstance() (instance *template.Template) {
+	return t.instance
+}
+
+func (t *Template) GetEnvironment() (environment *Environment) {
+	return t.environment
 }

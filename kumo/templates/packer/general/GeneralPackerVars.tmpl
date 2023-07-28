@@ -1,4 +1,4 @@
-GIT_USERNAME = "{{.PackerGeneralEnvironment.GIT_USERNAME}}"
-GIT_EMAIL = "{{.PackerGeneralEnvironment.GIT_EMAIL}}"
-ANSIBLE_TAGS = [{{range $index, $element := .PackerGeneralEnvironment.ANSIBLE_TAGS}}{{if $index}},{{end}}"{{$element}}"{{end}}]
-GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC = "{{.PackerGeneralEnvironment.GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC}}"
+GIT_USERNAME = "{{.general.GIT_USERNAME}}"
+GIT_EMAIL = "{{.general.GIT_EMAIL}}"
+ANSIBLE_TAGS = [{{range $index, $element := .general.ANSIBLE_TAGS}}{{if $index}},{{end}}"{{$element}}"{{end}}]
+GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC = "{{.general.GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC}}"

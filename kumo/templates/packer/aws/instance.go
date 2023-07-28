@@ -34,6 +34,7 @@ func (pae *Environment) IsEnvironment() (isEnvironment bool) {
 
 type Template struct {
 	instance    *template.Template
+	parentDirName         string
 	environment *Environment
 }
 
@@ -65,6 +66,7 @@ func NewTemplate() (newTemplate *Template, err error) {
 
 	newTemplate = &Template{
 		instance: packerAwsTemplateInstance,
+		parentDirName:      packer.PACKER_TEMPLATES_DIR_NAME,
 		environment: &Environment{
 			AWS_ACCESS_KEY:                     viper.GetString("AWS.AccessKeyId"),
 			AWS_SECRET_KEY:                     viper.GetString("AWS.SecretAccessKey"),
@@ -87,14 +89,18 @@ func NewTemplate() (newTemplate *Template, err error) {
 	return
 }
 
-func (pat *Template) GetName() (name string) {
-	return pat.instance.Name()
+func (t *Template) GetParentDirName() (dir string) {
+	return t.parentDirName
 }
 
-func (pat *Template) GetInstance() (instance *template.Template) {
-	return pat.instance
+func (t *Template) GetName() (name string) {
+	return t.instance.Name()
 }
 
-func (pat *Template) GetEnvironment() (environment *Environment) {
-	return pat.environment
+func (t *Template) GetInstance() (instance *template.Template) {
+	return t.instance
+}
+
+func (t *Template) GetEnvironment() (environment *Environment) {
+	return t.environment
 }

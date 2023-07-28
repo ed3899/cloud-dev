@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 	"text/template"
 
-	"github.com/ed3899/kumo/binaries"
 	"github.com/ed3899/kumo/utils"
 	"github.com/samber/oops"
 )
@@ -15,110 +14,112 @@ type Environment interface {
 	IsEnvironment() bool
 }
 
-type PackerMergedEnvironment[E Environment] struct {
-	EnvironmentOne E
-	EnvironmentTwo   E
+type MergedEnvironment[E Environment] struct {
+	general E
+	cloud   E
 }
 
 type MergedTemplate struct {
 	instance    *template.Template
-	environment *PackerMergedEnvironment[Environment]
+	environment *MergedEnvironment[Environment]
 }
 
 type TemplateI interface {
+	GetParentDirName() string
 	GetName() string
 	GetInstance() *template.Template
 	GetEnvironment() Environment
 }
 
-func NewMergedTemplate(templateOne, templateTwo TemplateI) (packerMergedTemplate *MergedTemplate, err error) {
+func NewMergedTemplate(generalTemplate, cloudTemplate TemplateI) (packerMergedTemplate *MergedTemplate, err error) {
 	const (
-		TEMPLATE_DIR_NAME = "templates"
-		PACKER_MERGED_TEMPLATE_NAME = "temp_merged_packer_template"
+		TEMPLATE_DIR_NAME    = "templates"
+		MERGED_TEMPLATE_NAME = "temp_merged_template"
 	)
 
 	var (
 		oopsBuilder = oops.
 				Code("new_packer_merged_template_failed").
-				With("templateOne", templateOne.GetName()).
-				With("templateTwo", templateTwo.GetName())
+				With("generalTemplate", generalTemplate.GetName()).
+				With("cloudTemplate", cloudTemplate.GetName())
 
-		packerMergedTemplateInstance      *template.Template
+		mergedTemplateInstance            *template.Template
 		absPathToTemplatesDir             string
 		absPathToTempPackerMergedTemplate string
 	)
 
 	if absPathToTemplatesDir, err = filepath.Abs(TEMPLATE_DIR_NAME); err != nil {
 		err = oopsBuilder.
-			Wrapf(err, "Error occurred while crafting absolute path to %s", binaries.TEMPLATE_DIR_NAME)
+			Wrapf(err, "Error occurred while crafting absolute path to %s", TEMPLATE_DIR_NAME)
 		return
 	}
 
-	absPathToTempPackerMergedTemplate = filepath.Join(absPathToTemplatesDir, PACKER_SUBDIR_NAME, PACKER_MERGED_TEMPLATE_NAME)
+	absPathToTempPackerMergedTemplate = filepath.Join(absPathToTemplatesDir, generalTemplate.GetParentDirName(), MERGED_TEMPLATE_NAME)
 
 	if err = utils.MergeFilesTo(
 		absPathToTempPackerMergedTemplate,
-		generalPackerTemplate.GetName(),
-		packerCloudTemplate.GetName(),
+		generalTemplate.GetName(),
+		cloudTemplate.GetName(),
 	); err != nil {
 		err = oopsBuilder.
-			Wrapf(err, "Error occurred while merging %s and %s to %s", generalPackerTemplate.GetName(), packerCloudTemplate.GetName(), absPathToTempPackerMergedTemplate)
+			Wrapf(err, "Error occurred while merging %s and %s to %s", generalTemplate.GetName(), cloudTemplate.GetName(), absPathToTempPackerMergedTemplate)
+		return
 	}
 
-	if packerMergedTemplateInstance, err = template.ParseFiles(absPathToTempPackerMergedTemplate); err != nil {
+	if mergedTemplateInstance, err = template.ParseFiles(absPathToTempPackerMergedTemplate); err != nil {
 		err = oopsBuilder.
 			Wrapf(err, "Error occurred while parsing template %s", absPathToTempPackerMergedTemplate)
 		return
 	}
 
 	packerMergedTemplate = &MergedTemplate{
-		instance: packerMergedTemplateInstance,
-		environment: &PackerMergedEnvironment[PackerCloudEnvironment]{
-			PackerGeneralEnvironment: generalPackerTemplate.GetEnvironment(),
-			PackerCloudEnvironment:   packerCloudTemplate.GetEnvironment(),
+		instance: mergedTemplateInstance,
+		environment: &MergedEnvironment[Environment]{
+			general: generalTemplate.GetEnvironment(),
+			cloud:   cloudTemplate.GetEnvironment(),
 		},
 	}
 
 	return
 }
 
-func (pmt *MergedTemplate) GetName() (name string) {
-	return pmt.instance.Name()
+func (mt *MergedTemplate) GetName() (name string) {
+	return mt.instance.Name()
 }
 
-func (pmt *MergedTemplate) GetInstance() (instance *template.Template) {
-	return pmt.instance
+func (mt *MergedTemplate) GetInstance() (instance *template.Template) {
+	return mt.instance
 }
 
-func (pmt *MergedTemplate) GetEnvironment() (environment *PackerMergedEnvironment[PackerCloudEnvironment]) {
-	return pmt.environment
+func (mt *MergedTemplate) GetEnvironment() (environment *MergedEnvironment[Environment]) {
+	return mt.environment
 }
 
-func (pmt *MergedTemplate) Remove() (err error) {
+func (mt *MergedTemplate) Remove() (err error) {
 	var (
 		oopsBuilder = oops.
-			Code("template_remove_failed")
+			Code("merged_template_remove_failed")
 	)
 
-	if os.RemoveAll(pmt.instance.Name()); err != nil {
+	if os.RemoveAll(mt.instance.Name()); err != nil {
 		err = oopsBuilder.
-			Wrapf(err, "Error occurred while removing %s", pmt.instance.Name())
+			Wrapf(err, "Error occurred while removing %s", mt.instance.Name())
 		return
 	}
 
 	return
 }
 
-func (pmt *MergedTemplate) Execute(writer io.Writer) (err error) {
+func (mt *MergedTemplate) Execute(writer io.Writer) (err error) {
 	var (
 		oopsBuilder = oops.
-			Code("template_execute_failed").
+			Code("merged_template_execute_failed").
 			With("writer", writer)
 	)
 
-	if err = pmt.instance.Execute(writer, pmt.environment); err != nil {
+	if err = mt.instance.Execute(writer, mt.environment); err != nil {
 		err = oopsBuilder.
-			Wrapf(err, "Error occurred while executing template: %s", pmt.instance.Name())
+			Wrapf(err, "Error occurred while executing template: %s", mt.instance.Name())
 		return
 	}
 
