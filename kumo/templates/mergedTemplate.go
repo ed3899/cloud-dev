@@ -24,14 +24,13 @@ type MergedTemplate struct {
 	environment *MergedEnvironment[Environment]
 }
 
-type TemplateI interface {
+type TemplateSingle interface {
 	GetParentDirName() string
 	GetName() string
-	GetInstance() *template.Template
 	GetEnvironment() Environment
 }
 
-func NewMergedTemplate(generalTemplate, cloudTemplate TemplateI) (packerMergedTemplate *MergedTemplate, err error) {
+func NewMergedTemplate(generalTemplate, cloudTemplate TemplateSingle) (packerMergedTemplate *MergedTemplate, err error) {
 	const (
 		TEMPLATE_DIR_NAME    = "templates"
 		MERGED_TEMPLATE_NAME = "temp_merged_template"
