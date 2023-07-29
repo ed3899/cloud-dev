@@ -2,6 +2,7 @@ package aws
 
 import (
 	"path/filepath"
+	"reflect"
 	"text/template"
 
 	"github.com/ed3899/kumo/templates"
@@ -27,8 +28,23 @@ type Environment struct {
 	AWS_EC2_INSTANCE_USERNAME_PASSWORD string
 }
 
-func (e *Environment) IsEnvironment() (isEnvironment bool) {
-	return true
+func (e *Environment) IsNotValidEnvironment() (isNotValidEnvironment bool) {
+	var (
+		reflectValue reflect.Value
+		fieldValue   reflect.Value
+	)
+	// Iterate over each field in the struct using reflection
+	reflectValue = reflect.ValueOf(e).Elem()
+	for i := 0; i < reflectValue.NumField(); i++ {
+		fieldValue = reflectValue.Field(i)
+
+		// Check if the field is uninitialized (has zero value)
+		if fieldValue.Interface() == reflect.Zero(fieldValue.Type()).Interface() {
+			return true // Return true if any field is undefined
+		}
+	}
+
+	return false // Return false if all fields are defined
 }
 
 type Template struct {

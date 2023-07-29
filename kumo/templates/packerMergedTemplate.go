@@ -11,7 +11,7 @@ import (
 )
 
 type Environment interface {
-	IsEnvironment() bool
+	IsNotValidEnvironment() bool
 }
 
 type MergedEnvironment[E Environment] struct {
@@ -47,6 +47,20 @@ func NewMergedTemplate(generalTemplate, cloudTemplate TemplateI) (packerMergedTe
 		absPathToTemplatesDir             string
 		absPathToTempPackerMergedTemplate string
 	)
+
+	if generalTemplate.GetParentDirName() != cloudTemplate.GetParentDirName() {
+		err = oopsBuilder.
+			With("generalTemplate.GetParentDirName()", generalTemplate.GetParentDirName()).
+			With("cloudTemplate.GetParentDirName()", cloudTemplate.GetParentDirName()).
+			Errorf("generalTemplate and cloudTemplate must be in the same directory")
+		return
+	}
+
+	if generalTemplate.GetEnvironment().IsNotValidEnvironment() || cloudTemplate.GetEnvironment().IsNotValidEnvironment() {
+		err = oopsBuilder.
+			Errorf("generalTemplate and cloudTemplate must have valid environments")
+		return
+	}
 
 	if absPathToTemplatesDir, err = filepath.Abs(TEMPLATE_DIR_NAME); err != nil {
 		err = oopsBuilder.
