@@ -4,6 +4,7 @@ import (
 	"path/filepath"
 	"text/template"
 
+	"github.com/ed3899/kumo/common/dirs"
 	"github.com/ed3899/kumo/common/templates"
 	"github.com/ed3899/kumo/utils"
 	"github.com/samber/oops"
@@ -35,10 +36,10 @@ func NewTemplate() (newTemplate *Template, err error) {
 
 	defer logger.Sync()
 
-	if absPath, err = filepath.Abs(filepath.Join(templates.TERRAFORM_DIR_NAME, templates.GENERAL_DIR_NAME, NAME)); err != nil {
+	if absPath, err = filepath.Abs(filepath.Join(dirs.TERRAFORM_DIR_NAME, dirs.GENERAL_DIR_NAME, NAME)); err != nil {
 		err = oopsBuilder.
-			With("templates.TERRAFORM_DIR_NAME", templates.TERRAFORM_DIR_NAME).
-			With("templates.GENERAL_DIR_NAME", templates.GENERAL_DIR_NAME).
+			With("dirs.TERRAFORM_DIR_NAME", dirs.TERRAFORM_DIR_NAME).
+			With("dirs.GENERAL_DIR_NAME", dirs.GENERAL_DIR_NAME).
 			Wrapf(err, "Error occurred while crafting absolute path to %s", NAME)
 		return
 	}
@@ -58,7 +59,7 @@ func NewTemplate() (newTemplate *Template, err error) {
 
 	newTemplate = &Template{
 		instance:      instance,
-		parentDirName: templates.TERRAFORM_DIR_NAME,
+		parentDirName: dirs.TERRAFORM_DIR_NAME,
 		environment: &Environment{
 			ALLOWED_IP: utils.MaskIp(pickedIp, 32),
 		},

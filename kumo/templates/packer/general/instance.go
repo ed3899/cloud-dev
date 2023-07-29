@@ -4,6 +4,7 @@ import (
 	"path/filepath"
 	"text/template"
 
+	"github.com/ed3899/kumo/common/dirs"
 	"github.com/ed3899/kumo/common/templates"
 	"github.com/samber/oops"
 	"github.com/spf13/viper"
@@ -27,10 +28,10 @@ func NewTemplate() (newTemplate *Template, err error) {
 		absPathToPackerGeneralTemplate string
 	)
 
-	if absPathToPackerGeneralTemplate, err = filepath.Abs(filepath.Join(templates.PACKER_DIR_NAME, templates.GENERAL_DIR_NAME, PACKER_GENERAL_TEMPLATE_NAME)); err != nil {
+	if absPathToPackerGeneralTemplate, err = filepath.Abs(filepath.Join(dirs.PACKER_DIR_NAME, dirs.GENERAL_DIR_NAME, PACKER_GENERAL_TEMPLATE_NAME)); err != nil {
 		err = oopsBuilder.
-			With("templates.PACKER_DIR_NAME", templates.PACKER_DIR_NAME).
-			With("templates.GENERAL_TEMPLATES_DIR_NAME", templates.GENERAL_DIR_NAME).
+			With("dirs.PACKER_DIR_NAME", dirs.PACKER_DIR_NAME).
+			With("dirs.GENERAL_DIR_NAME", dirs.GENERAL_DIR_NAME).
 			Wrapf(err, "Error occurred while crafting absolute path to %s", PACKER_GENERAL_TEMPLATE_NAME)
 		return
 	}
@@ -43,7 +44,7 @@ func NewTemplate() (newTemplate *Template, err error) {
 
 	newTemplate = &Template{
 		instance:      packerGeneralTemplateInstance,
-		parentDirName: templates.PACKER_DIR_NAME,
+		parentDirName: dirs.PACKER_DIR_NAME,
 		environment: &Environment{
 			GIT_USERNAME:                          viper.GetString("Git.Username"),
 			GIT_EMAIL:                             viper.GetString("Git.Email"),

@@ -3,7 +3,8 @@ package aws
 import (
 	"path/filepath"
 
-	"github.com/ed3899/kumo/common/templates"
+	"github.com/ed3899/kumo/common/dirs"
+	"github.com/ed3899/kumo/common/packer_manifest"
 	"github.com/ed3899/kumo/utils"
 	"github.com/samber/oops"
 )
@@ -25,11 +26,11 @@ func NewManifest() (manifest *Manifest, err error) {
 		lastBuiltAmiId string
 	)
 
-	if absPath, err = filepath.Abs(filepath.Join(templates.PACKER_DIR_NAME, templates.AWS_DIR_NAME, templates.PACKER_MANIFEST_NAME)); err != nil {
+	if absPath, err = filepath.Abs(filepath.Join(dirs.PACKER_DIR_NAME, dirs.AWS_DIR_NAME, packer_manifest.NAME)); err != nil {
 		err = oopsBuilder.
-			With("templates.PACKER_DIR_NAME", templates.PACKER_DIR_NAME).
-			With("templates.AWS_DIR_NAME", templates.AWS_DIR_NAME).
-			Wrapf(err, "Error occurred while crafting absolute path to %s", templates.PACKER_MANIFEST_NAME)
+			With("dirs.PACKER_DIR_NAME", dirs.PACKER_DIR_NAME).
+			With("dirs.AWS_DIR_NAME", dirs.AWS_DIR_NAME).
+			Wrapf(err, "Error occurred while crafting absolute path to %s", packer_manifest.NAME)
 		return
 	}
 
