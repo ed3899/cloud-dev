@@ -1,7 +1,7 @@
 package cloud
 
 import (
-	"github.com/ed3899/kumo/cloud/aws"
+	"github.com/ed3899/kumo/common/cloud/aws"
 	"github.com/samber/oops"
 	"github.com/spf13/viper"
 )
