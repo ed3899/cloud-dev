@@ -9,12 +9,11 @@ import (
 )
 
 type Manifest struct {
-	absPath        string
 	lastBuiltAmiId string
 }
 
-func (m *Manifest) GetAbsPath() (absPath string) {
-	return m.absPath
+func (m *Manifest) GetLastBuiltAmiId() (lastBuiltAmiId string) {
+	return m.lastBuiltAmiId
 }
 
 func NewManifest() (manifest *Manifest, err error) {
@@ -42,7 +41,6 @@ func NewManifest() (manifest *Manifest, err error) {
 	}
 
 	manifest = &Manifest{
-		absPath:        absPath,
 		lastBuiltAmiId: lastBuiltAmiId,
 	}
 

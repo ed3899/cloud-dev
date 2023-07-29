@@ -15,7 +15,7 @@ type Template struct {
 	environment   templates.EnvironmentI
 }
 
-func NewTemplate(amiIdToBeUsed string) (newTemplate *Template, err error) {
+func NewTemplate(packerManifest templates.PackerManifestI) (newTemplate *Template, err error) {
 	const (
 		NAME = "AWS_TerraformVars.tmpl"
 	)
@@ -50,7 +50,7 @@ func NewTemplate(amiIdToBeUsed string) (newTemplate *Template, err error) {
 			AWS_INSTANCE_TYPE:            viper.GetString("AWS.EC2.Instance.Type"),
 			AWS_EC2_INSTANCE_VOLUME_TYPE: viper.GetString("AWS.EC2.Volume.Type"),
 			AWS_EC2_INSTANCE_VOLUME_SIZE: viper.GetInt("AWS.EC2.Volume.Size"),
-			AMI_ID:                       amiIdToBeUsed,
+			AMI_ID:                       packerManifest.GetLastBuiltAmiId(),
 		},
 	}
 

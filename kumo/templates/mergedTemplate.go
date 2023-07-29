@@ -6,21 +6,22 @@ import (
 	"path/filepath"
 	"text/template"
 
+	"github.com/ed3899/kumo/common/templates"
 	"github.com/ed3899/kumo/utils"
 	"github.com/samber/oops"
 )
 
-type MergedEnvironment[E EnvironmentI] struct {
+type MergedEnvironment[E templates.EnvironmentI] struct {
 	general E
 	cloud   E
 }
 
 type MergedTemplate struct {
 	instance    *template.Template
-	environment *MergedEnvironment[EnvironmentI]
+	environment *MergedEnvironment[templates.EnvironmentI]
 }
 
-func NewMergedTemplate(generalTemplate, cloudTemplate TemplateSingle) (packerMergedTemplate *MergedTemplate, err error) {
+func NewMergedTemplate(generalTemplate, cloudTemplate templates.TemplateSingle) (packerMergedTemplate *MergedTemplate, err error) {
 	const (
 		TEMPLATE_DIR_NAME    = "templates"
 		MERGED_TEMPLATE_NAME = "temp_merged_template"
@@ -77,7 +78,7 @@ func NewMergedTemplate(generalTemplate, cloudTemplate TemplateSingle) (packerMer
 
 	packerMergedTemplate = &MergedTemplate{
 		instance: mergedTemplateInstance,
-		environment: &MergedEnvironment[EnvironmentI]{
+		environment: &MergedEnvironment[templates.EnvironmentI]{
 			general: generalTemplate.GetEnvironment(),
 			cloud:   cloudTemplate.GetEnvironment(),
 		},
@@ -94,7 +95,7 @@ func (mt *MergedTemplate) GetInstance() (instance *template.Template) {
 	return mt.instance
 }
 
-func (mt *MergedTemplate) GetEnvironment() (environment *MergedEnvironment[EnvironmentI]) {
+func (mt *MergedTemplate) GetEnvironment() (environment *MergedEnvironment[templates.EnvironmentI]) {
 	return mt.environment
 }
 
