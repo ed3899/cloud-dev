@@ -22,7 +22,7 @@ type Retrivable interface {
 }
 
 type Downloadable interface {
-	SetDownloadBar(MultiProgressBar, int64)
+	SetDownloadBar(MultiProgressBar)
 	Download(chan<- int) error
 	IncrementDownloadBar(int)
 }
