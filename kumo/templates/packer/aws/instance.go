@@ -2,10 +2,10 @@ package aws
 
 import (
 	"path/filepath"
-	"reflect"
 	"text/template"
 
 	"github.com/ed3899/kumo/templates"
+	"github.com/ed3899/kumo/utils"
 	"github.com/samber/oops"
 	"github.com/spf13/viper"
 )
@@ -29,22 +29,7 @@ type Environment struct {
 }
 
 func (e *Environment) IsNotValidEnvironment() (isNotValidEnvironment bool) {
-	var (
-		reflectValue reflect.Value
-		fieldValue   reflect.Value
-	)
-	// Iterate over each field in the struct using reflection
-	reflectValue = reflect.ValueOf(e).Elem()
-	for i := 0; i < reflectValue.NumField(); i++ {
-		fieldValue = reflectValue.Field(i)
-
-		// Check if the field is uninitialized (has zero value)
-		if fieldValue.Interface() == reflect.Zero(fieldValue.Type()).Interface() {
-			return true // Return true if any field is undefined
-		}
-	}
-
-	return false // Return false if all fields are defined
+	return !utils.IsStructFilledCompletely(e)
 }
 
 type Template struct {

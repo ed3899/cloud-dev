@@ -5,6 +5,7 @@ import (
 	"text/template"
 
 	"github.com/ed3899/kumo/templates"
+	"github.com/ed3899/kumo/utils"
 	"github.com/samber/oops"
 	"github.com/spf13/viper"
 )
@@ -16,8 +17,8 @@ type Environment struct {
 	GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC string
 }
 
-func (pge *Environment) IsEnvironment() (isEnvironment bool) {
-	return true
+func (e *Environment) IsNotValidEnvironment() (isNotValidEnvironment bool) {
+	return !utils.IsStructFilledCompletely(e)
 }
 
 type Template struct {
