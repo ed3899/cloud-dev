@@ -5,10 +5,7 @@ import (
 )
 
 type Environment struct {
-	GIT_USERNAME                          string
-	GIT_EMAIL                             string
-	ANSIBLE_TAGS                          []string
-	GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC string
+	ALLOWED_IP string
 }
 
 func (e *Environment) IsNotValidEnvironment() (isNotValidEnvironment bool) {

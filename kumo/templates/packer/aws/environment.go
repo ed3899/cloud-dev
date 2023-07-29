@@ -23,5 +23,5 @@ type Environment struct {
 }
 
 func (e *Environment) IsNotValidEnvironment() (isNotValidEnvironment bool) {
-	return !utils.IsStructFilledCompletely(e)
+	return !utils.IsStructCompletellyFilled(e)
 }

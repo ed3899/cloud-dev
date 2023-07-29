@@ -9,18 +9,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-type Environment struct {
-	AWS_REGION                   string
-	AWS_INSTANCE_TYPE            string
-	AWS_EC2_INSTANCE_VOLUME_TYPE string
-	AWS_EC2_INSTANCE_VOLUME_SIZE int
-	AMI_ID                       string
-}
-
-func (e *Environment) IsEnvironment() (isEnvironment bool) {
-	return true
-}
-
 type Template struct {
 	instance      *template.Template
 	parentDirName string

@@ -2,7 +2,7 @@ package utils
 
 import "reflect"
 
-func IsStructFilledCompletely(s any) (isFilledCompletely bool) {
+func IsStructCompletellyFilled(s any) (isFilledCompletely bool) {
 	var (
 		reflectValue reflect.Value
 		fieldValue   reflect.Value

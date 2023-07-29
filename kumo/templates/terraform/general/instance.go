@@ -10,10 +10,6 @@ import (
 	"go.uber.org/zap"
 )
 
-type Environment struct {
-	ALLOWED_IP string
-}
-
 type Template struct {
 	instance      *template.Template
 	parentDirName string
