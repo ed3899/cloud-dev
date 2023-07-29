@@ -5,7 +5,6 @@ import (
 	"text/template"
 
 	"github.com/ed3899/kumo/templates"
-	"github.com/ed3899/kumo/templates/packer"
 	"github.com/samber/oops"
 	"github.com/spf13/viper"
 )
@@ -22,9 +21,9 @@ func (pge *Environment) IsEnvironment() (isEnvironment bool) {
 }
 
 type Template struct {
-	instance    *template.Template
-	parentDirName         string
-	environment *Environment
+	instance      *template.Template
+	parentDirName string
+	environment   *Environment
 }
 
 func NewTemplate() (newTemplate *Template, err error) {
@@ -39,10 +38,10 @@ func NewTemplate() (newTemplate *Template, err error) {
 		absPathToPackerGeneralTemplate string
 	)
 
-	if absPathToPackerGeneralTemplate, err = filepath.Abs(filepath.Join(packer.PACKER_TEMPLATES_DIR_NAME, templates.GENERAL_TEMPLATES_DIR_NAME, PACKER_GENERAL_TEMPLATE_NAME)); err != nil {
+	if absPathToPackerGeneralTemplate, err = filepath.Abs(filepath.Join(templates.PACKER_DIR_NAME, templates.GENERAL_DIR_NAME, PACKER_GENERAL_TEMPLATE_NAME)); err != nil {
 		err = oopsBuilder.
-			With("packer.PACKER_TEMPLATES_DIR_NAME", packer.PACKER_TEMPLATES_DIR_NAME).
-			With("templates.GENERAL_TEMPLATES_DIR_NAME", templates.GENERAL_TEMPLATES_DIR_NAME).
+			With("templates.PACKER_DIR_NAME", templates.PACKER_DIR_NAME).
+			With("templates.GENERAL_TEMPLATES_DIR_NAME", templates.GENERAL_DIR_NAME).
 			Wrapf(err, "Error occurred while crafting absolute path to %s", PACKER_GENERAL_TEMPLATE_NAME)
 		return
 	}
@@ -54,8 +53,8 @@ func NewTemplate() (newTemplate *Template, err error) {
 	}
 
 	newTemplate = &Template{
-		instance: packerGeneralTemplateInstance,
-		parentDirName:      packer.PACKER_TEMPLATES_DIR_NAME,
+		instance:      packerGeneralTemplateInstance,
+		parentDirName: templates.PACKER_DIR_NAME,
 		environment: &Environment{
 			GIT_USERNAME:                          viper.GetString("Git.Username"),
 			GIT_EMAIL:                             viper.GetString("Git.Email"),

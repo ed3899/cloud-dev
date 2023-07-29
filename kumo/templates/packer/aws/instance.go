@@ -5,7 +5,6 @@ import (
 	"text/template"
 
 	"github.com/ed3899/kumo/templates"
-	"github.com/ed3899/kumo/templates/packer"
 	"github.com/samber/oops"
 	"github.com/spf13/viper"
 )
@@ -52,10 +51,10 @@ func NewTemplate() (newTemplate *Template, err error) {
 		absPath  string
 	)
 
-	if absPath, err = filepath.Abs(filepath.Join(packer.PACKER_TEMPLATES_DIR_NAME, templates.AWS_TEMPLATES_DIR_NAME, NAME)); err != nil {
+	if absPath, err = filepath.Abs(filepath.Join(templates.PACKER_DIR_NAME, templates.AWS_DIR_NAME, NAME)); err != nil {
 		err = oopsBuilder.
-			With("packer.PACKER_TEMPLATES_DIR_NAME", packer.PACKER_TEMPLATES_DIR_NAME).
-			With("templates.AWS_TEMPLATES_DIR_NAME", templates.AWS_TEMPLATES_DIR_NAME).
+			With("templates.PACKER_DIR_NAME", templates.PACKER_DIR_NAME).
+			With("templates.AWS_TEMPLATES_DIR_NAME", templates.AWS_DIR_NAME).
 			Wrapf(err, "Error occurred while crafting absolute path to %s", NAME)
 		return
 	}
@@ -68,7 +67,7 @@ func NewTemplate() (newTemplate *Template, err error) {
 
 	newTemplate = &Template{
 		instance:      instance,
-		parentDirName: packer.PACKER_TEMPLATES_DIR_NAME,
+		parentDirName: templates.PACKER_DIR_NAME,
 		environment: &Environment{
 			AWS_ACCESS_KEY:                     viper.GetString("AWS.AccessKeyId"),
 			AWS_SECRET_KEY:                     viper.GetString("AWS.SecretAccessKey"),
