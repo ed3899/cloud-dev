@@ -10,9 +10,7 @@ import (
 	"github.com/samber/oops"
 )
 
-type Environment interface {
-	IsNotValidEnvironment() bool
-}
+
 
 type MergedEnvironment[E Environment] struct {
 	general E
