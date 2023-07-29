@@ -10,18 +10,14 @@ import (
 	"github.com/samber/oops"
 )
 
-type Environment interface {
-	IsNotValidEnvironment() bool
-}
-
-type MergedEnvironment[E Environment] struct {
+type MergedEnvironment[E EnvironmentI] struct {
 	general E
 	cloud   E
 }
 
 type MergedTemplate struct {
 	instance    *template.Template
-	environment *MergedEnvironment[Environment]
+	environment *MergedEnvironment[EnvironmentI]
 }
 
 func NewMergedTemplate(generalTemplate, cloudTemplate TemplateSingle) (packerMergedTemplate *MergedTemplate, err error) {
@@ -81,7 +77,7 @@ func NewMergedTemplate(generalTemplate, cloudTemplate TemplateSingle) (packerMer
 
 	packerMergedTemplate = &MergedTemplate{
 		instance: mergedTemplateInstance,
-		environment: &MergedEnvironment[Environment]{
+		environment: &MergedEnvironment[EnvironmentI]{
 			general: generalTemplate.GetEnvironment(),
 			cloud:   cloudTemplate.GetEnvironment(),
 		},
@@ -98,7 +94,7 @@ func (mt *MergedTemplate) GetInstance() (instance *template.Template) {
 	return mt.instance
 }
 
-func (mt *MergedTemplate) GetEnvironment() (environment *MergedEnvironment[Environment]) {
+func (mt *MergedTemplate) GetEnvironment() (environment *MergedEnvironment[EnvironmentI]) {
 	return mt.environment
 }
 

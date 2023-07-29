@@ -13,7 +13,7 @@ import (
 type Template struct {
 	instance      *template.Template
 	parentDirName string
-	environment   *Environment
+	environment   templates.EnvironmentI
 }
 
 func NewTemplate() (newTemplate *Template, err error) {
@@ -66,4 +66,20 @@ func NewTemplate() (newTemplate *Template, err error) {
 
 	return
 
+}
+
+func (t *Template) GetParentDirName() (dir string) {
+	return t.parentDirName
+}
+
+func (t *Template) GetName() (name string) {
+	return t.instance.Name()
+}
+
+func (t *Template) GetInstance() (instance *template.Template) {
+	return t.instance
+}
+
+func (t *Template) GetEnvironment() (environment templates.EnvironmentI) {
+	return t.environment
 }
