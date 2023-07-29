@@ -29,8 +29,7 @@ type Template struct {
 
 func NewTemplate(amiIdToBeUsed string) (newTemplate *Template, err error) {
 	const (
-		NAME       = "AWS_TerraformVars.tmpl"
-		DEFAULT_IP = "0.0.0.0"
+		NAME = "AWS_TerraformVars.tmpl"
 	)
 
 	var (
