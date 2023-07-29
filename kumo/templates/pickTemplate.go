@@ -1,9 +1,10 @@
 package templates
 
 import (
-	"github.com/ed3899/kumo/templates/packer/general"
 	"github.com/ed3899/kumo/common/cloud"
+	"github.com/ed3899/kumo/common/templates"
 	"github.com/ed3899/kumo/common/tool"
+	"github.com/ed3899/kumo/templates/packer/general"
 	"github.com/samber/oops"
 )
 
@@ -12,7 +13,7 @@ func PickTemplate(toolType tool.Type, cloudType cloud.Type) (pickedTemplate *Mer
 		oopsBuilder = oops.
 				Code("create_template_failed")
 
-		generalTemplate, cloudTemplate TemplateSingle
+		generalTemplate, cloudTemplate templates.TemplateSingle
 	)
 
 	// 1. Pick general template
