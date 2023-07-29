@@ -28,45 +28,47 @@ type Environment struct {
 	AWS_EC2_INSTANCE_USERNAME_PASSWORD string
 }
 
-func (pae *Environment) IsEnvironment() (isEnvironment bool) {
+func (e *Environment) IsEnvironment() (isEnvironment bool) {
 	return true
 }
 
 type Template struct {
-	instance    *template.Template
-	parentDirName         string
-	environment *Environment
+	instance      *template.Template
+	parentDirName string
+	environment   *Environment
 }
 
 func NewTemplate() (newTemplate *Template, err error) {
 	const (
-		PACKER_AWS_TEMPLATE_NAME = "AWS_PackerVars.tmpl"
+		NAME = "AWS_PackerVars.tmpl"
 	)
 
 	var (
 		oopsBuilder = oops.
-				Code("new_packer_aws_template_failed")
-		packerAwsTemplateInstance  *template.Template
-		absPathToPackerAwsTemplate string
+				Code("new_template_failed").
+				With("TEMPLATE_NAME", NAME)
+
+		instance *template.Template
+		absPath  string
 	)
 
-	if absPathToPackerAwsTemplate, err = filepath.Abs(filepath.Join(packer.PACKER_TEMPLATES_DIR_NAME, templates.AWS_TEMPLATES_DIR_NAME, PACKER_AWS_TEMPLATE_NAME)); err != nil {
+	if absPath, err = filepath.Abs(filepath.Join(packer.PACKER_TEMPLATES_DIR_NAME, templates.AWS_TEMPLATES_DIR_NAME, NAME)); err != nil {
 		err = oopsBuilder.
 			With("packer.PACKER_TEMPLATES_DIR_NAME", packer.PACKER_TEMPLATES_DIR_NAME).
 			With("templates.AWS_TEMPLATES_DIR_NAME", templates.AWS_TEMPLATES_DIR_NAME).
-			Wrapf(err, "Error occurred while crafting absolute path to %s", PACKER_AWS_TEMPLATE_NAME)
+			Wrapf(err, "Error occurred while crafting absolute path to %s", NAME)
 		return
 	}
 
-	if packerAwsTemplateInstance, err = template.ParseFiles(absPathToPackerAwsTemplate); err != nil {
+	if instance, err = template.ParseFiles(absPath); err != nil {
 		err = oopsBuilder.
-			Wrapf(err, "Error occurred while parsing template %s", absPathToPackerAwsTemplate)
+			Wrapf(err, "Error occurred while parsing template %s", absPath)
 		return
 	}
 
 	newTemplate = &Template{
-		instance: packerAwsTemplateInstance,
-		parentDirName:      packer.PACKER_TEMPLATES_DIR_NAME,
+		instance:      instance,
+		parentDirName: packer.PACKER_TEMPLATES_DIR_NAME,
 		environment: &Environment{
 			AWS_ACCESS_KEY:                     viper.GetString("AWS.AccessKeyId"),
 			AWS_SECRET_KEY:                     viper.GetString("AWS.SecretAccessKey"),
