@@ -1,13 +1,13 @@
 package tool
 
 const (
-	PACKER_RUN_DIR_NAME = "packer"
+	PACKER_RUN_DIR_NAME    = "packer"
 	TERRAFORM_RUN_DIR_NAME = "terraform"
 )
 
-type Tool int
+type Type int
 
 const (
-	Packer Tool = iota
+	Packer Type = iota
 	Terraform
 )

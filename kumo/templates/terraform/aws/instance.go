@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"text/template"
 
-	"github.com/ed3899/kumo/templates"
+	"github.com/ed3899/kumo/common/templates"
 	"github.com/samber/oops"
 	"github.com/spf13/viper"
 )

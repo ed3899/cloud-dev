@@ -46,7 +46,7 @@ func (ts *ToolSetup) GoTargetDir() (err error) {
 	return
 }
 
-func NewToolSetup(tool Tool, cloud CloudSetupI) (toolSetup *ToolSetup, err error) {
+func NewToolSetup(tool Type, cloud CloudSetupI) (toolSetup *ToolSetup, err error) {
 	const (
 		PACKER_RUN_DIR_NAME    = "packer"
 		TERRAFORM_RUN_DIR_NAME = "terraform"

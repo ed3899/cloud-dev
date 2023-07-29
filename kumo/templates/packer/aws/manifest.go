@@ -3,7 +3,7 @@ package aws
 import (
 	"path/filepath"
 
-	"github.com/ed3899/kumo/templates"
+	"github.com/ed3899/kumo/common/templates"
 	"github.com/ed3899/kumo/utils"
 	"github.com/samber/oops"
 )
