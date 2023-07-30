@@ -9,7 +9,7 @@ type ProgressBar interface {
 }
 
 type MultiProgressBar interface {
-	AddBar(total int64, options ...mpb.BarOption) ProgressBar
+	AddBar(total int64, options ...mpb.BarOption) *mpb.Bar
 }
 
 type Removable interface {
