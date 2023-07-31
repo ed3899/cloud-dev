@@ -33,6 +33,7 @@ func Up() (err error) {
 			Wrapf(err, "Error occurred while instantiating Terraform")
 		return
 	}
+
 	// 2. Download and install if needed
 	if terraform.IsNotInstalled() {
 		if err = download.Initiate(terraform.Zip, filepath.Dir(terraform.AbsPathToExecutable)); err != nil {
@@ -41,6 +42,7 @@ func Up() (err error) {
 			return
 		}
 	}
+
 	// 3. Cloud setup
 	uncheckedCloudFromConfig = viper.GetString("Cloud")
 	if cloudSetup, err = cloud.NewCloudSetup(uncheckedCloudFromConfig); err != nil {
@@ -55,6 +57,7 @@ func Up() (err error) {
 		return
 	}
 	defer cloudSetup.Credentials.Unset()
+
 	// 4. Tool setup
 	if toolSetup, err = tool.NewToolSetup(tool.Terraform, cloudSetup); err != nil {
 		err = oopsBuilder.
@@ -63,6 +66,7 @@ func Up() (err error) {
 			Wrapf(err, "Error occurred while instantiating ToolSetup for terraform")
 		return
 	}
+
 	// 5. Pick template
 	if pickedTemplate, err = templates.PickTemplate(toolSetup, cloudSetup); err != nil {
 		err = oopsBuilder.
@@ -71,6 +75,7 @@ func Up() (err error) {
 			Wrapf(err, "Error occurred while picking template")
 		return
 	}
+
 	// 6. Pick hashicorp vars
 	if pickedHashicorpVars, err = hashicorp_vars.PickHashicorpVars(toolSetup, cloudSetup); err != nil {
 		err = oopsBuilder.
@@ -79,6 +84,7 @@ func Up() (err error) {
 			Wrapf(err, "Error occurred while picking hashicorp vars")
 		return
 	}
+
 	// 7. Execute template on hashicorp vars
 	if err = pickedTemplate.ExecuteOn(pickedHashicorpVars); err != nil {
 		err = oopsBuilder.
@@ -87,6 +93,7 @@ func Up() (err error) {
 			Wrapf(err, "Error occurred while executing template on hashicorp vars")
 		return
 	}
+
 	// 8. Change to the right directory and defer changing back
 	if err = toolSetup.GoTargetDir(); err != nil {
 		err = oopsBuilder.
@@ -103,17 +110,20 @@ func Up() (err error) {
 			)
 		}
 	}()
+
 	// 9. Initialize
 	if err = terraform.Init(); err != nil {
 		err = oopsBuilder.
 			Wrapf(err, "Error occurred while initializing terraform")
 		return
 	}
+
 	// 10. Apply deploy
 	if err = terraform.Up(); err != nil {
 		err = oopsBuilder.
 			Wrapf(err, "Error occurred while deploying terraform resources")
 		return
 	}
+	
 	return
 }
