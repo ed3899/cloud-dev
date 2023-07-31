@@ -4,12 +4,9 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/ed3899/kumo/common/cloud"
 	"github.com/samber/oops"
 )
-
-type CloudSetupI interface {
-	GetCloudName() string
-}
 
 type ToolSetup struct {
 	toolType   ToolType
@@ -51,7 +48,7 @@ func (ts *ToolSetup) GoTargetDir() (err error) {
 	return
 }
 
-func NewToolSetup(tool ToolType, cloud CloudSetupI) (toolSetup *ToolSetup, err error) {
+func NewToolSetup(tool ToolType, cloud cloud.CloudSetupI) (toolSetup *ToolSetup, err error) {
 	const (
 		PACKER_RUN_DIR_NAME    = "packer"
 		TERRAFORM_RUN_DIR_NAME = "terraform"

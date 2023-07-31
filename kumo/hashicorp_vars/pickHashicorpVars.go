@@ -9,12 +9,17 @@ import (
 	"github.com/samber/oops"
 )
 
-func PickHashicorpVars(toolType tool.ToolType, cloudType cloud.CloudType) (pickedHashicorpVars hashicorp_vars.HashicorpVarsI, err error) {
+func PickHashicorpVars(toolSetup tool.ToolSetupI, cloudSetup cloud.CloudSetupI) (pickedHashicorpVars hashicorp_vars.HashicorpVarsI, err error) {
 	var (
 		oopsBuilder = oops.
 			Code("pick_hashicorp_vars_failed").
-			With("toolType", toolType).
-			With("cloudType", cloudType)
+			With("toolType", toolSetup).
+			With("cloudType", cloudSetup)
+	)
+
+	var (
+		toolType  = toolSetup.GetToolType()
+		cloudType = cloudSetup.GetCloudType()
 	)
 
 	switch toolType {
@@ -30,7 +35,7 @@ func PickHashicorpVars(toolType tool.ToolType, cloudType cloud.CloudType) (picke
 
 		default:
 			err = oopsBuilder.
-				Errorf("Cloud '%v' not supported", cloudType)
+				Errorf("Cloud '%v' not supported", cloudSetup)
 			return
 		}
 
@@ -46,13 +51,13 @@ func PickHashicorpVars(toolType tool.ToolType, cloudType cloud.CloudType) (picke
 
 		default:
 			err = oopsBuilder.
-				Errorf("Cloud '%v' not supported", cloudType)
+				Errorf("Cloud '%v' not supported", cloudSetup)
 			return
 		}
 
 	default:
 		err = oopsBuilder.
-			Errorf("Tool '%v' not supported", toolType)
+			Errorf("Tool '%v' not supported", toolSetup)
 		return
 	}
 

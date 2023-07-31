@@ -48,6 +48,14 @@ func Build() (err error) {
 			Wrapf(err, "Error occurred while instantiating CloudSetup for %s", uncheckedCloudFromConfig)
 		return
 	}
+
+	if err = cloudSetup.Credentials.Set(); err != nil {
+		err = oopsBuilder.
+			Wrapf(err, "Error occurred while setting credentials for %s", cloudSetup.GetCloudName())
+		return
+	}
+	defer cloudSetup.Credentials.Unset()
+
 	// 4. ToolSetup
 	if toolSetup, err = tool.NewToolSetup(tool.Packer, cloudSetup); err != nil {
 		err = oopsBuilder.
@@ -65,7 +73,7 @@ func Build() (err error) {
 		return
 	}
 	// 6. Create hashicorp vars
-	if pickedHashicorpVars, err = hashicorp_vars.PickHashicorpVars(toolSetup.GetToolType(), cloudSetup.GetCloudType()); err != nil {
+	if pickedHashicorpVars, err = hashicorp_vars.PickHashicorpVars(toolSetup, cloudSetup); err != nil {
 		err = oopsBuilder.
 			With("toolSetup.GetToolType()", toolSetup.GetToolType()).
 			With("cloudSetup.GetCloudType()", cloudSetup.GetCloudType()).
