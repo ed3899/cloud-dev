@@ -1,18 +1,5 @@
 package binaries
 
-type ToolId int
-
-const (
-	PackerID ToolId = iota
-	TerraformID
-)
-
-type Cloud int
-
-const (
-	AWS Cloud = iota
-)
-
 const (
 	DEPENDENCIES_DIR_NAME = "deps"
 	TEMPLATE_DIR_NAME     = "templates"

@@ -3,7 +3,7 @@ package cloud
 type CloudType int
 
 const (
-	AWS_CLOUD_NAME = "aws"
+	AWS_NAME = "aws"
 )
 
 const (

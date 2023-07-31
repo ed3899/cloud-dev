@@ -4,8 +4,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/ed3899/kumo/common/dirs"
+	"github.com/ed3899/kumo/common/cloud"
 	"github.com/ed3899/kumo/common/hashicorp_vars"
+	"github.com/ed3899/kumo/common/tool"
 	"github.com/samber/oops"
 )
 
@@ -17,23 +18,26 @@ func NewHashicorpVars() (hashicorpVars *HashicorpVars, err error) {
 	var (
 		oopsBuilder = oops.
 				Code("new_hashicorp_vars_failed")
+		packerDirName = tool.PACKER_NAME
+		cloudDirName  = cloud.AWS_NAME
+		varsFileName  = hashicorp_vars.PACKER_VARS_NAME
 
 		varsFile          *os.File
 		absPathToVarsFile string
 	)
 
-	if absPathToVarsFile, err = filepath.Abs(filepath.Join(dirs.PACKER_DIR_NAME, dirs.AWS_DIR_NAME, hashicorp_vars.PACKER_VARS_NAME)); err != nil {
+	if absPathToVarsFile, err = filepath.Abs(filepath.Join(packerDirName, cloudDirName, varsFileName)); err != nil {
 		err = oopsBuilder.
-			With("dirs.PACKER_DIR_NAME", dirs.PACKER_DIR_NAME).
-			With("dirs.AWS_DIR_NAME", dirs.AWS_DIR_NAME).
-			Wrapf(err, "Error occurred while crafting absolute path to %s", hashicorp_vars.PACKER_VARS_NAME)
+			With("packerDirName", packerDirName).
+			With("cloudDirName", cloudDirName).
+			Wrapf(err, "Error occurred while crafting absolute path to %s", varsFileName)
 		return
 	}
 
 	if varsFile, err = os.Create(absPathToVarsFile); err != nil {
 		err = oopsBuilder.
 			With("absPathToVarsFile", absPathToVarsFile).
-			Wrapf(err, "Error occurred while creating %s", hashicorp_vars.PACKER_VARS_NAME)
+			Wrapf(err, "Error occurred while creating %s", varsFileName)
 		return
 	}
 
