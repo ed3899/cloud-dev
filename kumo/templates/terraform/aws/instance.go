@@ -4,8 +4,9 @@ import (
 	"path/filepath"
 	"text/template"
 
-	"github.com/ed3899/kumo/common/dirs"
+	"github.com/ed3899/kumo/common/cloud"
 	"github.com/ed3899/kumo/common/templates"
+	"github.com/ed3899/kumo/common/tool"
 	"github.com/samber/oops"
 	"github.com/spf13/viper"
 )
@@ -17,23 +18,22 @@ type Template struct {
 }
 
 func NewTemplate(packerManifest templates.PackerManifestI) (newTemplate *Template, err error) {
-	const (
-		NAME = "AWS_TerraformVars.tmpl"
-	)
-
 	var (
 		oopsBuilder = oops.
 				Code("new_template_failed")
+		terraformDirName         = tool.TERRAFORM_NAME
+		awsDirName               = cloud.AWS_NAME
+		terraformAwsTemplateName = templates.TERRAFORM_AWS_TEMPLATE_NAME
 
 		absPath  string
 		instance *template.Template
 	)
 
-	if absPath, err = filepath.Abs(filepath.Join(dirs.TERRAFORM_DIR_NAME, dirs.AWS_DIR_NAME, NAME)); err != nil {
+	if absPath, err = filepath.Abs(filepath.Join(terraformDirName, awsDirName, terraformAwsTemplateName)); err != nil {
 		err = oopsBuilder.
-			With("dirs.PACKER_DIR_NAME", dirs.PACKER_DIR_NAME).
-			With("dirs.AWS_DIR_NAME", dirs.AWS_DIR_NAME).
-			Wrapf(err, "Error occurred while crafting absolute path to %s", NAME)
+			With("terraformDirName", terraformDirName).
+			With("awsDirName", awsDirName).
+			Wrapf(err, "Error occurred while crafting absolute path to %s", terraformAwsTemplateName)
 		return
 	}
 
@@ -45,7 +45,7 @@ func NewTemplate(packerManifest templates.PackerManifestI) (newTemplate *Templat
 
 	newTemplate = &Template{
 		instance:      instance,
-		parentDirName: dirs.TERRAFORM_DIR_NAME,
+		parentDirName: terraformDirName,
 		environment: &Environment{
 			AWS_REGION:                   viper.GetString("AWS.Region"),
 			AWS_INSTANCE_TYPE:            viper.GetString("AWS.EC2.Instance.Type"),

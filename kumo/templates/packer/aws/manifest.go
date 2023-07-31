@@ -3,8 +3,8 @@ package aws
 import (
 	"path/filepath"
 
-	"github.com/ed3899/kumo/common/dirs"
-	"github.com/ed3899/kumo/common/packer_manifest"
+	"github.com/ed3899/kumo/common/cloud"
+	"github.com/ed3899/kumo/common/tool"
 	"github.com/ed3899/kumo/utils"
 	"github.com/samber/oops"
 )
@@ -21,16 +21,19 @@ func NewManifest() (manifest *Manifest, err error) {
 	var (
 		oopsBuilder = oops.
 				Code("new_manifest_failed")
+		packerDirName      = tool.PACKER_NAME
+		awsDirName         = cloud.AWS_NAME
+		packerManifestName = tool.PACKER_MANIFEST_NAME
 
 		absPath        string
 		lastBuiltAmiId string
 	)
 
-	if absPath, err = filepath.Abs(filepath.Join(dirs.PACKER_DIR_NAME, dirs.AWS_DIR_NAME, packer_manifest.NAME)); err != nil {
+	if absPath, err = filepath.Abs(filepath.Join(packerDirName, awsDirName, packerManifestName)); err != nil {
 		err = oopsBuilder.
-			With("dirs.PACKER_DIR_NAME", dirs.PACKER_DIR_NAME).
-			With("dirs.AWS_DIR_NAME", dirs.AWS_DIR_NAME).
-			Wrapf(err, "Error occurred while crafting absolute path to %s", packer_manifest.NAME)
+			With("packerDirName", packerDirName).
+			With("awsDirName", awsDirName).
+			Wrapf(err, "Error occurred while crafting absolute path to %s", packerManifestName)
 		return
 	}
 

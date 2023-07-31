@@ -4,8 +4,9 @@ import (
 	"path/filepath"
 	"text/template"
 
-	"github.com/ed3899/kumo/common/dirs"
+	"github.com/ed3899/kumo/common/cloud"
 	"github.com/ed3899/kumo/common/templates"
+	"github.com/ed3899/kumo/common/tool"
 	"github.com/samber/oops"
 	"github.com/spf13/viper"
 )
@@ -17,24 +18,23 @@ type Template struct {
 }
 
 func NewTemplate() (newTemplate *Template, err error) {
-	const (
-		NAME = "AWS_PackerVars.tmpl"
-	)
-
 	var (
 		oopsBuilder = oops.
 				Code("new_template_failed").
-				With("TEMPLATE_NAME", NAME)
+				With("templates.PACKER_AWS_TEMPLATE_NAME", templates.PACKER_AWS_TEMPLATE_NAME)
+		packerDirName         = tool.PACKER_NAME
+		awsDirName            = cloud.AWS_NAME
+		packerAwsTemplateName = templates.PACKER_AWS_TEMPLATE_NAME
 
 		instance *template.Template
 		absPath  string
 	)
 
-	if absPath, err = filepath.Abs(filepath.Join(dirs.PACKER_DIR_NAME, dirs.AWS_DIR_NAME, NAME)); err != nil {
+	if absPath, err = filepath.Abs(filepath.Join(packerDirName, awsDirName, packerAwsTemplateName)); err != nil {
 		err = oopsBuilder.
-			With("dirs.PACKER_DIR_NAME", dirs.PACKER_DIR_NAME).
-			With("dirs.AWS_DIR_NAME, NAME", dirs.AWS_DIR_NAME, NAME).
-			Wrapf(err, "Error occurred while crafting absolute path to %s", NAME)
+			With("packerDirName", packerDirName).
+			With("awsDirName", awsDirName).
+			Wrapf(err, "Error occurred while crafting absolute path to %s", packerAwsTemplateName)
 		return
 	}
 
@@ -46,7 +46,7 @@ func NewTemplate() (newTemplate *Template, err error) {
 
 	newTemplate = &Template{
 		instance:      instance,
-		parentDirName: dirs.PACKER_DIR_NAME,
+		parentDirName: packerDirName,
 		environment: &Environment{
 			AWS_ACCESS_KEY:                     viper.GetString("AWS.AccessKeyId"),
 			AWS_SECRET_KEY:                     viper.GetString("AWS.SecretAccessKey"),
