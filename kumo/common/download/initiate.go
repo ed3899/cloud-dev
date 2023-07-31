@@ -8,12 +8,12 @@ import (
 	"github.com/vbauerster/mpb/v8"
 )
 
-func DownloadAndExtract(z ZipI, extractToAbsPathDir string) (err error) {
+func Initiate(z ZipI, extractToAbsPathDir string) (err error) {
 	var (
 		absPathToZipDir = filepath.Dir(z.GetPath())
 		progress        = mpb.New(mpb.WithWidth(64), mpb.WithAutoRefresh())
 		oopsBuilder     = oops.
-				Code("download_and_extract_failed").
+				Code("initiate_failed").
 				With("extractToAbsPathDir", extractToAbsPathDir).
 				With("z.GetName()", z.GetName()).
 				With("z.GetPath()", z.GetPath())
