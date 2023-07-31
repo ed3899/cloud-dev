@@ -5,6 +5,7 @@ import (
 	"text/template"
 
 	"github.com/ed3899/kumo/common/cloud"
+	"github.com/ed3899/kumo/common/dirs"
 	"github.com/ed3899/kumo/common/templates"
 	"github.com/ed3899/kumo/common/tool"
 	"github.com/samber/oops"
@@ -22,6 +23,7 @@ func NewTemplate() (newTemplate *Template, err error) {
 		oopsBuilder = oops.
 				Code("new_template_failed").
 				With("templates.PACKER_AWS_TEMPLATE_NAME", templates.PACKER_AWS_TEMPLATE_NAME)
+		templatesDirName      = dirs.TEMPLATES_DIR_NAME
 		packerDirName         = tool.PACKER_NAME
 		awsDirName            = cloud.AWS_NAME
 		packerAwsTemplateName = templates.PACKER_AWS_TEMPLATE_NAME
@@ -30,8 +32,9 @@ func NewTemplate() (newTemplate *Template, err error) {
 		absPath  string
 	)
 
-	if absPath, err = filepath.Abs(filepath.Join(packerDirName, awsDirName, packerAwsTemplateName)); err != nil {
+	if absPath, err = filepath.Abs(filepath.Join(templatesDirName, packerDirName, awsDirName, packerAwsTemplateName)); err != nil {
 		err = oopsBuilder.
+			With("templatesDirName", templatesDirName).
 			With("packerDirName", packerDirName).
 			With("awsDirName", awsDirName).
 			Wrapf(err, "Error occurred while crafting absolute path to %s", packerAwsTemplateName)

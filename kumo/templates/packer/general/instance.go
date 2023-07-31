@@ -32,6 +32,7 @@ func NewTemplate() (newTemplate *Template, err error) {
 
 	if absPathToPackerGeneralTemplate, err = filepath.Abs(filepath.Join(templatesDirName, packerDirName, generalDirName, packerGeneralTemplateName)); err != nil {
 		err = oopsBuilder.
+			With("templatesDirName", templatesDirName).
 			With("packerDirName", packerDirName).
 			With("generalDirName", generalDirName).
 			Wrapf(err, "Error occurred while crafting absolute path to %s", packerGeneralTemplateName)
