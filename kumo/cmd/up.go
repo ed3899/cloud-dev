@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func GetUpCommand() *cobra.Command {
+func UpCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:   "up",
 		Short: "Deploy your AMI to the cloud",

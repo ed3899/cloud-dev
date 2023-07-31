@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func GetDestroyCommand() *cobra.Command {
+func DestroyCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:   "destroy",
 		Short: "Destroy your cloud environment",

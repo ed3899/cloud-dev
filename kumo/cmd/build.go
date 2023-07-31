@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func GetBuildCommand() *cobra.Command {
+func BuildCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:   "build",
 		Short: "Build an AMI with ready to use tools",
