@@ -6,6 +6,7 @@ import (
 
 	"github.com/ed3899/kumo/common/dirs"
 	"github.com/ed3899/kumo/common/templates"
+	"github.com/ed3899/kumo/common/tool"
 	"github.com/ed3899/kumo/utils"
 	"github.com/samber/oops"
 	"go.uber.org/zap"
@@ -18,15 +19,14 @@ type Template struct {
 }
 
 func NewTemplate() (newTemplate *Template, err error) {
-	const (
-		NAME       = "GeneralTerraformTfVars.tmpl"
-		DEFAULT_IP = "0.0.0.0"
-	)
-
 	var (
 		oopsBuilder = oops.
 				Code("new_template_failed")
-		logger, _ = zap.NewProduction()
+		logger, _                    = zap.NewProduction()
+		terraformDirName             = tool.TERRAFORM_NAME
+		generalDirName               = dirs.GENERAL_DIR_NAME
+		terraformGeneralTemplateName = templates.TERRAFORM_GENERAL_TEMPLATE_NAME
+		terraformDefaultAllowedIp           = tool.TERRAFORM_DEFAULT_ALLOWED_IP
 
 		absPath  string
 		instance *template.Template
@@ -36,11 +36,11 @@ func NewTemplate() (newTemplate *Template, err error) {
 
 	defer logger.Sync()
 
-	if absPath, err = filepath.Abs(filepath.Join(dirs.TERRAFORM_DIR_NAME, dirs.GENERAL_DIR_NAME, NAME)); err != nil {
+	if absPath, err = filepath.Abs(filepath.Join(terraformDirName, generalDirName, terraformGeneralTemplateName)); err != nil {
 		err = oopsBuilder.
-			With("dirs.TERRAFORM_DIR_NAME", dirs.TERRAFORM_DIR_NAME).
-			With("dirs.GENERAL_DIR_NAME", dirs.GENERAL_DIR_NAME).
-			Wrapf(err, "Error occurred while crafting absolute path to %s", NAME)
+			With("terraformDirName", terraformDirName).
+			With("generalDirName", generalDirName).
+			Wrapf(err, "Error occurred while crafting absolute path to %s", terraformGeneralTemplateName)
 		return
 	}
 
@@ -51,15 +51,15 @@ func NewTemplate() (newTemplate *Template, err error) {
 	}
 
 	if publicIp, err = utils.GetPublicIp(); err != nil {
-		logger.Sugar().Warnf("Failed to get public IP address. Defaulting to %s", DEFAULT_IP)
-		pickedIp = DEFAULT_IP
+		logger.Sugar().Warnf("Failed to get public IP address. Defaulting to %s", terraformDefaultAllowedIp)
+		pickedIp = terraformDefaultAllowedIp
 	} else {
 		pickedIp = publicIp
 	}
 
 	newTemplate = &Template{
 		instance:      instance,
-		parentDirName: dirs.TERRAFORM_DIR_NAME,
+		parentDirName: terraformDirName,
 		environment: &Environment{
 			ALLOWED_IP: utils.MaskIp(pickedIp, 32),
 		},
