@@ -12,12 +12,9 @@ import (
 func PickHashicorpVars(toolSetup tool.ToolSetupI, cloudSetup cloud.CloudSetupI) (pickedHashicorpVars hashicorp_vars.HashicorpVarsI, err error) {
 	var (
 		oopsBuilder = oops.
-			Code("pick_hashicorp_vars_failed").
-			With("toolType", toolSetup).
-			With("cloudType", cloudSetup)
-	)
-
-	var (
+				Code("pick_hashicorp_vars_failed").
+				With("toolType", toolSetup).
+				With("cloudType", cloudSetup)
 		toolType  = toolSetup.GetToolType()
 		cloudType = cloudSetup.GetCloudType()
 	)

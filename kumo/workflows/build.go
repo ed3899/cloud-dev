@@ -1,6 +1,7 @@
 package workflows
 
 import (
+	"log"
 	"path/filepath"
 
 	"github.com/ed3899/kumo/binaries/instances"
@@ -60,12 +61,12 @@ func Build() (err error) {
 	if toolSetup, err = tool.NewToolSetup(tool.Packer, cloudSetup); err != nil {
 		err = oopsBuilder.
 			With("tool.Packer", tool.Packer).
-			With("cloudSetup", cloudSetup.GetCloudName()).
+			With("cloudSetup.GetCloudName()", cloudSetup.GetCloudName()).
 			Wrapf(err, "Error occurred while instantiating ToolSetup for packer")
 		return
 	}
 	// 5. Create template
-	if pickedTemplate, err = templates.PickTemplate(toolSetup.GetToolType(), cloudSetup.GetCloudType()); err != nil {
+	if pickedTemplate, err = templates.PickTemplate(toolSetup, cloudSetup); err != nil {
 		err = oopsBuilder.
 			With("toolSetup.GetToolType()", toolSetup.GetToolType()).
 			With("cloudSetup.GetCloudType()", cloudSetup.GetCloudType()).
@@ -81,15 +82,29 @@ func Build() (err error) {
 		return
 	}
 	// 7. Execute template on hashicorp vars
-	if pickedTemplate.Execute(pickedHashicorpVars); err != nil {
+	if pickedTemplate.ExecuteOn(pickedHashicorpVars); err != nil {
 		err = oopsBuilder.
-			With("pickedTemplate", pickedTemplate).
-			With("pickedHashicorpVars", pickedHashicorpVars).
+			With("pickedTemplate.GetName()", pickedTemplate.GetName()).
+			With("pickedHashicorpVars.GetFile().Name()", pickedHashicorpVars.GetFile().Name()).
 			Wrapf(err, "Error occurred while executing template on hashicorp vars")
 		return
 	}
 	// 8. Change to right directory and defer change back
-
+	if err = toolSetup.GoTargetDir(); err != nil {
+		err = oopsBuilder.
+			With("toolSetup.GetToolType()", toolSetup.GetToolType()).
+			Wrapf(err, "Error occurred while changing to target directory")
+	}
+	defer func ()  {
+		if err := toolSetup.GoInitialDir(); err != nil {
+			log.Fatalf(
+				"%+v",
+				oopsBuilder.
+					With("toolSetup.GetToolType()", toolSetup.GetToolType()).
+					Wrapf(err, "Error occurred while changing back to initial directory"),
+			)
+		}
+	}()
 	// 9. Set plugin path
 
 	// 10. Initialize

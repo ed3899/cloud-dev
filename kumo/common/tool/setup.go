@@ -11,7 +11,7 @@ import (
 type ToolSetup struct {
 	toolType   ToolType
 	initialDir string
-	targetDir  string
+	toolDir  string
 }
 
 func (ts *ToolSetup) GetToolType() (toolType ToolType) {
@@ -39,9 +39,9 @@ func (ts *ToolSetup) GoTargetDir() (err error) {
 			Code("go_target_dir_failed")
 	)
 
-	if err = os.Chdir(ts.targetDir); err != nil {
+	if err = os.Chdir(ts.toolDir); err != nil {
 		err = oopsBuilder.
-			Wrapf(err, "Error occurred while changing directory to %s", ts.targetDir)
+			Wrapf(err, "Error occurred while changing directory to %s", ts.toolDir)
 		return
 	}
 
@@ -72,14 +72,14 @@ func NewToolSetup(tool ToolType, cloud cloud.CloudSetupI) (toolSetup *ToolSetup,
 		toolSetup = &ToolSetup{
 			toolType:   Packer,
 			initialDir: cwd,
-			targetDir:  filepath.Join(PACKER_RUN_DIR_NAME, cloud.GetCloudName()),
+			toolDir:  filepath.Join(PACKER_RUN_DIR_NAME, cloud.GetCloudName()),
 		}
 
 	case Terraform:
 		toolSetup = &ToolSetup{
 			toolType:   Terraform,
 			initialDir: cwd,
-			targetDir:  filepath.Join(TERRAFORM_RUN_DIR_NAME, cloud.GetCloudName()),
+			toolDir:  filepath.Join(TERRAFORM_RUN_DIR_NAME, cloud.GetCloudName()),
 		}
 
 	default:

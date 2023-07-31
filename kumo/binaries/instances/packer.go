@@ -95,12 +95,13 @@ func (p *Packer) IsNotInstalled() (isNotInstalled bool) {
 	return utils.FileNotPresent(p.AbsPathToExecutable)
 }
 
-func (p *Packer) SetPluginPath(cloudType cloud.CloudType) (err error) {
+func (p *Packer) SetPluginPath(cloudSetup cloud.CloudSetupI) (err error) {
 	var (
 		oopsBuilder = oops.
 				Code("packer_set_plugin_path_failed").
-				With("cloud", cloudType)
+				With("cloudSetup.GetCloudName()", cloudSetup.GetCloudName())
 
+		cloudType     = cloudSetup.GetCloudType()
 		absPluginPath string
 	)
 
@@ -117,31 +118,22 @@ func (p *Packer) SetPluginPath(cloudType cloud.CloudType) (err error) {
 
 	default:
 		err = oopsBuilder.
-			Errorf("Cloud '%v' not supported", cloudType)
+			Errorf("Cloud '%v' not supported", cloudSetup.GetCloudName())
 		return
 	}
 
 	return
 }
 
-func (p *Packer) UnsetPluginPath(cloudType cloud.CloudType) (err error) {
+func (p *Packer) UnsetPluginPath() (err error) {
 	var (
 		oopsBuilder = oops.
-			Code("packer_unset_plugin_path_failed").
-			With("cloud", cloudType)
+			Code("packer_unset_plugin_path_failed")
 	)
 
-	switch cloudType {
-	case cloud.AWS:
-		if err = os.Unsetenv(PACKER_PLUGIN_PATH); err != nil {
-			err = oopsBuilder.
-				Wrapf(err, "Error occurred while unsetting %s environment variable", PACKER_PLUGIN_PATH)
-			return
-		}
-
-	default:
+	if err = os.Unsetenv(PACKER_PLUGIN_PATH); err != nil {
 		err = oopsBuilder.
-			Errorf("Cloud '%v' not supported", cloudType)
+			Wrapf(err, "Error occurred while unsetting %s environment variable", PACKER_PLUGIN_PATH)
 		return
 	}
 

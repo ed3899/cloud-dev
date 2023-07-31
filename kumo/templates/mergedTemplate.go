@@ -114,7 +114,7 @@ func (mt *MergedTemplate) Remove() (err error) {
 	return
 }
 
-func (mt *MergedTemplate) Execute(hashicorpVars hashicorp_vars.HashicorpVarsI) (err error) {
+func (mt *MergedTemplate) ExecuteOn(hashicorpVars hashicorp_vars.HashicorpVarsI) (err error) {
 	var (
 		oopsBuilder = oops.
 			Code("merged_template_execute_failed").
