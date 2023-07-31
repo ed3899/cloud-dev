@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"text/template"
 
+	"github.com/ed3899/kumo/common/dirs"
 	"github.com/ed3899/kumo/common/hashicorp_vars"
 	"github.com/ed3899/kumo/common/templates"
 	"github.com/ed3899/kumo/common/utils"
@@ -23,20 +24,16 @@ type MergedTemplate struct {
 }
 
 func NewMergedTemplate(generalTemplate, cloudTemplate templates.TemplateSingle) (packerMergedTemplate *MergedTemplate, err error) {
-	const (
-		TEMPLATE_DIR_NAME    = "templates"
-		MERGED_TEMPLATE_NAME = "temp_merged_template"
-	)
-
 	var (
 		oopsBuilder = oops.
 				Code("new_packer_merged_template_failed").
 				With("generalTemplate", generalTemplate.GetAbsPath()).
 				With("cloudTemplate", cloudTemplate.GetAbsPath())
 
-		mergedTemplateInstance            *template.Template
-		absPathToTemplatesDir             string
-		absPathToTempPackerMergedTemplate string
+		mergedTemplateInstance     *template.Template
+		absPathToTemplatesDir      string
+		absPathToMergedTemplateDir string
+		mergedTemplateName         string
 	)
 
 	if generalTemplate.GetParentDirName() != cloudTemplate.GetParentDirName() {
@@ -53,33 +50,33 @@ func NewMergedTemplate(generalTemplate, cloudTemplate templates.TemplateSingle) 
 		return
 	}
 
-	if absPathToTemplatesDir, err = filepath.Abs(TEMPLATE_DIR_NAME); err != nil {
+	if absPathToTemplatesDir, err = filepath.Abs(dirs.TEMPLATES_DIR_NAME); err != nil {
 		err = oopsBuilder.
-			Wrapf(err, "Error occurred while crafting absolute path to %s", TEMPLATE_DIR_NAME)
+			Wrapf(err, "Error occurred while crafting absolute path to %s", dirs.TEMPLATES_DIR_NAME)
 		return
 	}
 
-	absPathToTempPackerMergedTemplate = filepath.Join(absPathToTemplatesDir, generalTemplate.GetParentDirName(), MERGED_TEMPLATE_NAME)
+	absPathToMergedTemplateDir = filepath.Join(absPathToTemplatesDir, generalTemplate.GetParentDirName())
 
-	if err = utils.MergeFilesTo(
-		absPathToTempPackerMergedTemplate,
+	if mergedTemplateName, err = utils.MergeFilesTo(
+		absPathToMergedTemplateDir,
 		generalTemplate.GetAbsPath(),
 		cloudTemplate.GetAbsPath(),
 	); err != nil {
 		err = oopsBuilder.
-			Wrapf(err, "Error occurred while merging %s and %s to %s", generalTemplate.GetAbsPath(), cloudTemplate.GetAbsPath(), absPathToTempPackerMergedTemplate)
+			Wrapf(err, "Error occurred while merging %s and %s to %s", generalTemplate.GetAbsPath(), cloudTemplate.GetAbsPath(), absPathToMergedTemplateDir)
 		return
 	}
 
-	if mergedTemplateInstance, err = template.ParseFiles(absPathToTempPackerMergedTemplate); err != nil {
+	if mergedTemplateInstance, err = template.ParseFiles(mergedTemplateName); err != nil {
 		err = oopsBuilder.
-			Wrapf(err, "Error occurred while parsing template %s", absPathToTempPackerMergedTemplate)
+			Wrapf(err, "Error occurred while parsing template %s", mergedTemplateName)
 		return
 	}
 
 	packerMergedTemplate = &MergedTemplate{
 		instance: mergedTemplateInstance,
-		absPath:  absPathToTempPackerMergedTemplate,
+		absPath:  mergedTemplateName,
 		environment: &MergedEnvironment[templates.EnvironmentI]{
 			general: generalTemplate.GetEnvironment(),
 			cloud:   cloudTemplate.GetEnvironment(),
