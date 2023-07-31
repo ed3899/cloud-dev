@@ -12,8 +12,8 @@ type Credentials interface {
 }
 
 type CloudSetup struct {
-	cloudName string
-
+	cloudName   string
+	cloudType   CloudType
 	Credentials Credentials
 }
 
@@ -21,34 +21,32 @@ func (cs *CloudSetup) GetCloudName() (cloudName string) {
 	return cs.cloudName
 }
 
+func (cs *CloudSetup) GetCloudType() (cloudType CloudType) {
+	return cs.cloudType
+}
+
 func NewCloudSetup(cloud string) (cloudSetup *CloudSetup, err error) {
 	var (
 		oopsBuilder = oops.
-				Code("new_cloud_deployment_failed").
-				With("cloud", cloud)
-
-		cloudName   string
-		credentials Credentials
+			Code("new_cloud_deployment_failed").
+			With("cloud", cloud)
 	)
 
 	switch cloud {
 	case "aws":
-		cloudName = "aws"
-		credentials = &aws.Credentials{
-			AccessKeyId:     viper.GetString("AWS.AccessKeyId"),
-			SecretAccessKey: viper.GetString("AWS.SecretAccessKey"),
+		cloudSetup = &CloudSetup{
+			cloudName: "aws",
+			cloudType: AWS,
+			Credentials: &aws.Credentials{
+				AccessKeyId:     viper.GetString("AWS.AccessKeyId"),
+				SecretAccessKey: viper.GetString("AWS.SecretAccessKey"),
+			},
 		}
 
 	default:
 		err = oopsBuilder.
 			Errorf("Cloud '%v' not supported", cloud)
 		return
-	}
-
-	cloudSetup = &CloudSetup{
-		cloudName: cloudName,
-
-		Credentials: credentials,
 	}
 
 	return

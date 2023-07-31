@@ -5,9 +5,9 @@ const (
 	TERRAFORM_RUN_DIR_NAME = "terraform"
 )
 
-type Type int
+type ToolType int
 
 const (
-	Packer Type = iota
+	Packer ToolType = iota
 	Terraform
 )

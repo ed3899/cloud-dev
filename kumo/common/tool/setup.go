@@ -12,8 +12,13 @@ type CloudSetupI interface {
 }
 
 type ToolSetup struct {
+	toolType   ToolType
 	initialDir string
 	targetDir  string
+}
+
+func (ts *ToolSetup) GetToolType() (toolType ToolType) {
+	return ts.toolType
 }
 
 func (ts *ToolSetup) GoInitialDir() (err error) {
@@ -46,7 +51,7 @@ func (ts *ToolSetup) GoTargetDir() (err error) {
 	return
 }
 
-func NewToolSetup(tool Type, cloud CloudSetupI) (toolSetup *ToolSetup, err error) {
+func NewToolSetup(tool ToolType, cloud CloudSetupI) (toolSetup *ToolSetup, err error) {
 	const (
 		PACKER_RUN_DIR_NAME    = "packer"
 		TERRAFORM_RUN_DIR_NAME = "terraform"
@@ -56,7 +61,6 @@ func NewToolSetup(tool Type, cloud CloudSetupI) (toolSetup *ToolSetup, err error
 		oopsBuilder = oops.
 				Code("new_tool_setup_failed").
 				With("tool", tool)
-
 		cwd string
 	)
 
@@ -69,12 +73,14 @@ func NewToolSetup(tool Type, cloud CloudSetupI) (toolSetup *ToolSetup, err error
 	switch tool {
 	case Packer:
 		toolSetup = &ToolSetup{
+			toolType:   Packer,
 			initialDir: cwd,
 			targetDir:  filepath.Join(PACKER_RUN_DIR_NAME, cloud.GetCloudName()),
 		}
 
 	case Terraform:
 		toolSetup = &ToolSetup{
+			toolType:   Terraform,
 			initialDir: cwd,
 			targetDir:  filepath.Join(TERRAFORM_RUN_DIR_NAME, cloud.GetCloudName()),
 		}

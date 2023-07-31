@@ -11,7 +11,7 @@ import (
 	"github.com/samber/oops"
 )
 
-func PickTemplate(toolType tool.Type, cloudType cloud.Type) (pickedTemplate *MergedTemplate, err error) {
+func PickTemplate(toolType tool.ToolType, cloudType cloud.CloudType) (pickedTemplate *MergedTemplate, err error) {
 	const (
 		PACKER    = "packer"
 		TERRAFORM = "terraform"
@@ -46,7 +46,7 @@ func PickTemplate(toolType tool.Type, cloudType cloud.Type) (pickedTemplate *Mer
 					Wrapf(err, "Error occurred while picking template for tool %s and cloud %s", PACKER, AWS)
 				return
 			}
-			
+
 		default:
 			err = oopsBuilder.
 				With("tool", tool.Packer).

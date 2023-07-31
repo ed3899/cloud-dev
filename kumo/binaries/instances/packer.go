@@ -95,7 +95,7 @@ func (p *Packer) IsNotInstalled() (isNotInstalled bool) {
 	return utils.FileNotPresent(p.AbsPathToExecutable)
 }
 
-func (p *Packer) SetPluginPath(cloudType cloud.Type) (err error) {
+func (p *Packer) SetPluginPath(cloudType cloud.CloudType) (err error) {
 	var (
 		oopsBuilder = oops.
 				Code("packer_set_plugin_path_failed").
@@ -124,7 +124,7 @@ func (p *Packer) SetPluginPath(cloudType cloud.Type) (err error) {
 	return
 }
 
-func (p *Packer) UnsetPluginPath(cloudType cloud.Type) (err error) {
+func (p *Packer) UnsetPluginPath(cloudType cloud.CloudType) (err error) {
 	var (
 		oopsBuilder = oops.
 			Code("packer_unset_plugin_path_failed").

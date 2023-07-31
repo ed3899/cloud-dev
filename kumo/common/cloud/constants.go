@@ -1,7 +1,7 @@
 package cloud
 
-type Type int
+type CloudType int
 
 const (
-	AWS Type = iota
+	AWS CloudType = iota
 )
