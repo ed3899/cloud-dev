@@ -4,13 +4,14 @@ import (
 	"log"
 
 	"github.com/ed3899/kumo/cmd"
-	"github.com/ed3899/kumo/utils"
+	"github.com/ed3899/kumo/common/utils"
 	"github.com/samber/oops"
 )
 
 // TODO Set ssh key file permissions to 600
 // TODO add AMI.User tag to packer ami
-// TODO add cleanup functions for both terraform and packer
+// TODO add packer clean up
+// TODO add ssh config file
 func init() {
 	if utils.HostIsNotCompatible() {
 		var (
