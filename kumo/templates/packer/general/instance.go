@@ -21,6 +21,7 @@ func NewTemplate() (newTemplate *Template, err error) {
 	var (
 		oopsBuilder = oops.
 				Code("new_packer_general_template_failed")
+		templatesDirName          = dirs.TEMPLATES_DIR_NAME
 		packerDirName             = tool.PACKER_NAME
 		generalDirName            = dirs.GENERAL_DIR_NAME
 		packerGeneralTemplateName = templates.PACKER_GENERAL_TEMPLATE_NAME
@@ -29,7 +30,7 @@ func NewTemplate() (newTemplate *Template, err error) {
 		absPathToPackerGeneralTemplate string
 	)
 
-	if absPathToPackerGeneralTemplate, err = filepath.Abs(filepath.Join(packerDirName, generalDirName, packerGeneralTemplateName)); err != nil {
+	if absPathToPackerGeneralTemplate, err = filepath.Abs(filepath.Join(templatesDirName, packerDirName, generalDirName, packerGeneralTemplateName)); err != nil {
 		err = oopsBuilder.
 			With("packerDirName", packerDirName).
 			With("generalDirName", generalDirName).
