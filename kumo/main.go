@@ -15,15 +15,19 @@ import (
 func init() {
 	if utils.HostIsNotCompatible() {
 		var (
+			oopsBuilder = oops.
+					Code("host_is_not_compatible")
 			os, arch = utils.GetCurrentHostSpecs()
 			err      error
 		)
 
-		err = oops.Code("host_is_not_compatible").
-			With("os", os).
-			With("arch", arch).
-			Errorf("Host is not compatible with kumo :/")
-		log.Fatalf("%+v", err)
+		log.Fatalf(
+			"%+v",
+			oopsBuilder.
+				With("os", os).
+				With("arch", arch).
+				Wrapf(err, "Host is not compatible with kumo :/"),
+		)
 	}
 }
 
