@@ -5,16 +5,16 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"github.com/ed3899/kumo/binaries"
+	"github.com/ed3899/kumo/common/dirs"
+	"github.com/ed3899/kumo/common/download"
 	"github.com/ed3899/kumo/utils"
 	"github.com/samber/oops"
 )
 
 type Terraform struct {
-	ID                  binaries.ToolId
 	AbsPathToExecutable string
 	AbsPathToRunDir     string
-	Zip                 *Zip
+	Zip                 *download.Zip
 }
 
 const (
@@ -42,9 +42,9 @@ func NewTerraform() (terraform *Terraform, err error) {
 		zipPath             string
 	)
 
-	if absPathToExecutable, err = filepath.Abs(filepath.Join(binaries.DEPENDENCIES_DIR_NAME, NAME, executableName)); err != nil {
+	if absPathToExecutable, err = filepath.Abs(filepath.Join(dirs.DEPENDENCIES_DIR_NAME, NAME, executableName)); err != nil {
 		err = oopsBuilder.
-			With("DEPENDENCIES_DIR_NAME", binaries.DEPENDENCIES_DIR_NAME).
+			With("dirs.DEPENDENCIES_DIR_NAME", dirs.DEPENDENCIES_DIR_NAME).
 			With("NAME", NAME).
 			Wrapf(err, "failed to create absolute path to: %s", executableName)
 		return
@@ -57,9 +57,9 @@ func NewTerraform() (terraform *Terraform, err error) {
 		return
 	}
 
-	if zipPath, err = filepath.Abs(filepath.Join(binaries.DEPENDENCIES_DIR_NAME, NAME, zipName)); err != nil {
+	if zipPath, err = filepath.Abs(filepath.Join(dirs.DEPENDENCIES_DIR_NAME, NAME, zipName)); err != nil {
 		err = oopsBuilder.
-			With("DEPENDENCIES_DIR_NAME", binaries.DEPENDENCIES_DIR_NAME).
+			With("dirs.DEPENDENCIES_DIR_NAME", dirs.DEPENDENCIES_DIR_NAME).
 			With("NAME", NAME).
 			Wrapf(err, "failed to create absolute path to: %s", zipName)
 		return
@@ -72,10 +72,9 @@ func NewTerraform() (terraform *Terraform, err error) {
 	}
 
 	terraform = &Terraform{
-		ID:                  binaries.TerraformID,
 		AbsPathToExecutable: absPathToExecutable,
 		AbsPathToRunDir:     absPathToRunDir,
-		Zip: &Zip{
+		Zip: &download.Zip{
 			Name:          zipName,
 			AbsPath:       zipPath,
 			URL:           url,
