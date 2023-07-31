@@ -4,7 +4,7 @@ import (
 	"log"
 	"path/filepath"
 
-	"github.com/ed3899/kumo/binaries/instances"
+	"github.com/ed3899/kumo/binaries"
 	"github.com/ed3899/kumo/common/cloud"
 	"github.com/ed3899/kumo/common/download"
 	common_hashicorp_vars "github.com/ed3899/kumo/common/hashicorp_vars"
@@ -19,7 +19,7 @@ func Up() (err error) {
 	var (
 		oopsBuilder = oops.
 				Code("up_failed")
-		terraform                *instances.Terraform
+		terraform                *binaries.Terraform
 		cloudSetup               *cloud.CloudSetup
 		toolSetup                *tool.ToolSetup
 		pickedTemplate           *templates.MergedTemplate
@@ -28,7 +28,7 @@ func Up() (err error) {
 	)
 
 	// 1. Instantiate Terraform
-	if terraform, err = instances.NewTerraform(); err != nil {
+	if terraform, err = binaries.NewTerraform(); err != nil {
 		err = oopsBuilder.
 			Wrapf(err, "Error occurred while instantiating Terraform")
 		return
@@ -124,6 +124,6 @@ func Up() (err error) {
 			Wrapf(err, "Error occurred while deploying terraform resources")
 		return
 	}
-	
+
 	return
 }

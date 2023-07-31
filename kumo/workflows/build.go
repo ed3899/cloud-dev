@@ -4,7 +4,7 @@ import (
 	"log"
 	"path/filepath"
 
-	"github.com/ed3899/kumo/binaries/instances"
+	"github.com/ed3899/kumo/binaries"
 	"github.com/ed3899/kumo/common/cloud"
 	"github.com/ed3899/kumo/common/download"
 	common_hashicorp_vars "github.com/ed3899/kumo/common/hashicorp_vars"
@@ -20,7 +20,7 @@ func Build() (err error) {
 		oopsBuilder = oops.
 				Code("build_failed")
 
-		packer                   *instances.Packer
+		packer                   *binaries.Packer
 		cloudSetup               *cloud.CloudSetup
 		toolSetup                *tool.ToolSetup
 		pickedTemplate           *templates.MergedTemplate
@@ -29,7 +29,7 @@ func Build() (err error) {
 	)
 
 	// 1. Instantiate Packer
-	if packer, err = instances.NewPacker(); err != nil {
+	if packer, err = binaries.NewPacker(); err != nil {
 		err = oopsBuilder.
 			Wrapf(err, "Error occurred while instantiating Packer")
 		return

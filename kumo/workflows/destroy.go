@@ -4,7 +4,7 @@ import (
 	"log"
 	"path/filepath"
 
-	"github.com/ed3899/kumo/binaries/instances"
+	"github.com/ed3899/kumo/binaries"
 	"github.com/ed3899/kumo/common/cloud"
 	"github.com/ed3899/kumo/common/download"
 	"github.com/ed3899/kumo/common/tool"
@@ -16,14 +16,14 @@ func Destroy() (err error) {
 	var (
 		oopsBuilder = oops.
 				Code("destroy_failed")
-		terraform                *instances.Terraform
+		terraform                *binaries.Terraform
 		cloudSetup               *cloud.CloudSetup
 		toolSetup                *tool.ToolSetup
 		uncheckedCloudFromConfig string
 	)
 
 	// 1. Instantiate Terraform
-	if terraform, err = instances.NewTerraform(); err != nil {
+	if terraform, err = binaries.NewTerraform(); err != nil {
 		err = oopsBuilder.
 			Wrapf(err, "Error occurred while instantiating Terraform")
 		return
