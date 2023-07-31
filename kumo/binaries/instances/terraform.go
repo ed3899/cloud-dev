@@ -7,6 +7,7 @@ import (
 
 	"github.com/ed3899/kumo/common/dirs"
 	"github.com/ed3899/kumo/common/download"
+	"github.com/ed3899/kumo/common/tool"
 	"github.com/ed3899/kumo/utils"
 	"github.com/samber/oops"
 )
@@ -29,56 +30,60 @@ func NewTerraform() (terraform *Terraform, err error) {
 	)
 
 	var (
-		executableName = fmt.Sprintf("%s.exe", NAME)
-		zipName        = fmt.Sprintf("%s.zip", NAME)
-		os, arch       = utils.GetCurrentHostSpecs()
-		url            = utils.CreateHashicorpURL(NAME, VERSION, os, arch)
-		oopsBuilder    = oops.
-				Code("new_terraform_failed")
+		dependenciesDirName     = dirs.DEPENDENCIES_DIR_NAME
+		terraformName           = tool.TERRAFORM_NAME
+		terraformDirName        = terraformName
+		terraformVersion        = tool.TERRAFORM_VERSION
+		terraformExecutableName = fmt.Sprintf("%s.exe", terraformName)
+		terraformZipName        = fmt.Sprintf("%s.zip", terraformName)
+		os, arch                = utils.GetCurrentHostSpecs()
+		terraformUrl            = utils.CreateHashicorpURL(terraformName, terraformVersion, os, arch)
+		oopsBuilder             = oops.
+					Code("new_terraform_failed")
 
-		absPathToExecutable string
-		absPathToRunDir     string
-		contentLength       int64
-		zipPath             string
+		absPathToTerraformExecutable string
+		absPathToTerraformRunDir     string
+		absPathToTerraformZip        string
+		terraformZipContentLength    int64
 	)
 
-	if absPathToExecutable, err = filepath.Abs(filepath.Join(dirs.DEPENDENCIES_DIR_NAME, NAME, executableName)); err != nil {
+	if absPathToTerraformExecutable, err = filepath.Abs(filepath.Join(dependenciesDirName, terraformDirName, terraformExecutableName)); err != nil {
 		err = oopsBuilder.
-			With("dirs.DEPENDENCIES_DIR_NAME", dirs.DEPENDENCIES_DIR_NAME).
-			With("NAME", NAME).
-			Wrapf(err, "failed to create absolute path to: %s", executableName)
+			With("dependenciesDirName", dependenciesDirName).
+			With("terraformDirName", terraformDirName).
+			Wrapf(err, "failed to create absolute path to: %s", terraformExecutableName)
 		return
 	}
 
-	if absPathToRunDir, err = filepath.Abs(NAME); err != nil {
+	if absPathToTerraformRunDir, err = filepath.Abs(terraformDirName); err != nil {
 		err = oopsBuilder.
-			With("NAME", NAME).
+			With("terraformDirName", terraformDirName).
 			Wrapf(err, "failed to create absolute path to run dir")
 		return
 	}
 
-	if zipPath, err = filepath.Abs(filepath.Join(dirs.DEPENDENCIES_DIR_NAME, NAME, zipName)); err != nil {
+	if absPathToTerraformZip, err = filepath.Abs(filepath.Join(dependenciesDirName, terraformName, terraformZipName)); err != nil {
 		err = oopsBuilder.
-			With("dirs.DEPENDENCIES_DIR_NAME", dirs.DEPENDENCIES_DIR_NAME).
-			With("NAME", NAME).
-			Wrapf(err, "failed to create absolute path to: %s", zipName)
+			With("dependenciesDirName", dependenciesDirName).
+			With("terraformName", terraformName).
+			Wrapf(err, "failed to create absolute path to: %s", terraformZipName)
 		return
 	}
 
-	if contentLength, err = utils.GetContentLength(url); err != nil {
+	if terraformZipContentLength, err = utils.GetContentLength(terraformUrl); err != nil {
 		err = oopsBuilder.
-			Wrapf(err, "failed to get content length for: %s", url)
+			Wrapf(err, "failed to get content length for: %s", terraformUrl)
 		return
 	}
 
 	terraform = &Terraform{
-		AbsPathToExecutable: absPathToExecutable,
-		AbsPathToRunDir:     absPathToRunDir,
+		AbsPathToExecutable: absPathToTerraformExecutable,
+		AbsPathToRunDir:     absPathToTerraformRunDir,
 		Zip: &download.Zip{
-			Name:          zipName,
-			AbsPath:       zipPath,
-			URL:           url,
-			ContentLength: contentLength,
+			Name:          terraformZipName,
+			AbsPath:       absPathToTerraformZip,
+			URL:           terraformUrl,
+			ContentLength: terraformZipContentLength,
 		},
 	}
 
