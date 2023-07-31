@@ -3,7 +3,7 @@ package cmd
 import (
 	"log"
 
-	"github.com/ed3899/kumo/binaries/workflows/terraform"
+	"github.com/ed3899/kumo/workflows"
 	"github.com/samber/oops"
 	"github.com/spf13/cobra"
 )
@@ -20,7 +20,7 @@ func GetDestroyCommand() *cobra.Command {
 					With("args", args)
 			)
 
-			if err := terraform.DestroyWorkflow(); err != nil {
+			if err := workflows.Destroy(); err != nil {
 				log.Fatalf(
 					"%+v",
 					oopsBuilder.

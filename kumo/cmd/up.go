@@ -3,7 +3,7 @@ package cmd
 import (
 	"log"
 
-	"github.com/ed3899/kumo/binaries/workflows/terraform"
+	"github.com/ed3899/kumo/workflows"
 	"github.com/samber/oops"
 	"github.com/spf13/cobra"
 )
@@ -22,7 +22,7 @@ func GetUpCommand() *cobra.Command {
 					With("args", args)
 			)
 
-			if err := terraform.UpWorkflow(); err != nil {
+			if err := workflows.Up(); err != nil {
 				log.Fatalf(
 					"%+v",
 					oopsBuilder.

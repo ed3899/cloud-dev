@@ -3,7 +3,7 @@ package cmd
 import (
 	"log"
 
-	"github.com/ed3899/kumo/binaries/workflows/packer"
+	"github.com/ed3899/kumo/workflows"
 	"github.com/samber/oops"
 	"github.com/spf13/cobra"
 )
@@ -22,7 +22,7 @@ func GetBuildCommand() *cobra.Command {
 					With("args", args)
 			)
 
-			if err := packer.BuildWorkflow(); err != nil {
+			if err := workflows.Build(); err != nil {
 				log.Fatalf(
 					"%+v",
 					oopsBuilder.
