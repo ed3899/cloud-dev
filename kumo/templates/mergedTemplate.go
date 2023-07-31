@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"text/template"
 
+	"github.com/ed3899/kumo/common/hashicorp_vars"
 	"github.com/ed3899/kumo/common/templates"
 	"github.com/ed3899/kumo/utils"
 	"github.com/samber/oops"
@@ -114,14 +115,14 @@ func (mt *MergedTemplate) Remove() (err error) {
 	return
 }
 
-func (mt *MergedTemplate) Execute(writer io.Writer) (err error) {
+func (mt *MergedTemplate) Execute(hashicorpVars hashicorp_vars.HashicorpVarsI) (err error) {
 	var (
 		oopsBuilder = oops.
 			Code("merged_template_execute_failed").
-			With("writer", writer)
+			With("hashicorpVars.GetFile().Name()", hashicorpVars.GetFile().Name())
 	)
 
-	if err = mt.instance.Execute(writer, mt.environment); err != nil {
+	if err = mt.instance.Execute(hashicorpVars.GetFile(), mt.environment); err != nil {
 		err = oopsBuilder.
 			Wrapf(err, "Error occurred while executing template: %s", mt.instance.Name())
 		return

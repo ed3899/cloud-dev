@@ -72,13 +72,21 @@ func Build() (err error) {
 			Wrapf(err, "Error occurred while picking hashicorp vars")
 		return
 	}
-	// 7. Change to right directory and defer change back
+	// 7. Execute template on hashicorp vars
+	if pickedTemplate.Execute(pickedHashicorpVars); err != nil {
+		err = oopsBuilder.
+			With("pickedTemplate", pickedTemplate).
+			With("pickedHashicorpVars", pickedHashicorpVars).
+			Wrapf(err, "Error occurred while executing template on hashicorp vars")
+		return
+	}
+	// 8. Change to right directory and defer change back
 
-	// 8. Set plugin path
+	// 9. Set plugin path
 
-	// 9. Initialize
+	// 10. Initialize
 
-	// 10. Build
+	// 11. Build
 
 	return
 }
