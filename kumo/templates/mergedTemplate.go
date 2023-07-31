@@ -33,7 +33,7 @@ func NewMergedTemplate(generalTemplate, cloudTemplate templates.TemplateSingle) 
 		mergedTemplateInstance     *template.Template
 		absPathToTemplatesDir      string
 		absPathToMergedTemplateDir string
-		mergedTemplateName         string
+		absPathToMergedTemplate         string
 	)
 
 	if generalTemplate.GetParentDirName() != cloudTemplate.GetParentDirName() {
@@ -58,7 +58,7 @@ func NewMergedTemplate(generalTemplate, cloudTemplate templates.TemplateSingle) 
 
 	absPathToMergedTemplateDir = filepath.Join(absPathToTemplatesDir, generalTemplate.GetParentDirName())
 
-	if mergedTemplateName, err = utils.MergeFilesTo(
+	if absPathToMergedTemplate, err = utils.MergeFilesTo(
 		absPathToMergedTemplateDir,
 		generalTemplate.GetAbsPath(),
 		cloudTemplate.GetAbsPath(),
@@ -68,15 +68,15 @@ func NewMergedTemplate(generalTemplate, cloudTemplate templates.TemplateSingle) 
 		return
 	}
 
-	if mergedTemplateInstance, err = template.ParseFiles(mergedTemplateName); err != nil {
+	if mergedTemplateInstance, err = template.ParseFiles(absPathToMergedTemplate); err != nil {
 		err = oopsBuilder.
-			Wrapf(err, "Error occurred while parsing template %s", mergedTemplateName)
+			Wrapf(err, "Error occurred while parsing template %s", absPathToMergedTemplate)
 		return
 	}
 
 	packerMergedTemplate = &MergedTemplate{
 		instance: mergedTemplateInstance,
-		absPath:  mergedTemplateName,
+		absPath:  absPathToMergedTemplate,
 		environment: &MergedEnvironment[templates.EnvironmentI]{
 			general: generalTemplate.GetEnvironment(),
 			cloud:   cloudTemplate.GetEnvironment(),
