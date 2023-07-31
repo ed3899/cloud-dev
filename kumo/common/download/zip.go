@@ -3,7 +3,7 @@ package download
 import (
 	"os"
 
-	"github.com/ed3899/kumo/utils"
+	"github.com/ed3899/kumo/common/utils"
 	"github.com/samber/oops"
 	"github.com/vbauerster/mpb/v8"
 	"github.com/vbauerster/mpb/v8/decor"
