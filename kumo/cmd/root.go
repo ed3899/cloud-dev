@@ -27,7 +27,7 @@ func init() {
 	}
 
 	// Assemble commands
-	rootCmd.AddCommand(*GetAllCommands()...)
+	rootCmd.AddCommand(*GetCommands()...)
 }
 
 func Execute() {
