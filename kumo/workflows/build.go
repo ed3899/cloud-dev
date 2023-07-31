@@ -49,7 +49,7 @@ func Build() (err error) {
 			Wrapf(err, "Error occurred while instantiating CloudSetup for %s", uncheckedCloudFromConfig)
 		return
 	}
-
+	// a. Set credentials and defer unset
 	if err = cloudSetup.Credentials.Set(); err != nil {
 		err = oopsBuilder.
 			Wrapf(err, "Error occurred while setting credentials for %s", cloudSetup.GetCloudName())
@@ -65,7 +65,16 @@ func Build() (err error) {
 			Wrapf(err, "Error occurred while instantiating ToolSetup for packer")
 		return
 	}
-	// 5. Create template
+	// 5. Set plugin paths and defer unset
+	if err = packer.SetPluginPath(cloudSetup); err != nil {
+		err = oopsBuilder.
+			With("cloudSetup.GetCloudName()", cloudSetup.GetCloudName()).
+			Wrapf(err, "Error occurred while setting plugin path for packer")
+		return
+	}
+	defer packer.UnsetPluginPath()
+
+	// 6. Create template
 	if pickedTemplate, err = templates.PickTemplate(toolSetup, cloudSetup); err != nil {
 		err = oopsBuilder.
 			With("toolSetup.GetToolType()", toolSetup.GetToolType()).
@@ -73,7 +82,7 @@ func Build() (err error) {
 			Wrapf(err, "Error occurred while picking template")
 		return
 	}
-	// 6. Create hashicorp vars
+	// 7. Create hashicorp vars
 	if pickedHashicorpVars, err = hashicorp_vars.PickHashicorpVars(toolSetup, cloudSetup); err != nil {
 		err = oopsBuilder.
 			With("toolSetup.GetToolType()", toolSetup.GetToolType()).
@@ -81,7 +90,7 @@ func Build() (err error) {
 			Wrapf(err, "Error occurred while picking hashicorp vars")
 		return
 	}
-	// 7. Execute template on hashicorp vars
+	// 8. Execute template on hashicorp vars
 	if pickedTemplate.ExecuteOn(pickedHashicorpVars); err != nil {
 		err = oopsBuilder.
 			With("pickedTemplate.GetName()", pickedTemplate.GetName()).
@@ -89,7 +98,7 @@ func Build() (err error) {
 			Wrapf(err, "Error occurred while executing template on hashicorp vars")
 		return
 	}
-	// 8. Change to right directory and defer change back
+	// 9. Change to right directory and defer changing back
 	if err = toolSetup.GoTargetDir(); err != nil {
 		err = oopsBuilder.
 			With("toolSetup.GetToolType()", toolSetup.GetToolType()).
@@ -105,11 +114,20 @@ func Build() (err error) {
 			)
 		}
 	}()
-	// 9. Set plugin path
-
 	// 10. Initialize
-
+	if err = packer.Init(); err != nil {
+		err = oopsBuilder.
+			With("toolSetup.GetToolType()", toolSetup.GetToolType()).
+			Wrapf(err, "Error occurred while initializing packer")
+		return
+	}
 	// 11. Build
-
+	if err = packer.Build(); err != nil {
+		err = oopsBuilder.
+			With("toolSetup.GetToolType()", toolSetup.GetToolType()).
+			Wrapf(err, "Error occurred while building packer")
+		return
+	}
+	
 	return
 }
