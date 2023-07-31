@@ -3,8 +3,9 @@ package workflows
 import (
 	"path/filepath"
 
-	"github.com/ed3899/kumo/templates"
 	"github.com/ed3899/kumo/binaries/instances"
+	"github.com/ed3899/kumo/hashicorp_vars/packer"
+	"github.com/ed3899/kumo/templates"
 	"github.com/ed3899/kumo/common/tool"
 	"github.com/ed3899/kumo/common/cloud"
 	"github.com/ed3899/kumo/common/download"
@@ -21,6 +22,7 @@ func Build() (err error) {
 		cloudSetup *cloud.CloudSetup
 		toolSetup *tool.ToolSetup
 		pickedTemplate *templates.MergedTemplate
+		pickedHashicorpVar any
 		uncheckedCloudFromConfig string
 	)
 
