@@ -12,17 +12,14 @@ import (
 )
 
 func PickTemplate(toolSetup tool.ToolSetupI, cloudSetup cloud.CloudSetupI) (pickedTemplate *MergedTemplate, err error) {
-	const (
-		PACKER    = "packer"
-		TERRAFORM = "terraform"
-		AWS       = "aws"
-	)
-
 	var (
 		oopsBuilder = oops.
 				Code("pick_template_failed")
-		toolType  = toolSetup.GetToolType()
-		cloudType = cloudSetup.GetCloudType()
+		toolType      = toolSetup.GetToolType()
+		cloudType     = cloudSetup.GetCloudType()
+		packerName    = tool.PACKER_NAME
+		terraformName = tool.TERRAFORM_NAME
+		awsName       = cloud.AWS_NAME
 
 		generalTemplate, cloudTemplate templates.TemplateSingle
 		packerManifest                 templates.PackerManifestI
@@ -35,7 +32,7 @@ func PickTemplate(toolSetup tool.ToolSetupI, cloudSetup cloud.CloudSetupI) (pick
 		if generalTemplate, err = packer_general.NewTemplate(); err != nil {
 			err = oopsBuilder.
 				With("tool", tool.Packer).
-				Wrapf(err, "Error occurred while picking general template for %s", PACKER)
+				Wrapf(err, "Error occurred while picking general template for %s", packerName)
 			return
 		}
 		// 3. Pick cloud template
@@ -45,7 +42,7 @@ func PickTemplate(toolSetup tool.ToolSetupI, cloudSetup cloud.CloudSetupI) (pick
 				err = oopsBuilder.
 					With("tool", tool.Packer).
 					With("cloud", cloud.AWS).
-					Wrapf(err, "Error occurred while picking template for tool %s and cloud %s", PACKER, AWS)
+					Wrapf(err, "Error occurred while picking template for tool %s and cloud %s", packerName, awsName)
 				return
 			}
 
@@ -53,7 +50,7 @@ func PickTemplate(toolSetup tool.ToolSetupI, cloudSetup cloud.CloudSetupI) (pick
 			err = oopsBuilder.
 				With("tool", tool.Packer).
 				With("cloud", cloudSetup).
-				Wrapf(err, "Error occurred while picking template for tool %s and cloud %v. Unsupported cloud", PACKER, cloudSetup)
+				Wrapf(err, "Error occurred while picking template for tool %s and cloud %v. Unsupported cloud", packerName, cloudSetup)
 			return
 		}
 
@@ -62,7 +59,7 @@ func PickTemplate(toolSetup tool.ToolSetupI, cloudSetup cloud.CloudSetupI) (pick
 		if generalTemplate, err = terraform_general.NewTemplate(); err != nil {
 			err = oopsBuilder.
 				With("tool", tool.Terraform).
-				Wrapf(err, "Error occurred while picking general template for %s", TERRAFORM)
+				Wrapf(err, "Error occurred while picking general template for %s", terraformName)
 			return
 		}
 		// 3. Pick cloud template
@@ -72,7 +69,7 @@ func PickTemplate(toolSetup tool.ToolSetupI, cloudSetup cloud.CloudSetupI) (pick
 				err = oopsBuilder.
 					With("tool", tool.Terraform).
 					With("cloud", cloud.AWS).
-					Wrapf(err, "Error occurred while picking packer manifest for cloud %s", AWS)
+					Wrapf(err, "Error occurred while picking packer manifest for cloud %s", awsName)
 				return
 			}
 
@@ -80,7 +77,7 @@ func PickTemplate(toolSetup tool.ToolSetupI, cloudSetup cloud.CloudSetupI) (pick
 				err = oopsBuilder.
 					With("tool", tool.Terraform).
 					With("cloud", cloud.AWS).
-					Wrapf(err, "Error occurred while picking template for tool %s and cloud %s", TERRAFORM, AWS)
+					Wrapf(err, "Error occurred while picking template for tool %s and cloud %s", terraformName, awsName)
 				return
 			}
 
@@ -88,7 +85,7 @@ func PickTemplate(toolSetup tool.ToolSetupI, cloudSetup cloud.CloudSetupI) (pick
 			err = oopsBuilder.
 				With("tool", tool.Terraform).
 				With("cloud", cloudSetup).
-				Wrapf(err, "Error occurred while picking template for tool %s and cloud %v. Unsupported cloud", TERRAFORM, cloudSetup)
+				Wrapf(err, "Error occurred while picking template for tool %s and cloud %v. Unsupported cloud", terraformName, cloudSetup)
 			return
 		}
 

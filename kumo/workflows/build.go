@@ -34,6 +34,7 @@ func Build() (err error) {
 			Wrapf(err, "Error occurred while instantiating Packer")
 		return
 	}
+
 	// 2. Download and install if needed
 	if packer.IsNotInstalled() {
 		if err = download.Initiate(packer.Zip, filepath.Dir(packer.AbsPathToExecutable)); err != nil {
@@ -42,6 +43,7 @@ func Build() (err error) {
 			return
 		}
 	}
+
 	// 3. Cloud setup
 	uncheckedCloudFromConfig = viper.GetString("Cloud")
 	if cloudSetup, err = cloud.NewCloudSetup(uncheckedCloudFromConfig); err != nil {
@@ -56,6 +58,7 @@ func Build() (err error) {
 		return
 	}
 	defer cloudSetup.Credentials.Unset()
+
 	// b. Set packer plugin paths and defer unset
 	if err = packer.SetPluginPath(cloudSetup); err != nil {
 		err = oopsBuilder.
@@ -64,6 +67,7 @@ func Build() (err error) {
 		return
 	}
 	defer packer.UnsetPluginPath()
+
 	// 4. Tool setup
 	if toolSetup, err = tool.NewToolSetup(tool.Packer, cloudSetup); err != nil {
 		err = oopsBuilder.
@@ -72,7 +76,8 @@ func Build() (err error) {
 			Wrapf(err, "Error occurred while instantiating ToolSetup for packer")
 		return
 	}
-	// 5. Pick template
+
+	// 5. Pick template and defer deletion
 	if pickedTemplate, err = templates.PickTemplate(toolSetup, cloudSetup); err != nil {
 		err = oopsBuilder.
 			With("toolSetup.GetToolType()", toolSetup.GetToolType()).
@@ -80,6 +85,8 @@ func Build() (err error) {
 			Wrapf(err, "Error occurred while picking template")
 		return
 	}
+	defer pickedTemplate.Remove()
+
 	// 6. Pick hashicorp vars
 	if pickedHashicorpVars, err = hashicorp_vars.PickHashicorpVars(toolSetup, cloudSetup); err != nil {
 		err = oopsBuilder.
@@ -88,6 +95,7 @@ func Build() (err error) {
 			Wrapf(err, "Error occurred while picking hashicorp vars")
 		return
 	}
+
 	// 7. Execute template on hashicorp vars
 	if err = pickedTemplate.ExecuteOn(pickedHashicorpVars); err != nil {
 		err = oopsBuilder.
@@ -96,6 +104,7 @@ func Build() (err error) {
 			Wrapf(err, "Error occurred while executing template on hashicorp vars")
 		return
 	}
+
 	// 8. Change to right directory and defer changing back
 	if err = toolSetup.GoTargetDir(); err != nil {
 		err = oopsBuilder.
@@ -112,6 +121,7 @@ func Build() (err error) {
 			)
 		}
 	}()
+
 	// 9. Initialize
 	if err = packer.Init(); err != nil {
 		err = oopsBuilder.
@@ -119,6 +129,7 @@ func Build() (err error) {
 			Wrapf(err, "Error occurred while initializing packer")
 		return
 	}
+
 	// 10. Build
 	if err = packer.Build(); err != nil {
 		err = oopsBuilder.

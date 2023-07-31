@@ -108,7 +108,7 @@ func (mt *MergedTemplate) Remove() (err error) {
 			Code("merged_template_remove_failed")
 	)
 
-	if os.RemoveAll(mt.instance.Name()); err != nil {
+	if os.Remove(mt.absPath); err != nil {
 		err = oopsBuilder.
 			Wrapf(err, "Error occurred while removing %s", mt.instance.Name())
 		return
