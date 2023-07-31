@@ -34,7 +34,7 @@ func (z *Zip) IsNotPresent() (notPresent bool) {
 	return utils.FileNotPresent(z.AbsPath)
 }
 
-func (z *Zip) SetDownloadBar(p *mpb.Progress) {
+func (z *Zip) SetDownloadBar(p MultiProgressBarI) {
 	z.DownloadBar = p.AddBar(int64(z.ContentLength),
 		mpb.BarFillerClearOnComplete(),
 		mpb.PrependDecorators(
@@ -54,7 +54,7 @@ func (z *Zip) IncrementDownloadBar(downloadedBytes int) {
 	z.DownloadBar.IncrBy(downloadedBytes)
 }
 
-func (z *Zip) SetExtractionBar(p *mpb.Progress, zipSize int64) {
+func (z *Zip) SetExtractionBar(p MultiProgressBarI, zipSize int64) {
 	z.ExtractionBar = p.AddBar(zipSize,
 		mpb.BarQueueAfter(z.DownloadBar),
 		mpb.BarFillerClearOnComplete(),

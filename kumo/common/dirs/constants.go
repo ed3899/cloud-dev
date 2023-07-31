@@ -5,4 +5,5 @@ const (
 	TERRAFORM_DIR_NAME   = "terraform"
 	AWS_DIR_NAME         = "aws"
 	GENERAL_DIR_NAME     = "general"
+	DEPENDENCIES_DIR_NAME = "deps"
 )

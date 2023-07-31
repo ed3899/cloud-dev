@@ -10,7 +10,7 @@ type DownloadableAndProgressive interface {
 	Retrivable
 }
 
-func DownloadAndShowProgress[D DownloadableAndProgressive](d D, multiProgressBar MultiProgressBar) (err error) {
+func DownloadAndShowProgress[D DownloadableAndProgressive](d D, multiProgressBar MultiProgressBarI) (err error) {
 	var (
 		downloadedBytesChan = make(chan int, 1024)
 		errChan             = make(chan error, 1)

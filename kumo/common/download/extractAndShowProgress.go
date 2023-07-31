@@ -11,7 +11,7 @@ type ExtractableAndProgressive interface {
 	Retrivable
 }
 
-func ExtractAndShowProgress[E ExtractableAndProgressive](e E, absPathToExtraction string, multiProgressBar MultiProgressBar) (err error) {
+func ExtractAndShowProgress[E ExtractableAndProgressive](e E, absPathToExtraction string, multiProgressBar MultiProgressBarI) (err error) {
 	var (
 		extractedBytesChan = make(chan int, 1024)
 		errChan            = make(chan error, 1)

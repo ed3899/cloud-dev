@@ -1,8 +1,10 @@
 package workflows
 
-
 import (
+	"path/filepath"
+
 	"github.com/ed3899/kumo/binaries/instances"
+	"github.com/ed3899/kumo/common/download"
 	"github.com/samber/oops"
 )
 
@@ -21,7 +23,7 @@ func Build() (err error) {
 	}
 	// 2. Download and install if needed
 	if packer.IsNotInstalled() {
-		
+		download.Initiate(packer.Zip, filepath.Dir(packer.AbsPathToExecutable))
 	}
 
 	// 3. CloudSetup
