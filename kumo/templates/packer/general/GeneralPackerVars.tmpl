@@ -1,4 +1,4 @@
-GIT_USERNAME = "{{.general.GIT_USERNAME}}"
-GIT_EMAIL = "{{.general.GIT_EMAIL}}"
-ANSIBLE_TAGS = [{{range $index, $element := .general.ANSIBLE_TAGS}}{{if $index}},{{end}}"{{$element}}"{{end}}]
-GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC = "{{.general.GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC}}"
+GIT_USERNAME = "{{.General.GIT_USERNAME}}"
+GIT_EMAIL = "{{.General.GIT_EMAIL}}"
+ANSIBLE_TAGS = [{{range $index, $element := .General.ANSIBLE_TAGS}}{{if $index}},{{end}}"{{$element}}"{{end}}]
+GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC = "{{.General.GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC}}"

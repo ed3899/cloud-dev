@@ -13,8 +13,8 @@ import (
 )
 
 type MergedEnvironment[E templates.EnvironmentI] struct {
-	general E
-	cloud   E
+	General E
+	Cloud   E
 }
 
 type MergedTemplate struct {
@@ -78,8 +78,8 @@ func NewMergedTemplate(generalTemplate, cloudTemplate templates.TemplateSingle) 
 		instance: mergedTemplateInstance,
 		absPath:  absPathToMergedTemplate,
 		environment: &MergedEnvironment[templates.EnvironmentI]{
-			general: generalTemplate.GetEnvironment(),
-			cloud:   cloudTemplate.GetEnvironment(),
+			General: generalTemplate.GetEnvironment(),
+			Cloud:   cloudTemplate.GetEnvironment(),
 		},
 	}
 
