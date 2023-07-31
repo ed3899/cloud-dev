@@ -18,17 +18,7 @@ type Terraform struct {
 	Zip                 *download.Zip
 }
 
-const (
-	AWS_ACCESS_KEY_ID     = "AWS_ACCESS_KEY_ID"
-	AWS_SECRET_ACCESS_KEY = "AWS_SECRET_ACCESS_KEY"
-)
-
 func NewTerraform() (terraform *Terraform, err error) {
-	const (
-		NAME    = "terraform"
-		VERSION = "1.5.3"
-	)
-
 	var (
 		dependenciesDirName     = dirs.DEPENDENCIES_DIR_NAME
 		terraformName           = tool.TERRAFORM_NAME
