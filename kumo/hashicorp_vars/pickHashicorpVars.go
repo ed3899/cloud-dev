@@ -1,25 +1,20 @@
 package hashicorp_vars
 
 import (
-	"os"
-
 	"github.com/ed3899/kumo/common/cloud"
+	"github.com/ed3899/kumo/common/hashicorp_vars"
 	"github.com/ed3899/kumo/common/tool"
-	terraform_aws "github.com/ed3899/kumo/hashicorp_vars/terraform/aws"
 	packer_aws "github.com/ed3899/kumo/hashicorp_vars/packer/aws"
+	terraform_aws "github.com/ed3899/kumo/hashicorp_vars/terraform/aws"
 	"github.com/samber/oops"
 )
 
-type HashicorpVarsI interface {
-	GetFile() *os.File
-}
-
-func PickHashicorpVars(toolType tool.ToolType, cloudType cloud.CloudType) (pickedHashicorpVars HashicorpVarsI , err error) {
+func PickHashicorpVars(toolType tool.ToolType, cloudType cloud.CloudType) (pickedHashicorpVars hashicorp_vars.HashicorpVarsI, err error) {
 	var (
 		oopsBuilder = oops.
-				Code("pick_hashicorp_vars_failed").
-				With("toolType", toolType).
-				With("cloudType", cloudType)
+			Code("pick_hashicorp_vars_failed").
+			With("toolType", toolType).
+			With("cloudType", cloudType)
 	)
 
 	switch toolType {
@@ -48,7 +43,7 @@ func PickHashicorpVars(toolType tool.ToolType, cloudType cloud.CloudType) (picke
 					Wrapf(err, "Error occurred while instantiating Terraform AWS Hashicorp Vars")
 				return
 			}
-			
+
 		default:
 			err = oopsBuilder.
 				Errorf("Cloud '%v' not supported", cloudType)

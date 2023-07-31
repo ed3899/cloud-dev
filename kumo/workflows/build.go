@@ -4,11 +4,12 @@ import (
 	"path/filepath"
 
 	"github.com/ed3899/kumo/binaries/instances"
-	"github.com/ed3899/kumo/hashicorp_vars/packer"
-	"github.com/ed3899/kumo/templates"
-	"github.com/ed3899/kumo/common/tool"
 	"github.com/ed3899/kumo/common/cloud"
 	"github.com/ed3899/kumo/common/download"
+	common_hashicorp_vars "github.com/ed3899/kumo/common/hashicorp_vars"
+	"github.com/ed3899/kumo/common/tool"
+	"github.com/ed3899/kumo/hashicorp_vars"
+	"github.com/ed3899/kumo/templates"
 	"github.com/samber/oops"
 	"github.com/spf13/viper"
 )
@@ -16,13 +17,13 @@ import (
 func Build() (err error) {
 	var (
 		oopsBuilder = oops.
-			Code("build_failed")
+				Code("build_failed")
 
-		packer *instances.Packer
-		cloudSetup *cloud.CloudSetup
-		toolSetup *tool.ToolSetup
-		pickedTemplate *templates.MergedTemplate
-		pickedHashicorpVar any
+		packer                   *instances.Packer
+		cloudSetup               *cloud.CloudSetup
+		toolSetup                *tool.ToolSetup
+		pickedTemplate           *templates.MergedTemplate
+		pickedHashicorpVars      common_hashicorp_vars.HashicorpVarsI
 		uncheckedCloudFromConfig string
 	)
 
@@ -56,7 +57,7 @@ func Build() (err error) {
 		return
 	}
 	// 5. Create template
-	if pickedTemplate ,err = templates.PickTemplate(toolSetup.GetToolType(), cloudSetup.GetCloudType()); err != nil {
+	if pickedTemplate, err = templates.PickTemplate(toolSetup.GetToolType(), cloudSetup.GetCloudType()); err != nil {
 		err = oopsBuilder.
 			With("toolSetup.GetToolType()", toolSetup.GetToolType()).
 			With("cloudSetup.GetCloudType()", cloudSetup.GetCloudType()).
@@ -64,7 +65,13 @@ func Build() (err error) {
 		return
 	}
 	// 6. Create hashicorp vars
-
+	if pickedHashicorpVars, err = hashicorp_vars.PickHashicorpVars(toolSetup.GetToolType(), cloudSetup.GetCloudType()); err != nil {
+		err = oopsBuilder.
+			With("toolSetup.GetToolType()", toolSetup.GetToolType()).
+			With("cloudSetup.GetCloudType()", cloudSetup.GetCloudType()).
+			Wrapf(err, "Error occurred while picking hashicorp vars")
+		return
+	}
 	// 7. Change to right directory and defer change back
 
 	// 8. Set plugin path
