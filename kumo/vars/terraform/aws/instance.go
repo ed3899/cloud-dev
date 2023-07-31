@@ -13,10 +13,10 @@ type HashicorpVars struct {
 	file *os.File
 }
 
-func NewVars() (hashicorpVars *HashicorpVars, err error) {
+func NewHashicorpVars() (hashicorpVars *HashicorpVars, err error) {
 	var (
 		oopsBuilder = oops.
-				Code("new_vars_failed")
+				Code("new_hashicorp_vars_failed")
 
 		varsFile          *os.File
 		absPathToVarsFile string
