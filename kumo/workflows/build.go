@@ -56,7 +56,14 @@ func Build() (err error) {
 		return
 	}
 	defer cloudSetup.Credentials.Unset()
-
+	// b. Set plugin paths and defer unset
+	if err = packer.SetPluginPath(cloudSetup); err != nil {
+		err = oopsBuilder.
+			With("cloudSetup.GetCloudName()", cloudSetup.GetCloudName()).
+			Wrapf(err, "Error occurred while setting plugin path for packer")
+		return
+	}
+	defer packer.UnsetPluginPath()
 	// 4. ToolSetup
 	if toolSetup, err = tool.NewToolSetup(tool.Packer, cloudSetup); err != nil {
 		err = oopsBuilder.
@@ -65,16 +72,7 @@ func Build() (err error) {
 			Wrapf(err, "Error occurred while instantiating ToolSetup for packer")
 		return
 	}
-	// 5. Set plugin paths and defer unset
-	if err = packer.SetPluginPath(cloudSetup); err != nil {
-		err = oopsBuilder.
-			With("cloudSetup.GetCloudName()", cloudSetup.GetCloudName()).
-			Wrapf(err, "Error occurred while setting plugin path for packer")
-		return
-	}
-	defer packer.UnsetPluginPath()
-
-	// 6. Create template
+	// 5. Create template
 	if pickedTemplate, err = templates.PickTemplate(toolSetup, cloudSetup); err != nil {
 		err = oopsBuilder.
 			With("toolSetup.GetToolType()", toolSetup.GetToolType()).
@@ -82,7 +80,7 @@ func Build() (err error) {
 			Wrapf(err, "Error occurred while picking template")
 		return
 	}
-	// 7. Create hashicorp vars
+	// 6. Create hashicorp vars
 	if pickedHashicorpVars, err = hashicorp_vars.PickHashicorpVars(toolSetup, cloudSetup); err != nil {
 		err = oopsBuilder.
 			With("toolSetup.GetToolType()", toolSetup.GetToolType()).
@@ -90,7 +88,7 @@ func Build() (err error) {
 			Wrapf(err, "Error occurred while picking hashicorp vars")
 		return
 	}
-	// 8. Execute template on hashicorp vars
+	// 7. Execute template on hashicorp vars
 	if pickedTemplate.ExecuteOn(pickedHashicorpVars); err != nil {
 		err = oopsBuilder.
 			With("pickedTemplate.GetName()", pickedTemplate.GetName()).
@@ -98,13 +96,13 @@ func Build() (err error) {
 			Wrapf(err, "Error occurred while executing template on hashicorp vars")
 		return
 	}
-	// 9. Change to right directory and defer changing back
+	// 8. Change to right directory and defer changing back
 	if err = toolSetup.GoTargetDir(); err != nil {
 		err = oopsBuilder.
 			With("toolSetup.GetToolType()", toolSetup.GetToolType()).
 			Wrapf(err, "Error occurred while changing to target directory")
 	}
-	defer func ()  {
+	defer func() {
 		if err := toolSetup.GoInitialDir(); err != nil {
 			log.Fatalf(
 				"%+v",
@@ -114,20 +112,20 @@ func Build() (err error) {
 			)
 		}
 	}()
-	// 10. Initialize
+	// 9. Initialize
 	if err = packer.Init(); err != nil {
 		err = oopsBuilder.
 			With("toolSetup.GetToolType()", toolSetup.GetToolType()).
 			Wrapf(err, "Error occurred while initializing packer")
 		return
 	}
-	// 11. Build
+	// 10. Build
 	if err = packer.Build(); err != nil {
 		err = oopsBuilder.
 			With("toolSetup.GetToolType()", toolSetup.GetToolType()).
 			Wrapf(err, "Error occurred while building packer")
 		return
 	}
-	
+
 	return
 }
