@@ -15,7 +15,7 @@ func DestroyCommand() *cobra.Command {
 		Long:  `Destroy your last deployed cloud environment. Doesn't destroy the AMI. It will also remove the SSH config file.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			var (
-				oopsBuilder = oops.Code("get_destroy_command_failed").
+				oopsBuilder = oops.Code("destroy_command_failed").
 					With("command", cmd.Name()).
 					With("args", args)
 			)
@@ -24,7 +24,7 @@ func DestroyCommand() *cobra.Command {
 				log.Fatalf(
 					"%+v",
 					oopsBuilder.
-						Wrapf(err, "Error occurred running terraform destroy workflow"),
+						Wrapf(err, "Error occurred running destroy workflow"),
 				)
 			}
 		},

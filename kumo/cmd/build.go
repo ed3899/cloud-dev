@@ -17,7 +17,7 @@ func BuildCommand() *cobra.Command {
 		to SSH into your instance.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			var (
-				oopsBuilder = oops.Code("get_build_command_failed").
+				oopsBuilder = oops.Code("build_command_failed").
 					With("command", cmd.Name()).
 					With("args", args)
 			)
@@ -26,7 +26,7 @@ func BuildCommand() *cobra.Command {
 				log.Fatalf(
 					"%+v",
 					oopsBuilder.
-						Wrapf(err, "Error occurred running packer build workflow"),
+						Wrapf(err, "Error occurred running build workflow"),
 				)
 			}
 		},

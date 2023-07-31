@@ -17,7 +17,7 @@ func UpCommand() *cobra.Command {
 		instances from VSCode.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			var (
-				oopsBuilder = oops.Code("get_up_command_failed").
+				oopsBuilder = oops.Code("up_command_failed").
 					With("command", cmd.Name()).
 					With("args", args)
 			)
@@ -26,7 +26,7 @@ func UpCommand() *cobra.Command {
 				log.Fatalf(
 					"%+v",
 					oopsBuilder.
-						Wrapf(err, "Error occurred while running terraform up workflow"),
+						Wrapf(err, "Error occurred while running up workflow"),
 				)
 			}
 		},
