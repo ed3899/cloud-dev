@@ -69,10 +69,6 @@ func (t *Template) GetParentDirName() (dir string) {
 	return t.parentDirName
 }
 
-func (t *Template) GetName() (name string) {
-	return t.instance.Name()
-}
-
 func (t *Template) GetInstance() (instance *template.Template) {
 	return t.instance
 }

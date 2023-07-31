@@ -31,8 +31,8 @@ func NewMergedTemplate(generalTemplate, cloudTemplate templates.TemplateSingle) 
 	var (
 		oopsBuilder = oops.
 				Code("new_packer_merged_template_failed").
-				With("generalTemplate", generalTemplate.GetName()).
-				With("cloudTemplate", cloudTemplate.GetName())
+				With("generalTemplate", generalTemplate.GetAbsPath()).
+				With("cloudTemplate", cloudTemplate.GetAbsPath())
 
 		mergedTemplateInstance            *template.Template
 		absPathToTemplatesDir             string
@@ -67,7 +67,7 @@ func NewMergedTemplate(generalTemplate, cloudTemplate templates.TemplateSingle) 
 		cloudTemplate.GetAbsPath(),
 	); err != nil {
 		err = oopsBuilder.
-			Wrapf(err, "Error occurred while merging %s and %s to %s", generalTemplate.GetName(), cloudTemplate.GetName(), absPathToTempPackerMergedTemplate)
+			Wrapf(err, "Error occurred while merging %s and %s to %s", generalTemplate.GetAbsPath(), cloudTemplate.GetAbsPath(), absPathToTempPackerMergedTemplate)
 		return
 	}
 

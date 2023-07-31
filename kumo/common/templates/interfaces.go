@@ -6,7 +6,6 @@ type EnvironmentI interface {
 
 type TemplateSingle interface {
 	GetParentDirName() string
-	GetName() string
 	GetAbsPath() string
 	GetEnvironment() EnvironmentI
 }
