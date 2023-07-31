@@ -13,6 +13,7 @@ import (
 
 type Template struct {
 	instance      *template.Template
+	absPath       string
 	parentDirName string
 	environment   templates.EnvironmentI
 }
@@ -47,6 +48,7 @@ func NewTemplate() (newTemplate *Template, err error) {
 
 	newTemplate = &Template{
 		instance:      packerGeneralTemplateInstance,
+		absPath:       absPathToPackerGeneralTemplate,
 		parentDirName: packerDirName,
 		environment: &Environment{
 			GIT_USERNAME:                          viper.GetString("Git.Username"),
@@ -57,6 +59,10 @@ func NewTemplate() (newTemplate *Template, err error) {
 	}
 
 	return
+}
+
+func (t *Template) GetAbsPath() (absPath string) {
+	return t.absPath
 }
 
 func (t *Template) GetParentDirName() (dir string) {

@@ -13,6 +13,7 @@ import (
 
 type Template struct {
 	instance      *template.Template
+	absPath       string
 	parentDirName string
 	environment   templates.EnvironmentI
 }
@@ -25,11 +26,11 @@ func NewTemplate(packerManifest templates.PackerManifestI) (newTemplate *Templat
 		awsDirName               = cloud.AWS_NAME
 		terraformAwsTemplateName = templates.TERRAFORM_AWS_TEMPLATE_NAME
 
-		absPath  string
-		instance *template.Template
+		absPathToTerraformTemplate string
+		instance                   *template.Template
 	)
 
-	if absPath, err = filepath.Abs(filepath.Join(terraformDirName, awsDirName, terraformAwsTemplateName)); err != nil {
+	if absPathToTerraformTemplate, err = filepath.Abs(filepath.Join(terraformDirName, awsDirName, terraformAwsTemplateName)); err != nil {
 		err = oopsBuilder.
 			With("terraformDirName", terraformDirName).
 			With("awsDirName", awsDirName).
@@ -37,14 +38,15 @@ func NewTemplate(packerManifest templates.PackerManifestI) (newTemplate *Templat
 		return
 	}
 
-	if instance, err = template.ParseFiles(absPath); err != nil {
+	if instance, err = template.ParseFiles(absPathToTerraformTemplate); err != nil {
 		err = oopsBuilder.
-			Wrapf(err, "Error occurred while parsing template %s", absPath)
+			Wrapf(err, "Error occurred while parsing template %s", absPathToTerraformTemplate)
 		return
 	}
 
 	newTemplate = &Template{
 		instance:      instance,
+		absPath:       absPathToTerraformTemplate,
 		parentDirName: terraformDirName,
 		environment: &Environment{
 			AWS_REGION:                   viper.GetString("AWS.Region"),
@@ -56,6 +58,10 @@ func NewTemplate(packerManifest templates.PackerManifestI) (newTemplate *Templat
 	}
 
 	return
+}
+
+func (t *Template) GetAbsPath() (absPath string) {
+	return t.absPath
 }
 
 func (t *Template) GetParentDirName() (dir string) {

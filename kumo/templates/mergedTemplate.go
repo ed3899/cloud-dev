@@ -18,6 +18,7 @@ type MergedEnvironment[E templates.EnvironmentI] struct {
 
 type MergedTemplate struct {
 	instance    *template.Template
+	absPath     string
 	environment *MergedEnvironment[templates.EnvironmentI]
 }
 
@@ -62,8 +63,8 @@ func NewMergedTemplate(generalTemplate, cloudTemplate templates.TemplateSingle) 
 
 	if err = utils.MergeFilesTo(
 		absPathToTempPackerMergedTemplate,
-		generalTemplate.GetName(),
-		cloudTemplate.GetName(),
+		generalTemplate.GetAbsPath(),
+		cloudTemplate.GetAbsPath(),
 	); err != nil {
 		err = oopsBuilder.
 			Wrapf(err, "Error occurred while merging %s and %s to %s", generalTemplate.GetName(), cloudTemplate.GetName(), absPathToTempPackerMergedTemplate)
@@ -78,6 +79,7 @@ func NewMergedTemplate(generalTemplate, cloudTemplate templates.TemplateSingle) 
 
 	packerMergedTemplate = &MergedTemplate{
 		instance: mergedTemplateInstance,
+		absPath:  absPathToTempPackerMergedTemplate,
 		environment: &MergedEnvironment[templates.EnvironmentI]{
 			general: generalTemplate.GetEnvironment(),
 			cloud:   cloudTemplate.GetEnvironment(),
@@ -85,6 +87,10 @@ func NewMergedTemplate(generalTemplate, cloudTemplate templates.TemplateSingle) 
 	}
 
 	return
+}
+
+func (mt *MergedTemplate) GetAbsPath() (path string) {
+	return mt.absPath
 }
 
 func (mt *MergedTemplate) GetName() (name string) {

@@ -14,6 +14,7 @@ import (
 
 type Template struct {
 	instance      *template.Template
+	absPath       string
 	parentDirName string
 	environment   templates.EnvironmentI
 }
@@ -28,11 +29,11 @@ func NewTemplate() (newTemplate *Template, err error) {
 		awsDirName            = cloud.AWS_NAME
 		packerAwsTemplateName = templates.PACKER_AWS_TEMPLATE_NAME
 
-		instance *template.Template
-		absPath  string
+		instance          *template.Template
+		absPathToTemplate string
 	)
 
-	if absPath, err = filepath.Abs(filepath.Join(templatesDirName, packerDirName, awsDirName, packerAwsTemplateName)); err != nil {
+	if absPathToTemplate, err = filepath.Abs(filepath.Join(templatesDirName, packerDirName, awsDirName, packerAwsTemplateName)); err != nil {
 		err = oopsBuilder.
 			With("templatesDirName", templatesDirName).
 			With("packerDirName", packerDirName).
@@ -41,14 +42,15 @@ func NewTemplate() (newTemplate *Template, err error) {
 		return
 	}
 
-	if instance, err = template.ParseFiles(absPath); err != nil {
+	if instance, err = template.ParseFiles(absPathToTemplate); err != nil {
 		err = oopsBuilder.
-			Wrapf(err, "Error occurred while parsing template %s", absPath)
+			Wrapf(err, "Error occurred while parsing template %s", absPathToTemplate)
 		return
 	}
 
 	newTemplate = &Template{
 		instance:      instance,
+		absPath:       absPathToTemplate,
 		parentDirName: packerDirName,
 		environment: &Environment{
 			AWS_ACCESS_KEY:                     viper.GetString("AWS.AccessKeyId"),
@@ -70,6 +72,10 @@ func NewTemplate() (newTemplate *Template, err error) {
 	}
 
 	return
+}
+
+func (t *Template) GetAbsPath() (absPath string) {
+	return t.absPath
 }
 
 func (t *Template) GetParentDirName() (dir string) {

@@ -14,6 +14,7 @@ import (
 
 type Template struct {
 	instance      *template.Template
+	absPath       string
 	parentDirName string
 	environment   templates.EnvironmentI
 }
@@ -26,17 +27,17 @@ func NewTemplate() (newTemplate *Template, err error) {
 		terraformDirName             = tool.TERRAFORM_NAME
 		generalDirName               = dirs.GENERAL_DIR_NAME
 		terraformGeneralTemplateName = templates.TERRAFORM_GENERAL_TEMPLATE_NAME
-		terraformDefaultAllowedIp           = tool.TERRAFORM_DEFAULT_ALLOWED_IP
+		terraformDefaultAllowedIp    = tool.TERRAFORM_DEFAULT_ALLOWED_IP
 
-		absPath  string
-		instance *template.Template
-		publicIp string
-		pickedIp string
+		absPathToTemplate string
+		instance          *template.Template
+		publicIp          string
+		pickedIp          string
 	)
 
 	defer logger.Sync()
 
-	if absPath, err = filepath.Abs(filepath.Join(terraformDirName, generalDirName, terraformGeneralTemplateName)); err != nil {
+	if absPathToTemplate, err = filepath.Abs(filepath.Join(terraformDirName, generalDirName, terraformGeneralTemplateName)); err != nil {
 		err = oopsBuilder.
 			With("terraformDirName", terraformDirName).
 			With("generalDirName", generalDirName).
@@ -44,9 +45,9 @@ func NewTemplate() (newTemplate *Template, err error) {
 		return
 	}
 
-	if instance, err = template.ParseFiles(absPath); err != nil {
+	if instance, err = template.ParseFiles(absPathToTemplate); err != nil {
 		err = oopsBuilder.
-			Wrapf(err, "Error occurred while parsing template %s", absPath)
+			Wrapf(err, "Error occurred while parsing template %s", absPathToTemplate)
 		return
 	}
 
@@ -59,6 +60,7 @@ func NewTemplate() (newTemplate *Template, err error) {
 
 	newTemplate = &Template{
 		instance:      instance,
+		absPath:       absPathToTemplate,
 		parentDirName: terraformDirName,
 		environment: &Environment{
 			ALLOWED_IP: utils.MaskIp(pickedIp, 32),
@@ -67,6 +69,10 @@ func NewTemplate() (newTemplate *Template, err error) {
 
 	return
 
+}
+
+func (t *Template) GetAbsPath() (absPath string) {
+	return t.absPath
 }
 
 func (t *Template) GetParentDirName() (dir string) {
