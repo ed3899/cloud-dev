@@ -8,7 +8,7 @@ import (
 	"github.com/ed3899/kumo/common/dirs"
 	"github.com/ed3899/kumo/common/download"
 	"github.com/ed3899/kumo/common/tool"
-	"github.com/ed3899/kumo/utils"
+	"github.com/ed3899/kumo/common/utils"
 	"github.com/samber/oops"
 )
 

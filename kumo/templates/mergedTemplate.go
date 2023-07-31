@@ -7,7 +7,7 @@ import (
 
 	"github.com/ed3899/kumo/common/hashicorp_vars"
 	"github.com/ed3899/kumo/common/templates"
-	"github.com/ed3899/kumo/utils"
+	"github.com/ed3899/kumo/common/utils"
 	"github.com/samber/oops"
 )
 
