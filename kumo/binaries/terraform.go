@@ -93,13 +93,11 @@ func (t *Terraform) Init() (err error) {
 		cmd         = exec.Command(t.AbsPathToExecutable, "init")
 		oopsBuilder = oops.
 				Code("terraform_init_failed")
-
-		cmdErr error
 	)
 
-	if cmdErr = utils.RunCmdAndStream(cmd); cmdErr != nil {
+	if err = utils.RunCmdAndStream(cmd); err != nil {
 		err = oopsBuilder.
-			Wrapf(cmdErr, "Error occured while initializing terraform")
+			Wrapf(err, "Error occured while running and streaming terraform init command")
 		return
 	}
 
@@ -111,13 +109,11 @@ func (t *Terraform) Up() (err error) {
 		cmd         = exec.Command(t.AbsPathToExecutable, "apply", "-auto-approve")
 		oopsBuilder = oops.
 				Code("terraform_up_failed")
-
-		cmdErr error
 	)
 
-	if cmdErr = utils.RunCmdAndStream(cmd); cmdErr != nil {
+	if err = utils.RunCmdAndStream(cmd); err != nil {
 		err = oopsBuilder.
-			Wrapf(cmdErr, "Error occured while deploying terraform resources")
+			Wrapf(err, "Error occured while running and streaming terraform apply command")
 		return
 	}
 
@@ -129,13 +125,11 @@ func (t *Terraform) Destroy() (err error) {
 		cmd         = exec.Command(t.AbsPathToExecutable, "destroy", "-auto-approve")
 		oopsBuilder = oops.
 				Code("terraform_destroy_failed")
-
-		cmdErr error
 	)
 
-	if cmdErr = utils.RunCmdAndStream(cmd); cmdErr != nil {
+	if err = utils.RunCmdAndStream(cmd); err != nil {
 		err = oopsBuilder.
-			Wrapf(cmdErr, "Error occured while destroying terraform resources")
+			Wrapf(err, "Error occured while running and streaming terraform destroy command")
 		return
 	}
 
