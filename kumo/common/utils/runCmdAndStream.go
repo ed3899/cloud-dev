@@ -30,10 +30,11 @@ func RunCmdAndStream(cmd *exec.Cmd) (err error) {
 	var (
 		oopsBuilder = oops.Code("run_cmd_and_stream_failed").
 				With("cmd", cmd.Path)
-		logger, _   = zap.NewProduction()
-		cmdWg       = new(sync.WaitGroup)
-		cmdErrChan  = make(chan error, 1)
-		cmdDoneChan = make(chan bool, 1)
+		logger, _        = zap.NewProduction()
+		cmdWg            = new(sync.WaitGroup)
+		cmdStreamErrChan = make(chan error, 1)
+		cmdErrChan       = make(chan error, 1)
+		cmdDoneChan      = make(chan bool, 1)
 
 		aggregatorGroup = new(sync.WaitGroup)
 		mainErrChan     = make(chan error, 1)
@@ -74,7 +75,7 @@ func RunCmdAndStream(cmd *exec.Cmd) (err error) {
 		if _, err := io.Copy(dest, *src); err != nil {
 			err = oopsBuilder.
 				Wrapf(err, "Error occurred while copying StdoutPipe to Stdout for command '%s'", cmd.Path)
-			cmdErrChan <- err
+			cmdStreamErrChan <- err
 			return
 		}
 	}(&cmdStdout, os.Stdout)
@@ -86,7 +87,7 @@ func RunCmdAndStream(cmd *exec.Cmd) (err error) {
 		if _, err := io.Copy(dest, *src); err != nil {
 			err = oopsBuilder.
 				Wrapf(err, "Error occurred while copying StderrPipe to Stderr for command '%s'", cmd.Path)
-			cmdErrChan <- err
+			cmdStreamErrChan <- err
 			return
 		}
 	}(&cmdStderr, os.Stderr)
@@ -107,6 +108,7 @@ func RunCmdAndStream(cmd *exec.Cmd) (err error) {
 	go func() {
 		defer close(cmdDoneChan)
 		defer close(cmdErrChan)
+		defer close(cmdStreamErrChan)
 		cmdWg.Wait()
 		cmdDoneChan <- true
 	}()
@@ -121,13 +123,22 @@ func RunCmdAndStream(cmd *exec.Cmd) (err error) {
 
 		for {
 			select {
-			// If an error occurred while copying std, send it to the main error channel and terminate the command
+			// If an error occurred while copying std, send it to the main error channel and terminate the command.
+			// Keep looping because the go routine that is waiting for the command to finish
+			// will send the error to the main error channel.
+			case err := <-cmdStreamErrChan:
+				if err != nil {
+					logger.Info("Exiting because of error occurred while copying std...", zap.String("error", err.Error()))
+					TerminateCommand(cmd)
+				}
+
+			// If an error occurred while waiting for the command to finish, send it to the main error channel. No need
+			// to terminate the command because it already finished.
 			case err := <-cmdErrChan:
 				if err != nil {
 					err = oopsBuilder.
-						Wrapf(err, "Error occurred while copying std for command '%s'", cmd.Path)
+						Wrapf(err, "Error occurred while waiting for '%s' completion", cmd.Path)
 					mainErrChan <- err
-					TerminateCommand(cmd)
 					return
 				}
 

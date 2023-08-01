@@ -1,6 +1,7 @@
 package tool
 
 import (
+	"log"
 	"os"
 	"path/filepath"
 
@@ -19,6 +20,7 @@ func (ts *ToolSetup) GetToolType() (toolType ToolType) {
 }
 
 func (ts *ToolSetup) GoInitialDir() (err error) {
+	log.Printf("Changing directory to %s", ts.initialDir)
 	var (
 		oopsBuilder = oops.
 			Code("go_initial_dir_failed")
@@ -34,6 +36,7 @@ func (ts *ToolSetup) GoInitialDir() (err error) {
 }
 
 func (ts *ToolSetup) GoTargetDir() (err error) {
+	log.Printf("Changing directory to %s", ts.toolDir)
 	var (
 		oopsBuilder = oops.
 			Code("go_target_dir_failed")

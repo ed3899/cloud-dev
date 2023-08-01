@@ -57,7 +57,12 @@ func Build() (err error) {
 			Wrapf(err, "Error occurred while setting credentials for %s", cloudSetup.GetCloudName())
 		return
 	}
-	defer cloudSetup.Credentials.Unset()
+	defer func() {
+		if err := cloudSetup.Credentials.Unset(); err != nil {
+			log.Print("Failed to unset credentials")
+		}
+		log.Print("Unset credentials")
+	}()
 
 	// b. Set packer plugin paths and defer unset
 	if err = packer.SetPluginPath(cloudSetup); err != nil {
@@ -120,6 +125,7 @@ func Build() (err error) {
 					Wrapf(err, "Error occurred while changing back to initial directory"),
 			)
 		}
+		log.Print("Changed back to initial directory")
 	}()
 
 	// 9. Initialize
