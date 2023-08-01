@@ -8,6 +8,7 @@ import (
 	"github.com/ed3899/kumo/common/dirs"
 	"github.com/ed3899/kumo/common/templates"
 	"github.com/ed3899/kumo/common/tool"
+	"github.com/ed3899/kumo/common/utils"
 	"github.com/samber/oops"
 	"github.com/spf13/viper"
 )
@@ -29,7 +30,8 @@ func NewTemplate(packerManifest templates.PackerManifestI) (newTemplate *Templat
 		terraformAwsTemplateName = templates.TERRAFORM_AWS_TEMPLATE_NAME
 
 		absPathToTemplate string
-		instance                   *template.Template
+		instance          *template.Template
+		pickedAmiId       string
 	)
 
 	if absPathToTemplate, err = filepath.Abs(filepath.Join(templatesDirName, terraformDirName, awsDirName, terraformAwsTemplateName)); err != nil {
@@ -47,6 +49,12 @@ func NewTemplate(packerManifest templates.PackerManifestI) (newTemplate *Templat
 		return
 	}
 
+	if pickedAmiId, err = utils.PickAmiIdToBeUsed(packerManifest.GetLastBuiltAmiId(), viper.GetString("AMI.IdToBeUsed")); err != nil {
+		err = oopsBuilder.
+			Wrapf(err, "Error occurred while picking ami id to be used")
+		return
+	}
+
 	newTemplate = &Template{
 		instance:      instance,
 		absPath:       absPathToTemplate,
@@ -56,7 +64,7 @@ func NewTemplate(packerManifest templates.PackerManifestI) (newTemplate *Templat
 			AWS_INSTANCE_TYPE:            viper.GetString("AWS.EC2.Instance.Type"),
 			AWS_EC2_INSTANCE_VOLUME_TYPE: viper.GetString("AWS.EC2.Volume.Type"),
 			AWS_EC2_INSTANCE_VOLUME_SIZE: viper.GetInt("AWS.EC2.Volume.Size"),
-			AMI_ID:                       packerManifest.GetLastBuiltAmiId(),
+			AMI_ID:                       pickedAmiId,
 		},
 	}
 
