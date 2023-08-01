@@ -51,10 +51,13 @@ func NewTemplate() (newTemplate *Template, err error) {
 		absPath:       absPathToPackerGeneralTemplate,
 		parentDirName: packerDirName,
 		environment: &Environment{
-			GIT_USERNAME:                          viper.GetString("Git.Username"),
-			GIT_EMAIL:                             viper.GetString("Git.Email"),
-			ANSIBLE_TAGS:                          viper.GetStringSlice("AMI.Tools"),
-			GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC: viper.GetString("GitHub.PersonalAccessTokenClassic"),
+			Required: &Required{
+				GIT_USERNAME: viper.GetString("Git.Username"),
+				GIT_EMAIL:    viper.GetString("Git.Email"),
+				ANSIBLE_TAGS: viper.GetStringSlice("AMI.Tools")},
+			Optional: &Optional{
+				GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC: viper.GetString("GitHub.PersonalAccessTokenClassic"),
+			},
 		},
 	}
 

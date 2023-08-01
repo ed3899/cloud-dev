@@ -65,7 +65,9 @@ func NewTemplate() (newTemplate *Template, err error) {
 		absPath:       absPathToTemplate,
 		parentDirName: terraformDirName,
 		environment: &Environment{
-			ALLOWED_IP: utils.MaskIp(pickedIp, 32),
+			Required: &Required{
+				ALLOWED_IP: utils.MaskIp(pickedIp, 32),
+			},
 		},
 	}
 

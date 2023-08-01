@@ -4,7 +4,7 @@ import (
 	"github.com/ed3899/kumo/common/utils"
 )
 
-type Environment struct {
+type Required struct {
 	AWS_ACCESS_KEY                     string
 	AWS_SECRET_KEY                     string
 	AWS_IAM_PROFILE                    string
@@ -22,6 +22,10 @@ type Environment struct {
 	AWS_EC2_INSTANCE_USERNAME_PASSWORD string
 }
 
+type Environment struct {
+	Required *Required
+}
+
 func (e *Environment) IsNotValidEnvironment() (isNotValidEnvironment bool) {
-	return !utils.IsStructCompletellyFilled(e)
+	return !utils.IsStructCompletellyFilled(e.Required)
 }

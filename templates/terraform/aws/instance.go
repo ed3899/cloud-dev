@@ -60,11 +60,15 @@ func NewTemplate(packerManifest templates.PackerManifestI) (newTemplate *Templat
 		absPath:       absPathToTemplate,
 		parentDirName: terraformDirName,
 		environment: &Environment{
-			AWS_REGION:                   viper.GetString("AWS.Region"),
-			AWS_INSTANCE_TYPE:            viper.GetString("AWS.EC2.Instance.Type"),
-			AWS_EC2_INSTANCE_VOLUME_TYPE: viper.GetString("AWS.EC2.Volume.Type"),
-			AWS_EC2_INSTANCE_VOLUME_SIZE: viper.GetInt("AWS.EC2.Volume.Size"),
-			AMI_ID:                       pickedAmiId,
+			Required: &Required{
+				AWS_REGION:        viper.GetString("AWS.Region"),
+				AWS_INSTANCE_TYPE: viper.GetString("AWS.EC2.Instance.Type"),
+				AMI_ID:            pickedAmiId,
+			},
+			Optional: &Optional{
+				AWS_EC2_INSTANCE_VOLUME_TYPE: viper.GetString("AWS.EC2.Volume.Type"),
+				AWS_EC2_INSTANCE_VOLUME_SIZE: viper.GetInt("AWS.EC2.Volume.Size"),
+			},
 		},
 	}
 
