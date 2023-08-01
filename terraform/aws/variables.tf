@@ -12,7 +12,7 @@ variable "AWS_REGION" {
 variable "AMI_ID" {
   description = "The AMI ID to use for the EC2 instance"
   type        = string
-  default     = null
+  default     = ""
 
   validation {
     condition     = length(var.AMI_ID) > 0
@@ -40,11 +40,6 @@ variable "AWS_EC2_INSTANCE_VOLUME_TYPE" {
   description = "The EC2 instance volume type to use"
   type        = string
   default     = "gp2"
-
-  validation {
-    condition     = length(var.AWS_EC2_INSTANCE_VOLUME_TYPE) > 0
-    error_message = "AWS_EC2_INSTANCE_VOLUME_TYPE must be present"
-  }
 }
 
 variable "AWS_EC2_INSTANCE_VOLUME_SIZE" {

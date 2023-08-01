@@ -246,12 +246,7 @@ variable "ANSIBLE_TAGS" {
 
 variable "GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC" {
   type        = string
-  default     = ""
+  default     = null
   sensitive   = true
   description = "The github personal access token use to setup ssh access on your instance"
-
-  validation {
-    condition     = can(regex("[a-zA-Z0-9]+", var.GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC))
-    error_message = "The variable must be a valid GitHub personal access token."
-  }
 }

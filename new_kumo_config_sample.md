@@ -12,8 +12,8 @@ AWS:
     Instance:
       Type: t2.micro
     Volume:
-      Type: gp2
-      Size: 8
+      Type: gp2 #optional
+      Size: 8 #optional
 
 AMI:
   Base:
@@ -29,13 +29,13 @@ AMI:
   Password: test12345
   Tools:
     - always
-  IdToBeUsed: ""
+  IdToBeUsed: "" #optional
 
 Git:
   Username: xxxxxxxxx
   Email: xxxxxxxxxxxxx
 
 GitHub:
-  PersonalAccessTokenClassic: xxxxxxxxxxxxx
+  PersonalAccessTokenClassic: xxxxxxxxxxxxx #optional
 
 ```
