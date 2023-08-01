@@ -142,13 +142,11 @@ func (p *Packer) Init() (err error) {
 		cmd         = exec.Command(p.AbsPathToExecutable, "init", "-upgrade", ".")
 		oopsBuilder = oops.
 				Code("packer_init_failed")
-
-		cmdErr error
 	)
 
-	if cmdErr = utils.RunCmdAndStream(cmd); cmdErr != nil {
+	if err = utils.RunCmdAndStream(cmd); err != nil {
 		err = oopsBuilder.
-			Wrapf(cmdErr, "Error occured while running and streaming packer init command")
+			Wrapf(err, "Error occured while running and streaming packer init command")
 		return
 	}
 
@@ -160,12 +158,11 @@ func (p *Packer) Build() (err error) {
 		cmd         = exec.Command(p.AbsPathToExecutable, "build", ".")
 		oopsBuilder = oops.
 				Code("packer_build_failed")
-		cmdErr error
 	)
 
-	if cmdErr = utils.RunCmdAndStream(cmd); cmdErr != nil {
+	if err = utils.RunCmdAndStream(cmd); err != nil {
 		err = oopsBuilder.
-			Wrapf(cmdErr, "Error occured running and streaming packer build command")
+			Wrapf(err, "Error occured running and streaming packer build command")
 		return
 	}
 
