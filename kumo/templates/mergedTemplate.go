@@ -10,6 +10,7 @@ import (
 	"github.com/ed3899/kumo/common/templates"
 	"github.com/ed3899/kumo/common/utils"
 	"github.com/samber/oops"
+	"go.uber.org/zap"
 )
 
 type MergedEnvironment[E templates.EnvironmentI] struct {
@@ -33,7 +34,7 @@ func NewMergedTemplate(generalTemplate, cloudTemplate templates.TemplateSingle) 
 		mergedTemplateInstance     *template.Template
 		absPathToTemplatesDir      string
 		absPathToMergedTemplateDir string
-		absPathToMergedTemplate         string
+		absPathToMergedTemplate    string
 	)
 
 	if generalTemplate.GetParentDirName() != cloudTemplate.GetParentDirName() {
@@ -104,13 +105,13 @@ func (mt *MergedTemplate) GetEnvironment() (environment *MergedEnvironment[templ
 
 func (mt *MergedTemplate) Remove() (err error) {
 	var (
-		oopsBuilder = oops.
-			Code("merged_template_remove_failed")
+		logger, _ = zap.NewProduction()
 	)
 
-	if os.Remove(mt.absPath); err != nil {
-		err = oopsBuilder.
-			Wrapf(err, "Error occurred while removing %s", mt.instance.Name())
+	defer logger.Sync()
+
+	if err = os.Remove(mt.absPath); err != nil {
+		logger.Sugar().Warnf("Failed to remove %s", mt.absPath)
 		return
 	}
 
