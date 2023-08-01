@@ -67,6 +67,8 @@ source "amazon-ebs" "ubuntu" {
     Base_AMI_Owner     = "{{ .SourceAMIOwner }}"
     Base_AMI_OwnerName = "{{ .SourceAMIOwnerName }}"
     ToolsInstalled     = local.ANSIBLE_TAGS
+    AMI_User           = local.AWS_EC2_INSTANCE_USERNAME
+    SSH_Key_Name       = local.AWS_EC2_INSTANCE_SSH_KEY_NAME
   }
 }
 
