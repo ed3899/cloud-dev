@@ -148,7 +148,7 @@ func (p *Packer) Init() (err error) {
 
 	if cmdErr = utils.RunCmdAndStream(cmd); cmdErr != nil {
 		err = oopsBuilder.
-			Wrapf(cmdErr, "Error occured while initializing packer")
+			Wrapf(cmdErr, "Error occured while running and streaming packer init command")
 		return
 	}
 
@@ -165,7 +165,7 @@ func (p *Packer) Build() (err error) {
 
 	if cmdErr = utils.RunCmdAndStream(cmd); cmdErr != nil {
 		err = oopsBuilder.
-			Wrapf(cmdErr, "Error occured while building packer")
+			Wrapf(cmdErr, "Error occured running and streaming packer build command")
 		return
 	}
 

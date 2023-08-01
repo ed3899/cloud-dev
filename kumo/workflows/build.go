@@ -1,7 +1,6 @@
 package workflows
 
 import (
-	"log"
 	"path/filepath"
 
 	"github.com/ed3899/kumo/binaries"
@@ -13,12 +12,14 @@ import (
 	"github.com/ed3899/kumo/templates"
 	"github.com/samber/oops"
 	"github.com/spf13/viper"
+	"go.uber.org/zap"
 )
 
 func Build() (err error) {
 	var (
 		oopsBuilder = oops.
 				Code("build_failed")
+		logger, _ = zap.NewProduction()
 
 		packer                   *binaries.Packer
 		cloudSetup               *cloud.CloudSetup
@@ -27,6 +28,8 @@ func Build() (err error) {
 		pickedHashicorpVars      common_hashicorp_vars.HashicorpVarsI
 		uncheckedCloudFromConfig string
 	)
+
+	defer logger.Sync()
 
 	// 1. Instantiate Packer
 	if packer, err = binaries.NewPacker(); err != nil {
@@ -59,9 +62,8 @@ func Build() (err error) {
 	}
 	defer func() {
 		if err := cloudSetup.Credentials.Unset(); err != nil {
-			log.Print("Failed to unset credentials")
+			logger.Warn("Failed to unset credentials", zap.String("error", err.Error()))
 		}
-		log.Print("Unset credentials")
 	}()
 
 	// b. Set packer plugin paths and defer unset
@@ -71,7 +73,11 @@ func Build() (err error) {
 			Wrapf(err, "Error occurred while setting plugin path for packer")
 		return
 	}
-	defer packer.UnsetPluginPath()
+	defer func() {
+		if err := packer.UnsetPluginPath(); err != nil {
+			logger.Warn("Failed to unset plugin path", zap.String("error", err.Error()))
+		}
+	}()
 
 	// 4. Tool setup
 	if toolSetup, err = tool.NewToolSetup(tool.Packer, cloudSetup); err != nil {
@@ -90,7 +96,11 @@ func Build() (err error) {
 			Wrapf(err, "Error occurred while picking template")
 		return
 	}
-	defer pickedTemplate.Remove()
+	defer func() {
+		if err := pickedTemplate.Remove(); err != nil {
+			logger.Warn("Failed to remove temporary template", zap.String("error", err.Error()))
+		}
+	}()
 
 	// 6. Pick hashicorp vars
 	if pickedHashicorpVars, err = hashicorp_vars.PickHashicorpVars(toolSetup, cloudSetup); err != nil {
@@ -118,14 +128,8 @@ func Build() (err error) {
 	}
 	defer func() {
 		if err := toolSetup.GoInitialDir(); err != nil {
-			log.Fatalf(
-				"%+v",
-				oopsBuilder.
-					With("toolSetup.GetToolType()", toolSetup.GetToolType()).
-					Wrapf(err, "Error occurred while changing back to initial directory"),
-			)
+			logger.Warn("Failed to change back to initial directory", zap.String("error", err.Error()))
 		}
-		log.Print("Changed back to initial directory")
 	}()
 
 	// 9. Initialize

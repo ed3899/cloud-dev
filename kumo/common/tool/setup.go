@@ -1,7 +1,6 @@
 package tool
 
 import (
-	"log"
 	"os"
 	"path/filepath"
 
@@ -12,7 +11,7 @@ import (
 type ToolSetup struct {
 	toolType   ToolType
 	initialDir string
-	toolDir  string
+	toolDir    string
 }
 
 func (ts *ToolSetup) GetToolType() (toolType ToolType) {
@@ -20,7 +19,6 @@ func (ts *ToolSetup) GetToolType() (toolType ToolType) {
 }
 
 func (ts *ToolSetup) GoInitialDir() (err error) {
-	log.Printf("Changing directory to %s", ts.initialDir)
 	var (
 		oopsBuilder = oops.
 			Code("go_initial_dir_failed")
@@ -36,7 +34,6 @@ func (ts *ToolSetup) GoInitialDir() (err error) {
 }
 
 func (ts *ToolSetup) GoTargetDir() (err error) {
-	log.Printf("Changing directory to %s", ts.toolDir)
 	var (
 		oopsBuilder = oops.
 			Code("go_target_dir_failed")
@@ -75,14 +72,14 @@ func NewToolSetup(tool ToolType, cloud cloud.CloudSetupI) (toolSetup *ToolSetup,
 		toolSetup = &ToolSetup{
 			toolType:   Packer,
 			initialDir: cwd,
-			toolDir:  filepath.Join(PACKER_RUN_DIR_NAME, cloud.GetCloudName()),
+			toolDir:    filepath.Join(PACKER_RUN_DIR_NAME, cloud.GetCloudName()),
 		}
 
 	case Terraform:
 		toolSetup = &ToolSetup{
 			toolType:   Terraform,
 			initialDir: cwd,
-			toolDir:  filepath.Join(TERRAFORM_RUN_DIR_NAME, cloud.GetCloudName()),
+			toolDir:    filepath.Join(TERRAFORM_RUN_DIR_NAME, cloud.GetCloudName()),
 		}
 
 	default:

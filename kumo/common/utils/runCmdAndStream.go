@@ -139,7 +139,7 @@ func RunCmdAndStream(cmd *exec.Cmd) (err error) {
 			case err := <-cmdErrChan:
 				if err != nil {
 					err = oopsBuilder.
-						Wrapf(err, "Error occurred while waiting for '%s' completion", cmd.Path)
+						Wrapf(err, "Error encountered for %s", cmd.Path)
 					mainErrChan <- err
 				}
 
