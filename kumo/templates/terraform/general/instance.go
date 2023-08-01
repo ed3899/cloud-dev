@@ -24,6 +24,7 @@ func NewTemplate() (newTemplate *Template, err error) {
 		oopsBuilder = oops.
 				Code("new_template_failed")
 		logger, _                    = zap.NewProduction()
+		templatesDirName             = dirs.TEMPLATES_DIR_NAME
 		terraformDirName             = tool.TERRAFORM_NAME
 		generalDirName               = dirs.GENERAL_DIR_NAME
 		terraformGeneralTemplateName = templates.TERRAFORM_GENERAL_TEMPLATE_NAME
@@ -37,8 +38,9 @@ func NewTemplate() (newTemplate *Template, err error) {
 
 	defer logger.Sync()
 
-	if absPathToTemplate, err = filepath.Abs(filepath.Join(terraformDirName, generalDirName, terraformGeneralTemplateName)); err != nil {
+	if absPathToTemplate, err = filepath.Abs(filepath.Join(templatesDirName, terraformDirName, generalDirName, terraformGeneralTemplateName)); err != nil {
 		err = oopsBuilder.
+			With("templatesDirName", templatesDirName).
 			With("terraformDirName", terraformDirName).
 			With("generalDirName", generalDirName).
 			Wrapf(err, "Error occurred while crafting absolute path to %s", terraformGeneralTemplateName)
