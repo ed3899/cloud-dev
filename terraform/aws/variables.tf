@@ -12,7 +12,7 @@ variable "AWS_REGION" {
 variable "AMI_ID" {
   description = "The AMI ID to use for the EC2 instance"
   type        = string
-  default     = ""
+  default     = null
 
   validation {
     condition     = length(var.AMI_ID) > 0

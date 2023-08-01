@@ -18,17 +18,17 @@ func NewHashicorpVars() (hashicorpVars *HashicorpVars, err error) {
 	var (
 		oopsBuilder = oops.
 				Code("new_hashicorp_vars_failed")
-		packerDirName = tool.PACKER_NAME
-		awsDirName    = cloud.AWS_NAME
-		varsFileName  = hashicorp_vars.PACKER_VARS_NAME
+		terraformDirName = tool.TERRAFORM_NAME
+		awsDirName       = cloud.AWS_NAME
+		varsFileName     = hashicorp_vars.TERRAFORM_VARS_NAME
 
 		varsFile          *os.File
 		absPathToVarsFile string
 	)
 
-	if absPathToVarsFile, err = filepath.Abs(filepath.Join(packerDirName, awsDirName, varsFileName)); err != nil {
+	if absPathToVarsFile, err = filepath.Abs(filepath.Join(terraformDirName, awsDirName, varsFileName)); err != nil {
 		err = oopsBuilder.
-			With("packerDirName", packerDirName).
+			With("terraformDirName", terraformDirName).
 			With("awsDirName", awsDirName).
 			Wrapf(err, "Error occurred while crafting absolute path to %s", varsFileName)
 		return
