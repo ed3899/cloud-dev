@@ -1,9 +1,5 @@
 package general
 
-import (
-	"github.com/ed3899/kumo/common/utils"
-)
-
 type Environment struct {
 	GIT_USERNAME                          string
 	GIT_EMAIL                             string
@@ -12,5 +8,14 @@ type Environment struct {
 }
 
 func (e *Environment) IsNotValidEnvironment() (isNotValidEnvironment bool) {
-	return !utils.IsStructCompletellyFilled(e)
+	switch {
+	case e.GIT_USERNAME == "":
+		return true
+	case e.GIT_EMAIL == "":
+		return true
+	case len(e.ANSIBLE_TAGS) == 0:
+		return true
+	default:
+		return false
+	}
 }

@@ -1,9 +1,5 @@
 package aws
 
-import (
-	"github.com/ed3899/kumo/common/utils"
-)
-
 type Environment struct {
 	AWS_REGION                   string
 	AWS_INSTANCE_TYPE            string
@@ -13,5 +9,14 @@ type Environment struct {
 }
 
 func (e *Environment) IsNotValidEnvironment() (isNotValidEnvironment bool) {
-	return !utils.IsStructCompletellyFilled(e)
+	switch {
+	case e.AWS_REGION == "":
+		return true
+	case e.AWS_INSTANCE_TYPE == "":
+		return true
+	case e.AMI_ID == "":
+		return true
+	default:
+		return false
+	}
 }
