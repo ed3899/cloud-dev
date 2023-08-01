@@ -123,7 +123,7 @@ func RunCmdAndStream(cmd *exec.Cmd) (err error) {
 
 		for {
 			select {
-			// If an error occurred while copying std, send it to the main error channel and terminate the command.
+			// If an error occurred while copying std, send it to the cmdStreamErrChan and terminate the command.
 			// Keep looping because the go routine that is waiting for the command to finish
 			// will send the error to the main error channel.
 			case err := <-cmdStreamErrChan:
@@ -133,16 +133,17 @@ func RunCmdAndStream(cmd *exec.Cmd) (err error) {
 				}
 
 			// If an error occurred while waiting for the command to finish, send it to the main error channel. No need
-			// to terminate the command because it already finished.
+			// to terminate the command because it already finished. Keep looping because the go routine that is waiting
+			// for all cmd related goroutines to finish will close all the cmd related channels and send true to the
+			// done channel once the cmd related goroutines finish.
 			case err := <-cmdErrChan:
 				if err != nil {
 					err = oopsBuilder.
 						Wrapf(err, "Error occurred while waiting for '%s' completion", cmd.Path)
 					mainErrChan <- err
-					return
 				}
 
-			// If the command finished successfully, return
+			// If the command finished (regardless of being succesful or not), return
 			case done := <-cmdDoneChan:
 				if done {
 					return
