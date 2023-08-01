@@ -62,7 +62,11 @@ func Build() (err error) {
 	}
 	defer func() {
 		if err := cloudSetup.Credentials.Unset(); err != nil {
-			logger.Warn("Failed to unset credentials", zap.String("error", err.Error()))
+			logger.Warn(
+				"Failed to unset cloud credentials",
+				zap.String("error", err.Error()),
+				zap.String("cloud", cloudSetup.GetCloudName()),
+			)
 		}
 	}()
 
@@ -75,7 +79,10 @@ func Build() (err error) {
 	}
 	defer func() {
 		if err := packer.UnsetPluginPath(); err != nil {
-			logger.Warn("Failed to unset plugin path", zap.String("error", err.Error()))
+			logger.Warn(
+				"Failed to unset plugin path for packer",
+				zap.String("error", err.Error()),
+			)
 		}
 	}()
 
@@ -98,7 +105,11 @@ func Build() (err error) {
 	}
 	defer func() {
 		if err := pickedTemplate.Remove(); err != nil {
-			logger.Warn("Failed to remove temporary template", zap.String("error", err.Error()))
+			logger.Warn(
+				"Failed to remove temporary template",
+				zap.String("error", err.Error()),
+				zap.String("template", pickedTemplate.GetName()),
+			)
 		}
 	}()
 
@@ -128,7 +139,10 @@ func Build() (err error) {
 	}
 	defer func() {
 		if err := toolSetup.GoInitialDir(); err != nil {
-			logger.Warn("Failed to change back to initial directory", zap.String("error", err.Error()))
+			logger.Warn(
+				"Failed to change back to initial directory",
+				zap.String("error", err.Error()),
+			)
 		}
 	}()
 

@@ -1,7 +1,6 @@
 package workflows
 
 import (
-	"log"
 	"path/filepath"
 
 	"github.com/ed3899/kumo/binaries"
@@ -13,12 +12,15 @@ import (
 	"github.com/ed3899/kumo/templates"
 	"github.com/samber/oops"
 	"github.com/spf13/viper"
+	"go.uber.org/zap"
 )
 
 func Up() (err error) {
 	var (
 		oopsBuilder = oops.
 				Code("up_failed")
+		logger, _ = zap.NewProduction()
+
 		terraform                *binaries.Terraform
 		cloudSetup               *cloud.CloudSetup
 		toolSetup                *tool.ToolSetup
@@ -56,7 +58,15 @@ func Up() (err error) {
 			Wrapf(err, "Error occurred while setting credentials for %s", cloudSetup.GetCloudName())
 		return
 	}
-	defer cloudSetup.Credentials.Unset()
+	defer func() {
+		if err := cloudSetup.Credentials.Unset(); err != nil {
+			logger.Warn(
+				"Failed to unset credentials",
+				zap.String("error", err.Error()),
+				zap.String("cloud", cloudSetup.GetCloudName()),
+			)
+		}
+	}()
 
 	// 4. Tool setup
 	if toolSetup, err = tool.NewToolSetup(tool.Terraform, cloudSetup); err != nil {
@@ -67,7 +77,7 @@ func Up() (err error) {
 		return
 	}
 
-	// 5. Pick template
+	// 5. Pick template and defer deletion
 	if pickedTemplate, err = templates.PickTemplate(toolSetup, cloudSetup); err != nil {
 		err = oopsBuilder.
 			With("toolSetup.GetToolType()", toolSetup.GetToolType()).
@@ -75,6 +85,15 @@ func Up() (err error) {
 			Wrapf(err, "Error occurred while picking template")
 		return
 	}
+	defer func() {
+		if err := pickedTemplate.Remove(); err != nil {
+			logger.Warn(
+				"Failed to remove temporary template",
+				zap.String("error", err.Error()),
+				zap.String("template", pickedTemplate.GetName()),
+			)
+		}
+	}()
 
 	// 6. Pick hashicorp vars
 	if pickedHashicorpVars, err = hashicorp_vars.PickHashicorpVars(toolSetup, cloudSetup); err != nil {
@@ -102,11 +121,9 @@ func Up() (err error) {
 	}
 	defer func() {
 		if err := toolSetup.GoInitialDir(); err != nil {
-			log.Fatalf(
-				"%+v",
-				oopsBuilder.
-					With("toolSetup.GetToolType()", toolSetup.GetToolType()).
-					Wrapf(err, "Error occurred while changing back to initial directory"),
+			logger.Warn(
+				"Failed to change back to initial directory",
+				zap.String("error", err.Error()),
 			)
 		}
 	}()

@@ -96,7 +96,7 @@ func PickTemplate(toolSetup tool.ToolSetupI, cloudSetup cloud.CloudSetupI) (pick
 		return
 	}
 
-	// 3. Merge them
+	// 4. Merge them
 	if pickedTemplate, err = NewMergedTemplate(generalTemplate, cloudTemplate); err != nil {
 		err = oopsBuilder.
 			Wrapf(err, "Error occurred while merging general template '%v' and cloud template '%v'", generalTemplate.GetAbsPath(), cloudTemplate.GetAbsPath())
