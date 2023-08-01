@@ -10,7 +10,6 @@ import (
 	"github.com/samber/oops"
 )
 
-// TODO add context
 func Download(url, destPath string, bytesDownloadedChan chan<- int) (err error) {
 	var (
 		destDir     = filepath.Dir(destPath)

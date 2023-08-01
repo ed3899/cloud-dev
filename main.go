@@ -8,10 +8,6 @@ import (
 	"github.com/samber/oops"
 )
 
-// TODO Set ssh key file permissions to 600
-// TODO add AMI.User tag to packer ami
-// TODO add packer clean up
-// TODO add ssh config file
 func init() {
 	if utils.HostIsNotCompatible() {
 		var (
