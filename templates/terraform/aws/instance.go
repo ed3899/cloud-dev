@@ -1,7 +1,6 @@
 package aws
 
 import (
-	"log"
 	"path/filepath"
 	"text/template"
 
@@ -55,8 +54,6 @@ func NewTemplate(packerManifest templates.PackerManifestI) (newTemplate *Templat
 			Wrapf(err, "Error occurred while picking ami id to be used")
 		return
 	}
-
-	log.Printf("Picked ami id to be used: %s", pickedAmiId)
 
 	newTemplate = &Template{
 		instance:      instance,
