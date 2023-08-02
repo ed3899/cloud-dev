@@ -20,8 +20,6 @@ secrets/
 
 .env
 
-*ssh_key*
-
 .vscode
 
 .node_modules
@@ -29,12 +27,6 @@ secrets/
 bin/
 
 *manifest.json*
-
-publicIP.json
-
-ssh_config
-
-[Pp]ulumi.dev.yaml
 
 packer.exe
 
@@ -60,3 +52,5 @@ kumokey*
 ginkgo.report
 
 temp_file*
+instance_ip
+kumossh

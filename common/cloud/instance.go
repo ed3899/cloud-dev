@@ -30,12 +30,13 @@ func NewCloudSetup(cloud string) (cloudSetup *CloudSetup, err error) {
 		oopsBuilder = oops.
 			Code("new_cloud_deployment_failed").
 			With("cloud", cloud)
+		awsName = AWS_NAME
 	)
 
 	switch cloud {
-	case "aws":
+	case awsName:
 		cloudSetup = &CloudSetup{
-			cloudName: "aws",
+			cloudName: awsName,
 			cloudType: AWS,
 			Credentials: &aws.Credentials{
 				AccessKeyId:     viper.GetString("AWS.AccessKeyId"),

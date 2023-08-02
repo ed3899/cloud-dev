@@ -4,6 +4,7 @@ import (
 	"path/filepath"
 	"text/template"
 
+	"github.com/ed3899/kumo/common/ssh"
 	"github.com/ed3899/kumo/common/cloud"
 	"github.com/ed3899/kumo/common/dirs"
 	"github.com/ed3899/kumo/common/templates"
@@ -64,6 +65,10 @@ func NewTemplate(packerManifest templates.PackerManifestI) (newTemplate *Templat
 				AWS_REGION:        viper.GetString("AWS.Region"),
 				AWS_INSTANCE_TYPE: viper.GetString("AWS.EC2.Instance.Type"),
 				AMI_ID:            pickedAmiId,
+				KEY_NAME: ssh.KEY_NAME,
+				SSH_PORT: ssh.SSH_PORT,
+				IP_FILE_NAME: ssh.IP_FILE_NAME,
+				USERNAME: viper.GetString("AMI.User"),
 			},
 			Optional: &Optional{
 				AWS_EC2_INSTANCE_VOLUME_TYPE: viper.GetString("AWS.EC2.Volume.Type"),

@@ -1,7 +1,6 @@
 variable "AWS_REGION" {
   description = "The AWS region to use"
   type        = string
-  default     = "us-west-2"
 
   validation {
     condition     = length(var.AWS_REGION) > 0
@@ -12,7 +11,6 @@ variable "AWS_REGION" {
 variable "AMI_ID" {
   description = "The AMI ID to use for the EC2 instance"
   type        = string
-  default     = null
 
   validation {
     condition     = length(var.AMI_ID) > 0
@@ -28,7 +26,6 @@ variable "AMI_ID" {
 variable "AWS_INSTANCE_TYPE" {
   description = "The EC2 instance type to use"
   type        = string
-  default     = "t2.micro"
 
   validation {
     condition     = length(var.AWS_INSTANCE_TYPE) > 0
@@ -53,18 +50,57 @@ variable "AWS_EC2_INSTANCE_VOLUME_SIZE" {
   }
 }
 
-variable "allowed_ip" {
+variable "ALLOWED_IP" {
   description = "The IP address to allow SSH access from"
   type        = string
-  default     = "0.0.0.0/0"
 
   validation {
-    condition     = length(var.allowed_ip) > 0
-    error_message = "allowed_ip must be present"
+    condition     = length(var.ALLOWED_IP) > 0
+    error_message = "ALLOWED_IP must be present"
   }
 
   validation {
-    condition     = can(regex("^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}(?:/[0-9]{1,2})?$", var.allowed_ip))
-    error_message = "allowed_ip must be a valid IP address with a CIDR mask"
+    condition     = can(regex("^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}(?:/[0-9]{1,2})?$", var.ALLOWED_IP))
+    error_message = "ALLOWED_IP must be a valid IP address with a CIDR mask"
+  }
+}
+
+variable "KEY_NAME" {
+  description = "The name of the SSH key to create"
+  type        = string
+
+  validation {
+    condition     = length(var.KEY_NAME) > 0
+    error_message = "KEY_NAME must be present"
+  }
+}
+
+variable "SSH_PORT" {
+  description = "The port to use for SSH"
+  type        = number
+
+  validation {
+    condition     = var.SSH_PORT > 0
+    error_message = "SSH_PORT must be greater than 0"
+  }
+}
+
+variable "IP_FILE_NAME" {
+  description = "The file to write the EC2 instance IP address to"
+  type        = string
+
+  validation {
+    condition     = length(var.IP_FILE_NAME) > 0
+    error_message = "IP_FILE_NAME must be present"
+  }
+}
+
+variable "USERNAME" {
+  description = "The username to use for SSH"
+  type        = string
+
+  validation {
+    condition     = length(var.USERNAME) > 0
+    error_message = "USERNAME must be present"
   }
 }
