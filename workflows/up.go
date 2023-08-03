@@ -3,7 +3,7 @@ package workflows
 import (
 	"path/filepath"
 
-	"github.com/ed3899/kumo/binaries"
+	"github.com/ed3899/kumo/binaries/terraform"
 	"github.com/ed3899/kumo/common/cloud"
 	"github.com/ed3899/kumo/common/download"
 	common_hashicorp_vars "github.com/ed3899/kumo/common/hashicorp_vars"
@@ -22,7 +22,7 @@ func Up() (err error) {
 				Code("up_failed")
 		logger, _ = zap.NewProduction()
 
-		terraform                *binaries.Terraform
+		terraformInstance        *terraform.Instance
 		cloudSetup               *cloud.CloudSetup
 		toolSetup                tool.ToolSetupI
 		sshConfig                ssh.SshConfigI
@@ -32,17 +32,17 @@ func Up() (err error) {
 	)
 
 	// 1. Instantiate Terraform
-	if terraform, err = binaries.NewTerraform(); err != nil {
+	if terraformInstance, err = terraform.NewInstance(); err != nil {
 		err = oopsBuilder.
 			Wrapf(err, "Error occurred while instantiating Terraform")
 		return
 	}
 
 	// 2. Download and install if needed
-	if terraform.IsNotInstalled() {
-		if err = download.Initiate(terraform.Zip, filepath.Dir(terraform.AbsPathToExecutable)); err != nil {
+	if terraformInstance.IsNotInstalled() {
+		if err = download.Initiate(terraformInstance.Zip, filepath.Dir(terraformInstance.AbsPathToExecutable)); err != nil {
 			err = oopsBuilder.
-				Wrapf(err, "Error occurred while downloading %s", terraform.Zip.GetName())
+				Wrapf(err, "Error occurred while downloading %s", terraformInstance.Zip.GetName())
 			return
 		}
 	}
@@ -123,14 +123,14 @@ func Up() (err error) {
 	}
 
 	// 9. Initialize
-	if err = terraform.Init(); err != nil {
+	if err = terraformInstance.Init(); err != nil {
 		err = oopsBuilder.
 			Wrapf(err, "Error occurred while initializing terraform")
 		return
 	}
 
 	// 10. Apply deploy
-	if err = terraform.Up(); err != nil {
+	if err = terraformInstance.Up(); err != nil {
 		err = oopsBuilder.
 			Wrapf(err, "Error occurred while deploying terraform resources")
 		return

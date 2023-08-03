@@ -62,6 +62,7 @@ func NewToolSetup(tool ToolType, cloud cloud.CloudSetupI) (toolSetup *ToolSetup,
 		oopsBuilder = oops.
 				Code("new_tool_setup_failed").
 				With("tool", tool)
+
 		cwd string
 	)
 

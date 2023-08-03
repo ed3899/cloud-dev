@@ -1,4 +1,4 @@
-package binaries
+package terraform
 
 import (
 	"fmt"
@@ -12,13 +12,13 @@ import (
 	"github.com/samber/oops"
 )
 
-type Terraform struct {
+type Instance struct {
 	AbsPathToExecutable string
 	AbsPathToRunDir     string
 	Zip                 *download.Zip
 }
 
-func NewTerraform() (terraform *Terraform, err error) {
+func NewInstance() (instance *Instance, err error) {
 	var (
 		dependenciesDirName     = dirs.DEPENDENCIES_DIR_NAME
 		terraformName           = tool.TERRAFORM_NAME
@@ -66,7 +66,7 @@ func NewTerraform() (terraform *Terraform, err error) {
 		return
 	}
 
-	terraform = &Terraform{
+	instance = &Instance{
 		AbsPathToExecutable: absPathToTerraformExecutable,
 		AbsPathToRunDir:     absPathToTerraformRunDir,
 		Zip: &download.Zip{
@@ -80,17 +80,17 @@ func NewTerraform() (terraform *Terraform, err error) {
 	return
 }
 
-func (t *Terraform) IsInstalled() (isInstalled bool) {
-	return utils.FilePresent(t.AbsPathToExecutable)
+func (i *Instance) IsInstalled() (isInstalled bool) {
+	return utils.FilePresent(i.AbsPathToExecutable)
 }
 
-func (t *Terraform) IsNotInstalled() (isNotInstalled bool) {
-	return utils.FileNotPresent(t.AbsPathToExecutable)
+func (i *Instance) IsNotInstalled() (isNotInstalled bool) {
+	return utils.FileNotPresent(i.AbsPathToExecutable)
 }
 
-func (t *Terraform) Init() (err error) {
+func (i *Instance) Init() (err error) {
 	var (
-		cmd         = exec.Command(t.AbsPathToExecutable, "init")
+		cmd         = exec.Command(i.AbsPathToExecutable, "init")
 		oopsBuilder = oops.
 				Code("terraform_init_failed")
 	)
@@ -104,9 +104,9 @@ func (t *Terraform) Init() (err error) {
 	return
 }
 
-func (t *Terraform) Up() (err error) {
+func (i *Instance) Up() (err error) {
 	var (
-		cmd         = exec.Command(t.AbsPathToExecutable, "apply", "-auto-approve")
+		cmd         = exec.Command(i.AbsPathToExecutable, "apply", "-auto-approve")
 		oopsBuilder = oops.
 				Code("terraform_up_failed")
 	)
@@ -120,9 +120,9 @@ func (t *Terraform) Up() (err error) {
 	return
 }
 
-func (t *Terraform) Destroy() (err error) {
+func (i *Instance) Destroy() (err error) {
 	var (
-		cmd         = exec.Command(t.AbsPathToExecutable, "destroy", "-auto-approve")
+		cmd         = exec.Command(i.AbsPathToExecutable, "destroy", "-auto-approve")
 		oopsBuilder = oops.
 				Code("terraform_destroy_failed")
 	)

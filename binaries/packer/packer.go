@@ -1,4 +1,4 @@
-package binaries
+package packer
 
 import (
 	"fmt"
@@ -14,14 +14,16 @@ import (
 	"github.com/samber/oops"
 )
 
-type Packer struct {
+type Instance struct {
 	AbsPathToExecutable string
 	AbsPathToRunDir     string
 	Zip                 *download.Zip
 }
 
-func NewPacker() (packer *Packer, err error) {
+func NewInstance() (instance *Instance, err error) {
 	var (
+		oopsBuilder = oops.
+				Code("new_packer_failed")
 		dependenciesDirName    = dirs.DEPENDENCIES_DIR_NAME
 		packerName             = tool.PACKER_NAME
 		packerDirName          = packerName
@@ -30,15 +32,13 @@ func NewPacker() (packer *Packer, err error) {
 		packerZipName          = fmt.Sprintf("%s.zip", packerName)
 		currentOs, currentArch = utils.GetCurrentHostSpecs()
 		packerUrl              = utils.CreateHashicorpURL(packerName, packerVersion, currentOs, currentArch)
-		oopsBuilder            = oops.
-					Code("new_packer_failed")
 
-		absPathToKumoExecutable   string
+		absPathToKumoExecutable    string
 		absPathToKumoExecutableDir string
-		absPathToPackerExecutable string
-		absPathToPackerRunDir     string
-		absPathToPackerZip        string
-		packerZipContentLength    int64
+		absPathToPackerExecutable  string
+		absPathToPackerRunDir      string
+		absPathToPackerZip         string
+		packerZipContentLength     int64
 	)
 
 	if absPathToKumoExecutable, err = os.Executable(); err != nil {
@@ -58,7 +58,7 @@ func NewPacker() (packer *Packer, err error) {
 		return
 	}
 
-	packer = &Packer{
+	instance = &Instance{
 		AbsPathToExecutable: absPathToPackerExecutable,
 		AbsPathToRunDir:     absPathToPackerRunDir,
 		Zip: &download.Zip{
@@ -72,15 +72,15 @@ func NewPacker() (packer *Packer, err error) {
 	return
 }
 
-func (p *Packer) IsInstalled() (isInstalled bool) {
-	return utils.FilePresent(p.AbsPathToExecutable)
+func (i *Instance) IsInstalled() (isInstalled bool) {
+	return utils.FilePresent(i.AbsPathToExecutable)
 }
 
-func (p *Packer) IsNotInstalled() (isNotInstalled bool) {
-	return utils.FileNotPresent(p.AbsPathToExecutable)
+func (i *Instance) IsNotInstalled() (isNotInstalled bool) {
+	return utils.FileNotPresent(i.AbsPathToExecutable)
 }
 
-func (p *Packer) SetPluginPath(cloudSetup cloud.CloudSetupI) (err error) {
+func (i *Instance) SetPluginPath(cloudSetup cloud.CloudSetupI) (err error) {
 	var (
 		oopsBuilder = oops.
 				Code("packer_set_plugin_path_failed").
@@ -88,12 +88,12 @@ func (p *Packer) SetPluginPath(cloudSetup cloud.CloudSetupI) (err error) {
 		cloudType            = cloudSetup.GetCloudType()
 		packerPluginPathName = tool.PACKER_PLUGIN_PATH_NAME
 
-		absPluginPath        string
+		absPluginPath string
 	)
 
 	switch cloudType {
 	case cloud.AWS:
-		absPluginPath = filepath.Join(p.AbsPathToRunDir, cloud.AWS_NAME, dirs.PLUGINS_DIR_NAME)
+		absPluginPath = filepath.Join(i.AbsPathToRunDir, cloud.AWS_NAME, dirs.PLUGINS_DIR_NAME)
 
 		if err = os.Setenv(packerPluginPathName, absPluginPath); err != nil {
 			err = oopsBuilder.
@@ -111,7 +111,7 @@ func (p *Packer) SetPluginPath(cloudSetup cloud.CloudSetupI) (err error) {
 	return
 }
 
-func (p *Packer) UnsetPluginPath() (err error) {
+func (i *Instance) UnsetPluginPath() (err error) {
 	var (
 		oopsBuilder = oops.
 				Code("packer_unset_plugin_path_failed")
@@ -127,9 +127,9 @@ func (p *Packer) UnsetPluginPath() (err error) {
 	return
 }
 
-func (p *Packer) Init() (err error) {
+func (i *Instance) Init() (err error) {
 	var (
-		cmd         = exec.Command(p.AbsPathToExecutable, "init", "-upgrade", ".")
+		cmd         = exec.Command(i.AbsPathToExecutable, "init", "-upgrade", ".")
 		oopsBuilder = oops.
 				Code("packer_init_failed")
 	)
@@ -143,9 +143,9 @@ func (p *Packer) Init() (err error) {
 	return
 }
 
-func (p *Packer) Build() (err error) {
+func (i *Instance) Build() (err error) {
 	var (
-		cmd         = exec.Command(p.AbsPathToExecutable, "build", ".")
+		cmd         = exec.Command(i.AbsPathToExecutable, "build", ".")
 		oopsBuilder = oops.
 				Code("packer_build_failed")
 	)

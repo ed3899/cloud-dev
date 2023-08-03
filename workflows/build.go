@@ -3,7 +3,7 @@ package workflows
 import (
 	"path/filepath"
 
-	"github.com/ed3899/kumo/binaries"
+	"github.com/ed3899/kumo/binaries/packer"
 	"github.com/ed3899/kumo/common/cloud"
 	"github.com/ed3899/kumo/common/download"
 	common_hashicorp_vars "github.com/ed3899/kumo/common/hashicorp_vars"
@@ -21,7 +21,7 @@ func Build() (err error) {
 				Code("build_failed")
 		logger, _ = zap.NewProduction()
 
-		packer                   *binaries.Packer
+		packerInstance           *packer.Instance
 		cloudSetup               *cloud.CloudSetup
 		toolSetup                *tool.ToolSetup
 		pickedTemplate           *templates.MergedTemplate
@@ -32,17 +32,17 @@ func Build() (err error) {
 	defer logger.Sync()
 
 	// 1. Instantiate Packer
-	if packer, err = binaries.NewPacker(); err != nil {
+	if packerInstance, err = packer.NewInstance(); err != nil {
 		err = oopsBuilder.
 			Wrapf(err, "Error occurred while instantiating Packer")
 		return
 	}
 
 	// 2. Download and install if needed
-	if packer.IsNotInstalled() {
-		if err = download.Initiate(packer.Zip, filepath.Dir(packer.AbsPathToExecutable)); err != nil {
+	if packerInstance.IsNotInstalled() {
+		if err = download.Initiate(packerInstance.Zip, filepath.Dir(packerInstance.AbsPathToExecutable)); err != nil {
 			err = oopsBuilder.
-				Wrapf(err, "Error occurred while downloading %s", packer.Zip.GetName())
+				Wrapf(err, "Error occurred while downloading %s", packerInstance.Zip.GetName())
 			return
 		}
 	}
@@ -71,14 +71,14 @@ func Build() (err error) {
 	}()
 
 	// b. Set packer plugin paths and defer unset
-	if err = packer.SetPluginPath(cloudSetup); err != nil {
+	if err = packerInstance.SetPluginPath(cloudSetup); err != nil {
 		err = oopsBuilder.
 			With("cloudSetup.GetCloudName()", cloudSetup.GetCloudName()).
 			Wrapf(err, "Error occurred while setting plugin path for packer")
 		return
 	}
 	defer func() {
-		if err := packer.UnsetPluginPath(); err != nil {
+		if err := packerInstance.UnsetPluginPath(); err != nil {
 			logger.Warn(
 				"Failed to unset plugin path for packer",
 				zap.String("error", err.Error()),
@@ -147,7 +147,7 @@ func Build() (err error) {
 	}()
 
 	// 9. Initialize
-	if err = packer.Init(); err != nil {
+	if err = packerInstance.Init(); err != nil {
 		err = oopsBuilder.
 			With("toolSetup.GetToolType()", toolSetup.GetToolType()).
 			Wrapf(err, "Error occurred while initializing packer")
@@ -155,7 +155,7 @@ func Build() (err error) {
 	}
 
 	// 10. Build
-	if err = packer.Build(); err != nil {
+	if err = packerInstance.Build(); err != nil {
 		err = oopsBuilder.
 			Wrapf(err, "Error occurred while building packer")
 		return
