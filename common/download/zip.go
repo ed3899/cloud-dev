@@ -3,6 +3,7 @@ package download
 import (
 	"os"
 
+	"github.com/ed3899/kumo/common/tool"
 	"github.com/ed3899/kumo/common/utils"
 	"github.com/samber/oops"
 	"github.com/vbauerster/mpb/v8"
@@ -16,6 +17,29 @@ type Zip struct {
 	ContentLength int64
 	DownloadBar   *mpb.Bar
 	ExtractionBar *mpb.Bar
+}
+
+func New(toolConfig tool.ConfigI) (z *Zip, err error) {
+	var (
+		oopsBuilder = oops.Code("zip_new_failed")
+
+		contentLength int64
+	)
+
+	if contentLength, err = toolConfig.GetZipContentLength(); err != nil {
+		err = oopsBuilder.
+			Wrapf(err, "failed to get zip content length")
+		return
+	}
+
+	z = &Zip{
+		Name:          toolConfig.GetZipName(),
+		AbsPath:       toolConfig.GetZipAbsPath(),
+		URL:           toolConfig.GetUrl(),
+		ContentLength: contentLength,
+	}
+
+	return
 }
 
 func (z *Zip) GetName() (name string) {

@@ -11,9 +11,9 @@ const (
 	TERRAFORM_DEFAULT_ALLOWED_IP = "0.0.0.0"
 )
 
-type ToolType int
+type Type int
 
 const (
-	Packer ToolType = iota
+	Packer Type = iota
 	Terraform
 )

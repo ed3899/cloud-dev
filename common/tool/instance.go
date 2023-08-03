@@ -1,24 +1,26 @@
 package tool
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 
 	"github.com/ed3899/kumo/common/cloud"
 	"github.com/ed3899/kumo/common/dirs"
+	"github.com/ed3899/kumo/common/utils"
 	"github.com/samber/oops"
 )
 
-type Config struct {
-	toolType            ToolType
-	toolName            string
-	toolVersion         string
+type Tool struct {
+	type_               Type
+	name                string
+	version             string
+	dir                 string
 	dependenciesDirName string
 	initialDir          string
-	toolDir             string
 }
 
-func NewConfig(toolType ToolType, cloudSetup cloud.CloudSetupI) (toolConfig *Config, err error) {
+func New(toolType Type, cloudSetup cloud.CloudSetupI) (toolConfig *Tool, err error) {
 	var (
 		oopsBuilder = oops.
 				Code("new_tool_setup_failed").
@@ -35,23 +37,23 @@ func NewConfig(toolType ToolType, cloudSetup cloud.CloudSetupI) (toolConfig *Con
 
 	switch toolType {
 	case Packer:
-		toolConfig = &Config{
+		toolConfig = &Tool{
 			dependenciesDirName: dirs.DEPENDENCIES_DIR_NAME,
-			toolType:            Packer,
-			toolName:            PACKER_NAME,
-			toolVersion:         PACKER_VERSION,
+			type_:               Packer,
+			name:                PACKER_NAME,
+			version:             PACKER_VERSION,
 			initialDir:          cwd,
-			toolDir:             filepath.Join(PACKER_NAME, cloudSetup.GetCloudName()),
+			dir:                 filepath.Join(PACKER_NAME, cloudSetup.GetCloudName()),
 		}
 
 	case Terraform:
-		toolConfig = &Config{
+		toolConfig = &Tool{
 			dependenciesDirName: dirs.DEPENDENCIES_DIR_NAME,
-			toolType:            Terraform,
-			toolName:            TERRAFORM_NAME,
-			toolVersion:         TERRAFORM_VERSION,
+			type_:               Terraform,
+			name:                TERRAFORM_NAME,
+			version:             TERRAFORM_VERSION,
 			initialDir:          cwd,
-			toolDir:             filepath.Join(TERRAFORM_NAME, cloudSetup.GetCloudName()),
+			dir:                 filepath.Join(TERRAFORM_NAME, cloudSetup.GetCloudName()),
 		}
 
 	default:
@@ -63,54 +65,91 @@ func NewConfig(toolType ToolType, cloudSetup cloud.CloudSetupI) (toolConfig *Con
 	return
 }
 
-func (c *Config) GetDependenciesDirName() (dependenciesDirName string) {
-	return c.dependenciesDirName
+func (t *Tool) GetDependenciesDirName() (dependenciesDirName string) {
+	return t.dependenciesDirName
 }
 
-func (c *Config) GetToolType() (toolType ToolType) {
-	return c.toolType
+func (t *Tool) GetType() (toolType Type) {
+	return t.type_
 }
 
-func (c *Config) GetToolName() (toolName string) {
-	return c.toolName
+func (t *Tool) GetName() (toolName string) {
+	return t.name
 }
 
-func (c *Config) GetToolVersion() (toolVersion string) {
-	return c.toolVersion
+func (t *Tool) GetZipName() (toolZipName string) {
+	return fmt.Sprintf("%s.zip", t.name)
 }
 
-func (c *Config) GetInitialDir() (initialDir string) {
-	return c.initialDir
+func (t *Tool) GetZipAbsPath() (toolZipAbsPath string) {
+	return filepath.Join(t.dependenciesDirName, t.name, fmt.Sprintf("%s.zip", t.name))
 }
 
-func (c *Config) GetToolDir() (toolDir string) {
-	return c.toolDir
-}
-
-func (c *Config) GoInitialDir() (err error) {
+func (t *Tool) GetZipContentLength() (toolZipContentLength int64, err error) {
 	var (
 		oopsBuilder = oops.
-			Code("go_initial_dir_failed")
+				Code("get_zip_content_length_failed")
+		currentOs, currentArch = utils.GetCurrentHostSpecs()
+		url                    = utils.CreateHashicorpURL(t.name, t.version, currentOs, currentArch)
 	)
 
-	if err = os.Chdir(c.initialDir); err != nil {
+	if toolZipContentLength, err = utils.GetContentLength(url); err != nil {
 		err = oopsBuilder.
-			Wrapf(err, "Error occurred while changing directory to %s", c.initialDir)
+			Wrapf(err, "failed to get content length for: %s", url)
 		return
 	}
 
 	return
 }
 
-func (c *Config) GoTargetDir() (err error) {
+func (t *Tool) GetExecutableName() (toolExecutableName string) {
+	return fmt.Sprintf("%s.exe", t.name)
+}
+
+func (t *Tool) GetVersion() (toolVersion string) {
+	return t.version
+}
+
+func (t *Tool) GetInitialDir() (initialDir string) {
+	return t.initialDir
+}
+
+func (t *Tool) GetDir() (toolDir string) {
+	return t.dir
+}
+
+func (t *Tool) GetUrl() (toolUrl string) {
+	var (
+		currentOs, currentArch = utils.GetCurrentHostSpecs()
+	)
+
+	return utils.CreateHashicorpURL(t.name, t.version, currentOs, currentArch)
+}
+
+func (t *Tool) GoInitialDir() (err error) {
+	var (
+		oopsBuilder = oops.
+			Code("go_initial_dir_failed")
+	)
+
+	if err = os.Chdir(t.initialDir); err != nil {
+		err = oopsBuilder.
+			Wrapf(err, "Error occurred while changing directory to %s", t.initialDir)
+		return
+	}
+
+	return
+}
+
+func (t *Tool) GoDir() (err error) {
 	var (
 		oopsBuilder = oops.
 			Code("go_target_dir_failed")
 	)
 
-	if err = os.Chdir(c.toolDir); err != nil {
+	if err = os.Chdir(t.dir); err != nil {
 		err = oopsBuilder.
-			Wrapf(err, "Error occurred while changing directory to %s", c.toolDir)
+			Wrapf(err, "Error occurred while changing directory to %s", t.dir)
 		return
 	}
 

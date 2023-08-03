@@ -1,4 +1,5 @@
 package dependency
+
 import (
 	"fmt"
 	"os"
@@ -15,7 +16,7 @@ type Config struct {
 	toolVersion         string
 }
 
-func NewConfig(toolType tool.ToolType) (config *Config, err error) {
+func NewConfig(toolType tool.Type) (config *Config, err error) {
 	var (
 		oopsBuilder = oops.
 				Code("new_config_failed").
