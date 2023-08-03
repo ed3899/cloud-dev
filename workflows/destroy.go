@@ -6,6 +6,7 @@ import (
 	"github.com/ed3899/kumo/binaries"
 	"github.com/ed3899/kumo/common/cloud"
 	"github.com/ed3899/kumo/common/download"
+	"github.com/ed3899/kumo/common/ssh"
 	"github.com/ed3899/kumo/common/tool"
 	"github.com/samber/oops"
 	"github.com/spf13/viper"
@@ -20,6 +21,7 @@ func Destroy() (err error) {
 
 		terraform                *binaries.Terraform
 		cloudSetup               *cloud.CloudSetup
+		sshConfig                ssh.SshConfigI
 		toolSetup                *tool.ToolSetup
 		uncheckedCloudFromConfig string
 	)
@@ -72,32 +74,57 @@ func Destroy() (err error) {
 		return
 	}
 
-	// 5. Change to the right directory and defer changing back
+	// 5. Instantiate ssh config
+	if sshConfig, err = ssh.NewSshConfig(toolSetup, cloudSetup); err != nil {
+		logger.Warn(
+			"Failed to instantiate ssh config",
+			zap.String("error", err.Error()),
+			zap.Any("toolSetup.GetToolType()", toolSetup.GetToolType()),
+			zap.String("cloudSetup.GetCloudName()", cloudSetup.GetCloudName()),
+		)
+		err = nil
+		return
+	}
+
+	// 6. Remove ssh config
+	if err = sshConfig.Remove(); err != nil {
+		logger.Warn(
+			"Failed to remove ssh config",
+			zap.String("error", err.Error()),
+			zap.String("sshConfig.GetAbsPath()", sshConfig.GetAbsPath()),
+		)
+		err = nil
+		return
+	}
+
+	// 7. Change to the target directory
 	if err = toolSetup.GoTargetDir(); err != nil {
 		err = oopsBuilder.
 			Wrapf(err, "Error occurred while changing to target directory")
 		return
 	}
-	defer func() {
-		if err := toolSetup.GoInitialDir(); err != nil {
-			logger.Warn(
-				"Failed to change back to initial directory",
-				zap.String("error", err.Error()),
-			)
-		}
-	}()
 
-	// 6. Initialize
+	// 8. Initialize
 	if err = terraform.Init(); err != nil {
 		err = oopsBuilder.
 			Wrapf(err, "Error occurred while initializing terraform")
 		return
 	}
 
-	// 7. Destroy
+	// 9. Destroy
 	if err = terraform.Destroy(); err != nil {
 		err = oopsBuilder.
 			Wrapf(err, "Error occurred while destroying terraform resources")
+		return
+	}
+
+	// 10. Change back to the initial directory
+	if err = toolSetup.GoInitialDir(); err != nil {
+		logger.Warn(
+			"Failed to change back to initial directory",
+			zap.String("error", err.Error()),
+		)
+		err = nil
 		return
 	}
 

@@ -18,6 +18,10 @@ func (ts *ToolSetup) GetToolType() (toolType ToolType) {
 	return ts.toolType
 }
 
+func (ts *ToolSetup) GetInitialDir() (initialDir string) {
+	return ts.initialDir
+}
+
 func (ts *ToolSetup) GoInitialDir() (err error) {
 	var (
 		oopsBuilder = oops.

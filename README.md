@@ -443,12 +443,11 @@ Our aim is to strike a balance between simplicity and security, providing you wi
         HostName 52.10.25.215
         IdentityFile "D:\Documents\DevEnvironments\Cloud\Jammy64\ssh_key"
         User dev
-        User 22
-        UserKnownHostsFile /dev/null
+        Port 22
         StrictHostKeyChecking no
         PasswordAuthentication no
         IdentitiesOnly yes
-        LogLevel FATAL
+        LogLevel INFO
       ```
 
   5. Save the SSH config file after adding the configuration.

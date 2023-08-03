@@ -6,6 +6,10 @@ type Required struct {
 	AWS_REGION        string
 	AWS_INSTANCE_TYPE string
 	AMI_ID            string
+	KEY_NAME string
+	SSH_PORT int
+	IP_FILE_NAME string
+	USERNAME string
 }
 
 type Optional struct {
