@@ -20,7 +20,7 @@ type Instance struct {
 	Zip                 *download.Zip
 }
 
-func NewInstance() (instance *Instance, err error) {
+func NewInstance(config ConfigI) (instance *Instance, err error) {
 	var (
 		oopsBuilder = oops.
 				Code("new_packer_failed")
@@ -30,8 +30,8 @@ func NewInstance() (instance *Instance, err error) {
 		packerVersion          = tool.PACKER_VERSION
 		packerExecutableName   = fmt.Sprintf("%s.exe", packerName)
 		packerZipName          = fmt.Sprintf("%s.zip", packerName)
-		currentOs, currentArch = utils.GetCurrentHostSpecs()
-		packerUrl              = utils.CreateHashicorpURL(packerName, packerVersion, currentOs, currentArch)
+		currentOs, currentArch = config.GetCurrentHostSpecs()
+		packerUrl              = config.CreateHashicorpURL(packerName, packerVersion, currentOs, currentArch)
 
 		absPathToKumoExecutable    string
 		absPathToKumoExecutableDir string
@@ -41,7 +41,7 @@ func NewInstance() (instance *Instance, err error) {
 		packerZipContentLength     int64
 	)
 
-	if absPathToKumoExecutable, err = os.Executable(); err != nil {
+	if absPathToKumoExecutable, err = config.GetKumoExecutableAbsPath(); err != nil {
 		err = oopsBuilder.
 			Wrapf(err, "failed to create absolute path to kumo executable")
 		return
@@ -52,7 +52,7 @@ func NewInstance() (instance *Instance, err error) {
 	absPathToPackerRunDir = filepath.Join(absPathToKumoExecutableDir, packerDirName)
 	absPathToPackerZip = filepath.Join(absPathToKumoExecutableDir, dependenciesDirName, packerDirName, packerZipName)
 
-	if packerZipContentLength, err = utils.GetContentLength(packerUrl); err != nil {
+	if packerZipContentLength, err = config.GetContentLength(packerUrl); err != nil {
 		err = oopsBuilder.
 			Wrapf(err, "failed to get content length for: %s", packerUrl)
 		return

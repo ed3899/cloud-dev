@@ -32,7 +32,7 @@ func Build() (err error) {
 	defer logger.Sync()
 
 	// 1. Instantiate Packer
-	if packerInstance, err = packer.NewInstance(); err != nil {
+	if packerInstance, err = packer.NewInstance(packer.Config{}); err != nil {
 		err = oopsBuilder.
 			Wrapf(err, "Error occurred while instantiating Packer")
 		return
