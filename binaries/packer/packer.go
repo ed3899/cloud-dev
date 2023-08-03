@@ -1,11 +1,11 @@
 package packer
 
 import (
-	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
 
+	"github.com/ed3899/kumo/binaries"
 	"github.com/ed3899/kumo/common/cloud"
 	"github.com/ed3899/kumo/common/dirs"
 	"github.com/ed3899/kumo/common/download"
@@ -20,16 +20,16 @@ type Instance struct {
 	Zip                 *download.Zip
 }
 
-func NewInstance(config ConfigI) (instance *Instance, err error) {
+func NewInstance(config binaries.ConfigI) (instance *Instance, err error) {
 	var (
 		oopsBuilder = oops.
 				Code("new_packer_failed")
-		dependenciesDirName    = dirs.DEPENDENCIES_DIR_NAME
-		packerName             = tool.PACKER_NAME
+		dependenciesDirName    = config.GetDependenciesDirName()
+		packerName             = config.GetToolName()
 		packerDirName          = packerName
-		packerVersion          = tool.PACKER_VERSION
-		packerExecutableName   = fmt.Sprintf("%s.exe", packerName)
-		packerZipName          = fmt.Sprintf("%s.zip", packerName)
+		packerVersion          = config.GetToolVersion()
+		packerExecutableName   = config.GetToolExecutableName()
+		packerZipName          = config.GetToolZipName()
 		currentOs, currentArch = config.GetCurrentHostSpecs()
 		packerUrl              = config.CreateHashicorpURL(packerName, packerVersion, currentOs, currentArch)
 

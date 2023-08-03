@@ -3,6 +3,7 @@ package workflows
 import (
 	"path/filepath"
 
+	"github.com/ed3899/kumo/binaries"
 	"github.com/ed3899/kumo/binaries/packer"
 	"github.com/ed3899/kumo/common/cloud"
 	"github.com/ed3899/kumo/common/download"
@@ -21,6 +22,7 @@ func Build() (err error) {
 				Code("build_failed")
 		logger, _ = zap.NewProduction()
 
+		packerConfig             binaries.ConfigI
 		packerInstance           *packer.Instance
 		cloudSetup               *cloud.CloudSetup
 		toolSetup                *tool.ToolSetup
@@ -31,8 +33,15 @@ func Build() (err error) {
 
 	defer logger.Sync()
 
+	// 0. Instantiate config
+	if packerConfig, err = binaries.NewConfig(tool.Packer); err != nil {
+		err = oopsBuilder.
+			Wrapf(err, "Error occurred while instantiating for tool %#v", tool.Packer)
+		return
+	}
+
 	// 1. Instantiate Packer
-	if packerInstance, err = packer.NewInstance(packer.Config{}); err != nil {
+	if packerInstance, err = packer.NewInstance(packerConfig); err != nil {
 		err = oopsBuilder.
 			Wrapf(err, "Error occurred while instantiating Packer")
 		return

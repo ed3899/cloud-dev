@@ -1,8 +1,12 @@
-package packer
+package binaries
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/ed3899/kumo/common/dirs"
 	"github.com/ed3899/kumo/common/tool"
+	"github.com/ed3899/kumo/common/utils"
 	"github.com/samber/oops"
 )
 
@@ -66,18 +70,38 @@ func NewConfig(toolType tool.ToolType) (config *Config, err error) {
 	return
 }
 
+func (c *Config) GetDependenciesDirName() (dependenciesDirName string) {
+	return c.dependenciesDirName
+}
+
+func (c *Config) GetToolName() (toolName string) {
+	return c.toolName
+}
+
+func (c *Config) GetToolVersion() (toolVersion string) {
+	return c.toolVersion
+}
+
+func (c *Config) GetToolExecutableName() (toolExecutableName string) {
+	return fmt.Sprintf("%s.exe", c.toolName)
+}
+
+func (c *Config) GetToolZipName() (toolZipName string) {
+	return fmt.Sprintf("%s.zip", c.toolName)
+}
+
 func (c *Config) GetKumoExecutableAbsPath() (absPathToKumoExecutable string, err error) {
-	return
+	return os.Executable()
 }
 
 func (c *Config) GetCurrentHostSpecs() (currentOs string, currentArch string) {
-	return
+	return utils.GetCurrentHostSpecs()
 }
 
 func (c *Config) CreateHashicorpURL(toolName string, toolVersion string, currentOs string, currentArch string) (url string) {
-	return
+	return utils.CreateHashicorpURL(toolName, toolVersion, currentOs, currentArch)
 }
 
 func (c *Config) GetContentLength(url string) (contentLength int64, err error) {
-	return
+	return utils.GetContentLength(url)
 }
