@@ -14,7 +14,12 @@ type Binary struct {
 
 func New(kumoExecAbsPath string) (binary *Binary) {
 	return &Binary{
-		absPath: filepath.Join(kumoExecAbsPath, dirs.DEPENDENCIES_DIR_NAME, tool_config.PACKER_NAME, fmt.Sprintf("%s.exe", tool_config.PACKER_NAME)),
+		absPath: filepath.Join(
+			kumoExecAbsPath,
+			dirs.DEPENDENCIES_DIR_NAME,
+			tool_config.PACKER_NAME,
+			fmt.Sprintf("%s.exe", tool_config.PACKER_NAME),
+		),
 	}
 }
 
