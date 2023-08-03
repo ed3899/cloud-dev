@@ -1,11 +1,11 @@
-package tool
+package tool_config
 
 import (
 	"fmt"
 	"os"
 	"path/filepath"
 
-	"github.com/ed3899/kumo/common/cloud"
+	"github.com/ed3899/kumo/common/cloud_config"
 	"github.com/ed3899/kumo/common/dirs"
 	"github.com/ed3899/kumo/common/utils"
 	"github.com/samber/oops"
@@ -20,7 +20,7 @@ type Tool struct {
 	initialDir          string
 }
 
-func New(toolType Type, cloudConfig cloud.ConfigI) (toolConfig *Tool, err error) {
+func New(toolType Type, cloudConfig cloud_config.CloudI) (toolConfig *Tool, err error) {
 	var (
 		oopsBuilder = oops.
 				Code("new_tool_setup_failed").
@@ -71,10 +71,6 @@ func (t *Tool) GetDependenciesDirName() (dependenciesDirName string) {
 
 func (t *Tool) GetType() (toolType Type) {
 	return t.type_
-}
-
-func (t *Tool) GetName() (toolName string) {
-	return t.name
 }
 
 func (t *Tool) GetZipName() (toolZipName string) {

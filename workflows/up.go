@@ -26,7 +26,7 @@ func Up() (err error) {
 		terraformConfig          binaries.ConfigI
 		terraformInstance        *terraform.Instance
 		cloudSetup               *cloud.Cloud
-		toolSetup                tool.ConfigI
+		toolSetup                tool.ToolI
 		sshConfig                ssh.SshConfigI
 		pickedTemplate           *templates.MergedTemplate
 		pickedHashicorpVars      common_hashicorp_vars.HashicorpVarsI
@@ -60,7 +60,7 @@ func Up() (err error) {
 
 	// 3. Cloud setup
 	uncheckedCloudFromConfig = viper.GetString("Cloud")
-	if cloudSetup, err = cloud.NewConfig(uncheckedCloudFromConfig); err != nil {
+	if cloudSetup, err = cloud.New(uncheckedCloudFromConfig); err != nil {
 		err = oopsBuilder.
 			Wrapf(err, "Error occurred while instantiating CloudSetup for %s", uncheckedCloudFromConfig)
 		return

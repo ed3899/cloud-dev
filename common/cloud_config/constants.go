@@ -1,4 +1,4 @@
-package cloud
+package cloud_config
 
 type Type int
 

@@ -1,4 +1,4 @@
-package tool
+package tool_config
 
 const (
 	PACKER_NAME             = "packer"

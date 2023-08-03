@@ -80,7 +80,7 @@ func (i *Instance) IsNotInstalled() (isNotInstalled bool) {
 	return utils.FileNotPresent(i.AbsPathToExecutable)
 }
 
-func (i *Instance) SetPluginPath(cloudSetup cloud.ConfigI) (err error) {
+func (i *Instance) SetPluginPath(cloudSetup cloud.CloudI) (err error) {
 	var (
 		oopsBuilder = oops.
 				Code("packer_set_plugin_path_failed").

@@ -1,7 +1,7 @@
-package cloud
+package cloud_config
 
 import (
-	"github.com/ed3899/kumo/common/cloud/aws"
+	"github.com/ed3899/kumo/common/cloud_config/aws"
 	"github.com/samber/oops"
 	"github.com/spf13/viper"
 )
@@ -12,20 +12,12 @@ type Credentials interface {
 }
 
 type Cloud struct {
-	name   string
-	type_   Type
+	name        string
+	type_       Type
 	Credentials Credentials
 }
 
-func (c *Cloud) GetName() (cloudName string) {
-	return c.name
-}
-
-func (c *Cloud) Type() (cloudType Type) {
-	return c.type_
-}
-
-func NewConfig(cloud string) (cloudConfig *Cloud, err error) {
+func New(cloud string) (cloudConfig *Cloud, err error) {
 	var (
 		oopsBuilder = oops.
 				Code("new_cloud_deployment_failed").
@@ -36,7 +28,7 @@ func NewConfig(cloud string) (cloudConfig *Cloud, err error) {
 	switch cloud {
 	case awsName:
 		cloudConfig = &Cloud{
-			name: awsName,
+			name:  awsName,
 			type_: AWS,
 			Credentials: &aws.Credentials{
 				AccessKeyId:     viper.GetString("AWS.AccessKeyId"),
@@ -51,4 +43,12 @@ func NewConfig(cloud string) (cloudConfig *Cloud, err error) {
 	}
 
 	return
+}
+
+func (c *Cloud) GetName() (cloudName string) {
+	return c.name
+}
+
+func (c *Cloud) Type() (cloudType Type) {
+	return c.type_
 }

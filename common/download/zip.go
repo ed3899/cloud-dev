@@ -2,6 +2,7 @@ package download
 
 import (
 	"os"
+	"path/filepath"
 
 	"github.com/ed3899/kumo/common/tool"
 	"github.com/ed3899/kumo/common/utils"
@@ -19,7 +20,7 @@ type Zip struct {
 	ExtractionBar *mpb.Bar
 }
 
-func New(toolConfig tool.ConfigI) (z *Zip, err error) {
+func New(toolConfig tool.ToolI) (z *Zip, err error) {
 	var (
 		oopsBuilder = oops.Code("zip_new_failed")
 
@@ -33,7 +34,7 @@ func New(toolConfig tool.ConfigI) (z *Zip, err error) {
 	}
 
 	z = &Zip{
-		Name:          toolConfig.GetZipName(),
+		Name:          filepath.Base(toolConfig.GetZipAbsPath()),
 		AbsPath:       toolConfig.GetZipAbsPath(),
 		URL:           toolConfig.GetUrl(),
 		ContentLength: contentLength,

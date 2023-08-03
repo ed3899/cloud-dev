@@ -58,7 +58,7 @@ func Build() (err error) {
 
 	// 3. Cloud setup
 	uncheckedCloudFromConfig = viper.GetString("Cloud")
-	if cloudSetup, err = cloud.NewConfig(uncheckedCloudFromConfig); err != nil {
+	if cloudSetup, err = cloud.New(uncheckedCloudFromConfig); err != nil {
 		err = oopsBuilder.
 			Wrapf(err, "Error occurred while instantiating CloudSetup for %s", uncheckedCloudFromConfig)
 		return

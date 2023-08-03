@@ -1,10 +1,9 @@
-package tool
+package tool_config
 
-type ConfigI interface {
+type ToolI interface {
 	GetDependenciesDirName() (dependenciesDirName string)
 	GetType() (toolType Type)
 	GetName() (toolName string)
-	GetZipName() (toolZipName string)
 	GetZipAbsPath() (toolZipAbsPath string)
 	GetZipContentLength() (toolZipContentLength int64, err error)
 	GetExecutableName() (toolExecutableName string)

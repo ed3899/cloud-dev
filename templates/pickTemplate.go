@@ -11,7 +11,7 @@ import (
 	"github.com/samber/oops"
 )
 
-func PickTemplate(toolSetup tool.ConfigI, cloudSetup cloud.ConfigI) (pickedTemplate *MergedTemplate, err error) {
+func PickTemplate(toolSetup tool.ToolI, cloudSetup cloud.CloudI) (pickedTemplate *MergedTemplate, err error) {
 	var (
 		oopsBuilder = oops.
 				Code("pick_template_failed")
