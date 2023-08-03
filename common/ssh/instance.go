@@ -30,7 +30,7 @@ type SshConfig struct {
 	contents *Contents
 }
 
-func NewSshConfig(toolSetup tool.ToolSetupI, cloudSetup cloud.CloudSetupI) (sshConfig *SshConfig, err error) {
+func NewSshConfig(toolSetup tool.ConfigI, cloudSetup cloud.CloudSetupI) (sshConfig *SshConfig, err error) {
 	var (
 		oopsBuilder = oops.
 				Code("new_ssh_config_failed").

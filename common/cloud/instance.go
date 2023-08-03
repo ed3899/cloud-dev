@@ -11,31 +11,31 @@ type Credentials interface {
 	Unset() error
 }
 
-type CloudSetup struct {
+type Config struct {
 	cloudName   string
 	cloudType   CloudType
 	Credentials Credentials
 }
 
-func (cs *CloudSetup) GetCloudName() (cloudName string) {
-	return cs.cloudName
+func (c *Config) GetCloudName() (cloudName string) {
+	return c.cloudName
 }
 
-func (cs *CloudSetup) GetCloudType() (cloudType CloudType) {
-	return cs.cloudType
+func (c *Config) GetCloudType() (cloudType CloudType) {
+	return c.cloudType
 }
 
-func NewCloudSetup(cloud string) (cloudSetup *CloudSetup, err error) {
+func NewConfig(cloud string) (cloudConfig *Config, err error) {
 	var (
 		oopsBuilder = oops.
-			Code("new_cloud_deployment_failed").
-			With("cloud", cloud)
+				Code("new_cloud_deployment_failed").
+				With("cloud", cloud)
 		awsName = AWS_NAME
 	)
 
 	switch cloud {
 	case awsName:
-		cloudSetup = &CloudSetup{
+		cloudConfig = &Config{
 			cloudName: awsName,
 			cloudType: AWS,
 			Credentials: &aws.Credentials{

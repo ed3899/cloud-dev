@@ -22,7 +22,7 @@ func Destroy() (err error) {
 
 		terraformConfig          binaries.ConfigI
 		terraformInstance        *terraform.Instance
-		cloudSetup               *cloud.CloudSetup
+		cloudSetup               *cloud.Config
 		sshConfig                ssh.SshConfigI
 		toolSetup                *tool.Config
 		uncheckedCloudFromConfig string
@@ -55,7 +55,7 @@ func Destroy() (err error) {
 
 	// 3. Cloud setup
 	uncheckedCloudFromConfig = viper.GetString("Cloud")
-	if cloudSetup, err = cloud.NewCloudSetup(uncheckedCloudFromConfig); err != nil {
+	if cloudSetup, err = cloud.NewConfig(uncheckedCloudFromConfig); err != nil {
 		err = oopsBuilder.
 			Wrapf(err, "Error occurred while instantiating CloudSetup for %s", uncheckedCloudFromConfig)
 		return

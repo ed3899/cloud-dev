@@ -9,7 +9,7 @@ import (
 	"github.com/samber/oops"
 )
 
-func PickHashicorpVars(toolSetup tool.ToolSetupI, cloudSetup cloud.CloudSetupI) (pickedHashicorpVars hashicorp_vars.HashicorpVarsI, err error) {
+func PickHashicorpVars(toolSetup tool.ConfigI, cloudSetup cloud.CloudSetupI) (pickedHashicorpVars hashicorp_vars.HashicorpVarsI, err error) {
 	var (
 		oopsBuilder = oops.
 				Code("pick_hashicorp_vars_failed").

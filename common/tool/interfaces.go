@@ -1,8 +1,12 @@
 package tool
 
-type ToolSetupI interface {
-	GetToolType() ToolType
-	GetInitialDir() string
-	GoInitialDir() error
-	GoTargetDir() error
+type ConfigI interface {
+	GetDependenciesDirName() (dependenciesDirName string)
+	GetToolType() (toolType ToolType)
+	GetToolName() (toolName string)
+	GetToolVersion() (toolVersion string)
+	GetInitialDir() (initialDir string)
+	GetToolDir() (toolDir string)
+	GoInitialDir() (err error)
+	GoTargetDir() (err error)
 }
