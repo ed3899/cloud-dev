@@ -69,7 +69,7 @@ func (t *Tool) DependenciesDirName() (dependenciesDirName string) {
 	return t.dependenciesDirName
 }
 
-func (t *Tool) Type() (toolType Kind) {
+func (t *Tool) Kind() (toolKind Kind) {
 	return t.kind
 }
 
@@ -118,7 +118,7 @@ func (t *Tool) Dir() (toolDir string) {
 	return t.dir
 }
 
-func (t *Tool) GetUrl() (toolUrl string) {
+func (t *Tool) Url() (toolUrl string) {
 	var (
 		currentOs, currentArch = utils.GetCurrentHostSpecs()
 	)

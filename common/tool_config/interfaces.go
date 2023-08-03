@@ -1,16 +1,16 @@
 package tool_config
 
 type ToolI interface {
-	GetDependenciesDirName() (dependenciesDirName string)
-	GetType() (toolType Kind)
-	GetName() (toolName string)
-	GetZipAbsPath() (toolZipAbsPath string)
-	GetZipContentLength() (toolZipContentLength int64, err error)
-	GetExecutableName() (toolExecutableName string)
-	GetVersion() (toolVersion string)
-	GetInitialDir() (initialDir string)
-	GetDir() (toolDir string)
-	GetUrl() (toolUrl string)
+	DependenciesDirName() (dependenciesDirName string)
+	Kind() (toolKind Kind)
+	Name() (toolName string)
+	ZipAbsPath() (toolZipAbsPath string)
+	ZipContentLength() (toolZipContentLength int64, err error)
+	ExecutableName() (toolExecutableName string)
+	Version() (toolVersion string)
+	InitialDir() (initialDir string)
+	Dir() (toolDir string)
+	Url() (toolUrl string)
 	GoInitialDir() (err error)
 	GoDir() (err error)
 }
