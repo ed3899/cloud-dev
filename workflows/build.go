@@ -3,9 +3,11 @@ package workflows
 import (
 	"path/filepath"
 
+	"github.com/ed3899/kumo/binaries"
+	"github.com/ed3899/kumo/binaries/packer"
 	"github.com/ed3899/kumo/common/cloud_config"
 	"github.com/ed3899/kumo/common/cloud_credentials"
-	"github.com/ed3899/kumo/binaries/packer"
+	cloud_credentials_interfaces "github.com/ed3899/kumo/common/cloud_credentials/interfaces"
 	"github.com/ed3899/kumo/common/download"
 	common_hashicorp_vars "github.com/ed3899/kumo/common/hashicorp_vars"
 	"github.com/ed3899/kumo/common/tool_config"
@@ -23,7 +25,7 @@ func Build() (err error) {
 		logger, _ = zap.NewProduction()
 
 		cloud                    cloud_config.CloudI
-		cloudCredentials         cloud_credentials.CredentialsI
+		cloudCredentials         cloud_credentials_interfaces.Credentials
 		packerConfig             *packer.Binary
 		packerInstance           *packer.Instance
 		tool                     tool_config.ToolI
@@ -42,7 +44,7 @@ func Build() (err error) {
 		return
 	}
 
-	// Set cloud credentials
+	// Set cloud credentials and defer unset
 	if cloudCredentials, err = cloud_credentials.New(cloud); err != nil {
 		err = oopsBuilder.
 			Wrapf(err, "Error occurred while instantiating cloud credentials for %s", cloud.Name())
@@ -50,14 +52,25 @@ func Build() (err error) {
 	}
 
 	if err = cloudCredentials.Set(); err != nil {
-
+		err = oopsBuilder.
+			Wrapf(err, "Error occurred while setting cloud credentials for %s", cloud.Name())
+		return
 	}
+	defer func() {
+		if err := cloudCredentials.Unset(); err != nil {
+			logger.Warn(
+				"Failed to unset cloud credentials",
+				zap.String("error", err.Error()),
+				zap.String("cloud", cloud.Name()),
+			)
+		}
+	}()
 
-	// 1. Set tool config
+	// Set tool config
 	if tool, err = tool_config.New(tool_config.Packer, cloud); err != nil {
 		err = oopsBuilder.
-			With("tool_config.Packer", tool_config.Packer).
-			With("cloudSetup.GetCloudName()", cloud.Name()).
+			With("toolKind", tool_config.Packer).
+			With("cloud", cloud.Name()).
 			Wrapf(err, "Error occurred while instantiating ToolSetup for packer")
 		return
 	}
