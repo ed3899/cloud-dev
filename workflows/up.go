@@ -7,6 +7,7 @@ import (
 	"github.com/ed3899/kumo/common/cloud"
 	"github.com/ed3899/kumo/common/download"
 	common_hashicorp_vars "github.com/ed3899/kumo/common/hashicorp_vars"
+	"github.com/ed3899/kumo/common/ssh"
 	"github.com/ed3899/kumo/common/tool"
 	"github.com/ed3899/kumo/hashicorp_vars"
 	"github.com/ed3899/kumo/templates"
@@ -23,7 +24,8 @@ func Up() (err error) {
 
 		terraform                *binaries.Terraform
 		cloudSetup               *cloud.CloudSetup
-		toolSetup                *tool.ToolSetup
+		toolSetup                tool.ToolSetupI
+		sshConfig                ssh.SshConfigI
 		pickedTemplate           *templates.MergedTemplate
 		pickedHashicorpVars      common_hashicorp_vars.HashicorpVarsI
 		uncheckedCloudFromConfig string
@@ -113,20 +115,12 @@ func Up() (err error) {
 		return
 	}
 
-	// 8. Change to the right directory and defer changing back
+	// 8. Change to the target directory
 	if err = toolSetup.GoTargetDir(); err != nil {
 		err = oopsBuilder.
 			Wrapf(err, "Error occurred while changing to target directory")
 		return
 	}
-	defer func() {
-		if err := toolSetup.GoInitialDir(); err != nil {
-			logger.Warn(
-				"Failed to change back to initial directory",
-				zap.String("error", err.Error()),
-			)
-		}
-	}()
 
 	// 9. Initialize
 	if err = terraform.Init(); err != nil {
@@ -139,6 +133,39 @@ func Up() (err error) {
 	if err = terraform.Up(); err != nil {
 		err = oopsBuilder.
 			Wrapf(err, "Error occurred while deploying terraform resources")
+		return
+	}
+
+	// 11. Change back to the initial directory
+	if err = toolSetup.GoInitialDir(); err != nil {
+		logger.Warn(
+			"Failed to change back to initial directory",
+			zap.String("error", err.Error()),
+		)
+		err = nil
+		return
+	}
+
+	// 12. Instantiate ssh config
+	if sshConfig, err = ssh.NewSshConfig(toolSetup, cloudSetup); err != nil {
+		logger.Warn(
+			"Failed to instantiate ssh config",
+			zap.String("error", err.Error()),
+			zap.Any("toolSetup.GetToolType()", toolSetup.GetToolType()),
+			zap.String("cloudSetup.GetCloudName()", cloudSetup.GetCloudName()),
+		)
+		err = nil
+		return
+	}
+
+	// 12. Write ssh config
+	if err = sshConfig.Create(); err != nil {
+		logger.Warn(
+			"Failed to write ssh config",
+			zap.String("error", err.Error()),
+			zap.String("sshConfig.GetAbsPath()", sshConfig.GetAbsPath()),
+		)
+		err = nil
 		return
 	}
 
