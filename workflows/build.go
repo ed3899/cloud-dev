@@ -3,9 +3,9 @@ package workflows
 import (
 	"path/filepath"
 
-	"github.com/ed3899/kumo/binaries"
-	"github.com/ed3899/kumo/binaries/packer"
 	"github.com/ed3899/kumo/common/cloud_config"
+	"github.com/ed3899/kumo/common/cloud_credentials"
+	"github.com/ed3899/kumo/binaries/packer"
 	"github.com/ed3899/kumo/common/download"
 	common_hashicorp_vars "github.com/ed3899/kumo/common/hashicorp_vars"
 	"github.com/ed3899/kumo/common/tool_config"
@@ -22,9 +22,10 @@ func Build() (err error) {
 				Code("build_failed")
 		logger, _ = zap.NewProduction()
 
+		cloud                    cloud_config.CloudI
+		cloudCredentials         cloud_credentials.CredentialsI
 		packerConfig             *packer.Binary
 		packerInstance           *packer.Instance
-		cloud                    *cloud_config.Cloud
 		tool                     tool_config.ToolI
 		pickedTemplate           *templates.MergedTemplate
 		pickedHashicorpVars      common_hashicorp_vars.HashicorpVarsI
@@ -33,28 +34,24 @@ func Build() (err error) {
 
 	defer logger.Sync()
 
-	// 0. Set cloud config
+	// Set cloud config
 	uncheckedCloudFromConfig = viper.GetString("Cloud")
 	if cloud, err = cloud_config.New(uncheckedCloudFromConfig); err != nil {
 		err = oopsBuilder.
-			Wrapf(err, "Error occurred while instantiating CloudSetup for %s", uncheckedCloudFromConfig)
+			Wrapf(err, "Error occurred while instantiating cloud for %s", uncheckedCloudFromConfig)
 		return
 	}
-	// a. Set cloud credentials and defer unset
-	if err = cloud.Credentials.Set(); err != nil {
+
+	// Set cloud credentials
+	if cloudCredentials, err = cloud_credentials.New(cloud); err != nil {
 		err = oopsBuilder.
-			Wrapf(err, "Error occurred while setting credentials for %s", cloud.Name())
+			Wrapf(err, "Error occurred while instantiating cloud credentials for %s", cloud.Name())
 		return
 	}
-	defer func() {
-		if err := cloud.Credentials.Unset(); err != nil {
-			logger.Warn(
-				"Failed to unset cloud credentials",
-				zap.String("error", err.Error()),
-				zap.String("cloud", cloud.Name()),
-			)
-		}
-	}()
+
+	if err = cloudCredentials.Set(); err != nil {
+
+	}
 
 	// 1. Set tool config
 	if tool, err = tool_config.New(tool_config.Packer, cloud); err != nil {
