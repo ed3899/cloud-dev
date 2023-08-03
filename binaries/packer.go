@@ -22,45 +22,35 @@ type Packer struct {
 
 func NewPacker() (packer *Packer, err error) {
 	var (
-		dependenciesDirName  = dirs.DEPENDENCIES_DIR_NAME
-		packerName           = tool.PACKER_NAME
-		packerDirName        = packerName
-		packerVersion        = tool.PACKER_VERSION
-		packerExecutableName = fmt.Sprintf("%s.exe", packerName)
-		packerZipName        = fmt.Sprintf("%s.zip", packerName)
-		currentOs, currentArch             = utils.GetCurrentHostSpecs()
-		packerUrl            = utils.CreateHashicorpURL(packerName, packerVersion, currentOs, currentArch)
-		oopsBuilder          = oops.
+		dependenciesDirName    = dirs.DEPENDENCIES_DIR_NAME
+		packerName             = tool.PACKER_NAME
+		packerDirName          = packerName
+		packerVersion          = tool.PACKER_VERSION
+		packerExecutableName   = fmt.Sprintf("%s.exe", packerName)
+		packerZipName          = fmt.Sprintf("%s.zip", packerName)
+		currentOs, currentArch = utils.GetCurrentHostSpecs()
+		packerUrl              = utils.CreateHashicorpURL(packerName, packerVersion, currentOs, currentArch)
+		oopsBuilder            = oops.
 					Code("new_packer_failed")
 
+		absPathToKumoExecutable   string
+		absPathToKumoExecutableDir string
 		absPathToPackerExecutable string
 		absPathToPackerRunDir     string
 		absPathToPackerZip        string
 		packerZipContentLength    int64
 	)
 
-	if absPathToPackerExecutable, err = filepath.Abs(filepath.Join(dependenciesDirName, packerDirName, packerExecutableName)); err != nil {
+	if absPathToKumoExecutable, err = os.Executable(); err != nil {
 		err = oopsBuilder.
-			With("dependenciesDirName", dependenciesDirName).
-			With("packerDirName", packerDirName).
-			Wrapf(err, "failed to create absolute path to: %s", packerExecutableName)
+			Wrapf(err, "failed to create absolute path to kumo executable")
 		return
 	}
 
-	if absPathToPackerRunDir, err = filepath.Abs(packerDirName); err != nil {
-		err = oopsBuilder.
-			With("packerDirName", packerDirName).
-			Wrapf(err, "failed to create absolute path to run dir")
-		return
-	}
-
-	if absPathToPackerZip, err = filepath.Abs(filepath.Join(dependenciesDirName, packerDirName, packerZipName)); err != nil {
-		err = oopsBuilder.
-			With("dependenciesDirName", dependenciesDirName).
-			With("packerDirName", packerDirName).
-			Wrapf(err, "failed to create absolute path to: %s", packerZipName)
-		return
-	}
+	absPathToKumoExecutableDir = filepath.Dir(absPathToKumoExecutable)
+	absPathToPackerExecutable = filepath.Join(absPathToKumoExecutableDir, dependenciesDirName, packerDirName, packerExecutableName)
+	absPathToPackerRunDir = filepath.Join(absPathToKumoExecutableDir, packerDirName)
+	absPathToPackerZip = filepath.Join(absPathToKumoExecutableDir, dependenciesDirName, packerDirName, packerZipName)
 
 	if packerZipContentLength, err = utils.GetContentLength(packerUrl); err != nil {
 		err = oopsBuilder.
@@ -95,9 +85,9 @@ func (p *Packer) SetPluginPath(cloudSetup cloud.CloudSetupI) (err error) {
 		oopsBuilder = oops.
 				Code("packer_set_plugin_path_failed").
 				With("cloudSetup.GetCloudName()", cloudSetup.GetCloudName())
-
 		cloudType            = cloudSetup.GetCloudType()
 		packerPluginPathName = tool.PACKER_PLUGIN_PATH_NAME
+
 		absPluginPath        string
 	)
 
