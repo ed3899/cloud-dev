@@ -2,7 +2,7 @@ package tool_config
 
 type ToolI interface {
 	GetDependenciesDirName() (dependenciesDirName string)
-	GetType() (toolType Type)
+	GetType() (toolType Kind)
 	GetName() (toolName string)
 	GetZipAbsPath() (toolZipAbsPath string)
 	GetZipContentLength() (toolZipContentLength int64, err error)

@@ -13,7 +13,7 @@ type Credentials interface {
 
 type Cloud struct {
 	name        string
-	type_       Type
+	kind       Kind
 	Credentials Credentials
 }
 
@@ -29,7 +29,7 @@ func New(cloud string) (cloudConfig *Cloud, err error) {
 	case awsName:
 		cloudConfig = &Cloud{
 			name:  awsName,
-			type_: AWS,
+			kind: AWS,
 			Credentials: &aws.Credentials{
 				AccessKeyId:     viper.GetString("AWS.AccessKeyId"),
 				SecretAccessKey: viper.GetString("AWS.SecretAccessKey"),
@@ -45,10 +45,10 @@ func New(cloud string) (cloudConfig *Cloud, err error) {
 	return
 }
 
-func (c *Cloud) GetName() (cloudName string) {
+func (c *Cloud) Name() (cloudName string) {
 	return c.name
 }
 
-func (c *Cloud) Type() (cloudType Type) {
-	return c.type_
+func (c *Cloud) Type() (cloudType Kind) {
+	return c.kind
 }

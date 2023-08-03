@@ -12,7 +12,7 @@ import (
 )
 
 type Tool struct {
-	type_               Type
+	kind               Kind
 	name                string
 	version             string
 	dir                 string
@@ -20,7 +20,7 @@ type Tool struct {
 	initialDir          string
 }
 
-func New(toolType Type, cloudConfig cloud_config.CloudI) (toolConfig *Tool, err error) {
+func New(toolType Kind, cloud cloud_config.CloudI) (toolConfig *Tool, err error) {
 	var (
 		oopsBuilder = oops.
 				Code("new_tool_setup_failed").
@@ -39,21 +39,21 @@ func New(toolType Type, cloudConfig cloud_config.CloudI) (toolConfig *Tool, err 
 	case Packer:
 		toolConfig = &Tool{
 			dependenciesDirName: dirs.DEPENDENCIES_DIR_NAME,
-			type_:               Packer,
+			kind:               Packer,
 			name:                PACKER_NAME,
 			version:             PACKER_VERSION,
 			initialDir:          cwd,
-			dir:                 filepath.Join(PACKER_NAME, cloudConfig.GetName()),
+			dir:                 filepath.Join(PACKER_NAME, cloud.Name()),
 		}
 
 	case Terraform:
 		toolConfig = &Tool{
 			dependenciesDirName: dirs.DEPENDENCIES_DIR_NAME,
-			type_:               Terraform,
+			kind:               Terraform,
 			name:                TERRAFORM_NAME,
 			version:             TERRAFORM_VERSION,
 			initialDir:          cwd,
-			dir:                 filepath.Join(TERRAFORM_NAME, cloudConfig.GetName()),
+			dir:                 filepath.Join(TERRAFORM_NAME, cloud.Name()),
 		}
 
 	default:
@@ -65,23 +65,27 @@ func New(toolType Type, cloudConfig cloud_config.CloudI) (toolConfig *Tool, err 
 	return
 }
 
-func (t *Tool) GetDependenciesDirName() (dependenciesDirName string) {
+func (t *Tool) DependenciesDirName() (dependenciesDirName string) {
 	return t.dependenciesDirName
 }
 
-func (t *Tool) GetType() (toolType Type) {
-	return t.type_
+func (t *Tool) Type() (toolType Kind) {
+	return t.kind
 }
 
-func (t *Tool) GetZipName() (toolZipName string) {
+func (t *Tool) Name() (toolName string) {
+	return t.name
+}
+
+func (t *Tool) ZipName() (toolZipName string) {
 	return fmt.Sprintf("%s.zip", t.name)
 }
 
-func (t *Tool) GetZipAbsPath() (toolZipAbsPath string) {
+func (t *Tool) ZipAbsPath() (toolZipAbsPath string) {
 	return filepath.Join(t.dependenciesDirName, t.name, fmt.Sprintf("%s.zip", t.name))
 }
 
-func (t *Tool) GetZipContentLength() (toolZipContentLength int64, err error) {
+func (t *Tool) ZipContentLength() (toolZipContentLength int64, err error) {
 	var (
 		oopsBuilder = oops.
 				Code("get_zip_content_length_failed")
@@ -98,19 +102,19 @@ func (t *Tool) GetZipContentLength() (toolZipContentLength int64, err error) {
 	return
 }
 
-func (t *Tool) GetExecutableName() (toolExecutableName string) {
+func (t *Tool) ExecutableName() (toolExecutableName string) {
 	return fmt.Sprintf("%s.exe", t.name)
 }
 
-func (t *Tool) GetVersion() (toolVersion string) {
+func (t *Tool) Version() (toolVersion string) {
 	return t.version
 }
 
-func (t *Tool) GetInitialDir() (initialDir string) {
+func (t *Tool) InitialDir() (initialDir string) {
 	return t.initialDir
 }
 
-func (t *Tool) GetDir() (toolDir string) {
+func (t *Tool) Dir() (toolDir string) {
 	return t.dir
 }
 

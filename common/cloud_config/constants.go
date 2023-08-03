@@ -1,11 +1,11 @@
 package cloud_config
 
-type Type int
+type Kind int
 
 const (
 	AWS_NAME = "aws"
 )
 
 const (
-	AWS Type = iota
+	AWS Kind = iota
 )
