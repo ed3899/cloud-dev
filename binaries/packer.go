@@ -28,8 +28,8 @@ func NewPacker() (packer *Packer, err error) {
 		packerVersion        = tool.PACKER_VERSION
 		packerExecutableName = fmt.Sprintf("%s.exe", packerName)
 		packerZipName        = fmt.Sprintf("%s.zip", packerName)
-		os, arch             = utils.GetCurrentHostSpecs()
-		packerUrl            = utils.CreateHashicorpURL(packerName, packerVersion, os, arch)
+		currentOs, currentArch             = utils.GetCurrentHostSpecs()
+		packerUrl            = utils.CreateHashicorpURL(packerName, packerVersion, currentOs, currentArch)
 		oopsBuilder          = oops.
 					Code("new_packer_failed")
 
