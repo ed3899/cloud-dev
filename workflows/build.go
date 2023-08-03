@@ -25,7 +25,7 @@ func Build() (err error) {
 		packerConfig             binaries.ConfigI
 		packerInstance           *packer.Instance
 		cloudSetup               *cloud.CloudSetup
-		toolSetup                *tool.ToolSetup
+		toolSetup                *tool.Config
 		pickedTemplate           *templates.MergedTemplate
 		pickedHashicorpVars      common_hashicorp_vars.HashicorpVarsI
 		uncheckedCloudFromConfig string
@@ -96,7 +96,7 @@ func Build() (err error) {
 	}()
 
 	// 4. Tool setup
-	if toolSetup, err = tool.NewToolSetup(tool.Packer, cloudSetup); err != nil {
+	if toolSetup, err = tool.NewConfig(tool.Packer, cloudSetup); err != nil {
 		err = oopsBuilder.
 			With("tool.Packer", tool.Packer).
 			With("cloudSetup.GetCloudName()", cloudSetup.GetCloudName()).

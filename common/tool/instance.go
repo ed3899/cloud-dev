@@ -5,63 +5,24 @@ import (
 	"path/filepath"
 
 	"github.com/ed3899/kumo/common/cloud"
+	"github.com/ed3899/kumo/common/dirs"
 	"github.com/samber/oops"
 )
 
-type ToolSetup struct {
-	toolType   ToolType
-	initialDir string
-	toolDir    string
+type Config struct {
+	toolType            ToolType
+	toolName            string
+	toolVersion         string
+	dependenciesDirName string
+	initialDir          string
+	toolDir             string
 }
 
-func (ts *ToolSetup) GetToolType() (toolType ToolType) {
-	return ts.toolType
-}
-
-func (ts *ToolSetup) GetInitialDir() (initialDir string) {
-	return ts.initialDir
-}
-
-func (ts *ToolSetup) GoInitialDir() (err error) {
-	var (
-		oopsBuilder = oops.
-			Code("go_initial_dir_failed")
-	)
-
-	if err = os.Chdir(ts.initialDir); err != nil {
-		err = oopsBuilder.
-			Wrapf(err, "Error occurred while changing directory to %s", ts.initialDir)
-		return
-	}
-
-	return
-}
-
-func (ts *ToolSetup) GoTargetDir() (err error) {
-	var (
-		oopsBuilder = oops.
-			Code("go_target_dir_failed")
-	)
-
-	if err = os.Chdir(ts.toolDir); err != nil {
-		err = oopsBuilder.
-			Wrapf(err, "Error occurred while changing directory to %s", ts.toolDir)
-		return
-	}
-
-	return
-}
-
-func NewToolSetup(tool ToolType, cloud cloud.CloudSetupI) (toolSetup *ToolSetup, err error) {
-	const (
-		PACKER_RUN_DIR_NAME    = "packer"
-		TERRAFORM_RUN_DIR_NAME = "terraform"
-	)
-
+func NewConfig(toolType ToolType, cloudSetup cloud.CloudSetupI) (toolConfig *Config, err error) {
 	var (
 		oopsBuilder = oops.
 				Code("new_tool_setup_failed").
-				With("tool", tool)
+				With("tool", toolType)
 
 		cwd string
 	)
@@ -72,24 +33,84 @@ func NewToolSetup(tool ToolType, cloud cloud.CloudSetupI) (toolSetup *ToolSetup,
 		return
 	}
 
-	switch tool {
+	switch toolType {
 	case Packer:
-		toolSetup = &ToolSetup{
-			toolType:   Packer,
-			initialDir: cwd,
-			toolDir:    filepath.Join(PACKER_RUN_DIR_NAME, cloud.GetCloudName()),
+		toolConfig = &Config{
+			dependenciesDirName: dirs.DEPENDENCIES_DIR_NAME,
+			toolType:            Packer,
+			toolName:            PACKER_NAME,
+			toolVersion:         PACKER_VERSION,
+			initialDir:          cwd,
+			toolDir:             filepath.Join(PACKER_NAME, cloudSetup.GetCloudName()),
 		}
 
 	case Terraform:
-		toolSetup = &ToolSetup{
-			toolType:   Terraform,
-			initialDir: cwd,
-			toolDir:    filepath.Join(TERRAFORM_RUN_DIR_NAME, cloud.GetCloudName()),
+		toolConfig = &Config{
+			dependenciesDirName: dirs.DEPENDENCIES_DIR_NAME,
+			toolType:            Terraform,
+			toolName:            TERRAFORM_NAME,
+			toolVersion:         TERRAFORM_VERSION,
+			initialDir:          cwd,
+			toolDir:             filepath.Join(TERRAFORM_NAME, cloudSetup.GetCloudName()),
 		}
 
 	default:
 		err = oopsBuilder.
-			Errorf("Tool '%v' not supported", tool)
+			Errorf("Tool '%v' not supported", toolType)
+		return
+	}
+
+	return
+}
+
+func (c *Config) GetDependenciesDirName() (dependenciesDirName string) {
+	return c.dependenciesDirName
+}
+
+func (c *Config) GetToolType() (toolType ToolType) {
+	return c.toolType
+}
+
+func (c *Config) GetToolName() (toolName string) {
+	return c.toolName
+}
+
+func (c *Config) GetToolVersion() (toolVersion string) {
+	return c.toolVersion
+}
+
+func (c *Config) GetInitialDir() (initialDir string) {
+	return c.initialDir
+}
+
+func (c *Config) GetToolDir() (toolDir string) {
+	return c.toolDir
+}
+
+func (c *Config) GoInitialDir() (err error) {
+	var (
+		oopsBuilder = oops.
+			Code("go_initial_dir_failed")
+	)
+
+	if err = os.Chdir(c.initialDir); err != nil {
+		err = oopsBuilder.
+			Wrapf(err, "Error occurred while changing directory to %s", c.initialDir)
+		return
+	}
+
+	return
+}
+
+func (c *Config) GoTargetDir() (err error) {
+	var (
+		oopsBuilder = oops.
+			Code("go_target_dir_failed")
+	)
+
+	if err = os.Chdir(c.toolDir); err != nil {
+		err = oopsBuilder.
+			Wrapf(err, "Error occurred while changing directory to %s", c.toolDir)
 		return
 	}
 

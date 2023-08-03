@@ -24,7 +24,7 @@ func Destroy() (err error) {
 		terraformInstance        *terraform.Instance
 		cloudSetup               *cloud.CloudSetup
 		sshConfig                ssh.SshConfigI
-		toolSetup                *tool.ToolSetup
+		toolSetup                *tool.Config
 		uncheckedCloudFromConfig string
 	)
 
@@ -77,7 +77,7 @@ func Destroy() (err error) {
 	}()
 
 	// 4. Tool setup
-	if toolSetup, err = tool.NewToolSetup(tool.Terraform, cloudSetup); err != nil {
+	if toolSetup, err = tool.NewConfig(tool.Terraform, cloudSetup); err != nil {
 		err = oopsBuilder.
 			With("tool.Terraform", tool.Terraform).
 			With("cloudSetup.GetCloudName()", cloudSetup.GetCloudName()).
