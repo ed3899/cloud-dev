@@ -3,6 +3,7 @@ package workflows
 import (
 	"path/filepath"
 
+	"github.com/ed3899/kumo/binaries"
 	"github.com/ed3899/kumo/binaries/terraform"
 	"github.com/ed3899/kumo/common/cloud"
 	"github.com/ed3899/kumo/common/download"
@@ -19,6 +20,7 @@ func Destroy() (err error) {
 				Code("destroy_failed")
 		logger, _ = zap.NewProduction()
 
+		terraformConfig          binaries.ConfigI
 		terraformInstance        *terraform.Instance
 		cloudSetup               *cloud.CloudSetup
 		sshConfig                ssh.SshConfigI
@@ -26,8 +28,17 @@ func Destroy() (err error) {
 		uncheckedCloudFromConfig string
 	)
 
+	defer logger.Sync()
+
+	// 0. Instantiate config
+	if terraformConfig, err = binaries.NewConfig(tool.Terraform); err != nil {
+		err = oopsBuilder.
+			Wrapf(err, "Error occurred while instantiating for tool %#v", tool.Terraform)
+		return
+	}
+
 	// 1. Instantiate Terraform
-	if terraformInstance, err = terraform.NewInstance(); err != nil {
+	if terraformInstance, err = terraform.NewInstance(terraformConfig); err != nil {
 		err = oopsBuilder.
 			Wrapf(err, "Error occurred while instantiating Terraform")
 		return
@@ -93,8 +104,6 @@ func Destroy() (err error) {
 			zap.String("error", err.Error()),
 			zap.String("sshConfig.GetAbsPath()", sshConfig.GetAbsPath()),
 		)
-		err = nil
-		return
 	}
 
 	// 7. Change to the target directory

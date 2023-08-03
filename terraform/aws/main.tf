@@ -12,6 +12,7 @@ locals {
   USERNAME     = trimspace(var.USERNAME)
 
   first_available_zone = length(data.aws_availability_zones.available.names) > 0 ? data.aws_availability_zones.available.names[0] : null
+  KUMO_NAME_TAG       = "kumo"
 }
 
 terraform {
@@ -46,10 +47,18 @@ resource "aws_vpc" "kumo-vpc" {
   cidr_block           = "10.0.0.0/16"
   enable_dns_hostnames = true
   enable_dns_support   = true
+
+  tags = {
+    Name = local.KUMO_NAME_TAG
+  }
 }
 
 resource "aws_internet_gateway" "kumo-internet-gateway" {
   vpc_id = aws_vpc.kumo-vpc.id
+
+  tags = {
+    Name = local.KUMO_NAME_TAG
+  }
 }
 
 resource "aws_subnet" "kumo-subnet" {
@@ -57,6 +66,10 @@ resource "aws_subnet" "kumo-subnet" {
   cidr_block              = "10.0.0.0/24"
   map_public_ip_on_launch = true
   availability_zone       = data.aws_availability_zones.available.names[0]
+
+  tags = {
+    Name = local.KUMO_NAME_TAG
+  }
 }
 
 resource "aws_route_table" "kumo-route-table" {
@@ -65,6 +78,10 @@ resource "aws_route_table" "kumo-route-table" {
   route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.kumo-internet-gateway.id
+  }
+
+  tags = {
+    Name = local.KUMO_NAME_TAG
   }
 }
 
@@ -76,6 +93,9 @@ resource "aws_route_table_association" "kumo-route-table-association" {
 resource "aws_security_group" "kumo-security-group" {
   name   = "kumo-security-group"
   vpc_id = aws_vpc.kumo-vpc.id
+  tags = {
+    Name = local.KUMO_NAME_TAG
+  }
 }
 
 resource "aws_vpc_security_group_egress_rule" "kumo-security-group-egress-rule" {
@@ -103,6 +123,10 @@ resource "tls_private_key" "kumo-ssh-key" {
 resource "aws_key_pair" "kumo-ssh-key-pair" {
   key_name   = local.KEY_NAME
   public_key = tls_private_key.kumo-ssh-key.public_key_openssh
+
+  tags = {
+    Name = local.KUMO_NAME_TAG
+  }
 }
 
 resource "local_file" "kumo-ssh-private-key" {
@@ -136,6 +160,10 @@ resource "aws_instance" "kumo-ec2-instance" {
     chmod 600 $path
     chown $user:$user $path
   EOF
+
+  tags = {
+    Name = local.KUMO_NAME_TAG
+  }
 }
 
 resource "local_file" "kumo-ec2-public-ip" {
