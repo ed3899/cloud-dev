@@ -25,7 +25,7 @@ func Up() (err error) {
 
 		terraformConfig          binaries.ConfigI
 		terraformInstance        *terraform.Instance
-		cloudSetup               *cloud.Config
+		cloudSetup               *cloud.Cloud
 		toolSetup                tool.ConfigI
 		sshConfig                ssh.SshConfigI
 		pickedTemplate           *templates.MergedTemplate

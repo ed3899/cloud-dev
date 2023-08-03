@@ -1,6 +1,7 @@
 package packer
 
 import (
+	"github.com/ed3899/kumo/common/cloud"
 	"github.com/ed3899/kumo/common/tool"
 	"github.com/samber/oops"
 )
@@ -8,12 +9,13 @@ import (
 type Executable struct {
 }
 
-func NewExecutable(tool tool.ConfigI) (executable *Executable, err error) {
+func NewExecutable(tool tool.ConfigI, cloud cloud.ConfigI) (executable *Executable, err error) {
 	var (
 		oopsBuilder = oops.
 			Code("new_executable_failed").
-			With("tool.GetToolName()", tool.GetToolName()).
-			With("tool.GetToolVersion()", tool.GetToolVersion())
+			With("tool", tool.GetName()).
+			With("version", tool.GetVersion()).
+			With("cloud", cloud.GetName())
 	)
 
 }

@@ -22,7 +22,7 @@ func Destroy() (err error) {
 
 		terraformConfig          binaries.ConfigI
 		terraformInstance        *terraform.Instance
-		cloudSetup               *cloud.Config
+		cloudSetup               *cloud.Cloud
 		sshConfig                ssh.SshConfigI
 		toolSetup                *tool.Tool
 		uncheckedCloudFromConfig string

@@ -30,13 +30,13 @@ type SshConfig struct {
 	contents *Contents
 }
 
-func NewSshConfig(toolSetup tool.ConfigI, cloudSetup cloud.CloudSetupI) (sshConfig *SshConfig, err error) {
+func NewSshConfig(toolConfig tool.ConfigI, cloudConfig cloud.ConfigI) (sshConfig *SshConfig, err error) {
 	var (
 		oopsBuilder = oops.
 				Code("new_ssh_config_failed").
-				With("toolSetup", toolSetup).
-				With("cloudSetup", cloudSetup.GetCloudName())
-		cloudDir                = filepath.Join(toolSetup.GetInitialDir(), tool.TERRAFORM_NAME, cloudSetup.GetCloudName())
+				With("toolSetup", toolConfig).
+				With("cloudSetup", cloudConfig.GetName())
+		cloudDir                = filepath.Join(toolConfig.GetInitialDir(), tool.TERRAFORM_NAME, cloudConfig.GetName())
 		absPathToInstanceIpFile = filepath.Join(cloudDir, IP_FILE_NAME)
 
 		cwd        string

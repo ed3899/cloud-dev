@@ -20,7 +20,7 @@ type Tool struct {
 	initialDir          string
 }
 
-func New(toolType Type, cloudSetup cloud.CloudSetupI) (toolConfig *Tool, err error) {
+func New(toolType Type, cloudConfig cloud.ConfigI) (toolConfig *Tool, err error) {
 	var (
 		oopsBuilder = oops.
 				Code("new_tool_setup_failed").
@@ -43,7 +43,7 @@ func New(toolType Type, cloudSetup cloud.CloudSetupI) (toolConfig *Tool, err err
 			name:                PACKER_NAME,
 			version:             PACKER_VERSION,
 			initialDir:          cwd,
-			dir:                 filepath.Join(PACKER_NAME, cloudSetup.GetCloudName()),
+			dir:                 filepath.Join(PACKER_NAME, cloudConfig.GetName()),
 		}
 
 	case Terraform:
@@ -53,7 +53,7 @@ func New(toolType Type, cloudSetup cloud.CloudSetupI) (toolConfig *Tool, err err
 			name:                TERRAFORM_NAME,
 			version:             TERRAFORM_VERSION,
 			initialDir:          cwd,
-			dir:                 filepath.Join(TERRAFORM_NAME, cloudSetup.GetCloudName()),
+			dir:                 filepath.Join(TERRAFORM_NAME, cloudConfig.GetName()),
 		}
 
 	default:

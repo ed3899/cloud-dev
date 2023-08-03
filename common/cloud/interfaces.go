@@ -1,6 +1,6 @@
 package cloud
 
-type CloudSetupI interface {
-	GetCloudName() (string)
-	GetCloudType() (CloudType)
+type ConfigI interface {
+	GetName() string
+	GetType() Type
 }

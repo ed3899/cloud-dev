@@ -11,21 +11,21 @@ type Credentials interface {
 	Unset() error
 }
 
-type Config struct {
-	cloudName   string
-	cloudType   CloudType
+type Cloud struct {
+	name   string
+	type_   Type
 	Credentials Credentials
 }
 
-func (c *Config) GetCloudName() (cloudName string) {
-	return c.cloudName
+func (c *Cloud) GetName() (cloudName string) {
+	return c.name
 }
 
-func (c *Config) GetCloudType() (cloudType CloudType) {
-	return c.cloudType
+func (c *Cloud) Type() (cloudType Type) {
+	return c.type_
 }
 
-func NewConfig(cloud string) (cloudConfig *Config, err error) {
+func NewConfig(cloud string) (cloudConfig *Cloud, err error) {
 	var (
 		oopsBuilder = oops.
 				Code("new_cloud_deployment_failed").
@@ -35,9 +35,9 @@ func NewConfig(cloud string) (cloudConfig *Config, err error) {
 
 	switch cloud {
 	case awsName:
-		cloudConfig = &Config{
-			cloudName: awsName,
-			cloudType: AWS,
+		cloudConfig = &Cloud{
+			name: awsName,
+			type_: AWS,
 			Credentials: &aws.Credentials{
 				AccessKeyId:     viper.GetString("AWS.AccessKeyId"),
 				SecretAccessKey: viper.GetString("AWS.SecretAccessKey"),

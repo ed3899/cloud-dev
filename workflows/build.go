@@ -24,7 +24,7 @@ func Build() (err error) {
 
 		packerConfig             binaries.ConfigI
 		packerInstance           *packer.Instance
-		cloudSetup               *cloud.Config
+		cloudSetup               *cloud.Cloud
 		toolSetup                *tool.Tool
 		pickedTemplate           *templates.MergedTemplate
 		pickedHashicorpVars      common_hashicorp_vars.HashicorpVarsI

@@ -1,11 +1,11 @@
 package cloud
 
-type CloudType int
+type Type int
 
 const (
 	AWS_NAME = "aws"
 )
 
 const (
-	AWS CloudType = iota
+	AWS Type = iota
 )
