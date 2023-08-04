@@ -106,7 +106,7 @@ func Build() (err error) {
 			)
 		}
 	}()
-g
+
 	// Verify presence of tool
 	if utils.FileNotPresent(tool.ExecutableName()); err != nil {
 
