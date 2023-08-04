@@ -3,8 +3,8 @@ package structs
 import (
 	"path/filepath"
 
-	"github.com/ed3899/kumo/common/cloud"
-	"github.com/ed3899/kumo/common/tool"
+	common_cloud_constants "github.com/ed3899/kumo/common/cloud/constants"
+	common_tool_constants "github.com/ed3899/kumo/common/tool/constants"
 	"github.com/ed3899/kumo/common/utils"
 	"github.com/samber/oops"
 )
@@ -13,17 +13,13 @@ type Manifest struct {
 	lastBuiltAmiId string
 }
 
-func (m *Manifest) GetLastBuiltAmiId() (lastBuiltAmiId string) {
-	return m.lastBuiltAmiId
-}
-
-func NewManifest() (manifest *Manifest, err error) {
+func New() (manifest *Manifest, err error) {
 	var (
 		oopsBuilder = oops.
 				Code("new_manifest_failed")
-		packerDirName      = tool.PACKER_NAME
-		awsDirName         = cloud.AWS_NAME
-		packerManifestName = tool.PACKER_MANIFEST_NAME
+		packerDirName      = common_tool_constants.PACKER_NAME
+		awsDirName         = common_cloud_constants.AWS_NAME
+		packerManifestName = common_tool_constants.PACKER_MANIFEST_NAME
 
 		absPath        string
 		lastBuiltAmiId string
@@ -49,4 +45,8 @@ func NewManifest() (manifest *Manifest, err error) {
 	}
 
 	return
+}
+
+func (m *Manifest) LastBuiltAmiId() (lastBuiltAmiId string) {
+	return m.lastBuiltAmiId
 }

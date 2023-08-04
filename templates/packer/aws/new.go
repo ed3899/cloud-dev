@@ -8,6 +8,7 @@ import (
 	"github.com/ed3899/kumo/common/dirs"
 	"github.com/ed3899/kumo/common/templates"
 	common_tool_constants "github.com/ed3899/kumo/common/tool/constants"
+	templates_packer_aws_structs "github.com/ed3899/kumo/templates/packer/aws/structs"
 	"github.com/samber/oops"
 	"github.com/spf13/viper"
 )
@@ -52,8 +53,8 @@ func New() (newTemplate *Template, err error) {
 		instance:      instance,
 		absPath:       absPathToTemplate,
 		parentDirName: packerDirName,
-		environment: &Environment{
-			Required: &Required{
+		environment: &templates_packer_aws_structs.Environment{
+			Required: &templates_packer_aws_structs.Required{
 				AWS_ACCESS_KEY:                     viper.GetString("AWS.AccessKeyId"),
 				AWS_SECRET_KEY:                     viper.GetString("AWS.SecretAccessKey"),
 				AWS_IAM_PROFILE:                    viper.GetString("AWS.IamProfile"),

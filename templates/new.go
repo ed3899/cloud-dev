@@ -31,7 +31,7 @@ func New(tool common_tool_interfaces.Tool, cloud common_cloud_interfaces.Cloud) 
 	switch toolType {
 	case common_tool_constants.Packer:
 		// 2. Pick general template
-		if generalTemplate, err = packer_general.NewTemplate(); err != nil {
+		if generalTemplate, err = packer_general.New(); err != nil {
 			err = oopsBuilder.
 				With("tool", common_tool_constants.Packer).
 				Wrapf(err, "Error occurred while picking general template for %s", packerName)

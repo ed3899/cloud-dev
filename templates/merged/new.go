@@ -7,8 +7,8 @@ import (
 
 	"github.com/ed3899/kumo/common/dirs"
 	"github.com/ed3899/kumo/common/hashicorp_vars"
-	"github.com/ed3899/kumo/templates/merged/structs"
-	"github.com/ed3899/kumo/common/templates"
+	common_templates_interfaces "github.com/ed3899/kumo/common/templates/interfaces"
+	common_templates_structs "github.com/ed3899/kumo/common/templates/structs"
 	"github.com/ed3899/kumo/common/utils"
 	"github.com/samber/oops"
 )
@@ -16,15 +16,15 @@ import (
 type Template struct {
 	instance    *template.Template
 	absPath     string
-	environment *structs.Environment[templates.EnvironmentI]
+	environment *common_templates_structs.Environment[common_templates_interfaces.Environment]
 }
 
-func New(generalTemplate, cloudTemplate templates.TemplateSingle) (packerMergedTemplate *Template, err error) {
+func New(generalTemplate, cloudTemplate common_templates_interfaces.Template) (packerMergedTemplate *Template, err error) {
 	var (
 		oopsBuilder = oops.
 				Code("new_packer_merged_template_failed").
-				With("generalTemplate", generalTemplate.GetAbsPath()).
-				With("cloudTemplate", cloudTemplate.GetAbsPath())
+				With("generalTemplate", generalTemplate.AbsPath()).
+				With("cloudTemplate", cloudTemplate.AbsPath())
 
 		mergedTemplateInstance     *template.Template
 		absPathToTemplatesDir      string
@@ -32,15 +32,15 @@ func New(generalTemplate, cloudTemplate templates.TemplateSingle) (packerMergedT
 		absPathToMergedTemplate    string
 	)
 
-	if generalTemplate.GetParentDirName() != cloudTemplate.GetParentDirName() {
+	if generalTemplate.ParentDirName() != cloudTemplate.ParentDirName() {
 		err = oopsBuilder.
-			With("generalTemplate.GetParentDirName()", generalTemplate.GetParentDirName()).
-			With("cloudTemplate.GetParentDirName()", cloudTemplate.GetParentDirName()).
+			With("generalTemplate.GetParentDirName()", generalTemplate.ParentDirName()).
+			With("cloudTemplate.GetParentDirName()", cloudTemplate.ParentDirName()).
 			Errorf("generalTemplate and cloudTemplate must be in the same directory")
 		return
 	}
 
-	if generalTemplate.GetEnvironment().IsNotValidEnvironment() || cloudTemplate.GetEnvironment().IsNotValidEnvironment() {
+	if generalTemplate.Environment().IsNotValidEnvironment() || cloudTemplate.Environment().IsNotValidEnvironment() {
 		err = oopsBuilder.
 			Errorf("generalTemplate and cloudTemplate must have valid environments")
 		return
@@ -52,15 +52,15 @@ func New(generalTemplate, cloudTemplate templates.TemplateSingle) (packerMergedT
 		return
 	}
 
-	absPathToMergedTemplateDir = filepath.Join(absPathToTemplatesDir, generalTemplate.GetParentDirName())
+	absPathToMergedTemplateDir = filepath.Join(absPathToTemplatesDir, generalTemplate.ParentDirName())
 
 	if absPathToMergedTemplate, err = utils.MergeFilesTo(
 		absPathToMergedTemplateDir,
-		generalTemplate.GetAbsPath(),
-		cloudTemplate.GetAbsPath(),
+		generalTemplate.AbsPath(),
+		cloudTemplate.AbsPath(),
 	); err != nil {
 		err = oopsBuilder.
-			Wrapf(err, "Error occurred while merging %s and %s to %s", generalTemplate.GetAbsPath(), cloudTemplate.GetAbsPath(), absPathToMergedTemplateDir)
+			Wrapf(err, "Error occurred while merging %s and %s to %s", generalTemplate.AbsPath(), cloudTemplate.AbsPath(), absPathToMergedTemplateDir)
 		return
 	}
 
@@ -73,9 +73,9 @@ func New(generalTemplate, cloudTemplate templates.TemplateSingle) (packerMergedT
 	packerMergedTemplate = &Template{
 		instance: mergedTemplateInstance,
 		absPath:  absPathToMergedTemplate,
-		environment: &structs.Environment[templates.EnvironmentI]{
-			General: generalTemplate.GetEnvironment(),
-			Cloud:   cloudTemplate.GetEnvironment(),
+		environment: &common_templates_structs.Environment[common_templates_interfaces.Environment]{
+			General: generalTemplate.Environment(),
+			Cloud:   cloudTemplate.Environment(),
 		},
 	}
 
@@ -94,7 +94,9 @@ func (mt *Template) Instance() (instance *template.Template) {
 	return mt.instance
 }
 
-func (mt *Template) Environment() (environment *structs.Environment[templates.EnvironmentI]) {
+func (mt *Template) Environment() (
+	environment *common_templates_structs.Environment[common_templates_interfaces.Environment],
+) {
 	return mt.environment
 }
 
