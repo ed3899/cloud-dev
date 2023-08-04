@@ -1,10 +1,11 @@
-package download
+package zip
 
 import (
 	"fmt"
 	"os"
 	"path/filepath"
 
+	"github.com/ed3899/kumo/common/zip/interfaces"
 	"github.com/ed3899/kumo/common/dirs"
 	"github.com/ed3899/kumo/common/tool_config"
 	"github.com/ed3899/kumo/common/utils"
@@ -22,7 +23,7 @@ type Zip struct {
 	ExtractionBar *mpb.Bar
 }
 
-func New(toolConfig tool_config.ToolI) (zip *Zip, err error) {
+func New(toolConfig tool_config.ToolI) (zip interfaces.ZipI, err error) {
 	var (
 		oopsBuilder = oops.Code("zip_new_failed")
 		absPath     = filepath.Join(dirs.DEPENDENCIES_DIR_NAME, toolConfig.Name(), fmt.Sprintf("%s.zip", toolConfig.Name()))
@@ -62,7 +63,7 @@ func (z *Zip) IsNotPresent() (notPresent bool) {
 	return utils.FileNotPresent(z.AbsPath)
 }
 
-func (z *Zip) SetDownloadBar(p MultiProgressBarI) {
+func (z *Zip) SetDownloadBar(p interfaces.MultiProgressBar) {
 	z.DownloadBar = p.AddBar(int64(z.ContentLength),
 		mpb.BarFillerClearOnComplete(),
 		mpb.PrependDecorators(
@@ -82,7 +83,7 @@ func (z *Zip) IncrementDownloadBar(downloadedBytes int) {
 	z.DownloadBar.IncrBy(downloadedBytes)
 }
 
-func (z *Zip) SetExtractionBar(p MultiProgressBarI, zipSize int64) {
+func (z *Zip) SetExtractionBar(p interfaces.MultiProgressBar, zipSize int64) {
 	z.ExtractionBar = p.AddBar(zipSize,
 		mpb.BarQueueAfter(z.DownloadBar),
 		mpb.BarFillerClearOnComplete(),

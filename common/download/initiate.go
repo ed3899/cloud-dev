@@ -4,11 +4,12 @@ import (
 	"os"
 	"path/filepath"
 
+	common_zip_interfaces "github.com/ed3899/kumo/common/zip/interfaces"
 	"github.com/samber/oops"
 	"github.com/vbauerster/mpb/v8"
 )
 
-func Initiate(z ZipI, extractToAbsPathDir string) (err error) {
+func Initiate(z common_zip_interfaces.ZipI, extractToAbsPathDir string) (err error) {
 	var (
 		absPathToZipDir = filepath.Dir(z.GetPath())
 		progress        = mpb.New(mpb.WithWidth(64), mpb.WithAutoRefresh())

@@ -1,16 +1,20 @@
 package download
 
 import (
+	common_zip_interfaces "github.com/ed3899/kumo/common/zip/interfaces"
 	"github.com/samber/oops"
 )
 
 type DownloadableAndProgressive interface {
-	Downloadable
-	Removable
-	Retrivable
+	common_zip_interfaces.Downloadable
+	common_zip_interfaces.Removable
+	common_zip_interfaces.Retrivable
 }
 
-func DownloadAndShowProgress[D DownloadableAndProgressive](d D, multiProgressBar MultiProgressBarI) (err error) {
+func DownloadAndShowProgress(
+	d DownloadableAndProgressive,
+	multiProgressBar common_zip_interfaces.MultiProgressBar,
+) (err error) {
 	var (
 		downloadedBytesChan = make(chan int, 1024)
 		errChan             = make(chan error, 1)

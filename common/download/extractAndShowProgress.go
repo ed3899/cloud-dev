@@ -2,16 +2,21 @@ package download
 
 import (
 	"github.com/ed3899/kumo/common/utils"
+	common_zip_interfaces "github.com/ed3899/kumo/common/zip/interfaces"
 	"github.com/samber/oops"
 )
 
 type ExtractableAndProgressive interface {
-	Extractable
-	Removable
-	Retrivable
+	common_zip_interfaces.Extractable
+	common_zip_interfaces.Removable
+	common_zip_interfaces.Retrivable
 }
 
-func ExtractAndShowProgress[E ExtractableAndProgressive](e E, absPathToExtraction string, multiProgressBar MultiProgressBarI) (err error) {
+func ExtractAndShowProgress(
+	e ExtractableAndProgressive,
+	absPathToExtraction string,
+	multiProgressBar common_zip_interfaces.MultiProgressBar,
+) (err error) {
 	var (
 		extractedBytesChan = make(chan int, 1024)
 		errChan            = make(chan error, 1)

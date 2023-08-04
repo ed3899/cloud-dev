@@ -1,14 +1,14 @@
-package download
+package interfaces
 
 import (
 	"github.com/vbauerster/mpb/v8"
 )
 
-type ProgressBarI interface {
+type ProgressBar interface {
 	IncrBy(n int)
 }
 
-type MultiProgressBarI interface {
+type MultiProgressBar interface {
 	AddBar(total int64, options ...mpb.BarOption) *mpb.Bar
 }
 
@@ -22,13 +22,13 @@ type Retrivable interface {
 }
 
 type Downloadable interface {
-	SetDownloadBar(MultiProgressBarI)
+	SetDownloadBar(MultiProgressBar)
 	Download(chan<- int) error
 	IncrementDownloadBar(int)
 }
 
 type Extractable interface {
-	SetExtractionBar(MultiProgressBarI, int64)
+	SetExtractionBar(MultiProgressBar, int64)
 	ExtractTo(string, chan<- int) error
 	IncrementExtractionBar(int)
 }
