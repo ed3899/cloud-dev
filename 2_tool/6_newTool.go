@@ -8,7 +8,6 @@ import (
 type Tool struct {
 	Name              string
 	Version           string
-	ExecutableAbsPath string
 }
 
 func NewTool(kind constants.ToolKind) (tool Tool, err error) {

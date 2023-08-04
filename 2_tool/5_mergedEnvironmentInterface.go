@@ -1,6 +1,6 @@
 package tool
 
-type Merged[E Environment] struct {
+type Merged[E PackerAwsEnvironment] struct {
 	General E
 	Cloud   E
 }

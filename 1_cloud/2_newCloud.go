@@ -3,14 +3,9 @@ package cloud
 import (
 	"path/filepath"
 
+	constants "github.com/ed3899/kumo/0_constants"
 	"github.com/samber/oops"
 	"github.com/spf13/viper"
-)
-
-const (
-	PACKER          = "packer"
-	PACKER_MANIFEST = "manifest.json"
-	AWS             = "aws"
 )
 
 type Cloud struct {
@@ -27,14 +22,14 @@ func NewCloud(cloudFromConfig string, kumoExecAbsPath string) (cloud Cloud, err 
 	)
 
 	switch cloudFromConfig {
-	case AWS:
+	case constants.AWS:
 		cloud = Cloud{
-			Name: AWS,
+			Name: constants.AWS,
 			Credentials: AwsCredentials{
 				AccessKeyId:     viper.GetString("AWS.AccessKeyId"),
 				SecretAccessKey: viper.GetString("AWS.SecretAccessKey"),
 			},
-			AssociatedPackerManifestPath: filepath.Join(kumoExecAbsPath, PACKER, AWS, PACKER_MANIFEST),
+			AssociatedPackerManifestPath: filepath.Join(kumoExecAbsPath, constants.PACKER, constants.AWS, constants.PACKER_MANIFEST),
 		}
 
 	default:

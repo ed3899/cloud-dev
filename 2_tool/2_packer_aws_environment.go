@@ -18,6 +18,10 @@ type PackerAwsRequired struct {
 	AWS_EC2_INSTANCE_USERNAME_PASSWORD string
 }
 
-type Environment struct {
+type PackerAwsEnvironment struct {
 	Required PackerAwsRequired
+}
+
+func (pae PackerAwsEnvironment) IsCloudEnvironment() bool {
+	return true
 }
