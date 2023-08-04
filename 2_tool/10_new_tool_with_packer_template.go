@@ -18,7 +18,6 @@ type ToolWithPackerTemplate struct {
 }
 
 func NewToolWithPackerTemplate(
-	toolKind constants.ToolKind,
 	toolWithRunDir ToolWithRunDir,
 	cloud cloud.Cloud,
 	kumoExecutableAbsPath string,
@@ -26,7 +25,6 @@ func NewToolWithPackerTemplate(
 	var (
 		oopsBuilder = oops.
 				Code("NewToolWithPackerTemplate").
-				With("tool", toolKind).
 				With("cloud", cloud).
 				With("kumoExecutableAbsPath", kumoExecutableAbsPath)
 
