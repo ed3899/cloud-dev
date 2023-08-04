@@ -10,7 +10,7 @@ type Cloud struct {
 	kind constants.Kind
 }
 
-func New(cloudFromConfig string) (cloud *Cloud, err error) {
+func New(cloudFromConfig string, kumoExecAbsPath string) (cloud *Cloud, err error) {
 	var (
 		oopsBuilder = oops.
 				Code("new_cloud_deployment_failed").

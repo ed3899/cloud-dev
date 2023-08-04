@@ -2,7 +2,7 @@ package aws
 
 import "github.com/ed3899/kumo/common/utils"
 
-type TerraformAwsRequired struct {
+type Required struct {
 	AWS_REGION        string
 	AWS_INSTANCE_TYPE string
 	AMI_ID            string
@@ -12,16 +12,16 @@ type TerraformAwsRequired struct {
 	USERNAME          string
 }
 
-type TerraformAwsOptional struct {
+type Optional struct {
 	AWS_EC2_INSTANCE_VOLUME_TYPE string
 	AWS_EC2_INSTANCE_VOLUME_SIZE int
 }
 
-type TerraformAwsEnvironment struct {
-	Required *TerraformAwsRequired
-	Optional *TerraformAwsOptional
+type Environment struct {
+	Required *Required
+	Optional *Optional
 }
 
-func (tae *TerraformAwsEnvironment) IsNotValidEnvironment() (isNotValidEnvironment bool) {
-	return !utils.IsStructCompletellyFilled(tae.Required)
+func (e *Environment) IsNotValidEnvironment() (isNotValidEnvironment bool) {
+	return !utils.IsStructCompletellyFilled(e.Required)
 }
