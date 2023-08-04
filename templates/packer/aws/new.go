@@ -4,10 +4,10 @@ import (
 	"path/filepath"
 	"text/template"
 
-	"github.com/ed3899/kumo/common/cloud"
+	common_cloud_constants "github.com/ed3899/kumo/common/cloud/constants"
 	"github.com/ed3899/kumo/common/dirs"
 	"github.com/ed3899/kumo/common/templates"
-	"github.com/ed3899/kumo/common/tool"
+	common_tool_constants "github.com/ed3899/kumo/common/tool/constants"
 	"github.com/samber/oops"
 	"github.com/spf13/viper"
 )
@@ -19,14 +19,14 @@ type Template struct {
 	environment   templates.EnvironmentI
 }
 
-func NewTemplate() (newTemplate *Template, err error) {
+func New() (newTemplate *Template, err error) {
 	var (
 		oopsBuilder = oops.
 				Code("new_template_failed").
 				With("templates.PACKER_AWS_TEMPLATE_NAME", templates.PACKER_AWS_TEMPLATE_NAME)
 		templatesDirName      = dirs.TEMPLATES_DIR_NAME
-		packerDirName         = tool.PACKER_NAME
-		awsDirName            = cloud.AWS_NAME
+		packerDirName         = common_tool_constants.PACKER_NAME
+		awsDirName            = common_cloud_constants.AWS_NAME
 		packerAwsTemplateName = templates.PACKER_AWS_TEMPLATE_NAME
 
 		instance          *template.Template
@@ -76,18 +76,18 @@ func NewTemplate() (newTemplate *Template, err error) {
 	return
 }
 
-func (t *Template) GetAbsPath() (absPath string) {
+func (t *Template) AbsPath() (absPath string) {
 	return t.absPath
 }
 
-func (t *Template) GetParentDirName() (dir string) {
+func (t *Template) ParentDirName() (dir string) {
 	return t.parentDirName
 }
 
-func (t *Template) GetInstance() (instance *template.Template) {
+func (t *Template) Instance() (instance *template.Template) {
 	return t.instance
 }
 
-func (t *Template) GetEnvironment() (environment templates.EnvironmentI) {
+func (t *Template) Environment() (environment templates.EnvironmentI) {
 	return t.environment
 }

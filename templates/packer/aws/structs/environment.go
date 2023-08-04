@@ -1,4 +1,4 @@
-package aws
+package structs
 
 import (
 	"github.com/ed3899/kumo/common/utils"

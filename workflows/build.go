@@ -126,12 +126,10 @@ func Build() (err error) {
 
 	}
 
-	// 5. Pick template and defer deletion
-	if pickedTemplate, err = templates.PickTemplate(tool, cloud); err != nil {
+	// Pick template and defer deletion
+	if pickedTemplate, err = templates.New(tool, cloud); err != nil {
 		err = oopsBuilder.
-			With("toolSetup.GetToolType()", tool.GetToolType()).
-			With("cloudSetup.GetCloudType()", cloud.GetCloudType()).
-			Wrapf(err, "Error occurred while picking template")
+			Wrapf(err, "Error occurred while picking template for %s and %s", tool.Name(), cloud.Name())
 		return
 	}
 	defer func() {
@@ -139,7 +137,7 @@ func Build() (err error) {
 			logger.Warn(
 				"Failed to remove temporary template",
 				zap.String("error", err.Error()),
-				zap.String("template", pickedTemplate.GetName()),
+				zap.String("template", pickedTemplate.Name()),
 			)
 		}
 	}()

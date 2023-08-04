@@ -6,5 +6,5 @@ import (
 
 type Cloud interface {
 	Name() (cloudName string)
-	Type() (cloudType constants.Kind)
+	Kind() (cloudKind constants.Kind)
 }

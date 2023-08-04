@@ -91,7 +91,7 @@ func Up() (err error) {
 	}
 
 	// 5. Pick template and defer deletion
-	if pickedTemplate, err = templates.PickTemplate(toolSetup, cloudSetup); err != nil {
+	if pickedTemplate, err = templates.New(toolSetup, cloudSetup); err != nil {
 		err = oopsBuilder.
 			With("toolSetup.GetToolType()", toolSetup.GetToolType()).
 			With("cloudSetup.GetCloudName()", cloudSetup.GetCloudName()).

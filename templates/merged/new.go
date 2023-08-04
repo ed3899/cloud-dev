@@ -1,4 +1,4 @@
-package templates
+package merged
 
 import (
 	"os"
@@ -7,24 +7,19 @@ import (
 
 	"github.com/ed3899/kumo/common/dirs"
 	"github.com/ed3899/kumo/common/hashicorp_vars"
+	"github.com/ed3899/kumo/templates/merged/structs"
 	"github.com/ed3899/kumo/common/templates"
 	"github.com/ed3899/kumo/common/utils"
 	"github.com/samber/oops"
-	"go.uber.org/zap"
 )
 
-type MergedEnvironment[E templates.EnvironmentI] struct {
-	General E
-	Cloud   E
-}
-
-type MergedTemplate struct {
+type Template struct {
 	instance    *template.Template
 	absPath     string
-	environment *MergedEnvironment[templates.EnvironmentI]
+	environment *structs.Environment[templates.EnvironmentI]
 }
 
-func NewMergedTemplate(generalTemplate, cloudTemplate templates.TemplateSingle) (packerMergedTemplate *MergedTemplate, err error) {
+func New(generalTemplate, cloudTemplate templates.TemplateSingle) (packerMergedTemplate *Template, err error) {
 	var (
 		oopsBuilder = oops.
 				Code("new_packer_merged_template_failed").
@@ -75,10 +70,10 @@ func NewMergedTemplate(generalTemplate, cloudTemplate templates.TemplateSingle) 
 		return
 	}
 
-	packerMergedTemplate = &MergedTemplate{
+	packerMergedTemplate = &Template{
 		instance: mergedTemplateInstance,
 		absPath:  absPathToMergedTemplate,
-		environment: &MergedEnvironment[templates.EnvironmentI]{
+		environment: &structs.Environment[templates.EnvironmentI]{
 			General: generalTemplate.GetEnvironment(),
 			Cloud:   cloudTemplate.GetEnvironment(),
 		},
@@ -87,38 +82,38 @@ func NewMergedTemplate(generalTemplate, cloudTemplate templates.TemplateSingle) 
 	return
 }
 
-func (mt *MergedTemplate) GetAbsPath() (path string) {
+func (mt *Template) AbsPath() (path string) {
 	return mt.absPath
 }
 
-func (mt *MergedTemplate) GetName() (name string) {
+func (mt *Template) Name() (name string) {
 	return mt.instance.Name()
 }
 
-func (mt *MergedTemplate) GetInstance() (instance *template.Template) {
+func (mt *Template) Instance() (instance *template.Template) {
 	return mt.instance
 }
 
-func (mt *MergedTemplate) GetEnvironment() (environment *MergedEnvironment[templates.EnvironmentI]) {
+func (mt *Template) Environment() (environment *structs.Environment[templates.EnvironmentI]) {
 	return mt.environment
 }
 
-func (mt *MergedTemplate) Remove() (err error) {
+func (mt *Template) Remove() (err error) {
 	var (
-		logger, _ = zap.NewProduction()
+		oopsBuilder = oops.
+			Code("merged_template_remove_failed")
 	)
 
-	defer logger.Sync()
-
 	if err = os.Remove(mt.absPath); err != nil {
-		logger.Sugar().Warnf("Failed to remove %s", mt.absPath)
+		err = oopsBuilder.
+			Wrapf(err, "Error occurred while removing %s", mt.absPath)
 		return
 	}
 
 	return
 }
 
-func (mt *MergedTemplate) ExecuteOn(hashicorpVars hashicorp_vars.HashicorpVarsI) (err error) {
+func (mt *Template) ExecuteOn(hashicorpVars hashicorp_vars.HashicorpVarsI) (err error) {
 	var (
 		oopsBuilder = oops.
 			Code("merged_template_execute_failed").

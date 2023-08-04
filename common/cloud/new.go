@@ -38,6 +38,6 @@ func (c *Cloud) Name() (cloudName string) {
 	return c.name
 }
 
-func (c *Cloud) Type() (cloudType constants.Kind) {
+func (c *Cloud) Kind() (cloudKind constants.Kind) {
 	return c.kind
 }
