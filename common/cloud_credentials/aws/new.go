@@ -3,7 +3,7 @@ package aws
 import (
 	"os"
 
-	"github.com/ed3899/kumo/common/cloud_config"
+	common_cloud_interfaces "github.com/ed3899/kumo/common/cloud/interfaces"
 	"github.com/ed3899/kumo/common/cloud_credentials/interfaces"
 	"github.com/samber/oops"
 	"github.com/spf13/viper"
@@ -14,7 +14,7 @@ type Credentials struct {
 	secretAccessKey string
 }
 
-func New(cloud cloud_config.CloudI) (credential interfaces.Credentials) {
+func New(cloud common_cloud_interfaces.Cloud) (credential interfaces.Credentials) {
 	return &Credentials{
 		accessKeyId:     viper.GetString("AWS.AccessKeyId"),
 		secretAccessKey: viper.GetString("AWS.SecretAccessKey"),

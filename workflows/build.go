@@ -6,7 +6,9 @@ import (
 
 	binaries_packer "github.com/ed3899/kumo/binaries/packer"
 	binaries_packer_interfaces "github.com/ed3899/kumo/binaries/packer/interfaces"
-	"github.com/ed3899/kumo/common/cloud_config"
+	common_cloud "github.com/ed3899/kumo/common/cloud"
+	common_cloud_interfaces "github.com/ed3899/kumo/common/cloud/interfaces"
+	common_cloud_constants "github.com/ed3899/kumo/common/cloud/constants"
 	"github.com/ed3899/kumo/common/cloud_credentials"
 	cloud_credentials_interfaces "github.com/ed3899/kumo/common/cloud_credentials/interfaces"
 	"github.com/ed3899/kumo/common/download"
@@ -30,7 +32,7 @@ func Build() (err error) {
 				Code("build_failed")
 		logger, _ = zap.NewProduction()
 
-		cloud            cloud_config.CloudI
+		cloud            common_cloud_interfaces.Cloud
 		cloudCredentials cloud_credentials_interfaces.Credentials
 		kumoExecAbsPath  string
 
@@ -47,7 +49,7 @@ func Build() (err error) {
 
 	// Set cloud config
 	uncheckedCloudFromConfig = viper.GetString("Cloud")
-	if cloud, err = cloud_config.New(uncheckedCloudFromConfig); err != nil {
+	if cloud, err = common_cloud.New(uncheckedCloudFromConfig); err != nil {
 		err = oopsBuilder.
 			Wrapf(err, "Error occurred while instantiating cloud for %s", uncheckedCloudFromConfig)
 		return

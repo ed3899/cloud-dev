@@ -1,12 +1,13 @@
-package cloud_config
+package cloud
 
 import (
+	"github.com/ed3899/kumo/common/cloud/constants"
 	"github.com/samber/oops"
 )
 
 type Cloud struct {
 	name string
-	kind Kind
+	kind constants.Kind
 }
 
 func New(cloudFromConfig string) (cloud *Cloud, err error) {
@@ -14,14 +15,14 @@ func New(cloudFromConfig string) (cloud *Cloud, err error) {
 		oopsBuilder = oops.
 				Code("new_cloud_deployment_failed").
 				With("cloud", cloudFromConfig)
-		awsName = AWS_NAME
+		awsName = constants.AWS_NAME
 	)
 
 	switch cloudFromConfig {
 	case awsName:
 		cloud = &Cloud{
 			name: awsName,
-			kind: AWS,
+			kind: constants.AWS,
 		}
 
 	default:
@@ -37,6 +38,6 @@ func (c *Cloud) Name() (cloudName string) {
 	return c.name
 }
 
-func (c *Cloud) Type() (cloudType Kind) {
+func (c *Cloud) Type() (cloudType constants.Kind) {
 	return c.kind
 }
