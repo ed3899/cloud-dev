@@ -4,18 +4,16 @@ import (
 	"os"
 	"path/filepath"
 
-	binaries_packer "github.com/ed3899/kumo/binaries/packer"
 	binaries_packer_interfaces "github.com/ed3899/kumo/binaries/packer/interfaces"
 	common_cloud "github.com/ed3899/kumo/common/cloud"
 	common_cloud_interfaces "github.com/ed3899/kumo/common/cloud/interfaces"
-	common_cloud_constants "github.com/ed3899/kumo/common/cloud/constants"
 	"github.com/ed3899/kumo/common/cloud_credentials"
 	cloud_credentials_interfaces "github.com/ed3899/kumo/common/cloud_credentials/interfaces"
 	"github.com/ed3899/kumo/common/download"
 	common_hashicorp_vars "github.com/ed3899/kumo/common/hashicorp_vars"
 	common_tool "github.com/ed3899/kumo/common/tool"
-	common_tool_interfaces "github.com/ed3899/kumo/common/tool/interfaces"
 	common_tool_constants "github.com/ed3899/kumo/common/tool/constants"
+	common_tool_interfaces "github.com/ed3899/kumo/common/tool/interfaces"
 	"github.com/ed3899/kumo/common/utils"
 	common_zip "github.com/ed3899/kumo/common/zip"
 	common_zip_interfaces "github.com/ed3899/kumo/common/zip/interfaces"
@@ -36,9 +34,9 @@ func Build() (err error) {
 		cloudCredentials cloud_credentials_interfaces.Credentials
 		kumoExecAbsPath  string
 
-		packer 			 binaries_packer_interfaces.Packer
-		tool           common_tool_interfaces.Tool
-		zip            common_zip_interfaces.Zip
+		packer binaries_packer_interfaces.Packer
+		tool   common_tool_interfaces.Tool
+		zip    common_zip_interfaces.Zip
 
 		pickedTemplate           *templates.MergedTemplate
 		pickedHashicorpVars      common_hashicorp_vars.HashicorpVarsI
@@ -94,8 +92,21 @@ func Build() (err error) {
 	}
 
 	// Set plugin path and defer unset
-
-
+	if err = tool.SetPluginPath(); err != nil {
+		err = oopsBuilder.
+			Wrapf(err, "Error occurred while setting plugin path for %s", tool.Name())
+		return
+	}
+	defer func() {
+		if err := tool.UnsetPluginPath(); err != nil {
+			logger.Warn(
+				"Failed to unset plugin path",
+				zap.String("error", err.Error()),
+				zap.String("tool", tool.Name()),
+			)
+		}
+	}()
+g
 	// Verify presence of tool
 	if utils.FileNotPresent(tool.ExecutableName()); err != nil {
 

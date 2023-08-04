@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/ed3899/kumo/common/cloud_config"
+	common_cloud_interfaces "github.com/ed3899/kumo/common/cloud/interfaces"
 	"github.com/ed3899/kumo/common/dirs"
 	"github.com/ed3899/kumo/common/tool/constants"
 	"github.com/ed3899/kumo/common/utils"
@@ -21,7 +21,7 @@ type Tool struct {
 	pluginDir         string
 }
 
-func New(toolKind constants.Kind, cloud cloud_config.CloudI, kumoExecAbsPath string) (toolConfig *Tool, err error) {
+func New(toolKind constants.Kind, cloud common_cloud_interfaces.Cloud, kumoExecAbsPath string) (toolConfig *Tool, err error) {
 	var (
 		oopsBuilder = oops.
 			Code("new_tool_setup_failed").
@@ -125,31 +125,6 @@ func (t *Tool) UnsetPluginPath() (err error) {
 
 	return
 }
-
-// func (t *Tool) ZipName() (toolZipName string) {
-// 	return fmt.Sprintf("%s.zip", t.name)
-// }
-
-// func (t *Tool) ZipAbsPath() (toolZipAbsPath string) {
-// 	return filepath.Join(t.dependenciesDirName, t.name, fmt.Sprintf("%s.zip", t.name))
-// }
-
-// func (t *Tool) ZipContentLength() (toolZipContentLength int64, err error) {
-// 	var (
-// 		oopsBuilder = oops.
-// 				Code("get_zip_content_length_failed")
-// 		currentOs, currentArch = utils.GetCurrentHostSpecs()
-// 		url                    = utils.CreateHashicorpURL(t.name, t.version, currentOs, currentArch)
-// 	)
-
-// 	if toolZipContentLength, err = utils.GetContentLength(url); err != nil {
-// 		err = oopsBuilder.
-// 			Wrapf(err, "failed to get content length for: %s", url)
-// 		return
-// 	}
-
-// 	return
-// }
 
 func (t *Tool) ExecutableName() (toolExecutableName string) {
 	return fmt.Sprintf("%s.exe", t.name)
