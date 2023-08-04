@@ -13,6 +13,8 @@ import (
 	common_hashicorp_vars "github.com/ed3899/kumo/common/hashicorp_vars"
 	"github.com/ed3899/kumo/common/tool_config"
 	"github.com/ed3899/kumo/common/utils"
+	common_zip "github.com/ed3899/kumo/common/zip"
+	common_zip_interfaces "github.com/ed3899/kumo/common/zip/interfaces"
 	"github.com/ed3899/kumo/hashicorp_vars"
 	"github.com/ed3899/kumo/templates"
 	"github.com/samber/oops"
@@ -29,11 +31,12 @@ func Build() (err error) {
 		cloud            cloud_config.CloudI
 		cloudCredentials cloud_credentials_interfaces.Credentials
 		kumoExecAbsPath  string
-		zip              download.ZipI
 
 		packerConfig             *packer.Binary
 		packerInstance           *packer.Instance
 		tool                     tool_config.ToolI
+		zip											common_zip_interfaces.Zip
+
 		pickedTemplate           *templates.MergedTemplate
 		pickedHashicorpVars      common_hashicorp_vars.HashicorpVarsI
 		uncheckedCloudFromConfig string
@@ -89,7 +92,14 @@ func Build() (err error) {
 
 	// Verify presence of tool
 	if utils.FileNotPresent(tool.ExecutableName()); err != nil {
-		zip, err = download.New(tool)
+
+		if zip, err = common_zip.New(tool); err != nil {
+			err = oopsBuilder.
+				Wrapf(err, "Error occurred while instantiating zip for %s", tool.Name())
+			return
+		}
+
+		
 	}
 
 	// 0. Instantiate config
