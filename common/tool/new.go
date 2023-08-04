@@ -19,6 +19,7 @@ type Tool struct {
 	executableAbsPath string
 	runDir            string
 	pluginDir         string
+	cloudTemplateDir  string
 }
 
 func New(toolKind constants.Kind, cloud common_cloud_interfaces.Cloud, kumoExecAbsPath string) (toolConfig *Tool, err error) {
@@ -51,6 +52,12 @@ func New(toolKind constants.Kind, cloud common_cloud_interfaces.Cloud, kumoExecA
 				cloud.Name(),
 				dirs.PLUGINS_DIR_NAME,
 			),
+			cloudTemplateDir: filepath.Join(
+				kumoExecAbsPath,
+				dirs.TEMPLATES_DIR_NAME,
+				constants.PACKER_NAME,
+				cloud.Name(),
+			),
 		}
 
 	case constants.Terraform:
@@ -74,6 +81,12 @@ func New(toolKind constants.Kind, cloud common_cloud_interfaces.Cloud, kumoExecA
 				constants.TERRAFORM_NAME,
 				cloud.Name(),
 				dirs.PLUGINS_DIR_NAME,
+			),
+			cloudTemplateDir: filepath.Join(
+				kumoExecAbsPath,
+				dirs.TEMPLATES_DIR_NAME,
+				constants.TERRAFORM_NAME,
+				cloud.Name(),
 			),
 		}
 
