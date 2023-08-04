@@ -1,0 +1,8 @@
+package constants
+
+const (
+	GENERAL_DIR_NAME      = "general"
+	DEPENDENCIES_DIR_NAME = "deps"
+	PLUGINS_DIR_NAME      = "plugins"
+	TEMPLATES_DIR_NAME    = "templates"
+)
