@@ -4,11 +4,13 @@ import (
 	"path/filepath"
 	"text/template"
 
-	"github.com/ed3899/kumo/common/ssh"
-	"github.com/ed3899/kumo/common/cloud"
+	common_cloud_constants "github.com/ed3899/kumo/common/cloud/constants"
 	"github.com/ed3899/kumo/common/dirs"
-	"github.com/ed3899/kumo/common/templates"
-	"github.com/ed3899/kumo/common/tool"
+	"github.com/ed3899/kumo/common/ssh"
+
+	common_templates_interfaces "github.com/ed3899/kumo/common/templates/interfaces"
+	common_templates_constants "github.com/ed3899/kumo/common/templates/constants"
+	common_tool_constants "github.com/ed3899/kumo/common/tool/constants"
 	"github.com/ed3899/kumo/common/utils"
 	"github.com/samber/oops"
 	"github.com/spf13/viper"
@@ -18,17 +20,17 @@ type Template struct {
 	instance      *template.Template
 	absPath       string
 	parentDirName string
-	environment   templates.EnvironmentI
+	environment   common_templates_interfaces.Environment
 }
 
-func NewTemplate(packerManifest templates.PackerManifestI) (newTemplate *Template, err error) {
+func NewTemplate(packerManifest common_templates_interfaces.PackerManifest) (newTemplate *Template, err error) {
 	var (
 		oopsBuilder = oops.
 				Code("new_template_failed")
 		templatesDirName         = dirs.TEMPLATES_DIR_NAME
-		terraformDirName         = tool.TERRAFORM_NAME
-		awsDirName               = cloud.AWS_NAME
-		terraformAwsTemplateName = templates.TERRAFORM_AWS_TEMPLATE_NAME
+		terraformDirName         = common_tool_constants.TERRAFORM_NAME
+		awsDirName               = common_cloud_constants.AWS_NAME
+		terraformAwsTemplateName = common_templates_constants.TERRAFORM_AWS_TEMPLATE_NAME
 
 		absPathToTemplate string
 		instance          *template.Template
@@ -50,7 +52,7 @@ func NewTemplate(packerManifest templates.PackerManifestI) (newTemplate *Templat
 		return
 	}
 
-	if pickedAmiId, err = utils.PickAmiIdToBeUsed(packerManifest.GetLastBuiltAmiId(), viper.GetString("AMI.IdToBeUsed")); err != nil {
+	if pickedAmiId, err = utils.PickAmiIdToBeUsed(packerManifest.LastBuiltAmiId(), viper.GetString("AMI.IdToBeUsed")); err != nil {
 		err = oopsBuilder.
 			Wrapf(err, "Error occurred while picking ami id to be used")
 		return
@@ -65,10 +67,10 @@ func NewTemplate(packerManifest templates.PackerManifestI) (newTemplate *Templat
 				AWS_REGION:        viper.GetString("AWS.Region"),
 				AWS_INSTANCE_TYPE: viper.GetString("AWS.EC2.Instance.Type"),
 				AMI_ID:            pickedAmiId,
-				KEY_NAME: ssh.KEY_NAME,
-				SSH_PORT: ssh.SSH_PORT,
-				IP_FILE_NAME: ssh.IP_FILE_NAME,
-				USERNAME: viper.GetString("AMI.User"),
+				KEY_NAME:          ssh.KEY_NAME,
+				SSH_PORT:          ssh.SSH_PORT,
+				IP_FILE_NAME:      ssh.IP_FILE_NAME,
+				USERNAME:          viper.GetString("AMI.User"),
 			},
 			Optional: &Optional{
 				AWS_EC2_INSTANCE_VOLUME_TYPE: viper.GetString("AWS.EC2.Volume.Type"),

@@ -16,7 +16,7 @@ import (
 type Template struct {
 	instance    *template.Template
 	absPath     string
-	environment *common_templates_structs.Environment[common_templates_interfaces.Environment]
+	environment *common_templates_structs.MergedEnvironment[common_templates_interfaces.Environment]
 }
 
 func New(generalTemplate, cloudTemplate common_templates_interfaces.Template) (packerMergedTemplate *Template, err error) {
@@ -73,7 +73,7 @@ func New(generalTemplate, cloudTemplate common_templates_interfaces.Template) (p
 	packerMergedTemplate = &Template{
 		instance: mergedTemplateInstance,
 		absPath:  absPathToMergedTemplate,
-		environment: &common_templates_structs.Environment[common_templates_interfaces.Environment]{
+		environment: &common_templates_structs.MergedEnvironment[common_templates_interfaces.Environment]{
 			General: generalTemplate.Environment(),
 			Cloud:   cloudTemplate.Environment(),
 		},
@@ -95,7 +95,7 @@ func (mt *Template) Instance() (instance *template.Template) {
 }
 
 func (mt *Template) Environment() (
-	environment *common_templates_structs.Environment[common_templates_interfaces.Environment],
+	environment *common_templates_structs.MergedEnvironment[common_templates_interfaces.Environment],
 ) {
 	return mt.environment
 }

@@ -54,8 +54,8 @@ func New() (newTemplate *Template, err error) {
 		instance:      instance,
 		absPath:       absPathToTemplate,
 		parentDirName: packerDirName,
-		environment: &common_templates_structs.AwsEnvironment{
-			Required: &common_templates_structs.AwsRequired{
+		environment: &common_templates_structs.PackerAwsEnvironment{
+			Required: &common_templates_structs.PackerAwsRequired{
 				AWS_ACCESS_KEY:                     viper.GetString("AWS.AccessKeyId"),
 				AWS_SECRET_KEY:                     viper.GetString("AWS.SecretAccessKey"),
 				AWS_IAM_PROFILE:                    viper.GetString("AWS.IamProfile"),
