@@ -11,7 +11,9 @@ import (
 	cloud_credentials_interfaces "github.com/ed3899/kumo/common/cloud_credentials/interfaces"
 	"github.com/ed3899/kumo/common/download"
 	common_hashicorp_vars "github.com/ed3899/kumo/common/hashicorp_vars"
-	"github.com/ed3899/kumo/common/tool_config"
+	common_tool "github.com/ed3899/kumo/common/tool"
+	common_tool_interfaces "github.com/ed3899/kumo/common/tool/interfaces"
+	common_tool_constants "github.com/ed3899/kumo/common/tool/constants"
 	"github.com/ed3899/kumo/common/utils"
 	common_zip "github.com/ed3899/kumo/common/zip"
 	common_zip_interfaces "github.com/ed3899/kumo/common/zip/interfaces"
@@ -33,7 +35,7 @@ func Build() (err error) {
 		kumoExecAbsPath  string
 
 		packer 			 binaries_packer_interfaces.Packer
-		tool           tool_config.ToolI
+		tool           common_tool_interfaces.Tool
 		zip            common_zip_interfaces.Zip
 
 		pickedTemplate           *templates.MergedTemplate
@@ -81,13 +83,16 @@ func Build() (err error) {
 	}
 
 	// Set tool config
-	if tool, err = tool_config.New(tool_config.Packer, cloud, kumoExecAbsPath); err != nil {
+	if tool, err = common_tool.New(common_tool_constants.Packer, cloud, kumoExecAbsPath); err != nil {
 		err = oopsBuilder.
-			With("toolKind", tool_config.Packer).
+			With("toolKind", common_tool_constants.Packer).
 			With("cloud", cloud.Name()).
 			Wrapf(err, "Error occurred while instantiating ToolSetup for packer")
 		return
 	}
+
+	// Set plugin path and defer unset
+
 
 	// Verify presence of tool
 	if utils.FileNotPresent(tool.ExecutableName()); err != nil {
@@ -107,29 +112,6 @@ func Build() (err error) {
 		}
 
 	}
-
-	// Instantiate packer
-	packer = binaries_packer.New(kumoExecAbsPath)
-
-	// Set plugin path and defer unset
-
-	// b. Set packer plugin paths and defer unset
-	if err = packerInstance.SetPluginPath(cloud); err != nil {
-		err = oopsBuilder.
-			With("cloudSetup.GetCloudName()", cloud.GetCloudName()).
-			Wrapf(err, "Error occurred while setting plugin path for packer")
-		return
-	}
-	defer func() {
-		if err := packerInstance.UnsetPluginPath(); err != nil {
-			logger.Warn(
-				"Failed to unset plugin path for packer",
-				zap.String("error", err.Error()),
-			)
-		}
-	}()
-
-	// 4. Tool setup
 
 	// 5. Pick template and defer deletion
 	if pickedTemplate, err = templates.PickTemplate(tool, cloud); err != nil {
