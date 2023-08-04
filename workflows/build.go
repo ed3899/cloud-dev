@@ -4,8 +4,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/ed3899/kumo/binaries"
-	"github.com/ed3899/kumo/binaries/packer"
+	binaries_packer "github.com/ed3899/kumo/binaries/packer"
+	binaries_packer_interfaces "github.com/ed3899/kumo/binaries/packer/interfaces"
 	"github.com/ed3899/kumo/common/cloud_config"
 	"github.com/ed3899/kumo/common/cloud_credentials"
 	cloud_credentials_interfaces "github.com/ed3899/kumo/common/cloud_credentials/interfaces"
@@ -32,8 +32,7 @@ func Build() (err error) {
 		cloudCredentials cloud_credentials_interfaces.Credentials
 		kumoExecAbsPath  string
 
-		packerConfig   *packer.Binary
-		packerInstance *packer.Instance
+		packer 			 binaries_packer_interfaces.Packer
 		tool           tool_config.ToolI
 		zip            common_zip_interfaces.Zip
 
@@ -93,40 +92,26 @@ func Build() (err error) {
 	// Verify presence of tool
 	if utils.FileNotPresent(tool.ExecutableName()); err != nil {
 
+		// Instantiate zip
 		if zip, err = common_zip.New(tool); err != nil {
 			err = oopsBuilder.
 				Wrapf(err, "Error occurred while instantiating zip for %s", tool.Name())
 			return
 		}
 
-		download.New(zip, filepath.Dir(zip.GetPath()))
-
-	}
-
-	// 0. Instantiate config
-	if packerConfig, err = binaries.NewConfig(tool.Packer); err != nil {
-		err = oopsBuilder.
-			Wrapf(err, "Error occurred while instantiating for tool %#v", tool.Packer)
-		return
-	}
-
-	// 1. Instantiate Packer
-	if packerInstance, err = packer.NewInstance(packerConfig); err != nil {
-		err = oopsBuilder.
-			Wrapf(err, "Error occurred while instantiating Packer")
-		return
-	}
-
-	// 2. Download and install if needed
-	if packerInstance.IsNotInstalled() {
-		if err = download.New(packerInstance.Zip, filepath.Dir(packerInstance.AbsPathToExecutable)); err != nil {
+		// Download zip
+		if err = download.New(zip, filepath.Dir(zip.AbsPath())); err != nil {
 			err = oopsBuilder.
-				Wrapf(err, "Error occurred while downloading %s", packerInstance.Zip.GetName())
+				Wrapf(err, "Error occurred while downloading %s", zip.Name())
 			return
 		}
+
 	}
 
-	// 3. Cloud setup
+	// Instantiate packer
+	packer = binaries_packer.New(kumoExecAbsPath)
+
+	// Set plugin path and defer unset
 
 	// b. Set packer plugin paths and defer unset
 	if err = packerInstance.SetPluginPath(cloud); err != nil {

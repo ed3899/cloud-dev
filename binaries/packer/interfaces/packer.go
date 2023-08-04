@@ -1,6 +1,6 @@
 package packer
 
-type PackerI interface {
+type Packer interface {
 	Init() (err error)
 	Build() (err error)
 }
