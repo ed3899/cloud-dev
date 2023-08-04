@@ -5,4 +5,6 @@ const (
 	PACKER_VERSION          = "1.9.1"
 	PACKER_MANIFEST_NAME    = "manifest.json"
 	PACKER_PLUGIN_PATH_NAME = "PACKER_PLUGIN_PATH"
+	PACKER_GENERAL_TEMPLATE_NAME = "GeneralPackerVars.tmpl"
+	PACKER_AWS_TEMPLATE_NAME = "AWS_PackerVars.tmpl"
 )

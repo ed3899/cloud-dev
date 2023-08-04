@@ -5,12 +5,25 @@ import (
 	"os"
 	"path/filepath"
 
+	common_cloud_constants "github.com/ed3899/kumo/common/cloud/constants"
 	common_cloud_interfaces "github.com/ed3899/kumo/common/cloud/interfaces"
 	"github.com/ed3899/kumo/common/dirs"
+	common_templates_constants "github.com/ed3899/kumo/common/templates/constants"
+	common_templates_interfaces "github.com/ed3899/kumo/common/templates/interfaces"
 	"github.com/ed3899/kumo/common/tool/constants"
 	"github.com/ed3899/kumo/common/utils"
 	"github.com/samber/oops"
 )
+
+type Info struct {
+	absPath     string
+	environment common_templates_interfaces.Environment
+}
+
+type Templates struct {
+	general *Info
+	cloud   *Info
+}
 
 type Tool struct {
 	kind              constants.Kind
@@ -19,7 +32,7 @@ type Tool struct {
 	executableAbsPath string
 	runDir            string
 	pluginDir         string
-	cloudTemplateDir  string
+	templates         *Templates
 }
 
 func New(toolKind constants.Kind, cloud common_cloud_interfaces.Cloud, kumoExecAbsPath string) (toolConfig *Tool, err error) {
@@ -52,12 +65,16 @@ func New(toolKind constants.Kind, cloud common_cloud_interfaces.Cloud, kumoExecA
 				cloud.Name(),
 				dirs.PLUGINS_DIR_NAME,
 			),
-			cloudTemplateDir: filepath.Join(
-				kumoExecAbsPath,
-				dirs.TEMPLATES_DIR_NAME,
-				constants.PACKER_NAME,
-				cloud.Name(),
-			),
+			templates: &Templates{
+				general: &Info{
+					absPath: filepath.Join(
+						kumoExecAbsPath,
+						dirs.TEMPLATES_DIR_NAME,
+						constants.PACKER_NAME,
+						common_templates_constants.PACKER_GENERAL_TEMPLATE_NAME,
+					),
+				},
+			},
 		}
 
 	case constants.Terraform:
@@ -82,17 +99,29 @@ func New(toolKind constants.Kind, cloud common_cloud_interfaces.Cloud, kumoExecA
 				cloud.Name(),
 				dirs.PLUGINS_DIR_NAME,
 			),
-			cloudTemplateDir: filepath.Join(
-				kumoExecAbsPath,
-				dirs.TEMPLATES_DIR_NAME,
-				constants.TERRAFORM_NAME,
-				cloud.Name(),
-			),
+			templates: &Templates{
+				general: &Info{
+					absPath: filepath.Join(
+						kumoExecAbsPath,
+						dirs.TEMPLATES_DIR_NAME,
+						constants.TERRAFORM_NAME,
+						common_templates_constants.TERRAFORM_GENERAL_TEMPLATE_NAME,
+					),
+				},
+			},
 		}
 
 	default:
 		err = oopsBuilder.
 			Errorf("Tool '%v' not supported", toolKind)
+		return
+	}
+
+	switch cloud.Kind() {
+	case common_cloud_constants.AWS:
+	default:
+		err = oopsBuilder.
+			Wrapf(err, "Cloud '%v' not supported", cloud.Kind())
 		return
 	}
 

@@ -1,8 +1,7 @@
-package structs
-
+package aws
 import "github.com/ed3899/kumo/common/utils"
 
-type PackerAwsRequired struct {
+type Required struct {
 	AWS_ACCESS_KEY                     string
 	AWS_SECRET_KEY                     string
 	AWS_IAM_PROFILE                    string
@@ -20,10 +19,10 @@ type PackerAwsRequired struct {
 	AWS_EC2_INSTANCE_USERNAME_PASSWORD string
 }
 
-type PackerAwsEnvironment struct {
-	Required *PackerAwsRequired
+type Environment struct {
+	Required *Required
 }
 
-func (pae *PackerAwsEnvironment) IsNotValidEnvironment() (isNotValidEnvironment bool) {
-	return !utils.IsStructCompletellyFilled(pae.Required)
+func (e *Environment) IsNotValidEnvironment() (isNotValidEnvironment bool) {
+	return !utils.IsStructCompletellyFilled(e.Required)
 }
