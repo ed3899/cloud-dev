@@ -1,6 +1,7 @@
 package workflows
 
 import (
+	"os"
 	"path/filepath"
 
 	"github.com/ed3899/kumo/binaries"
@@ -26,6 +27,7 @@ func Build() (err error) {
 
 		cloud                    cloud_config.CloudI
 		cloudCredentials         cloud_credentials_interfaces.Credentials
+		kumoExecAbsPath          string
 		packerConfig             *packer.Binary
 		packerInstance           *packer.Instance
 		tool                     tool_config.ToolI
@@ -66,8 +68,15 @@ func Build() (err error) {
 		}
 	}()
 
+	// Get kumo executable abs path
+	if kumoExecAbsPath, err = os.Executable(); err != nil {
+		err = oopsBuilder.
+			Wrapf(err, "Error occurred while getting kumo executable abs path")
+		return
+	}
+
 	// Set tool config
-	if tool, err = tool_config.New(tool_config.Packer, cloud); err != nil {
+	if tool, err = tool_config.New(tool_config.Packer, cloud, kumoExecAbsPath); err != nil {
 		err = oopsBuilder.
 			With("toolKind", tool_config.Packer).
 			With("cloud", cloud.Name()).

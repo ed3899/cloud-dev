@@ -80,30 +80,30 @@ func (t *Tool) Name() (toolName string) {
 	return t.name
 }
 
-func (t *Tool) ZipName() (toolZipName string) {
-	return fmt.Sprintf("%s.zip", t.name)
-}
+// func (t *Tool) ZipName() (toolZipName string) {
+// 	return fmt.Sprintf("%s.zip", t.name)
+// }
 
-func (t *Tool) ZipAbsPath() (toolZipAbsPath string) {
-	return filepath.Join(t.dependenciesDirName, t.name, fmt.Sprintf("%s.zip", t.name))
-}
+// func (t *Tool) ZipAbsPath() (toolZipAbsPath string) {
+// 	return filepath.Join(t.dependenciesDirName, t.name, fmt.Sprintf("%s.zip", t.name))
+// }
 
-func (t *Tool) ZipContentLength() (toolZipContentLength int64, err error) {
-	var (
-		oopsBuilder = oops.
-				Code("get_zip_content_length_failed")
-		currentOs, currentArch = utils.GetCurrentHostSpecs()
-		url                    = utils.CreateHashicorpURL(t.name, t.version, currentOs, currentArch)
-	)
+// func (t *Tool) ZipContentLength() (toolZipContentLength int64, err error) {
+// 	var (
+// 		oopsBuilder = oops.
+// 				Code("get_zip_content_length_failed")
+// 		currentOs, currentArch = utils.GetCurrentHostSpecs()
+// 		url                    = utils.CreateHashicorpURL(t.name, t.version, currentOs, currentArch)
+// 	)
 
-	if toolZipContentLength, err = utils.GetContentLength(url); err != nil {
-		err = oopsBuilder.
-			Wrapf(err, "failed to get content length for: %s", url)
-		return
-	}
+// 	if toolZipContentLength, err = utils.GetContentLength(url); err != nil {
+// 		err = oopsBuilder.
+// 			Wrapf(err, "failed to get content length for: %s", url)
+// 		return
+// 	}
 
-	return
-}
+// 	return
+// }
 
 func (t *Tool) ExecutableName() (toolExecutableName string) {
 	return fmt.Sprintf("%s.exe", t.name)
@@ -113,11 +113,7 @@ func (t *Tool) Version() (toolVersion string) {
 	return t.version
 }
 
-func (t *Tool) InitialDir() (initialDir string) {
-	return t.initialDir
-}
-
-func (t *Tool) Dir() (toolDir string) {
+func (t *Tool) RunDir() (toolDir string) {
 	return t.runDir
 }
 
@@ -129,32 +125,3 @@ func (t *Tool) Url() (toolUrl string) {
 	return utils.CreateHashicorpURL(t.name, t.version, currentOs, currentArch)
 }
 
-func (t *Tool) GoInitialDir() (err error) {
-	var (
-		oopsBuilder = oops.
-			Code("go_initial_dir_failed")
-	)
-
-	if err = os.Chdir(t.initialDir); err != nil {
-		err = oopsBuilder.
-			Wrapf(err, "Error occurred while changing directory to %s", t.initialDir)
-		return
-	}
-
-	return
-}
-
-func (t *Tool) GoDir() (err error) {
-	var (
-		oopsBuilder = oops.
-			Code("go_target_dir_failed")
-	)
-
-	if err = os.Chdir(t.runDir); err != nil {
-		err = oopsBuilder.
-			Wrapf(err, "Error occurred while changing directory to %s", t.runDir)
-		return
-	}
-
-	return
-}
