@@ -6,9 +6,10 @@ import (
 
 	common_cloud_constants "github.com/ed3899/kumo/common/cloud/constants"
 	"github.com/ed3899/kumo/common/dirs"
-	"github.com/ed3899/kumo/common/templates"
+	common_templates_constants "github.com/ed3899/kumo/common/templates/constants"
+	common_templates_interfaces "github.com/ed3899/kumo/common/templates/interfaces"
+	common_templates_structs "github.com/ed3899/kumo/common/templates/structs"
 	common_tool_constants "github.com/ed3899/kumo/common/tool/constants"
-	templates_packer_aws_structs "github.com/ed3899/kumo/templates/packer/aws/structs"
 	"github.com/samber/oops"
 	"github.com/spf13/viper"
 )
@@ -17,18 +18,18 @@ type Template struct {
 	instance      *template.Template
 	absPath       string
 	parentDirName string
-	environment   templates.EnvironmentI
+	environment   common_templates_interfaces.Environment
 }
 
 func New() (newTemplate *Template, err error) {
 	var (
 		oopsBuilder = oops.
 				Code("new_template_failed").
-				With("templates.PACKER_AWS_TEMPLATE_NAME", templates.PACKER_AWS_TEMPLATE_NAME)
+				With("templates.PACKER_AWS_TEMPLATE_NAME", common_templates_constants.PACKER_AWS_TEMPLATE_NAME)
 		templatesDirName      = dirs.TEMPLATES_DIR_NAME
 		packerDirName         = common_tool_constants.PACKER_NAME
 		awsDirName            = common_cloud_constants.AWS_NAME
-		packerAwsTemplateName = templates.PACKER_AWS_TEMPLATE_NAME
+		packerAwsTemplateName = common_templates_constants.PACKER_AWS_TEMPLATE_NAME
 
 		instance          *template.Template
 		absPathToTemplate string
@@ -53,8 +54,8 @@ func New() (newTemplate *Template, err error) {
 		instance:      instance,
 		absPath:       absPathToTemplate,
 		parentDirName: packerDirName,
-		environment: &templates_packer_aws_structs.Environment{
-			Required: &templates_packer_aws_structs.Required{
+		environment: &common_templates_structs.AwsEnvironment{
+			Required: &common_templates_structs.AwsRequired{
 				AWS_ACCESS_KEY:                     viper.GetString("AWS.AccessKeyId"),
 				AWS_SECRET_KEY:                     viper.GetString("AWS.SecretAccessKey"),
 				AWS_IAM_PROFILE:                    viper.GetString("AWS.IamProfile"),
@@ -89,6 +90,6 @@ func (t *Template) Instance() (instance *template.Template) {
 	return t.instance
 }
 
-func (t *Template) Environment() (environment templates.EnvironmentI) {
+func (t *Template) Environment() (environment common_templates_interfaces.Environment) {
 	return t.environment
 }
