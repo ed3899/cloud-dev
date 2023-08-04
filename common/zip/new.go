@@ -15,12 +15,12 @@ import (
 )
 
 type Zip struct {
-	Name          string
-	AbsPath       string
-	URL           string
-	ContentLength int64
-	DownloadBar   *mpb.Bar
-	ExtractionBar *mpb.Bar
+	name          string
+	absPath       string
+	url           string
+	contentLength int64
+	downloadBar   *mpb.Bar
+	extractionBar *mpb.Bar
 }
 
 func New(toolConfig tool_config.ToolI) (zip interfaces.Zip, err error) {
@@ -38,36 +38,36 @@ func New(toolConfig tool_config.ToolI) (zip interfaces.Zip, err error) {
 	}
 
 	zip = &Zip{
-		Name:          filepath.Base(absPath),
-		AbsPath:       absPath,
-		URL:           toolConfig.Url(),
-		ContentLength: contentLength,
+		name:          filepath.Base(absPath),
+		absPath:       absPath,
+		url:           toolConfig.Url(),
+		contentLength: contentLength,
 	}
 
 	return
 }
 
-func (z *Zip) GetName() (name string) {
-	return z.Name
+func (z *Zip) Name() (name string) {
+	return z.name
 }
 
-func (z *Zip) GetPath() (path string) {
-	return z.AbsPath
+func (z *Zip) AbsPath() (path string) {
+	return z.absPath
 }
 
 func (z *Zip) IsPresent() (present bool) {
-	return utils.FilePresent(z.AbsPath)
+	return utils.FilePresent(z.absPath)
 }
 
 func (z *Zip) IsNotPresent() (notPresent bool) {
-	return utils.FileNotPresent(z.AbsPath)
+	return utils.FileNotPresent(z.absPath)
 }
 
 func (z *Zip) SetDownloadBar(p interfaces.MultiProgressBar) {
-	z.DownloadBar = p.AddBar(int64(z.ContentLength),
+	z.downloadBar = p.AddBar(int64(z.contentLength),
 		mpb.BarFillerClearOnComplete(),
 		mpb.PrependDecorators(
-			decor.Name(z.Name),
+			decor.Name(z.name),
 			decor.Counters(decor.SizeB1024(0), " % .2f / % .2f"),
 		),
 		mpb.AppendDecorators(
@@ -80,15 +80,15 @@ func (z *Zip) SetDownloadBar(p interfaces.MultiProgressBar) {
 }
 
 func (z *Zip) IncrementDownloadBar(downloadedBytes int) {
-	z.DownloadBar.IncrBy(downloadedBytes)
+	z.downloadBar.IncrBy(downloadedBytes)
 }
 
 func (z *Zip) SetExtractionBar(p interfaces.MultiProgressBar, zipSize int64) {
-	z.ExtractionBar = p.AddBar(zipSize,
-		mpb.BarQueueAfter(z.DownloadBar),
+	z.extractionBar = p.AddBar(zipSize,
+		mpb.BarQueueAfter(z.downloadBar),
 		mpb.BarFillerClearOnComplete(),
 		mpb.PrependDecorators(
-			decor.Name(z.Name),
+			decor.Name(z.name),
 			decor.Counters(decor.SizeB1024(0), " % .2f / % .2f"),
 		),
 		mpb.AppendDecorators(
@@ -101,7 +101,7 @@ func (z *Zip) SetExtractionBar(p interfaces.MultiProgressBar, zipSize int64) {
 }
 
 func (z *Zip) IncrementExtractionBar(extractedBytes int) {
-	z.ExtractionBar.IncrBy(extractedBytes)
+	z.extractionBar.IncrBy(extractedBytes)
 }
 
 func (z *Zip) Download(downloadedBytesChan chan<- int) (err error) {
@@ -110,11 +110,11 @@ func (z *Zip) Download(downloadedBytesChan chan<- int) (err error) {
 			With("downloadedBytesChan", downloadedBytesChan)
 	)
 
-	if err = utils.Download(z.URL, z.AbsPath, downloadedBytesChan); err != nil {
+	if err = utils.Download(z.url, z.absPath, downloadedBytesChan); err != nil {
 		err = oopsBuilder.
-			With("url", z.URL).
-			With("absPath", z.AbsPath).
-			Wrapf(err, "failed to download: %v", z.URL)
+			With("url", z.url).
+			With("absPath", z.absPath).
+			Wrapf(err, "failed to download: %v", z.url)
 		return
 	}
 
@@ -128,10 +128,10 @@ func (z *Zip) ExtractTo(extractToPath string, extractedBytesChan chan<- int) (er
 			With("extractedBytesChan", extractedBytesChan)
 	)
 
-	if err = utils.Unzip(z.AbsPath, extractToPath, extractedBytesChan); err != nil {
+	if err = utils.Unzip(z.absPath, extractToPath, extractedBytesChan); err != nil {
 		err = oopsBuilder.
-			With("absPath", z.AbsPath).
-			Wrapf(err, "failed to unzip: %v", z.AbsPath)
+			With("absPath", z.absPath).
+			Wrapf(err, "failed to unzip: %v", z.absPath)
 		return
 	}
 
@@ -143,10 +143,10 @@ func (z *Zip) Remove() (err error) {
 		oopsBuilder = oops.Code("zip_remove_failed")
 	)
 
-	if err = os.Remove(z.AbsPath); err != nil {
+	if err = os.Remove(z.absPath); err != nil {
 		err = oopsBuilder.
-			With("absPath", z.AbsPath).
-			Wrapf(err, "failed to remove: %v", z.AbsPath)
+			With("absPath", z.absPath).
+			Wrapf(err, "failed to remove: %v", z.absPath)
 		return
 	}
 

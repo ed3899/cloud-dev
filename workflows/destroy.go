@@ -46,7 +46,7 @@ func Destroy() (err error) {
 
 	// 2. Download and install if needed
 	if terraformInstance.IsNotInstalled() {
-		if err = download.Initiate(terraformInstance.Zip, filepath.Dir(terraformInstance.AbsPathToExecutable)); err != nil {
+		if err = download.New(terraformInstance.Zip, filepath.Dir(terraformInstance.AbsPathToExecutable)); err != nil {
 			err = oopsBuilder.
 				Wrapf(err, "Error occurred while downloading %s", terraformInstance.Zip.GetName())
 			return

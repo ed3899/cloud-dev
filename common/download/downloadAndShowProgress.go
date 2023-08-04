@@ -21,8 +21,8 @@ func DownloadAndShowProgress(
 		doneChan            = make(chan bool, 1)
 		oopsBuilder         = oops.
 					Code("download_and_show_progress_failed").
-					With("d.GetName()", d.GetName()).
-					With("d.GetPath()", d.GetPath()).
+					With("d.GetName()", d.Name()).
+					With("d.GetPath()", d.AbsPath()).
 					With("multiProgressBar", multiProgressBar)
 
 		downloadedBytes int
@@ -39,7 +39,7 @@ func DownloadAndShowProgress(
 		if err := d.Download(downloadedBytesChan); err != nil {
 			err = oopsBuilder.
 				With("downloadedBytesChan", downloadedBytesChan).
-				Wrapf(err, "Error occurred while downloading %s", d.GetName())
+				Wrapf(err, "Error occurred while downloading %s", d.Name())
 			errChan <- err
 			return
 		}
@@ -58,7 +58,7 @@ OuterLoop:
 		case err = <-errChan:
 			if err != nil {
 				err = oopsBuilder.
-					Wrapf(err, "Error occurred while downloading %s", d.GetName())
+					Wrapf(err, "Error occurred while downloading %s", d.Name())
 				return
 			}
 

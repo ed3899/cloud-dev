@@ -5,8 +5,8 @@ type Removable interface {
 }
 
 type Retrivable interface {
-	GetName() string
-	GetPath() string
+	Name() string
+	AbsPath() string
 }
 
 type Downloadable interface {

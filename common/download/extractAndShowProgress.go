@@ -21,12 +21,12 @@ func ExtractAndShowProgress(
 		extractedBytesChan = make(chan int, 1024)
 		errChan            = make(chan error, 1)
 		doneChan           = make(chan bool, 1)
-		absPathToZip       = e.GetPath()
+		absPathToZip       = e.AbsPath()
 		oopsBuilder        = oops.
 					Code("extract_and_show_progress_failed").
 					With("absPathToExtraction", absPathToExtraction).
-					With("e.GetName()", e.GetName()).
-					With("e.GetPath()", e.GetPath()).
+					With("e.GetName()", e.Name()).
+					With("e.GetPath()", e.AbsPath()).
 					With("multiProgressBar", multiProgressBar)
 
 		extractedBytes int
@@ -49,7 +49,7 @@ func ExtractAndShowProgress(
 		if err := e.ExtractTo(absPathToExtraction, extractedBytesChan); err != nil {
 			err = oopsBuilder.
 				With("extractedBytesChan", extractedBytesChan).
-				Wrapf(err, "Error occurred while extracting %s", e.GetName())
+				Wrapf(err, "Error occurred while extracting %s", e.Name())
 			errChan <- err
 			return
 		}
@@ -68,7 +68,7 @@ OuterLoop:
 		case err = <-errChan:
 			if err != nil {
 				err = oopsBuilder.
-					Wrapf(err, "Error occurred while extracting %s", e.GetName())
+					Wrapf(err, "Error occurred while extracting %s", e.Name())
 				return
 			}
 

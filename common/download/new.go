@@ -9,15 +9,15 @@ import (
 	"github.com/vbauerster/mpb/v8"
 )
 
-func Initiate(z common_zip_interfaces.Zip, extractToAbsPathDir string) (err error) {
+func New(zip common_zip_interfaces.Zip, extractToAbsPathDir string) (err error) {
 	var (
-		absPathToZipDir = filepath.Dir(z.GetPath())
+		absPathToZipDir = filepath.Dir(zip.AbsPath())
 		progress        = mpb.New(mpb.WithWidth(64), mpb.WithAutoRefresh())
 		oopsBuilder     = oops.
-				Code("initiate_failed").
+				Code("common_download_new_failed").
 				With("extractToAbsPathDir", extractToAbsPathDir).
-				With("z.GetName()", z.GetName()).
-				With("z.GetPath()", z.GetPath())
+				With("zip", zip.Name()).
+				With("absPath", zip.AbsPath())
 	)
 
 	// Start with a clean slate
@@ -34,25 +34,25 @@ func Initiate(z common_zip_interfaces.Zip, extractToAbsPathDir string) (err erro
 	}
 
 	// Download
-	if err = DownloadAndShowProgress(z, progress); err != nil {
+	if err = DownloadAndShowProgress(zip, progress); err != nil {
 		err = oopsBuilder.
-			Wrapf(err, "Error occurred while downloading %s", z.GetName())
+			Wrapf(err, "Error occurred while downloading %s", zip.Name())
 		return
 	}
 
 	// Extract
-	if err = ExtractAndShowProgress(z, extractToAbsPathDir, progress); err != nil {
+	if err = ExtractAndShowProgress(zip, extractToAbsPathDir, progress); err != nil {
 		err = oopsBuilder.
-			Wrapf(err, "Error occurred while extracting %s", z.GetName())
+			Wrapf(err, "Error occurred while extracting %s", zip.Name())
 		return
 	}
 
 	progress.Shutdown()
 
 	// Remove zip
-	if err = z.Remove(); err != nil {
+	if err = zip.Remove(); err != nil {
 		err = oopsBuilder.
-			Wrapf(err, "Error occurred while removing %s", z.GetName())
+			Wrapf(err, "Error occurred while removing %s", zip.Name())
 		return
 	}
 

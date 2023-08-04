@@ -32,10 +32,10 @@ func Build() (err error) {
 		cloudCredentials cloud_credentials_interfaces.Credentials
 		kumoExecAbsPath  string
 
-		packerConfig             *packer.Binary
-		packerInstance           *packer.Instance
-		tool                     tool_config.ToolI
-		zip											common_zip_interfaces.Zip
+		packerConfig   *packer.Binary
+		packerInstance *packer.Instance
+		tool           tool_config.ToolI
+		zip            common_zip_interfaces.Zip
 
 		pickedTemplate           *templates.MergedTemplate
 		pickedHashicorpVars      common_hashicorp_vars.HashicorpVarsI
@@ -99,7 +99,8 @@ func Build() (err error) {
 			return
 		}
 
-		
+		download.New(zip, filepath.Dir(zip.GetPath()))
+
 	}
 
 	// 0. Instantiate config
@@ -118,7 +119,7 @@ func Build() (err error) {
 
 	// 2. Download and install if needed
 	if packerInstance.IsNotInstalled() {
-		if err = download.Initiate(packerInstance.Zip, filepath.Dir(packerInstance.AbsPathToExecutable)); err != nil {
+		if err = download.New(packerInstance.Zip, filepath.Dir(packerInstance.AbsPathToExecutable)); err != nil {
 			err = oopsBuilder.
 				Wrapf(err, "Error occurred while downloading %s", packerInstance.Zip.GetName())
 			return
