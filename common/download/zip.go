@@ -1,10 +1,12 @@
 package download
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 
-	"github.com/ed3899/kumo/common/tool"
+	"github.com/ed3899/kumo/common/dirs"
+	"github.com/ed3899/kumo/common/tool_config"
 	"github.com/ed3899/kumo/common/utils"
 	"github.com/samber/oops"
 	"github.com/vbauerster/mpb/v8"
@@ -20,23 +22,24 @@ type Zip struct {
 	ExtractionBar *mpb.Bar
 }
 
-func New(toolConfig tool.ToolI) (z *Zip, err error) {
+func New(toolConfig tool_config.ToolI) (zip *Zip, err error) {
 	var (
 		oopsBuilder = oops.Code("zip_new_failed")
+		absPath     = filepath.Join(dirs.DEPENDENCIES_DIR_NAME, toolConfig.Name(), fmt.Sprintf("%s.zip", toolConfig.Name()))
 
 		contentLength int64
 	)
 
-	if contentLength, err = toolConfig.GetZipContentLength(); err != nil {
+	if contentLength, err = utils.GetContentLength(toolConfig.Url()); err != nil {
 		err = oopsBuilder.
 			Wrapf(err, "failed to get zip content length")
 		return
 	}
 
-	z = &Zip{
-		Name:          filepath.Base(toolConfig.GetZipAbsPath()),
-		AbsPath:       toolConfig.GetZipAbsPath(),
-		URL:           toolConfig.GetUrl(),
+	zip = &Zip{
+		Name:          filepath.Base(absPath),
+		AbsPath:       absPath,
+		URL:           toolConfig.Url(),
 		ContentLength: contentLength,
 	}
 

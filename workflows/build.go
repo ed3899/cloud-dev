@@ -12,6 +12,7 @@ import (
 	"github.com/ed3899/kumo/common/download"
 	common_hashicorp_vars "github.com/ed3899/kumo/common/hashicorp_vars"
 	"github.com/ed3899/kumo/common/tool_config"
+	"github.com/ed3899/kumo/common/utils"
 	"github.com/ed3899/kumo/hashicorp_vars"
 	"github.com/ed3899/kumo/templates"
 	"github.com/samber/oops"
@@ -25,9 +26,11 @@ func Build() (err error) {
 				Code("build_failed")
 		logger, _ = zap.NewProduction()
 
-		cloud                    cloud_config.CloudI
-		cloudCredentials         cloud_credentials_interfaces.Credentials
-		kumoExecAbsPath          string
+		cloud            cloud_config.CloudI
+		cloudCredentials cloud_credentials_interfaces.Credentials
+		kumoExecAbsPath  string
+		zip              download.ZipI
+
 		packerConfig             *packer.Binary
 		packerInstance           *packer.Instance
 		tool                     tool_config.ToolI
@@ -82,6 +85,11 @@ func Build() (err error) {
 			With("cloud", cloud.Name()).
 			Wrapf(err, "Error occurred while instantiating ToolSetup for packer")
 		return
+	}
+
+	// Verify presence of tool
+	if utils.FileNotPresent(tool.ExecutableName()); err != nil {
+		zip, err = download.New(tool)
 	}
 
 	// 0. Instantiate config

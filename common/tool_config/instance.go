@@ -2,7 +2,6 @@ package tool_config
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 
 	"github.com/ed3899/kumo/common/cloud_config"
@@ -124,4 +123,3 @@ func (t *Tool) Url() (toolUrl string) {
 
 	return utils.CreateHashicorpURL(t.name, t.version, currentOs, currentArch)
 }
-
