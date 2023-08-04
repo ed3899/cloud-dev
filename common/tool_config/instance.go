@@ -12,61 +12,64 @@ import (
 )
 
 type Tool struct {
-	kind               Kind
-	name                string
-	version             string
-	dir                 string
-	dependenciesDirName string
-	initialDir          string
+	kind              Kind
+	name              string
+	version           string
+	executableAbsPath string
+	runDir            string
 }
 
-func New(toolType Kind, cloud cloud_config.CloudI) (toolConfig *Tool, err error) {
+func New(toolKind Kind, cloud cloud_config.CloudI, kumoExecAbsPath string) (toolConfig *Tool, err error) {
 	var (
 		oopsBuilder = oops.
-				Code("new_tool_setup_failed").
-				With("tool", toolType)
-
-		cwd string
+			Code("new_tool_setup_failed").
+			With("tool", toolKind)
 	)
 
-	if cwd, err = os.Getwd(); err != nil {
-		err = oopsBuilder.
-			Wrapf(err, "Error occurred while getting current working directory")
-		return
-	}
-
-	switch toolType {
+	switch toolKind {
 	case Packer:
 		toolConfig = &Tool{
-			dependenciesDirName: dirs.DEPENDENCIES_DIR_NAME,
-			kind:               Packer,
-			name:                PACKER_NAME,
-			version:             PACKER_VERSION,
-			initialDir:          cwd,
-			dir:                 filepath.Join(PACKER_NAME, cloud.Name()),
+			kind:    Packer,
+			name:    PACKER_NAME,
+			version: PACKER_VERSION,
+			executableAbsPath: filepath.Join(
+				kumoExecAbsPath,
+				dirs.DEPENDENCIES_DIR_NAME,
+				PACKER_NAME,
+				fmt.Sprintf("%s.exe", PACKER_NAME),
+			),
+			runDir: filepath.Join(
+				kumoExecAbsPath,
+				PACKER_NAME,
+				cloud.Name(),
+			),
 		}
 
 	case Terraform:
 		toolConfig = &Tool{
-			dependenciesDirName: dirs.DEPENDENCIES_DIR_NAME,
-			kind:               Terraform,
-			name:                TERRAFORM_NAME,
-			version:             TERRAFORM_VERSION,
-			initialDir:          cwd,
-			dir:                 filepath.Join(TERRAFORM_NAME, cloud.Name()),
+			kind:    Terraform,
+			name:    TERRAFORM_NAME,
+			version: TERRAFORM_VERSION,
+			executableAbsPath: filepath.Join(
+				kumoExecAbsPath,
+				dirs.DEPENDENCIES_DIR_NAME,
+				TERRAFORM_NAME,
+				fmt.Sprintf("%s.exe", TERRAFORM_NAME),
+			),
+			runDir: filepath.Join(
+				kumoExecAbsPath,
+				TERRAFORM_NAME,
+				cloud.Name(),
+			),
 		}
 
 	default:
 		err = oopsBuilder.
-			Errorf("Tool '%v' not supported", toolType)
+			Errorf("Tool '%v' not supported", toolKind)
 		return
 	}
 
 	return
-}
-
-func (t *Tool) DependenciesDirName() (dependenciesDirName string) {
-	return t.dependenciesDirName
 }
 
 func (t *Tool) Kind() (toolKind Kind) {
@@ -115,7 +118,7 @@ func (t *Tool) InitialDir() (initialDir string) {
 }
 
 func (t *Tool) Dir() (toolDir string) {
-	return t.dir
+	return t.runDir
 }
 
 func (t *Tool) Url() (toolUrl string) {
@@ -147,9 +150,9 @@ func (t *Tool) GoDir() (err error) {
 			Code("go_target_dir_failed")
 	)
 
-	if err = os.Chdir(t.dir); err != nil {
+	if err = os.Chdir(t.runDir); err != nil {
 		err = oopsBuilder.
-			Wrapf(err, "Error occurred while changing directory to %s", t.dir)
+			Wrapf(err, "Error occurred while changing directory to %s", t.runDir)
 		return
 	}
 
