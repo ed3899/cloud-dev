@@ -14,12 +14,10 @@ func NewTerraformGeneralEnvironment(
 ) {
 	var (
 		logger, _ = zap.NewProduction()
-		
-		err       error
-		publicIp       string
-		pickedIp       string
-		MaskIpWith32   utils.MaskIpL
-		maskedIpWith32 string
+
+		err      error
+		publicIp string
+		pickedIp string
 	)
 
 	defer logger.Sync()
@@ -35,12 +33,9 @@ func NewTerraformGeneralEnvironment(
 		pickedIp = publicIp
 	}
 
-	MaskIpWith32 = WithMask(32)
-	maskedIpWith32 = MaskIpWith32(pickedIp)
-
 	terraformGeneralEnvironment = TerraformGeneralEnvironment{
 		Required: TerraformGeneralRequired{
-			ALLOWED_IP: maskedIpWith32,
+			ALLOWED_IP: WithMask(32)(pickedIp),
 		},
 	}
 
