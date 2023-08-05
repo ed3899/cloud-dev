@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"path/filepath"
 
-	constants "github.com/ed3899/kumo/0_constants"
-	utils "github.com/ed3899/kumo/1_utils"
 	tool "github.com/ed3899/kumo/3_tool"
+	"github.com/ed3899/kumo/constants"
+	"github.com/ed3899/kumo/utils"
 
 	"github.com/samber/oops"
 	"github.com/vbauerster/mpb/v8"

@@ -1,7 +1,7 @@
 package zip
 
 import (
-	utils "github.com/ed3899/kumo/1_utils"
+	"github.com/ed3899/kumo/utils"
 	"github.com/samber/oops"
 )
 
