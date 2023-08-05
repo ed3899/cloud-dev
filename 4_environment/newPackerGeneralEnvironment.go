@@ -1,11 +1,10 @@
 package environment
 
 import (
-	"github.com/ed3899/kumo/constants"
 	"github.com/spf13/viper"
 )
 
-func NewPackerGeneralEnvironment(toolKind constants.ToolKind) (generalEnvironment GeneralEnvironmentI) {
+func NewPackerGeneralEnvironment() (generalEnvironment GeneralEnvironmentI) {
 	return PackerGeneralEnvironment{
 		Required: PackerGeneralRequired{
 			GIT_USERNAME: viper.GetString("Git.Username"),
