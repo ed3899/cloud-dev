@@ -2,7 +2,7 @@ package environment
 
 import "github.com/spf13/viper"
 
-func NewPackerAwsEnvironment() (packerAwsEnvironment PackerAwsEnvironment) {
+func NewPackerAwsEnvironment() (packerAwsEnvironment CloudEnvironmentI) {
 	packerAwsEnvironment = PackerAwsEnvironment{
 		Required: PackerAwsRequired{
 			AWS_ACCESS_KEY:                     viper.GetString("AWS.AccessKeyId"),
