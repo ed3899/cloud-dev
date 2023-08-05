@@ -1,25 +1,24 @@
 package zip
 
 import (
+	"path/filepath"
+
 	utils "github.com/ed3899/kumo/1_utils"
 	"github.com/samber/oops"
 )
 
 func ExtractAndShowProgress(
 	zip Zip,
-	absPathToExtraction string,
 	multiProgressBar MultiProgressBar,
 ) (err error) {
 	var (
 		extractedBytesChan = make(chan int, 1024)
 		errChan            = make(chan error, 1)
 		doneChan           = make(chan bool, 1)
-		absPathToZip       = zip.AbsPath
 		oopsBuilder        = oops.
-					Code("extract_and_show_progress_failed").
-					With("absPathToExtraction", absPathToExtraction).
-					With("e.GetName()", zip.Name).
-					With("e.GetPath()", zip.AbsPath).
+					Code("ExtractAndShowProgress").
+					With("zip.Name", zip.Name).
+					With("zip.AbsPath", zip.AbsPath).
 					With("multiProgressBar", multiProgressBar)
 
 		extractedBytes int
@@ -27,9 +26,9 @@ func ExtractAndShowProgress(
 		zipSize        int64
 	)
 
-	if zipSize, err = utils.GetZipSize(absPathToZip); err != nil {
+	if zipSize, err = utils.GetZipSize(zip.AbsPath); err != nil {
 		err = oopsBuilder.
-			Wrapf(err, "failed to get zip size for: %v", absPathToZip)
+			Wrapf(err, "failed to get zip size for: %v", zip.AbsPath)
 		return
 	}
 
@@ -39,10 +38,11 @@ func ExtractAndShowProgress(
 
 		zip.SetExtractionBar(multiProgressBar, zipSize)
 
-		if err := zip.ExtractTo(absPathToExtraction, extractedBytesChan); err != nil {
+		if err = utils.Unzip(zip.AbsPath, filepath.Dir(zip.AbsPath), extractedBytesChan); err != nil {
 			err = oopsBuilder.
+				With("absPath", zip.AbsPath).
 				With("extractedBytesChan", extractedBytesChan).
-				Wrapf(err, "Error occurred while extracting %s", zip.Name)
+				Wrapf(err, "failed to unzip: %v", zip.AbsPath)
 			errChan <- err
 			return
 		}

@@ -29,8 +29,10 @@ func New(t tool.Tool) (zip ZipI, err error) {
 		absPath     = filepath.Join(
 			constants.DEPENDENCIES_DIR_NAME,
 			t.Name,
-			fmt.Sprintf("%s.zip",
-				t.Name),
+			fmt.Sprintf(
+				"%s.zip",
+				t.Name,
+			),
 		)
 
 		contentLength int64
@@ -104,23 +106,6 @@ func (z Zip) Download(downloadedBytesChan chan<- int) (err error) {
 			With("url", z.Url).
 			With("absPath", z.AbsPath).
 			Wrapf(err, "failed to download: %v", z.Url)
-		return
-	}
-
-	return
-}
-
-func (z Zip) ExtractTo(extractToPath string, extractedBytesChan chan<- int) (err error) {
-	var (
-		oopsBuilder = oops.Code("zip_extract_to_failed").
-			With("extractToPath", extractToPath).
-			With("extractedBytesChan", extractedBytesChan)
-	)
-
-	if err = utils.Unzip(z.AbsPath, extractToPath, extractedBytesChan); err != nil {
-		err = oopsBuilder.
-			With("absPath", z.AbsPath).
-			Wrapf(err, "failed to unzip: %v", z.AbsPath)
 		return
 	}
 
