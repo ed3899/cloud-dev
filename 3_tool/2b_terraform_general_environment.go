@@ -7,3 +7,11 @@ type TerraformGeneralRequired struct {
 type TerraformGeneralEnvironment struct {
 	Required TerraformGeneralRequired
 }
+
+func (tae TerraformGeneralEnvironment) IsEnvironment() bool {
+	return true
+}
+
+func (tae TerraformGeneralEnvironment) IsCloudEnvironment() bool {
+	return true
+}

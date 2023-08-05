@@ -14,3 +14,11 @@ type PackerGeneralEnvironment struct {
 	Required  PackerGeneralRequired
 	Optional PackerGeneralOptional
 }
+
+func (pge PackerGeneralEnvironment) IsEnvironment() bool {
+	return true
+}
+
+func (pge PackerGeneralEnvironment) IsGeneralEnvironment() bool {
+	return true
+}

@@ -6,6 +6,10 @@ import (
 	"github.com/samber/oops"
 )
 
+type ToolI interface {
+	IsTool() bool
+}
+
 type Tool struct {
 	Name    string
 	Version string
@@ -25,14 +29,14 @@ func NewTool(kind constants.ToolKind) (tool Tool, err error) {
 		tool = Tool{
 			Name:    constants.PACKER,
 			Version: constants.PACKER_VERSION,
-			Url: utils.CreateHashicorpURL(constants.PACKER, constants.PACKER_VERSION, currentOs, currentArch),
+			Url:     utils.CreateHashicorpURL(constants.PACKER, constants.PACKER_VERSION, currentOs, currentArch),
 		}
 
 	case constants.Terraform:
 		tool = Tool{
 			Name:    constants.TERRAFORM,
 			Version: constants.TERRAFORM_VERSION,
-			Url: utils.CreateHashicorpURL(constants.TERRAFORM, constants.TERRAFORM_VERSION, currentOs, currentArch),
+			Url:     utils.CreateHashicorpURL(constants.TERRAFORM, constants.TERRAFORM_VERSION, currentOs, currentArch),
 		}
 
 	default:
@@ -43,4 +47,8 @@ func NewTool(kind constants.ToolKind) (tool Tool, err error) {
 	}
 
 	return
+}
+
+func (t Tool) IsTool() (tool bool) {
+	return true
 }

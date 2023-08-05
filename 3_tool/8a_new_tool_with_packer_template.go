@@ -9,7 +9,7 @@ import (
 
 type PackerTemplate struct {
 	General PackerGeneralEnvironment
-	Cloud   CloudEnvironmentI
+	Cloud   EnvironmentI
 }
 
 type ToolWithPackerTemplate struct {

@@ -1,5 +1,13 @@
 package tool
 
 type EnvironmentI interface {
-	IsNotValidEnvironment() bool
+	IsEnvironment() bool
+}
+
+type GeneralEnvironmentI interface {
+	IsGeneralEnvironment() bool
+}
+
+type CloudEnvironmentI interface {
+	IsCloudEnvironment() bool
 }

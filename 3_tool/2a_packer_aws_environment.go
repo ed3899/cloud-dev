@@ -22,6 +22,11 @@ type PackerAwsEnvironment struct {
 	Required PackerAwsRequired
 }
 
+func (pae PackerAwsEnvironment) IsEnvironment() bool {
+	return true
+}
+
 func (pae PackerAwsEnvironment) IsCloudEnvironment() bool {
 	return true
 }
+
