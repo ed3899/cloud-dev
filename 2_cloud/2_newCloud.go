@@ -14,16 +14,14 @@ type Cloud struct {
 	AssociatedPackerManifestPath string
 }
 
-type PickCloud = func(cloudFromConfig string) (cloud Cloud, err error)
-
-func NewCloud(kumoExecAbsPath string) PickCloud {
+func NewCloud(kumoExecAbsPath string) (PickCloud PickCloud) {
 	var (
 		oopsBuilder = oops.
 			Code("new_cloud_failed").
 			With("kumoExecAbsPath", kumoExecAbsPath)
 	)
 
-	PickCloud := func(cloudFromConfig string) (cloud Cloud, err error) {
+	PickCloud = func(cloudFromConfig string) (cloud Cloud, err error) {
 		switch cloudFromConfig {
 		case constants.AWS:
 			cloud = Cloud{
@@ -43,5 +41,7 @@ func NewCloud(kumoExecAbsPath string) PickCloud {
 		return
 	}
 
-	return PickCloud
+	return
 }
+
+type PickCloud = func(cloudFromConfig string) (cloud Cloud, err error)
