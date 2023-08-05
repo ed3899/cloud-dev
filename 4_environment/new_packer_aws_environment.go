@@ -2,7 +2,7 @@ package environment
 
 import "github.com/spf13/viper"
 
-func NewPackerAwsEnvironment() (packerAwsEnvironment CloudEnvironmentI) {
+func NewPackerAwsEnvironment() (packerAwsEnvironment PackerCloudEnvironmentI) {
 	packerAwsEnvironment = PackerAwsEnvironment{
 		Required: PackerAwsRequired{
 			AWS_ACCESS_KEY:                     viper.GetString("AWS.AccessKeyId"),
@@ -47,6 +47,6 @@ type PackerAwsEnvironment struct {
 	Required PackerAwsRequired
 }
 
-func (pae PackerAwsEnvironment) IsCloudEnvironment() bool {
+func (pae PackerAwsEnvironment) IsPackerCloudEnvironment() bool {
 	return true
 }

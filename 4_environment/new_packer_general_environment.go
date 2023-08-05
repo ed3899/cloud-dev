@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-func NewPackerGeneralEnvironment() (generalEnvironment GeneralEnvironmentI) {
+func NewPackerGeneralEnvironment() (generalEnvironment PackerGeneralEnvironmentI) {
 	return PackerGeneralEnvironment{
 		Required: PackerGeneralRequired{
 			GIT_USERNAME: viper.GetString("Git.Username"),
@@ -15,14 +15,6 @@ func NewPackerGeneralEnvironment() (generalEnvironment GeneralEnvironmentI) {
 			GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC: viper.GetString("GitHub.PersonalAccessTokenClassic"),
 		},
 	}
-}
-
-func (pge PackerGeneralEnvironment) IsEnvironment() bool {
-	return true
-}
-
-func (pge PackerGeneralEnvironment) IsGeneralEnvironment() bool {
-	return true
 }
 
 type PackerGeneralRequired struct {
@@ -39,3 +31,15 @@ type PackerGeneralEnvironment struct {
 	Required PackerGeneralRequired
 	Optional PackerGeneralOptional
 }
+
+
+type PackerGeneralEnvironmentI interface {
+	IsPackerGeneralEnvironment() bool
+}
+
+func (pge PackerGeneralEnvironment) IsPackerGeneralEnvironment() bool {
+	return true
+}
+
+type NewPackerGeneralEnvironmentF func() PackerGeneralEnvironmentI
+

@@ -6,8 +6,6 @@ import (
 	"github.com/samber/oops"
 )
 
-type NewPackerCloudEnvironmentF func() CloudEnvironmentI
-
 func PickPackerCloudEnvironment(cloud cloud.Cloud) (NewPackerCloudEnvironment NewPackerCloudEnvironmentF, err error) {
 	var (
 		oopsBuilder = oops.
@@ -26,4 +24,10 @@ func PickPackerCloudEnvironment(cloud cloud.Cloud) (NewPackerCloudEnvironment Ne
 	}
 
 	return
+}
+
+type PickPackerCloudEnvironmentF func(cloud.Cloud) (NewPackerCloudEnvironment NewPackerCloudEnvironmentF, err error)
+
+type PackerCloudEnvironmentI interface {
+	IsPackerCloudEnvironment() bool
 }

@@ -10,7 +10,7 @@ func NewTerraformGeneralEnvironment(
 	GetPublicIp utils.GetPublicIpF,
 	WithMask utils.WithMaskF,
 ) (
-	terraformGeneralEnvironment GeneralEnvironmentI,
+	terraformGeneralEnvironment TerraformGeneralEnvironmentI,
 ) {
 	var (
 		logger, _ = zap.NewProduction()
@@ -50,10 +50,10 @@ type TerraformGeneralEnvironment struct {
 	Required TerraformGeneralRequired
 }
 
-func (tae TerraformGeneralEnvironment) IsEnvironment() bool {
-	return true
+type TerraformGeneralEnvironmentI interface {
+	IsTerraformGeneralEnvironment() bool
 }
 
-func (tae TerraformGeneralEnvironment) IsGeneralEnvironment() bool {
+func (tae TerraformGeneralEnvironment) IsTerraformGeneralEnvironment() bool {
 	return true
 }

@@ -26,3 +26,7 @@ func PickTerraformCloudEnvironment(cloud cloud.Cloud) (NewTerraformCloudEnvironm
 	return
 
 }
+
+type TerraformCloudEnvironmentI interface {
+	IsTerraformCloudEnvironment() bool
+}
