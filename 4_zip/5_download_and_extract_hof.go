@@ -33,4 +33,15 @@ func DownloadAndExtractHof(zip Zip) (err error) {
 			Wrapf(err, "Error occurred while extracting %s", zip.Name)
 		return
 	}
+
+	progress.Shutdown()
+
+	if err = os.Remove(zip.AbsPath); err != nil {
+		err = oopsBuilder.
+			With("absPath", zip.AbsPath).
+			Wrapf(err, "failed to remove: %v", zip.AbsPath)
+		return
+	}
+
+	return
 }

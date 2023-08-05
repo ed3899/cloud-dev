@@ -2,7 +2,6 @@ package zip
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 
 	constants "github.com/ed3899/kumo/0_constants"
@@ -93,36 +92,4 @@ func (z Zip) SetExtractionBar(p MultiProgressBar, zipSize int64) {
 
 func (z Zip) IncrementExtractionBar(extractedBytes int) {
 	z.ExtractionBar.IncrBy(extractedBytes)
-}
-
-func (z Zip) Download(downloadedBytesChan chan<- int) (err error) {
-	var (
-		oopsBuilder = oops.Code("zip_download_failed").
-			With("downloadedBytesChan", downloadedBytesChan)
-	)
-
-	if err = utils.Download(z.Url, z.AbsPath, downloadedBytesChan); err != nil {
-		err = oopsBuilder.
-			With("url", z.Url).
-			With("absPath", z.AbsPath).
-			Wrapf(err, "failed to download: %v", z.Url)
-		return
-	}
-
-	return
-}
-
-func (z Zip) Remove() (err error) {
-	var (
-		oopsBuilder = oops.Code("zip_remove_failed")
-	)
-
-	if err = os.Remove(z.AbsPath); err != nil {
-		err = oopsBuilder.
-			With("absPath", z.AbsPath).
-			Wrapf(err, "failed to remove: %v", z.AbsPath)
-		return
-	}
-
-	return
 }
