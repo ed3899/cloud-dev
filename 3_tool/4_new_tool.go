@@ -7,6 +7,7 @@ import (
 )
 
 type Tool struct {
+	Kind    constants.ToolKind
 	Name    string
 	Version string
 	Url     string
@@ -23,6 +24,7 @@ func NewTool(kind constants.ToolKind) (ForSpecs ForSpecs) {
 		switch kind {
 		case constants.Packer:
 			tool = Tool{
+				Kind:    constants.Packer,
 				Name:    constants.PACKER,
 				Version: constants.PACKER_VERSION,
 				Url:     utils.CreateHashicorpURL(constants.PACKER, constants.PACKER_VERSION, currentOs, currentArch),
@@ -30,6 +32,7 @@ func NewTool(kind constants.ToolKind) (ForSpecs ForSpecs) {
 
 		case constants.Terraform:
 			tool = Tool{
+				Kind:    constants.Terraform,
 				Name:    constants.TERRAFORM,
 				Version: constants.TERRAFORM_VERSION,
 				Url:     utils.CreateHashicorpURL(constants.TERRAFORM, constants.TERRAFORM_VERSION, currentOs, currentArch),
