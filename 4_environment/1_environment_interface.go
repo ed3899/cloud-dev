@@ -1,9 +1,5 @@
 package environment
 
-type EnvironmentI interface {
-	IsEnvironment() bool
-}
-
 type GeneralEnvironmentI interface {
 	IsGeneralEnvironment() bool
 }
@@ -11,3 +7,4 @@ type GeneralEnvironmentI interface {
 type CloudEnvironmentI interface {
 	IsCloudEnvironment() bool
 }
+

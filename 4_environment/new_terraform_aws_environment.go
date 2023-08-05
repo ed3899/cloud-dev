@@ -5,7 +5,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-func NewTerraformAwsEnvironment(pickedAmiId string) (terraformAwsEnvironment TerraformAwsEnvironment) {
+func NewTerraformAwsEnvironment(pickedAmiId string) (terraformAwsEnvironment CloudEnvironmentI) {
 	terraformAwsEnvironment = TerraformAwsEnvironment{
 		Required: TerraformAwsRequired{
 			AWS_REGION:        viper.GetString("AWS.Region"),

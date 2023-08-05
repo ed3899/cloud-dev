@@ -15,7 +15,6 @@ func NewPackerGeneralEnvironment() (generalEnvironment GeneralEnvironmentI) {
 			GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC: viper.GetString("GitHub.PersonalAccessTokenClassic"),
 		},
 	}
-
 }
 
 func (pge PackerGeneralEnvironment) IsEnvironment() bool {
