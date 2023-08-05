@@ -3,7 +3,7 @@ package tool
 import (
 	"path/filepath"
 
-	constants "github.com/ed3899/kumo/0_constants"
+	"github.com/ed3899/kumo/constants"
 	cloud "github.com/ed3899/kumo/2_cloud"
 	"github.com/samber/oops"
 )
