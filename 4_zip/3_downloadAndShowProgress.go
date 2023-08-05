@@ -1,19 +1,12 @@
-package download
+package zip
 
 import (
-	common_zip_interfaces "github.com/ed3899/kumo/common/zip/interfaces"
 	"github.com/samber/oops"
 )
 
-type DownloadableAndProgressive interface {
-	common_zip_interfaces.Downloadable
-	common_zip_interfaces.Removable
-	common_zip_interfaces.Retrivable
-}
-
 func DownloadAndShowProgress(
-	d DownloadableAndProgressive,
-	multiProgressBar common_zip_interfaces.MultiProgressBar,
+	z Zip,
+	multiProgressBar MultiProgressBar,
 ) (err error) {
 	var (
 		downloadedBytesChan = make(chan int, 1024)
@@ -21,8 +14,8 @@ func DownloadAndShowProgress(
 		doneChan            = make(chan bool, 1)
 		oopsBuilder         = oops.
 					Code("download_and_show_progress_failed").
-					With("d.GetName()", d.Name()).
-					With("d.GetPath()", d.AbsPath()).
+					With("d.Name", z.Name).
+					With("d.AbsPath", z.AbsPath).
 					With("multiProgressBar", multiProgressBar)
 
 		downloadedBytes int
@@ -34,12 +27,12 @@ func DownloadAndShowProgress(
 		defer close(errChan)
 		defer close(doneChan)
 
-		d.SetDownloadBar(multiProgressBar)
+		z.SetDownloadBar(multiProgressBar)
 
-		if err := d.Download(downloadedBytesChan); err != nil {
+		if err := z.Download(downloadedBytesChan); err != nil {
 			err = oopsBuilder.
 				With("downloadedBytesChan", downloadedBytesChan).
-				Wrapf(err, "Error occurred while downloading %s", d.Name())
+				Wrapf(err, "Error occurred while downloading %s", z.Name)
 			errChan <- err
 			return
 		}
@@ -52,13 +45,13 @@ OuterLoop:
 		select {
 		case downloadedBytes = <-downloadedBytesChan:
 			if downloadedBytes > 0 {
-				d.IncrementDownloadBar(downloadedBytes)
+				z.IncrementDownloadBar(downloadedBytes)
 			}
 
 		case err = <-errChan:
 			if err != nil {
 				err = oopsBuilder.
-					Wrapf(err, "Error occurred while downloading %s", d.Name())
+					Wrapf(err, "Error occurred while downloading %s", z.Name)
 				return
 			}
 

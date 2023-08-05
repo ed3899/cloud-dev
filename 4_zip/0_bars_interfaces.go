@@ -1,4 +1,4 @@
-package interfaces
+package zip
 
 import (
 	"github.com/vbauerster/mpb/v8"
