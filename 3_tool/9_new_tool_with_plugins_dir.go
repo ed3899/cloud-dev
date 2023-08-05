@@ -4,8 +4,7 @@ import (
 	"path/filepath"
 
 	constants "github.com/ed3899/kumo/0_constants"
-	cloud "github.com/ed3899/kumo/1_cloud"
-	"github.com/ed3899/kumo/common/dirs"
+	cloud "github.com/ed3899/kumo/2_cloud"
 	"github.com/samber/oops"
 )
 
@@ -34,7 +33,7 @@ func NewToolWithPluginDir(
 				kumoExecutableAbsPath,
 				constants.PACKER,
 				cloud.Name,
-				dirs.PLUGINS_DIR_NAME,
+				constants.PLUGINS_DIR_NAME,
 			),
 		}
 
@@ -45,7 +44,7 @@ func NewToolWithPluginDir(
 				kumoExecutableAbsPath,
 				constants.TERRAFORM,
 				cloud.Name,
-				dirs.PLUGINS_DIR_NAME,
+				constants.PLUGINS_DIR_NAME,
 			),
 		}
 
