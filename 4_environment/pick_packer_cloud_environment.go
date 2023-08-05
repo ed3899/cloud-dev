@@ -26,9 +26,9 @@ func PickPackerCloudEnvironment(cloud cloud.Cloud) (NewPackerCloudEnvironment Ne
 	return
 }
 
-type NewPackerCloudEnvironmentF func() PackerCloudEnvironmentI
-
 type PickPackerCloudEnvironmentF func(cloud.Cloud) (NewPackerCloudEnvironment NewPackerCloudEnvironmentF, err error)
+
+type NewPackerCloudEnvironmentF func() PackerCloudEnvironmentI
 
 type PackerCloudEnvironmentI interface {
 	IsPackerCloudEnvironment() bool

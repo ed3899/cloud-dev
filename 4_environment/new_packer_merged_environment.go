@@ -1,18 +1,18 @@
 package environment
 
-type PackerMergedEnvironment struct {
+type PackerEnvironment struct {
 	General PackerGeneralEnvironmentI
 	Cloud   PackerCloudEnvironmentI
 }
 
-func NewPackerMergedEnvironment(
+func NewPackerEnvironment(
 	NewPackerGeneralEnvironment NewPackerGeneralEnvironmentF,
 	NewPackerCloudEnvironment NewPackerCloudEnvironmentF,
 ) (
-	mergedEnvironment PackerMergedEnvironment,
+	mergedEnvironment PackerEnvironment,
 ) {
 
-	mergedEnvironment = PackerMergedEnvironment{
+	mergedEnvironment = PackerEnvironment{
 		General: NewPackerGeneralEnvironment(),
 		Cloud:   NewPackerCloudEnvironment(),
 	}
