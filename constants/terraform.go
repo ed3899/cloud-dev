@@ -6,8 +6,8 @@ const (
 
 	TERRAFORM_DEFAULT_ALLOWED_IP = "0.0.0.0"
 
-	TERRAFORM_GENERAL_TEMPLATE_NAME = "GeneralTerraformTfVars.tmpl"
-	TERRAFORM_AWS_TEMPLATE_NAME     = "AWS_TerraformTfVars.tmpl"
+	TERRAFORM_GENERAL_VARS_TEMPLATE = "terraform_general_vars.tmpl"
+	TERRAFORM_AWS_VARS_TEMPLATE     = "terraform_aws_vars.tmpl"
 
-	TERRAFORM_VARS_NAME = ".auto.tfvars"
+	TERRAFORM_VARS = ".auto.tfvars"
 )

@@ -8,8 +8,8 @@ const (
 
 	PACKER_PLUGIN_PATH = "PACKER_PLUGIN_PATH"
 
-	PACKER_GENERAL_TEMPLATE_NAME = "GeneralPackerVars.tmpl"
-	PACKER_AWS_TEMPLATE_NAME     = "AWS_PackerVars.tmpl"
+	PACKER_GENERAL_VARS_TEMPLATE = "packer_general_vars.tmpl"
+	PACKER_AWS_VARS_TEMPLATE     = "packer_aws_vars.tmpl"
 
-	PACKER_VARS_NAME = ".auto.pkrvars.hcl"
+	PACKER_VARS = ".auto.pkrvars.hcl"
 )
