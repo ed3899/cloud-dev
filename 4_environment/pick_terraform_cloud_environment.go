@@ -25,10 +25,10 @@ func PickTerraformCloudEnvironment(cloud cloud.Cloud) (NewTerraformCloudEnvironm
 
 }
 
-type TerraformCloudEnvironmentI interface {
-	IsTerraformCloudEnvironment() bool
-}
+type PickTerraformCloudEnvironmentF func(cloud cloud.Cloud) (NewTerraformCloudEnvironment NewTerraformCloudEnvironmentF, err error)
 
 type NewTerraformCloudEnvironmentF func(pickedAmiId string) TerraformCloudEnvironmentI
 
-type PickTerraformCloudEnvironmentF func(cloud cloud.Cloud) (NewTerraformCloudEnvironment NewTerraformCloudEnvironmentF, err error)
+type TerraformCloudEnvironmentI interface {
+	IsTerraformCloudEnvironment() bool
+}

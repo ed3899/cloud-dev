@@ -57,3 +57,5 @@ type TerraformGeneralEnvironmentI interface {
 func (tae TerraformGeneralEnvironment) IsTerraformGeneralEnvironment() bool {
 	return true
 }
+
+type NewTerraformGeneralEnvironmentF func(GetPublicIp utils.GetPublicIpF, WithMask utils.WithMaskF) (terraformGeneralEnvironment TerraformGeneralEnvironmentI)

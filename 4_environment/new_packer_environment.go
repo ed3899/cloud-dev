@@ -9,10 +9,10 @@ func NewPackerEnvironment(
 	NewPackerGeneralEnvironment NewPackerGeneralEnvironmentF,
 	NewPackerCloudEnvironment NewPackerCloudEnvironmentF,
 ) (
-	mergedEnvironment PackerEnvironment,
+	packerEnvironment PackerEnvironment,
 ) {
 
-	mergedEnvironment = PackerEnvironment{
+	packerEnvironment = PackerEnvironment{
 		General: NewPackerGeneralEnvironment(),
 		Cloud:   NewPackerCloudEnvironment(),
 	}
