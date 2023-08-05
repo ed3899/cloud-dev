@@ -1,4 +1,4 @@
-package tool
+package environment
 
 type TerraformAwsRequired struct {
 	AWS_REGION        string

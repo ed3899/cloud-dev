@@ -1,4 +1,4 @@
-package tool
+package environment
 
 type PackerAwsRequired struct {
 	AWS_ACCESS_KEY                     string

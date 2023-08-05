@@ -1,4 +1,4 @@
-package tool
+package environment
 
 type EnvironmentI interface {
 	IsEnvironment() bool

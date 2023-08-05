@@ -8,6 +8,8 @@ import (
 	"github.com/samber/oops"
 )
 
+type GetPublicIpF func() (ip string, err error)
+
 // Returns the public IP of the machine running the program.
 // Returns an empty string and an error if the call fails.
 //

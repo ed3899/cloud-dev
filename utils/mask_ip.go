@@ -2,11 +2,14 @@ package utils
 
 import "fmt"
 
-// Return the given IP address with the given mask
-//
-// Example:
-//
-//	("0.0.0.0", 32) -> "0.0.0.0/32"
-func MaskIp(ip string, mask int) (maskedIp string) {
-	return fmt.Sprintf("%s/%d", ip, mask)
+type WithMaskF func(mask int) (GetIp MaskIpL)
+type MaskIpL func(ip string) (maskedIp string)
+
+func WithMask(mask int) (MaskIp MaskIpL) {
+
+	MaskIp = func(ip string) (maskedIp string) {
+		return fmt.Sprintf("%s/%d", ip, mask)
+	}
+
+	return
 }

@@ -1,4 +1,4 @@
-package tool
+package environment
 
 type TerraformGeneralRequired struct {
 	ALLOWED_IP string
@@ -12,6 +12,6 @@ func (tae TerraformGeneralEnvironment) IsEnvironment() bool {
 	return true
 }
 
-func (tae TerraformGeneralEnvironment) IsCloudEnvironment() bool {
+func (tae TerraformGeneralEnvironment) IsGeneralEnvironment() bool {
 	return true
 }
