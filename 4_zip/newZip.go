@@ -5,7 +5,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/ed3899/kumo/0_constants"
+	constants "github.com/ed3899/kumo/0_constants"
+	utils "github.com/ed3899/kumo/1_utils"
+	tool "github.com/ed3899/kumo/3_tool"
 
 	"github.com/ed3899/kumo/common/zip/interfaces"
 	"github.com/samber/oops"
@@ -22,10 +24,15 @@ type Zip struct {
 	extractionBar *mpb.Bar
 }
 
-func New(toolConfig common_tool_interfaces.Tool) (zip interfaces.Zip, err error) {
+func New(toolConfig tool.Tool) (zip interfaces.Zip, err error) {
 	var (
 		oopsBuilder = oops.Code("zip_new_failed")
-		absPath     = filepath.Join(dirs.DEPENDENCIES_DIR_NAME, toolConfig.Name(), fmt.Sprintf("%s.zip", toolConfig.Name()))
+		absPath     = filepath.Join(
+			constants.DEPENDENCIES_DIR_NAME,
+			toolConfig.Name,
+			fmt.Sprintf("%s.zip",
+				toolConfig.Name),
+		)
 
 		contentLength int64
 	)
@@ -39,7 +46,7 @@ func New(toolConfig common_tool_interfaces.Tool) (zip interfaces.Zip, err error)
 	zip = &Zip{
 		name:          filepath.Base(absPath),
 		absPath:       absPath,
-		url:           toolConfig.Url(),
+		url:           toolConfig.Url,
 		contentLength: contentLength,
 	}
 
