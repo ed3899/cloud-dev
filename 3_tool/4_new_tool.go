@@ -6,10 +6,6 @@ import (
 	"github.com/samber/oops"
 )
 
-type ToolI interface {
-	IsTool() bool
-}
-
 type Tool struct {
 	Name    string
 	Version string
@@ -49,6 +45,3 @@ func NewTool(kind constants.ToolKind) (tool Tool, err error) {
 	return
 }
 
-func (t Tool) IsTool() (tool bool) {
-	return true
-}
