@@ -5,8 +5,6 @@ type PackerMergedEnvironment struct {
 	Cloud   PackerCloudEnvironmentI
 }
 
-type NewPackerCloudEnvironmentF func() PackerCloudEnvironmentI
-
 func NewPackerMergedEnvironment(
 	NewPackerGeneralEnvironment NewPackerGeneralEnvironmentF,
 	NewPackerCloudEnvironment NewPackerCloudEnvironmentF,

@@ -6,8 +6,6 @@ import (
 	"github.com/samber/oops"
 )
 
-type NewTerraformCloudEnvironmentF func(pickedAmiId string) CloudEnvironmentI
-
 func PickTerraformCloudEnvironment(cloud cloud.Cloud) (NewTerraformCloudEnvironment NewTerraformCloudEnvironmentF, err error) {
 	var (
 		oopsBuilder = oops.
@@ -30,3 +28,7 @@ func PickTerraformCloudEnvironment(cloud cloud.Cloud) (NewTerraformCloudEnvironm
 type TerraformCloudEnvironmentI interface {
 	IsTerraformCloudEnvironment() bool
 }
+
+type NewTerraformCloudEnvironmentF func(pickedAmiId string) TerraformCloudEnvironmentI
+
+type PickTerraformCloudEnvironmentF func(cloud cloud.Cloud) (NewTerraformCloudEnvironment NewTerraformCloudEnvironmentF, err error)
