@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"github.com/ed3899/kumo/cloud"
 	constants "github.com/ed3899/kumo/constants"
 	utils "github.com/ed3899/kumo/utils"
 	"github.com/samber/oops"
@@ -15,6 +16,7 @@ type Tool struct {
 	Version           string
 	Url               string
 	ExecutableAbsPath string
+	RunDirAbsPath     string
 }
 
 func NewTool(opts ...Option) (tool Tool, err error) {
@@ -167,6 +169,41 @@ func WithExecutableAbsPath(toolKind constants.ToolKind, kumoExecAbsPath string) 
 				constants.DEPENDENCIES_DIR_NAME,
 				constants.TERRAFORM,
 				fmt.Sprintf("%s.exe", constants.TERRAFORM),
+			)
+		default:
+			err = oopsBuilder.
+				Errorf("Unknown tool kind: %d", toolKind)
+			return
+		}
+
+		return
+	}
+
+	return
+}
+
+func WithRunDirAbsPath(cloud cloud.Cloud, toolKind constants.ToolKind, kumoExecAbsPath string) (option Option) {
+	var (
+		oopsBuilder = oops.
+			Code("WithRunDir").
+			With("toolKind", toolKind).
+			With("cloud", cloud).
+			With("kumoExecAbsPath", kumoExecAbsPath)
+	)
+
+	option = func(t Tool) (tool Tool, err error) {
+		switch toolKind {
+		case constants.Packer:
+			t.RunDirAbsPath = filepath.Join(
+				kumoExecAbsPath,
+				constants.PACKER,
+				cloud.Name,
+			)
+		case constants.Terraform:
+			t.RunDirAbsPath = filepath.Join(
+				kumoExecAbsPath,
+				constants.TERRAFORM,
+				cloud.Name,
 			)
 		default:
 			err = oopsBuilder.
