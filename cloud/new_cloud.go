@@ -9,13 +9,34 @@ import (
 )
 
 type Cloud struct {
-	kind               constants.CloudKind
-	name               string
-	credentials        CredentialsI
-	packerManifestPath string
+	Kind               constants.CloudKind
+	Name               string
+	Credentials        CredentialsI
+	PackerManifestPath string
 }
 
 type Option func(Cloud) (Cloud, error)
+
+func NewCloud(opts ...Option) (cloud Cloud, err error) {
+	var (
+		oopsBuilder = oops.
+				Code("NewCloud").
+				With("opts", opts)
+
+		o Option
+	)
+
+	cloud = Cloud{}
+	for _, o = range opts {
+		if cloud, err = o(cloud); err != nil {
+			err = oopsBuilder.
+				Wrapf(err, "Option %v", o)
+			return
+		}
+	}
+
+	return
+}
 
 func WithKind(cloudFromConfig string) (option Option) {
 	var (
@@ -24,10 +45,10 @@ func WithKind(cloudFromConfig string) (option Option) {
 			With("cloudFromConfig", cloudFromConfig)
 	)
 
-	return func(c Cloud) (cloud Cloud, err error) {
+	option = func(c Cloud) (cloud Cloud, err error) {
 		switch cloudFromConfig {
 		case constants.AWS:
-			c.kind = constants.Aws
+			c.Kind = constants.Aws
 		default:
 			err = oopsBuilder.
 				Wrapf(err, "Cloud %s is not supported", cloudFromConfig)
@@ -36,6 +57,8 @@ func WithKind(cloudFromConfig string) (option Option) {
 
 		return
 	}
+
+	return
 }
 
 func WithName(cloudFromConfig string) (option Option) {
@@ -45,10 +68,10 @@ func WithName(cloudFromConfig string) (option Option) {
 			With("cloudFromConfig", cloudFromConfig)
 	)
 
-	return func(c Cloud) (cloud Cloud, err error) {
+	option = func(c Cloud) (cloud Cloud, err error) {
 		switch cloudFromConfig {
 		case constants.AWS:
-			c.name = constants.AWS
+			c.Name = constants.AWS
 		default:
 			err = oopsBuilder.
 				Wrapf(err, "Cloud %s is not supported", cloudFromConfig)
@@ -57,6 +80,8 @@ func WithName(cloudFromConfig string) (option Option) {
 
 		return
 	}
+
+	return
 }
 
 func WithCredentials(cloudFromConfig string) (option Option) {
@@ -66,10 +91,10 @@ func WithCredentials(cloudFromConfig string) (option Option) {
 			With("cloudFromConfig", cloudFromConfig)
 	)
 
-	return func(c Cloud) (cloud Cloud, err error) {
+	option = func(c Cloud) (cloud Cloud, err error) {
 		switch cloudFromConfig {
 		case constants.AWS:
-			c.credentials = AwsCredentials{
+			c.Credentials = AwsCredentials{
 				AccessKeyId:     viper.GetString("AWS.AccessKeyId"),
 				SecretAccessKey: viper.GetString("AWS.SecretAccessKey"),
 			}
@@ -81,6 +106,8 @@ func WithCredentials(cloudFromConfig string) (option Option) {
 
 		return
 	}
+
+	return
 }
 
 func WithPackerManifestPath(cloudFromConfig, kumoExecAbsPath string) (option Option) {
@@ -90,10 +117,10 @@ func WithPackerManifestPath(cloudFromConfig, kumoExecAbsPath string) (option Opt
 			With("cloudFromConfig", cloudFromConfig)
 	)
 
-	return func(c Cloud) (cloud Cloud, err error) {
+	option = func(c Cloud) (cloud Cloud, err error) {
 		switch cloudFromConfig {
 		case constants.AWS:
-			c.packerManifestPath = filepath.Join(kumoExecAbsPath, constants.PACKER, constants.AWS, constants.PACKER_MANIFEST)
+			c.PackerManifestPath = filepath.Join(kumoExecAbsPath, constants.PACKER, constants.AWS, constants.PACKER_MANIFEST)
 		default:
 			err = oopsBuilder.
 				Wrapf(err, "Cloud %s is not supported", cloudFromConfig)
@@ -101,23 +128,6 @@ func WithPackerManifestPath(cloudFromConfig, kumoExecAbsPath string) (option Opt
 		}
 
 		return
-	}
-}
-
-func NewCloud(opts ...Option) (cloud Cloud, err error) {
-	var (
-		oopsBuilder = oops.
-			Code("new_cloud_failed").
-			With("opts", opts)
-	)
-
-	cloud = Cloud{}
-	for _, opt := range opts {
-		if cloud, err = opt(cloud); err != nil {
-			err = oopsBuilder.
-				Wrapf(err, "Option %v", opt)
-			return
-		}
 	}
 
 	return
