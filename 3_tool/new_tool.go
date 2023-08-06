@@ -17,6 +17,7 @@ type Tool struct {
 	Url               string
 	ExecutableAbsPath string
 	RunDirAbsPath     string
+	PluginsDirAbsPath string
 }
 
 func NewTool(opts ...Option) (tool Tool, err error) {
@@ -204,6 +205,43 @@ func WithRunDirAbsPath(cloud cloud.Cloud, toolKind constants.ToolKind, kumoExecA
 				kumoExecAbsPath,
 				constants.TERRAFORM,
 				cloud.Name,
+			)
+		default:
+			err = oopsBuilder.
+				Errorf("Unknown tool kind: %d", toolKind)
+			return
+		}
+
+		return
+	}
+
+	return
+}
+
+func WithPluginsDir(cloud cloud.Cloud, toolKind constants.ToolKind, kumoExecAbsPath string) (option Option) {
+	var (
+		oopsBuilder = oops.
+			Code("WithPluginsDir").
+			With("toolKind", toolKind).
+			With("cloud", cloud).
+			With("kumoExecAbsPath", kumoExecAbsPath)
+	)
+
+	option = func(t Tool) (tool Tool, err error) {
+		switch toolKind {
+		case constants.Packer:
+			t.PluginsDirAbsPath = filepath.Join(
+				kumoExecAbsPath,
+				constants.PACKER,
+				cloud.Name,
+				constants.PLUGINS_DIR_NAME,
+			)
+		case constants.Terraform:
+			t.PluginsDirAbsPath = filepath.Join(
+				kumoExecAbsPath,
+				constants.TERRAFORM,
+				cloud.Name,
+				constants.PLUGINS_DIR_NAME,
 			)
 		default:
 			err = oopsBuilder.

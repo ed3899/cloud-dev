@@ -7,8 +7,8 @@ import (
 )
 
 func NewTerraformGeneralEnvironment(
-	GetPublicIp utils.GetPublicIpF,
-	WithMask utils.WithMaskF,
+	getPublicIp utils.GetPublicIpF,
+	withMask utils.WithMaskF,
 ) (
 	terraformGeneralEnvironment TerraformGeneralEnvironmentI,
 ) {
@@ -22,7 +22,7 @@ func NewTerraformGeneralEnvironment(
 
 	defer logger.Sync()
 
-	if publicIp, err = GetPublicIp(); err != nil {
+	if publicIp, err = getPublicIp(); err != nil {
 		logger.Warn(
 			"There was an error getting the public ip, using default instead",
 			zap.String("error", err.Error()),
@@ -35,7 +35,7 @@ func NewTerraformGeneralEnvironment(
 
 	terraformGeneralEnvironment = TerraformGeneralEnvironment{
 		Required: TerraformGeneralRequired{
-			ALLOWED_IP: WithMask(32)(pickedIp),
+			ALLOWED_IP: withMask(32)(pickedIp),
 		},
 	}
 
