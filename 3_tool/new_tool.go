@@ -1,16 +1,41 @@
 package tool
 
 import (
+	"fmt"
+	"path/filepath"
+
 	constants "github.com/ed3899/kumo/constants"
 	utils "github.com/ed3899/kumo/utils"
 	"github.com/samber/oops"
 )
 
 type Tool struct {
-	Kind    constants.ToolKind
-	Name    string
-	Version string
-	Url     string
+	Kind              constants.ToolKind
+	Name              string
+	Version           string
+	Url               string
+	ExecutableAbsPath string
+}
+
+func NewTool(opts ...Option) (tool Tool, err error) {
+	var (
+		oopsBuilder = oops.
+				Code("NewTool").
+				With("opts", opts)
+
+		o Option
+	)
+
+	tool = Tool{}
+	for _, o = range opts {
+		if tool, err = o(tool); err != nil {
+			err = oopsBuilder.
+				Wrapf(err, "Option %v", o)
+			return
+		}
+	}
+
+	return
 }
 
 type Option func(Tool) (Tool, error)
@@ -111,6 +136,7 @@ func WithUrl(
 		default:
 			err = oopsBuilder.
 				Errorf("Unknown tool kind: %d", toolKind)
+			return
 		}
 
 		return
@@ -119,22 +145,36 @@ func WithUrl(
 	return
 }
 
-func NewTool(opts ...Option) (tool Tool, err error) {
+func WithExecutableAbsPath(toolKind constants.ToolKind, kumoExecAbsPath string) (option Option) {
 	var (
 		oopsBuilder = oops.
-				Code("NewTool").
-				With("opts", opts)
-
-		o Option
+			Code("WithExecutableAbsPath").
+			With("toolKind", toolKind)
 	)
 
-	tool = Tool{}
-	for _, o = range opts {
-		if tool, err = o(tool); err != nil {
+	option = func(t Tool) (tool Tool, err error) {
+		switch toolKind {
+		case constants.Packer:
+			t.ExecutableAbsPath = filepath.Join(
+				kumoExecAbsPath,
+				constants.DEPENDENCIES_DIR_NAME,
+				constants.PACKER,
+				fmt.Sprintf("%s.exe", constants.PACKER),
+			)
+		case constants.Terraform:
+			t.ExecutableAbsPath = filepath.Join(
+				kumoExecAbsPath,
+				constants.DEPENDENCIES_DIR_NAME,
+				constants.TERRAFORM,
+				fmt.Sprintf("%s.exe", constants.TERRAFORM),
+			)
+		default:
 			err = oopsBuilder.
-				Wrapf(err, "Option %v", o)
+				Errorf("Unknown tool kind: %d", toolKind)
 			return
 		}
+
+		return
 	}
 
 	return
