@@ -5,22 +5,13 @@ import (
 	"path/filepath"
 
 	"github.com/ed3899/kumo/cloud"
-	constants "github.com/ed3899/kumo/constants"
-	utils "github.com/ed3899/kumo/utils"
+	"github.com/ed3899/kumo/constants"
+	"github.com/ed3899/kumo/utils/host"
+	"github.com/ed3899/kumo/utils/url"
 	"github.com/samber/oops"
 )
 
-type Tool struct {
-	Kind              constants.ToolKind
-	Name              string
-	Version           string
-	Url               string
-	ExecutableAbsPath string
-	RunDirAbsPath     string
-	PluginsDirAbsPath string
-}
-
-func NewTool(opts ...Option) (tool Tool, err error) {
+func NewTool(opts ...Option) (tool *Tool, err error) {
 	var (
 		oopsBuilder = oops.
 				Code("NewTool").
@@ -29,9 +20,9 @@ func NewTool(opts ...Option) (tool Tool, err error) {
 		o Option
 	)
 
-	tool = Tool{}
+	tool = &Tool{}
 	for _, o = range opts {
-		if tool, err = o(tool); err != nil {
+		if err = o(tool); err != nil {
 			err = oopsBuilder.
 				Wrapf(err, "Option %v", o)
 			return
@@ -41,8 +32,6 @@ func NewTool(opts ...Option) (tool Tool, err error) {
 	return
 }
 
-type Option func(Tool) (Tool, error)
-
 func WithKind(toolKind constants.ToolKind) (option Option) {
 	var (
 		oopsBuilder = oops.
@@ -50,12 +39,12 @@ func WithKind(toolKind constants.ToolKind) (option Option) {
 			With("toolKind", toolKind)
 	)
 
-	option = func(t Tool) (tool Tool, err error) {
+	option = func(tool *Tool) (err error) {
 		switch toolKind {
 		case constants.Packer:
-			t.Kind = constants.Packer
+			tool.Kind = constants.Packer
 		case constants.Terraform:
-			t.Kind = constants.Terraform
+			tool.Kind = constants.Terraform
 		default:
 			err = oopsBuilder.
 				Errorf("Unknown tool kind: %d", toolKind)
@@ -75,12 +64,12 @@ func WithName(toolKind constants.ToolKind) (option Option) {
 			With("toolKind", toolKind)
 	)
 
-	option = func(t Tool) (tool Tool, err error) {
+	option = func(tool *Tool) (err error) {
 		switch toolKind {
 		case constants.Packer:
-			t.Name = constants.PACKER
+			tool.Name = constants.PACKER
 		case constants.Terraform:
-			t.Name = constants.TERRAFORM
+			tool.Name = constants.TERRAFORM
 		default:
 			err = oopsBuilder.
 				Errorf("Unknown tool kind: %d", toolKind)
@@ -100,12 +89,12 @@ func WithVersion(toolKind constants.ToolKind) (option Option) {
 			With("toolKind", toolKind)
 	)
 
-	option = func(t Tool) (tool Tool, err error) {
+	option = func(tool *Tool) (err error) {
 		switch toolKind {
 		case constants.Packer:
-			t.Version = constants.PACKER_VERSION
+			tool.Version = constants.PACKER_VERSION
 		case constants.Terraform:
-			t.Version = constants.TERRAFORM_VERSION
+			tool.Version = constants.TERRAFORM_VERSION
 		default:
 			err = oopsBuilder.
 				Errorf("Unknown tool kind: %d", toolKind)
@@ -120,8 +109,8 @@ func WithVersion(toolKind constants.ToolKind) (option Option) {
 
 func WithUrl(
 	toolKind constants.ToolKind,
-	createHashicorpUrl utils.CreateHashicorpURLF,
-	getCurrentHostSpecs utils.GetCurrentHostSpecsF,
+	createHashicorpUrl url.CreateHashicorpURLF,
+	getCurrentHostSpecs host.GetCurrentHostSpecsF,
 ) (option Option) {
 	var (
 		oopsBuilder = oops.
@@ -130,12 +119,12 @@ func WithUrl(
 		currentOs, currentArch = getCurrentHostSpecs()
 	)
 
-	option = func(t Tool) (tool Tool, err error) {
+	option = func(tool *Tool) (err error) {
 		switch toolKind {
 		case constants.Packer:
-			t.Url = createHashicorpUrl(constants.PACKER, constants.PACKER_VERSION, currentOs, currentArch)
+			tool.Url = createHashicorpUrl(constants.PACKER, constants.PACKER_VERSION, currentOs, currentArch)
 		case constants.Terraform:
-			t.Url = createHashicorpUrl(constants.TERRAFORM, constants.TERRAFORM_VERSION, currentOs, currentArch)
+			tool.Url = createHashicorpUrl(constants.TERRAFORM, constants.TERRAFORM_VERSION, currentOs, currentArch)
 		default:
 			err = oopsBuilder.
 				Errorf("Unknown tool kind: %d", toolKind)
@@ -155,17 +144,17 @@ func WithExecutableAbsPath(toolKind constants.ToolKind, kumoExecAbsPath string) 
 			With("toolKind", toolKind)
 	)
 
-	option = func(t Tool) (tool Tool, err error) {
+	option = func(tool *Tool) (err error) {
 		switch toolKind {
 		case constants.Packer:
-			t.ExecutableAbsPath = filepath.Join(
+			tool.ExecutableAbsPath = filepath.Join(
 				kumoExecAbsPath,
 				constants.DEPENDENCIES_DIR_NAME,
 				constants.PACKER,
 				fmt.Sprintf("%s.exe", constants.PACKER),
 			)
 		case constants.Terraform:
-			t.ExecutableAbsPath = filepath.Join(
+			tool.ExecutableAbsPath = filepath.Join(
 				kumoExecAbsPath,
 				constants.DEPENDENCIES_DIR_NAME,
 				constants.TERRAFORM,
@@ -192,16 +181,16 @@ func WithRunDirAbsPath(cloud cloud.Cloud, toolKind constants.ToolKind, kumoExecA
 			With("kumoExecAbsPath", kumoExecAbsPath)
 	)
 
-	option = func(t Tool) (tool Tool, err error) {
+	option = func(tool *Tool) (err error) {
 		switch toolKind {
 		case constants.Packer:
-			t.RunDirAbsPath = filepath.Join(
+			tool.RunDirAbsPath = filepath.Join(
 				kumoExecAbsPath,
 				constants.PACKER,
 				cloud.Name,
 			)
 		case constants.Terraform:
-			t.RunDirAbsPath = filepath.Join(
+			tool.RunDirAbsPath = filepath.Join(
 				kumoExecAbsPath,
 				constants.TERRAFORM,
 				cloud.Name,
@@ -227,17 +216,17 @@ func WithPluginsDir(cloud cloud.Cloud, toolKind constants.ToolKind, kumoExecAbsP
 			With("kumoExecAbsPath", kumoExecAbsPath)
 	)
 
-	option = func(t Tool) (tool Tool, err error) {
+	option = func(tool *Tool) (err error) {
 		switch toolKind {
 		case constants.Packer:
-			t.PluginsDirAbsPath = filepath.Join(
+			tool.PluginsDirAbsPath = filepath.Join(
 				kumoExecAbsPath,
 				constants.PACKER,
 				cloud.Name,
 				constants.PLUGINS_DIR_NAME,
 			)
 		case constants.Terraform:
-			t.PluginsDirAbsPath = filepath.Join(
+			tool.PluginsDirAbsPath = filepath.Join(
 				kumoExecAbsPath,
 				constants.TERRAFORM,
 				cloud.Name,
@@ -254,3 +243,15 @@ func WithPluginsDir(cloud cloud.Cloud, toolKind constants.ToolKind, kumoExecAbsP
 
 	return
 }
+
+type Tool struct {
+	Kind              constants.ToolKind
+	Name              string
+	Version           string
+	Url               string
+	ExecutableAbsPath string
+	RunDirAbsPath     string
+	PluginsDirAbsPath string
+}
+
+type Option func(*Tool) error
