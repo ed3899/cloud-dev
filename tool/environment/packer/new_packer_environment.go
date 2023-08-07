@@ -2,6 +2,7 @@ package environment
 
 import (
 	"github.com/ed3899/kumo/cloud"
+	"github.com/ed3899/kumo/common/interfaces"
 	"github.com/ed3899/kumo/constants"
 	"github.com/ed3899/kumo/tool/environment/packer/aws"
 	"github.com/ed3899/kumo/tool/environment/packer/general"
@@ -70,8 +71,8 @@ func WithGeneralEnvironment(
 }
 
 func WithCloudEnvironment(
-	packerCloudEnvironment *PackerCloudEnvironmentOptions,
 	cloud cloud.Cloud,
+	packerCloudEnvironment *PackerCloudEnvironmentOptions,
 	areRequiredFieldsNotFilled environment.IsStructNotCompletelyFilledF,
 ) (
 	option Option,
@@ -111,13 +112,9 @@ func WithCloudEnvironment(
 	return
 }
 
-type CloudEnvironmentI interface {
-	IsCloudEnvironment() (isCloudEnvironment bool)
-}
-
 type PackerEnvironment struct {
 	General *general.PackerGeneralEnvironment
-	Cloud   CloudEnvironmentI
+	Cloud   interfaces.PackerCloudEnvironmentI
 }
 
 type Option func(*PackerEnvironment) (err error)
