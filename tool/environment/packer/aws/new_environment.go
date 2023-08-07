@@ -1,6 +1,10 @@
 package aws
 
-import "github.com/spf13/viper"
+import (
+	utils_environment "github.com/ed3899/kumo/utils/environment"
+	"github.com/samber/oops"
+	"github.com/spf13/viper"
+)
 
 func NewEnvironment() (environment Environment) {
 	environment = Environment{
@@ -52,5 +56,37 @@ type NewEnvironmentF func() Environment
 
 func (e Environment) IsCloudEnvironment() (isCloudEnvironment bool) {
 	isCloudEnvironment = true
+	return
+}
+
+type Option func(Environment) Environment
+
+func NewEnv(
+	requiredFieldsAreNotFilled utils_environment.IsStructNotCompletelyFilledF,
+	opts ...Option,
+) (environment Environment, err error) {
+
+	var (
+		oopsBuilder = oops.
+				Code("NewEnv").
+				With("opts", opts)
+
+		notFilled bool
+		missingField string
+	)
+
+	environment = Environment{}
+	for _, o := range opts {
+		environment = o(environment)
+	}
+
+	notFilled, missingField = requiredFieldsAreNotFilled(environment.Required)
+	if notFilled {
+		err = oopsBuilder.
+			With("environment.Required", environment.Required).
+			Errorf("Required field '%s' is not filled", missingField)
+		return
+	}
+
 	return
 }

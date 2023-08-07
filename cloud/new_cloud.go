@@ -9,15 +9,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-type Cloud struct {
-	Kind               constants.CloudKind
-	Name               string
-	Credentials        interfaces.Credentials
-	PackerManifestPath string
-}
-
-type Option func(Cloud) (Cloud, error)
-
 func NewCloud(opts ...Option) (cloud Cloud, err error) {
 	var (
 		oopsBuilder = oops.
@@ -133,3 +124,12 @@ func WithPackerManifestPath(cloudFromConfig, kumoExecAbsPath string) (option Opt
 
 	return
 }
+
+type Cloud struct {
+	Kind               constants.CloudKind
+	Name               string
+	Credentials        interfaces.Credentials
+	PackerManifestPath string
+}
+
+type Option func(Cloud) (Cloud, error)
