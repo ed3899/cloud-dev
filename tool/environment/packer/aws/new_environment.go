@@ -71,7 +71,7 @@ func NewEnv(
 				Code("NewEnv").
 				With("opts", opts)
 
-		notFilled bool
+		notFilled    bool
 		missingField string
 	)
 
@@ -89,4 +89,17 @@ func NewEnv(
 	}
 
 	return
+}
+
+func WithAwsAccessKey(awsAccessKey string) (option Option) {
+	var (
+		oopsBuilder = oops.
+			Code("WithAwsAccessKey").
+			With("awsAccessKey", awsAccessKey)
+	)
+
+	option = func(e Environment) (environment Environment) {
+		e.Required.AWS_ACCESS_KEY = awsAccessKey
+		return
+	}
 }
