@@ -1,10 +1,10 @@
-package environment
+package aws
 
 import "github.com/spf13/viper"
 
-func NewPackerAwsEnvironment() (packerAwsEnvironment PackerCloudEnvironmentI) {
-	packerAwsEnvironment = PackerAwsEnvironment{
-		Required: PackerAwsRequired{
+func NewEnvironment() (environment Environment) {
+	environment = Environment{
+		Required: Required{
 			AWS_ACCESS_KEY:                     viper.GetString("AWS.AccessKeyId"),
 			AWS_SECRET_KEY:                     viper.GetString("AWS.SecretAccessKey"),
 			AWS_IAM_PROFILE:                    viper.GetString("AWS.IamProfile"),
@@ -22,10 +22,11 @@ func NewPackerAwsEnvironment() (packerAwsEnvironment PackerCloudEnvironmentI) {
 			AWS_EC2_INSTANCE_USERNAME_PASSWORD: viper.GetString("AMI.Password"),
 		},
 	}
+
 	return
 }
 
-type PackerAwsRequired struct {
+type Required struct {
 	AWS_ACCESS_KEY                     string
 	AWS_SECRET_KEY                     string
 	AWS_IAM_PROFILE                    string
@@ -43,10 +44,13 @@ type PackerAwsRequired struct {
 	AWS_EC2_INSTANCE_USERNAME_PASSWORD string
 }
 
-type PackerAwsEnvironment struct {
-	Required PackerAwsRequired
+type Environment struct {
+	Required Required
 }
 
-func (pae PackerAwsEnvironment) IsPackerCloudEnvironment() bool {
-	return true
+type NewEnvironmentF func() Environment
+
+func (e Environment) IsCloudEnvironment() (isCloudEnvironment bool) {
+	isCloudEnvironment = true
+	return
 }
