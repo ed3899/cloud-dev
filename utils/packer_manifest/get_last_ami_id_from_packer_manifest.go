@@ -85,3 +85,5 @@ func GetLastBuiltAmiIdFromPackerManifest(packerManifestAbsPath string) (amiId st
 
 	return
 }
+
+type GetLastBuiltAmiIdFromPackerManifestF func(packerManifestAbsPath string) (amiId string, err error)

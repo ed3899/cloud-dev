@@ -28,3 +28,5 @@ func PickAmiId(lastBuildAmiId, amiIdFromConfig string) (amiIdToBeUsed string, er
 
 	return
 }
+
+type PickAmiIdF func(lastBuildAmiId, amiIdFromConfig string) (amiIdToBeUsed string, err error)
