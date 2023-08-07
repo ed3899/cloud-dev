@@ -72,7 +72,7 @@ func WithGeneralEnvironment(
 
 func WithCloudEnvironment(
 	cloud cloud.Cloud,
-	packerCloudEnvironment *PackerCloudEnvironmentOptions,
+	packerCloudEnvironmentOptions *PackerCloudEnvironmentOptions,
 	areRequiredFieldsNotFilled environment.IsStructNotCompletelyFilledF,
 ) (
 	option Option,
@@ -80,7 +80,7 @@ func WithCloudEnvironment(
 	var (
 		oopsBuilder = oops.
 				Code("WithCloudEnvironment").
-				With("packerCloudEnvironment", packerCloudEnvironment).
+				With("packerCloudEnvironment", packerCloudEnvironmentOptions).
 				With("areRequiredFieldsNotFilled", areRequiredFieldsNotFilled)
 
 		requiredFieldsNotFilled bool
@@ -90,14 +90,14 @@ func WithCloudEnvironment(
 	option = func(packerEnvironment *PackerEnvironment) (err error) {
 		switch cloud.Kind {
 		case constants.Aws:
-			requiredFieldsNotFilled, missingField = areRequiredFieldsNotFilled(packerCloudEnvironment.Aws.Required)
+			requiredFieldsNotFilled, missingField = areRequiredFieldsNotFilled(packerCloudEnvironmentOptions.Aws.Required)
 			if requiredFieldsNotFilled {
 				err = oopsBuilder.
-					With("packerCloudEnvironment.Aws.Required", packerCloudEnvironment.Aws.Required).
+					With("packerCloudEnvironment.Aws.Required", packerCloudEnvironmentOptions.Aws.Required).
 					Errorf("Required field '%s' is not filled", missingField)
 				return
 			}
-			packerEnvironment.Cloud = packerCloudEnvironment.Aws
+			packerEnvironment.Cloud = packerCloudEnvironmentOptions.Aws
 
 		default:
 			err = oopsBuilder.

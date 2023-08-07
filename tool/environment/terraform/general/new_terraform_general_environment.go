@@ -1,4 +1,4 @@
-package environment
+package general
 
 import (
 	"github.com/ed3899/kumo/constants"
@@ -10,7 +10,7 @@ func NewEnvironment(
 	getPublicIp ip.GetPublicIpF,
 	withMask ip.WithMaskF,
 ) (
-	generalEnvironment Environment,
+	generalEnvironment TerraformGeneralEnvironment,
 ) {
 	var (
 		logger, _ = zap.NewProduction()
@@ -33,8 +33,8 @@ func NewEnvironment(
 		pickedIp = publicIp
 	}
 
-	generalEnvironment = Environment{
-		Required: Required{
+	generalEnvironment = TerraformGeneralEnvironment{
+		Required: TerraformGeneralRequired{
 			ALLOWED_IP: withMask(32)(pickedIp),
 		},
 	}
@@ -42,12 +42,12 @@ func NewEnvironment(
 	return
 }
 
-type Required struct {
+type TerraformGeneralRequired struct {
 	ALLOWED_IP string
 }
 
-type Environment struct {
-	Required Required
+type TerraformGeneralEnvironment struct {
+	Required *TerraformGeneralRequired
 }
 
-type NewTerraformGeneralEnvironmentF func(GetPublicIp ip.GetPublicIpF, WithMask ip.WithMaskF) (terraformGeneralEnvironment Environment)
+type NewTerraformGeneralEnvironmentF func(GetPublicIp ip.GetPublicIpF, WithMask ip.WithMaskF) (terraformGeneralEnvironment TerraformGeneralEnvironment)
