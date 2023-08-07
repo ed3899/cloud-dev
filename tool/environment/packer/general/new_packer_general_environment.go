@@ -99,3 +99,8 @@ type PackerGeneralEnvironment struct {
 }
 
 type Option func(environment *PackerGeneralEnvironment)
+
+type NewPackerGeneralEnvironmentF func(
+	areRequiredFieldsNotFilled environment.IsStructNotCompletelyFilledF,
+	options ...Option,
+) (packerGeneralEnvironment *PackerGeneralEnvironment, err error)
