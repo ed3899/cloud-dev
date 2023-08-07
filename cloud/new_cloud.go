@@ -3,6 +3,7 @@ package cloud
 import (
 	"path/filepath"
 
+	"github.com/ed3899/kumo/common/interfaces"
 	"github.com/ed3899/kumo/constants"
 	"github.com/samber/oops"
 	"github.com/spf13/viper"
@@ -11,7 +12,7 @@ import (
 type Cloud struct {
 	Kind               constants.CloudKind
 	Name               string
-	Credentials        CredentialsI
+	Credentials        interfaces.Credentials
 	PackerManifestPath string
 }
 
