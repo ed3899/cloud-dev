@@ -9,20 +9,20 @@ import (
 	"github.com/spf13/viper"
 )
 
-func NewCloud(opts ...Option) (cloud *Cloud, err error) {
+func NewCloud(options ...Option) (cloud *Cloud, err error) {
 	var (
 		oopsBuilder = oops.
 				Code("NewCloud").
-				With("opts", opts)
+				With("opts", options)
 
-		o Option
+		opt Option
 	)
 
 	cloud = &Cloud{}
-	for _, o = range opts {
-		if err = o(cloud); err != nil {
+	for _, opt = range options {
+		if err = opt(cloud); err != nil {
 			err = oopsBuilder.
-				Wrapf(err, "Option %v", o)
+				Wrapf(err, "Option %v", opt)
 			return
 		}
 	}
