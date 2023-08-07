@@ -1,4 +1,4 @@
-package utils
+package packer_manifest
 
 import (
 	"encoding/json"

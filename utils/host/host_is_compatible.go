@@ -1,14 +1,6 @@
-package utils
+package host
 
-import (
-	"runtime"
-)
-
-type GetCurrentHostSpecsF func() (os, arch string)
-
-func GetCurrentHostSpecs() (os, arch string) {
-	return runtime.GOOS, runtime.GOARCH
-}
+import "runtime"
 
 func HostIsCompatible() (compatible bool) {
 	switch runtime.GOOS {
@@ -42,8 +34,4 @@ func HostIsCompatible() (compatible bool) {
 		compatible = false
 	}
 	return
-}
-
-func HostIsNotCompatible() (notCompatible bool) {
-	return !HostIsCompatible()
 }

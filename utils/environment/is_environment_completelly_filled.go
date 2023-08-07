@@ -1,15 +1,15 @@
-package utils
+package environment
 
 import "reflect"
 
-func IsStructCompletellyFilled(s any) (isFilledCompletely bool) {
+func IsEnvironmentCompletellyFilled(e any) (isFilledCompletely bool) {
 	var (
 		reflectValue reflect.Value
 		fieldValue   reflect.Value
 	)
 
 	// Iterate over each field in the struct using reflection
-	reflectValue = reflect.ValueOf(s).Elem()
+	reflectValue = reflect.ValueOf(e).Elem()
 	for i := 0; i < reflectValue.NumField(); i++ {
 		fieldValue = reflectValue.Field(i)
 

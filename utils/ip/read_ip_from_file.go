@@ -1,4 +1,4 @@
-package utils
+package ip
 
 import (
 	"fmt"

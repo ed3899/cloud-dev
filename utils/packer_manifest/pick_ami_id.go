@@ -1,4 +1,4 @@
-package utils
+package packer_manifest
 
 import (
 	"github.com/samber/oops"
