@@ -1,7 +1,7 @@
 package aws
 
 import (
-	utils_environment "github.com/ed3899/kumo/utils/environment"
+	"github.com/ed3899/kumo/utils/environment"
 	"github.com/samber/oops"
 )
 
@@ -32,28 +32,30 @@ import (
 type NewPackerAwsEnvironmentF func() (*PackerAwsEnvironment, error)
 
 func NewPackerAwsEnvironment(
-	requiredFieldsAreNotFilled utils_environment.IsStructNotCompletelyFilledF,
-	opts ...Option,
-) (environment *PackerAwsEnvironment, err error) {
+	areRequiredFieldsNotFilled environment.IsStructNotCompletelyFilledF,
+	options ...Option,
+) (packerAwsEnvironment *PackerAwsEnvironment, err error) {
 
 	var (
 		oopsBuilder = oops.
 				Code("NewEnv").
-				With("opts", opts)
+				With("opts", options).
+				With("requiredFieldsAreNotFilled", areRequiredFieldsNotFilled)
 
-		notFilled    bool
-		missingField string
+		opt                     Option
+		requiredFieldsNotFilled bool
+		missingField            string
 	)
 
-	environment = &PackerAwsEnvironment{}
-	for _, o := range opts {
-		o(environment)
+	packerAwsEnvironment = &PackerAwsEnvironment{}
+	for _, opt = range options {
+		opt(packerAwsEnvironment)
 	}
 
-	notFilled, missingField = requiredFieldsAreNotFilled(environment.Required)
-	if notFilled {
+	requiredFieldsNotFilled, missingField = areRequiredFieldsNotFilled(packerAwsEnvironment.Required)
+	if requiredFieldsNotFilled {
 		err = oopsBuilder.
-			With("environment.Required", environment.Required).
+			With("packerAwsEnvironment.Required", packerAwsEnvironment.Required).
 			Errorf("Required field '%s' is not filled", missingField)
 		return
 	}
@@ -181,7 +183,7 @@ func WithAwsEc2InstanceUsernamePassword(awsEc2InstanceUsernamePassword string) (
 	return
 }
 
-type Required struct {
+type PackerAwsRequired struct {
 	AWS_ACCESS_KEY                     string
 	AWS_SECRET_KEY                     string
 	AWS_IAM_PROFILE                    string
@@ -200,7 +202,7 @@ type Required struct {
 }
 
 type PackerAwsEnvironment struct {
-	Required Required
+	Required *PackerAwsRequired
 }
 
 func (e *PackerAwsEnvironment) IsCloudEnvironment() (isCloudEnvironment bool) {

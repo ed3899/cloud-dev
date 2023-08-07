@@ -9,7 +9,7 @@ type CloudEnvironmentI interface {
 }
 
 type Environment struct {
-	General general.Environment
+	General general.PackerGeneralEnvironment
 	Cloud   CloudEnvironmentI
 }
 
