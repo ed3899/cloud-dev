@@ -146,3 +146,4 @@ func (d *Download) SetExtractionBar(p interfaces.MpbV8MultiprogressBar, zipSize 
 func (d *Download) IncrementExtractionBar(extractedBytes int) {
 	d.Progress.Extracting.IncrBy(extractedBytes)
 }
+

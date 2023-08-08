@@ -69,3 +69,9 @@ OuterLoop:
 
 	return
 }
+
+type DownloadAndShowProgressF func(
+	download *Download,
+	multiProgressBar interfaces.MpbV8MultiprogressBar,
+	urlDownload url.DownloadF,
+) (err error)

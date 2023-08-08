@@ -77,3 +77,10 @@ OuterLoop:
 
 	return
 }
+
+type ExtractAndShowProgressF func(
+	download *Download,
+	multiProgressBar interfaces.MpbV8MultiprogressBar,
+	getZipSize utils_zip.GetZipSizeF,
+	unzip utils_zip.UnzipF,
+) (err error)
