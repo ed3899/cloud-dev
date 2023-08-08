@@ -1,6 +1,6 @@
 module github.com/ed3899/kumo
 
-go 1.20
+go 1.21.0
 
 require (
 	github.com/onsi/ginkgo/v2 v2.11.0

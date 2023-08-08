@@ -4,16 +4,16 @@ import (
 	"log"
 
 	"github.com/ed3899/kumo/cmd"
-	"github.com/ed3899/kumo/common/utils"
+	"github.com/ed3899/kumo/utils/host"
 	"github.com/samber/oops"
 )
 
 func init() {
-	if utils.HostIsNotCompatible() {
+	if host.HostIsNotCompatible() {
 		var (
 			oopsBuilder = oops.
 					Code("host_is_not_compatible")
-			os, arch = utils.GetCurrentHostSpecs()
+			os, arch = host.GetCurrentHostSpecs()
 			err      error
 		)
 

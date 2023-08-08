@@ -4,7 +4,6 @@ import (
 	"github.com/ed3899/kumo/cloud"
 	"github.com/ed3899/kumo/common/interfaces"
 	"github.com/ed3899/kumo/constants"
-	"github.com/ed3899/kumo/tool/environment/terraform/aws"
 	"github.com/ed3899/kumo/tool/environment/terraform/general"
 	"github.com/ed3899/kumo/utils/environment"
 	"github.com/samber/oops"
@@ -67,7 +66,7 @@ func WithGeneralEnvironment(
 
 func WithCloudEnvironment(
 	cloud cloud.Cloud,
-	terraformCloudEnvironmentOptions *TerraformCloudEnvironmentOption,
+	terraformCloudEnvironmentOptions *TerraformCloudEnvironmentOptions,
 	areRequiredFieldsNotFilled environment.IsStructNotCompletelyFilledF,
 ) (
 	option Option,
@@ -114,7 +113,3 @@ type TerraformEnvironment struct {
 }
 
 type Option func(*TerraformEnvironment) (err error)
-
-type TerraformCloudEnvironmentOption struct {
-	Aws *aws.TerraformAwsEnvironment
-}
