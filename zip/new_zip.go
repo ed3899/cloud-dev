@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"path/filepath"
 
-	tool "github.com/ed3899/kumo/3_tool"
+	"github.com/ed3899/kumo/common/interfaces"
 	"github.com/ed3899/kumo/constants"
-	"github.com/ed3899/kumo/utils"
+	"github.com/ed3899/kumo/tool"
+	"github.com/ed3899/kumo/utils/url"
 
 	"github.com/samber/oops"
 	"github.com/vbauerster/mpb/v8"
@@ -22,7 +23,7 @@ type Zip struct {
 	ExtractionBar *mpb.Bar
 }
 
-func New(t tool.Tool) (zip ZipI, err error) {
+func New(t tool.Tool) (zip interfaces.ZipI, err error) {
 	var (
 		oopsBuilder = oops.Code("zip_new_failed")
 		absPath     = filepath.Join(
@@ -37,7 +38,7 @@ func New(t tool.Tool) (zip ZipI, err error) {
 		contentLength int64
 	)
 
-	if contentLength, err = utils.GetContentLength(t.Url); err != nil {
+	if contentLength, err = url.GetContentLength(t.Url); err != nil {
 		err = oopsBuilder.
 			Wrapf(err, "failed to get zip content length")
 		return
@@ -53,7 +54,7 @@ func New(t tool.Tool) (zip ZipI, err error) {
 	return
 }
 
-func (z Zip) SetDownloadBar(p MultiProgressBar) {
+func (z Zip) SetDownloadBar(p interfaces.ProgressBarAdder) {
 	z.DownloadBar = p.AddBar(int64(z.ContentLength),
 		mpb.BarFillerClearOnComplete(),
 		mpb.PrependDecorators(
@@ -73,7 +74,7 @@ func (z Zip) IncrementDownloadBar(downloadedBytes int) {
 	z.DownloadBar.IncrBy(downloadedBytes)
 }
 
-func (z Zip) SetExtractionBar(p MultiProgressBar, zipSize int64) {
+func (z Zip) SetExtractionBar(p interfaces.ProgressBarAdder, zipSize int64) {
 	z.ExtractionBar = p.AddBar(zipSize,
 		mpb.BarQueueAfter(z.DownloadBar),
 		mpb.BarFillerClearOnComplete(),

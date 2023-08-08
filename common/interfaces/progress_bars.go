@@ -1,13 +1,13 @@
-package zip
+package interfaces
 
 import (
 	"github.com/vbauerster/mpb/v8"
 )
 
-type ProgressBar interface {
+type ProgressBarIncrementor interface {
 	IncrBy(n int)
 }
 
-type MultiProgressBar interface {
+type ProgressBarAdder interface {
 	AddBar(total int64, options ...mpb.BarOption) *mpb.Bar
 }

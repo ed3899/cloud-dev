@@ -1,13 +1,14 @@
 package zip
 
 import (
-	"github.com/ed3899/kumo/utils"
+	"github.com/ed3899/kumo/common/interfaces"
+	"github.com/ed3899/kumo/utils/url"
 	"github.com/samber/oops"
 )
 
 func DownloadAndShowProgress(
 	zip Zip,
-	multiProgressBar MultiProgressBar,
+	multiProgressBar interfaces.ProgressBarAdder,
 ) (err error) {
 	var (
 		downloadedBytesChan = make(chan int, 1024)
@@ -30,7 +31,7 @@ func DownloadAndShowProgress(
 
 		zip.SetDownloadBar(multiProgressBar)
 
-		if err = utils.Download(zip.Url, zip.AbsPath, downloadedBytesChan); err != nil {
+		if err = url.Download(zip.Url, zip.AbsPath, downloadedBytesChan); err != nil {
 			err = oopsBuilder.
 				With("url", zip.Url).
 				With("absPath", zip.AbsPath).

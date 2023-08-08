@@ -3,13 +3,14 @@ package zip
 import (
 	"path/filepath"
 
-	"github.com/ed3899/kumo/utils"
+	"github.com/ed3899/kumo/common/interfaces"
+	utils_zip "github.com/ed3899/kumo/utils/zip"
 	"github.com/samber/oops"
 )
 
 func ExtractAndShowProgress(
 	zip Zip,
-	multiProgressBar MultiProgressBar,
+	multiProgressBar interfaces.ProgressBarAdder,
 ) (err error) {
 	var (
 		extractedBytesChan = make(chan int, 1024)
@@ -26,7 +27,7 @@ func ExtractAndShowProgress(
 		zipSize        int64
 	)
 
-	if zipSize, err = utils.GetZipSize(zip.AbsPath); err != nil {
+	if zipSize, err = utils_zip.GetZipSize(zip.AbsPath); err != nil {
 		err = oopsBuilder.
 			Wrapf(err, "failed to get zip size for: %v", zip.AbsPath)
 		return
@@ -38,7 +39,7 @@ func ExtractAndShowProgress(
 
 		zip.SetExtractionBar(multiProgressBar, zipSize)
 
-		if err = utils.Unzip(zip.AbsPath, filepath.Dir(zip.AbsPath), extractedBytesChan); err != nil {
+		if err = utils_zip.Unzip(zip.AbsPath, filepath.Dir(zip.AbsPath), extractedBytesChan); err != nil {
 			err = oopsBuilder.
 				With("absPath", zip.AbsPath).
 				With("extractedBytesChan", extractedBytesChan).
