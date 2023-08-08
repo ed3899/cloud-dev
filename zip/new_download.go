@@ -98,16 +98,16 @@ type Download struct {
 	AbsPath       string
 	Url           string
 	ContentLength int64
-	Progress      *Progress[*mpb.Bar]
+	Bars      *Bars[*mpb.Bar]
 }
 
-type Progress[B interfaces.MpbV8BarIncrementor] struct {
+type Bars[B interfaces.MpbV8BarIncrementor] struct {
 	Downloading B
 	Extracting  B
 }
 
 func (d *Download) SetDownloadBar(p interfaces.MpbV8MultiProgressBar) {
-	d.Progress.Downloading = p.AddBar(int64(d.ContentLength),
+	d.Bars.Downloading = p.AddBar(int64(d.ContentLength),
 		mpb.BarFillerClearOnComplete(),
 		mpb.PrependDecorators(
 			decor.Name(d.Name),
@@ -123,12 +123,12 @@ func (d *Download) SetDownloadBar(p interfaces.MpbV8MultiProgressBar) {
 }
 
 func (d *Download) IncrementDownloadBar(downloadedBytes int) {
-	d.Progress.Downloading.IncrBy(downloadedBytes)
+	d.Bars.Downloading.IncrBy(downloadedBytes)
 }
 
 func (d *Download) SetExtractionBar(p interfaces.MpbV8MultiProgressBar, zipSize int64) {
-	d.Progress.Extracting = p.AddBar(zipSize,
-		mpb.BarQueueAfter(d.Progress.Downloading),
+	d.Bars.Extracting = p.AddBar(zipSize,
+		mpb.BarQueueAfter(d.Bars.Downloading),
 		mpb.BarFillerClearOnComplete(),
 		mpb.PrependDecorators(
 			decor.Name(d.Name),
@@ -144,5 +144,5 @@ func (d *Download) SetExtractionBar(p interfaces.MpbV8MultiProgressBar, zipSize 
 }
 
 func (d *Download) IncrementExtractionBar(extractedBytes int) {
-	d.Progress.Extracting.IncrBy(extractedBytes)
+	d.Bars.Extracting.IncrBy(extractedBytes)
 }

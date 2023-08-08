@@ -21,12 +21,12 @@ func WithMultiProgressBar() {
 
 }
 
-type DownloadAndExtract struct {
+type Progress struct {
 	Download         *Download
 	MultiProgressBar interfaces.MpbV8MultiProgressBar
 }
 
-func (dae *DownloadAndExtract) DownloadAndShowProgress(
+func (dae *Progress) DownloadAndShowProgress(
 	multiProgressBar interfaces.MpbV8MultiProgressBar,
 	urlDownload url.DownloadF,
 ) (err error) {
@@ -89,7 +89,7 @@ OuterLoop:
 	return
 }
 
-func (dae *DownloadAndExtract) ExtractAndShowProgress(
+func (dae *Progress) ExtractAndShowProgress(
 	multiProgressBar interfaces.MpbV8MultiProgressBar,
 	getZipSize utils_zip.GetZipSizeF,
 	unzip utils_zip.UnzipF,
@@ -158,7 +158,7 @@ OuterLoop:
 	return
 }
 
-func (dae *DownloadAndExtract) CleanAbsPathToZipDirWith(
+func (dae *Progress) CleanAbsPathToZipDirWith(
 	removeAll RemoverF,
 ) (err error) {
 	var (
@@ -177,7 +177,7 @@ func (dae *DownloadAndExtract) CleanAbsPathToZipDirWith(
 	return
 }
 
-func (dae *DownloadAndExtract) RemoveDownloadWith(
+func (dae *Progress) RemoveDownloadWith(
 	remove RemoverF,
 ) (err error) {
 	var (
@@ -195,7 +195,7 @@ func (dae *DownloadAndExtract) RemoveDownloadWith(
 	return
 }
 
-func (dae *DownloadAndExtract) Shutdown() {
+func (dae *Progress) Shutdown() {
 	dae.MultiProgressBar.Shutdown()
 }
 
