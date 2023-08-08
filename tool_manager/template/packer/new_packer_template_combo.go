@@ -13,35 +13,22 @@ import (
 func NewMergedTemplate(
 	options ...Option,
 ) (
-	packerMergedTemplate *MergedTemplate,
+	mergedTemplate *MergedTemplate,
 ) {
 	var (
 		option Option
 	)
 
-	packerMergedTemplate = &MergedTemplate{}
+	mergedTemplate = &MergedTemplate{}
 	for _, option = range options {
-		option(packerMergedTemplate)
-	}
-
-	return
-}
-
-func WithAbsPathFor(kumoExecAbsPath string, cloud cloud.Cloud, tool tool_manager.ToolManager) (option Option) {
-	option = func(packerTemplate *MergedTemplate) (err error) {
-		packerTemplate.AbsPath = filepath.Join(
-			kumoExecAbsPath,
-			constants.TEMPLATES_DIR_NAME,
-			constants.PACKER_TEMP,
-		)
-
-		return
+		option(mergedTemplate)
 	}
 
 	return
 }
 
 func WithTemplatesFor(
+	toolManager *tool_manager.ToolManager,
 	cloud cloud.Cloud,
 	kumoExecAbsPath string,
 ) (option Option) {
@@ -115,7 +102,6 @@ func (ptc *MergedTemplate) Remove(fileRemover func(name string) error) (err erro
 }
 
 type MergedTemplate struct {
-	AbsPath                    string
 	GeneralTemplateFileAbsPath string
 	CloudTemplateFileAbsPath   string
 }

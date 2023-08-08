@@ -254,7 +254,7 @@ func WithInitialDirAbsPath(kumoExecAbsPath string) (option Option) {
 	return
 }
 
-func TempMergedTemplateFileName(toolKind constants.ToolKind) (option Option) {
+func WithTempMergedTemplateFileName(toolKind constants.ToolKind) (option Option) {
 	var (
 		oopsBuilder = oops.
 			Code("TempMergedTemplateFileName").
@@ -264,9 +264,115 @@ func TempMergedTemplateFileName(toolKind constants.ToolKind) (option Option) {
 	option = func(toolManager *ToolManager) (err error) {
 		switch toolKind {
 		case constants.Packer:
-			toolManager.TempMergedTemplateFileName = constants.PACKER_TEMP
+			toolManager.TempMergedTemplateAbsPath = filepath.Join(constants.TEMPLATES_DIR_NAME, constants.PACKER_TEMP)
 		case constants.Terraform:
-			toolManager.TempMergedTemplateFileName = constants.TERRAFORM_TEMP
+			toolManager.TempMergedTemplateAbsPath = filepath.Join(constants.TEMPLATES_DIR_NAME, constants.TERRAFORM_TEMP)
+		default:
+			err = oopsBuilder.
+				Errorf("Unknown tool kind: %d", toolKind)
+			return
+		}
+
+		return
+	}
+
+	return
+}
+
+func WithAbsPathToGeneralTemplate(
+	toolKind constants.ToolKind,
+	kumoExecAbsPath string,
+) (option Option) {
+	var (
+		oopsBuilder = oops.
+			Code("WithAbsPathToGeneralTemplateFor").
+			With("toolKind", toolKind).
+			With("kumoExecAbsPath", kumoExecAbsPath)
+	)
+
+	option = func(toolManager *ToolManager) (err error) {
+		switch toolKind {
+		case constants.Packer:
+			toolManager.GeneralTemplateAbsPath = filepath.Join(
+				kumoExecAbsPath,
+				constants.TEMPLATES_DIR_NAME,
+				constants.PACKER,
+				constants.GENERAL_DIR_NAME,
+				constants.PACKER_GENERAL_VARS_TEMPLATE,
+			)
+
+		case constants.Terraform:
+			toolManager.GeneralTemplateAbsPath = filepath.Join(
+				kumoExecAbsPath,
+				constants.TEMPLATES_DIR_NAME,
+				constants.TERRAFORM,
+				constants.GENERAL_DIR_NAME,
+				constants.TERRAFORM_GENERAL_VARS_TEMPLATE,
+			)
+
+		default:
+			err = oopsBuilder.
+				Errorf("Unknown tool kind: %d", toolKind)
+			return
+		}
+
+		return
+	}
+	return
+}
+
+func WithAbsPathToCloudTemplate(
+	toolKind constants.ToolKind,
+	cloud cloud.Cloud,
+	kumoExecAbsPath string,
+) (option Option) {
+
+	var (
+		oopsBuilder = oops.
+			Code("WithAbsPathToCloudTemplateFor").
+			With("toolKind", toolKind).
+			With("cloud", cloud).
+			With("kumoExecAbsPath", kumoExecAbsPath)
+	)
+
+	option = func(toolManager *ToolManager) (err error) {
+		switch toolKind {
+		case constants.Packer:
+
+			switch cloud.Kind {
+			case constants.Aws:
+				toolManager.CloudTemplateAbsPath = filepath.Join(
+					kumoExecAbsPath,
+					constants.TEMPLATES_DIR_NAME,
+					constants.PACKER,
+					constants.AWS,
+					constants.PACKER_AWS_VARS_TEMPLATE,
+				)
+
+			default:
+				err = oopsBuilder.
+					Wrapf(err, "Unsupported cloud '%v'", cloud.Kind)
+				return
+			}
+
+		case constants.Terraform:
+
+			switch cloud.Kind {
+			case constants.Aws:
+				toolManager.CloudTemplateAbsPath = filepath.Join(
+					kumoExecAbsPath,
+					constants.TEMPLATES_DIR_NAME,
+					constants.TERRAFORM,
+					constants.AWS,
+					constants.TERRAFORM_AWS_VARS_TEMPLATE,
+				)
+
+			default:
+				err = oopsBuilder.
+					Wrapf(err, "Unsupported cloud '%v'", cloud.Kind)
+				return
+			}
+
 		default:
 			err = oopsBuilder.
 				Errorf("Unknown tool kind: %d", toolKind)
@@ -342,15 +448,17 @@ func (tm *ToolManager) ChangeToRunDirWith(dirChanger DirChangerF) (err error) {
 }
 
 type ToolManager struct {
-	Kind                       constants.ToolKind
-	Name                       string
-	Version                    string
-	Url                        string
-	ExecutableAbsPath          string
-	InitialDirAbsPath          string
-	RunDirAbsPath              string
-	PluginsDirAbsPath          string
-	TempMergedTemplateFileName string
+	Kind                      constants.ToolKind
+	Name                      string
+	Version                   string
+	Url                       string
+	ExecutableAbsPath         string
+	InitialDirAbsPath         string
+	RunDirAbsPath             string
+	PluginsDirAbsPath         string
+	GeneralTemplateAbsPath    string
+	CloudTemplateAbsPath      string
+	TempMergedTemplateAbsPath string
 }
 
 type Option func(*ToolManager) error
