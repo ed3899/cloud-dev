@@ -16,12 +16,14 @@ func LoadPackerGeneralVarsTemplate(
 ) {
 	var (
 		oopsBuilder = oops.
-				Code("LoadPackerGeneralTemplate")
+				Code("LoadPackerGeneralTemplate").
+				With("kumoExecAbsPath", kumoExecAbsPath)
 
 		packerGeneralTemplateAbsPath = filepath.Join(
 			kumoExecAbsPath,
 			constants.TEMPLATES_DIR_NAME,
 			constants.PACKER,
+			constants.GENERAL_DIR_NAME,
 			constants.PACKER_GENERAL_VARS_TEMPLATE,
 		)
 	)
