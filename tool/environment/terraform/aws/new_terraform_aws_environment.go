@@ -69,7 +69,7 @@ type TerraformAwsEnvironment struct {
 	Optional TerraformAwsOptional
 }
 
-func (tae TerraformAwsEnvironment) IsCloudEnvironment() (isCloudEnvironment bool) {
-	isCloudEnvironment = true
+func (tae TerraformAwsEnvironment) IsTerraformCloudEnvironment() (isTerraformCloudEnvironment bool) {
+	isTerraformCloudEnvironment = true
 	return
 }

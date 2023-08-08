@@ -1,7 +1,9 @@
 package environment
 
 import (
+	"github.com/ed3899/kumo/cloud"
 	"github.com/ed3899/kumo/common/interfaces"
+	"github.com/ed3899/kumo/constants"
 	"github.com/ed3899/kumo/tool/environment/terraform/aws"
 	"github.com/ed3899/kumo/tool/environment/terraform/general"
 	"github.com/ed3899/kumo/utils/environment"
@@ -63,9 +65,52 @@ func WithGeneralEnvironment(
 	return
 }
 
+func WithCloudEnvironment(
+	cloud cloud.Cloud,
+	terraformCloudEnvironmentOptions *TerraformCloudEnvironmentOption,
+	areRequiredFieldsNotFilled environment.IsStructNotCompletelyFilledF,
+) (
+	option Option,
+) {
+	var (
+		oopsBuilder = oops.
+				Code("WithCloudEnvironment").
+				With("terraformCloudEnvironment", terraformCloudEnvironmentOptions).
+				With("areRequiredFieldsNotFilled", areRequiredFieldsNotFilled)
+
+		requiredFieldsNotFilled bool
+		missingField            string
+	)
+
+	option = func(terraformEnvironment *TerraformEnvironment) (err error) {
+		switch cloud.Kind {
+		case constants.Aws:
+			requiredFieldsNotFilled, missingField = areRequiredFieldsNotFilled(terraformCloudEnvironmentOptions.Aws.Required)
+			if requiredFieldsNotFilled {
+				err = oopsBuilder.
+					With("terraformCloudEnvironmentOptions.Aws.Required", terraformCloudEnvironmentOptions.Aws.Required).
+					Errorf("Required field '%s' is not filled", missingField)
+				return
+			}
+
+			terraformEnvironment.Cloud = terraformCloudEnvironmentOptions.Aws
+
+		default:
+			err = oopsBuilder.
+				With("cloud.Kind", cloud.Kind).
+				Errorf("Cloud '%s' is not supported", cloud.Name)
+			return
+		}
+
+		return
+	}
+
+	return
+}
+
 type TerraformEnvironment struct {
 	General *general.TerraformGeneralEnvironment
-	Cloud   *interfaces.TerraformCloudEnvironmentI
+	Cloud   interfaces.TerraformCloudEnvironmentI
 }
 
 type Option func(*TerraformEnvironment) (err error)

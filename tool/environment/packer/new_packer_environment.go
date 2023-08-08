@@ -97,6 +97,7 @@ func WithCloudEnvironment(
 					Errorf("Required field '%s' is not filled", missingField)
 				return
 			}
+			
 			packerEnvironment.Cloud = packerCloudEnvironmentOptions.Aws
 
 		default:
