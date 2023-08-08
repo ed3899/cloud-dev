@@ -11,7 +11,7 @@ import (
 	"github.com/samber/oops"
 )
 
-func NewTool(opts ...Option) (tool *Tool, err error) {
+func NewToolManager(opts ...Option) (toolManager *ToolManager, err error) {
 	var (
 		oopsBuilder = oops.
 				Code("NewTool").
@@ -20,9 +20,9 @@ func NewTool(opts ...Option) (tool *Tool, err error) {
 		o Option
 	)
 
-	tool = &Tool{}
+	toolManager = &ToolManager{}
 	for _, o = range opts {
-		if err = o(tool); err != nil {
+		if err = o(toolManager); err != nil {
 			err = oopsBuilder.
 				Wrapf(err, "Option %v", o)
 			return
@@ -39,12 +39,12 @@ func WithKind(toolKind constants.ToolKind) (option Option) {
 			With("toolKind", toolKind)
 	)
 
-	option = func(tool *Tool) (err error) {
+	option = func(toolManager *ToolManager) (err error) {
 		switch toolKind {
 		case constants.Packer:
-			tool.Kind = constants.Packer
+			toolManager.Kind = constants.Packer
 		case constants.Terraform:
-			tool.Kind = constants.Terraform
+			toolManager.Kind = constants.Terraform
 		default:
 			err = oopsBuilder.
 				Errorf("Unknown tool kind: %d", toolKind)
@@ -64,12 +64,12 @@ func WithName(toolKind constants.ToolKind) (option Option) {
 			With("toolKind", toolKind)
 	)
 
-	option = func(tool *Tool) (err error) {
+	option = func(toolManager *ToolManager) (err error) {
 		switch toolKind {
 		case constants.Packer:
-			tool.Name = constants.PACKER
+			toolManager.Name = constants.PACKER
 		case constants.Terraform:
-			tool.Name = constants.TERRAFORM
+			toolManager.Name = constants.TERRAFORM
 		default:
 			err = oopsBuilder.
 				Errorf("Unknown tool kind: %d", toolKind)
@@ -89,12 +89,12 @@ func WithVersion(toolKind constants.ToolKind) (option Option) {
 			With("toolKind", toolKind)
 	)
 
-	option = func(tool *Tool) (err error) {
+	option = func(toolManager *ToolManager) (err error) {
 		switch toolKind {
 		case constants.Packer:
-			tool.Version = constants.PACKER_VERSION
+			toolManager.Version = constants.PACKER_VERSION
 		case constants.Terraform:
-			tool.Version = constants.TERRAFORM_VERSION
+			toolManager.Version = constants.TERRAFORM_VERSION
 		default:
 			err = oopsBuilder.
 				Errorf("Unknown tool kind: %d", toolKind)
@@ -119,12 +119,12 @@ func WithUrl(
 		currentOs, currentArch = getCurrentHostSpecs()
 	)
 
-	option = func(tool *Tool) (err error) {
+	option = func(toolManager *ToolManager) (err error) {
 		switch toolKind {
 		case constants.Packer:
-			tool.Url = createHashicorpUrl(constants.PACKER, constants.PACKER_VERSION, currentOs, currentArch)
+			toolManager.Url = createHashicorpUrl(constants.PACKER, constants.PACKER_VERSION, currentOs, currentArch)
 		case constants.Terraform:
-			tool.Url = createHashicorpUrl(constants.TERRAFORM, constants.TERRAFORM_VERSION, currentOs, currentArch)
+			toolManager.Url = createHashicorpUrl(constants.TERRAFORM, constants.TERRAFORM_VERSION, currentOs, currentArch)
 		default:
 			err = oopsBuilder.
 				Errorf("Unknown tool kind: %d", toolKind)
@@ -144,17 +144,17 @@ func WithExecutableAbsPath(toolKind constants.ToolKind, kumoExecAbsPath string) 
 			With("toolKind", toolKind)
 	)
 
-	option = func(tool *Tool) (err error) {
+	option = func(toolManager *ToolManager) (err error) {
 		switch toolKind {
 		case constants.Packer:
-			tool.ExecutableAbsPath = filepath.Join(
+			toolManager.ExecutableAbsPath = filepath.Join(
 				kumoExecAbsPath,
 				constants.DEPENDENCIES_DIR_NAME,
 				constants.PACKER,
 				fmt.Sprintf("%s.exe", constants.PACKER),
 			)
 		case constants.Terraform:
-			tool.ExecutableAbsPath = filepath.Join(
+			toolManager.ExecutableAbsPath = filepath.Join(
 				kumoExecAbsPath,
 				constants.DEPENDENCIES_DIR_NAME,
 				constants.TERRAFORM,
@@ -181,16 +181,16 @@ func WithRunDirAbsPath(cloud cloud.Cloud, toolKind constants.ToolKind, kumoExecA
 			With("kumoExecAbsPath", kumoExecAbsPath)
 	)
 
-	option = func(tool *Tool) (err error) {
+	option = func(toolManager *ToolManager) (err error) {
 		switch toolKind {
 		case constants.Packer:
-			tool.RunDirAbsPath = filepath.Join(
+			toolManager.RunDirAbsPath = filepath.Join(
 				kumoExecAbsPath,
 				constants.PACKER,
 				cloud.Name,
 			)
 		case constants.Terraform:
-			tool.RunDirAbsPath = filepath.Join(
+			toolManager.RunDirAbsPath = filepath.Join(
 				kumoExecAbsPath,
 				constants.TERRAFORM,
 				cloud.Name,
@@ -216,17 +216,17 @@ func WithPluginsDir(cloud cloud.Cloud, toolKind constants.ToolKind, kumoExecAbsP
 			With("kumoExecAbsPath", kumoExecAbsPath)
 	)
 
-	option = func(tool *Tool) (err error) {
+	option = func(toolManager *ToolManager) (err error) {
 		switch toolKind {
 		case constants.Packer:
-			tool.PluginsDirAbsPath = filepath.Join(
+			toolManager.PluginsDirAbsPath = filepath.Join(
 				kumoExecAbsPath,
 				constants.PACKER,
 				cloud.Name,
 				constants.PLUGINS_DIR_NAME,
 			)
 		case constants.Terraform:
-			tool.PluginsDirAbsPath = filepath.Join(
+			toolManager.PluginsDirAbsPath = filepath.Join(
 				kumoExecAbsPath,
 				constants.TERRAFORM,
 				cloud.Name,
@@ -244,7 +244,37 @@ func WithPluginsDir(cloud cloud.Cloud, toolKind constants.ToolKind, kumoExecAbsP
 	return
 }
 
-type Tool struct {
+func (tm *ToolManager) SetPluginsPathWith(environmentSetter EnvironmentSetterF) (err error) {
+	var (
+		oopsBuilder = oops.
+			Code("SetPluginsDir")
+	)
+
+	if err = environmentSetter(constants.PACKER_PLUGIN_PATH, tm.PluginsDirAbsPath); err != nil {
+		err = oopsBuilder.
+			Wrapf(err, "Failed to set plugins dir '%s'", tm.PluginsDirAbsPath)
+		return
+	}
+
+	return
+}
+
+func (tm *ToolManager) UnsetPluginsPathWith(environmentUnsetter EnvironmentUnsetterF) (err error) {
+	var (
+		oopsBuilder = oops.
+			Code("UnsetPluginsDir")
+	)
+
+	if err = environmentUnsetter(constants.PACKER_PLUGIN_PATH); err != nil {
+		err = oopsBuilder.
+			Wrapf(err, "Failed to unset plugins dir '%s'", constants.PACKER_PLUGIN_PATH)
+		return
+	}
+
+	return
+}
+
+type ToolManager struct {
 	Kind              constants.ToolKind
 	Name              string
 	Version           string
@@ -254,4 +284,7 @@ type Tool struct {
 	PluginsDirAbsPath string
 }
 
-type Option func(*Tool) error
+type Option func(*ToolManager) error
+
+type EnvironmentSetterF func(key string, value string) error
+type EnvironmentUnsetterF func(key string) error
