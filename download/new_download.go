@@ -1,4 +1,4 @@
-package zip
+package download
 
 import (
 	"fmt"

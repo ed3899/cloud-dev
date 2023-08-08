@@ -1,9 +1,10 @@
-package zip
+package progress
 
 import (
 	"path/filepath"
 
 	"github.com/ed3899/kumo/common/interfaces"
+	"github.com/ed3899/kumo/download"
 	"github.com/ed3899/kumo/utils/url"
 	utils_zip "github.com/ed3899/kumo/utils/zip"
 	"github.com/samber/oops"
@@ -22,7 +23,7 @@ func WithMultiProgressBar() {
 }
 
 type Progress struct {
-	Download         *Download
+	Download         *download.Download
 	MultiProgressBar interfaces.MpbV8MultiProgressBar
 }
 
