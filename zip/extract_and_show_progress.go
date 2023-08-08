@@ -9,7 +9,7 @@ import (
 )
 
 func ExtractAndShowProgress(
-	zip Zip,
+	download *Download,
 	multiProgressBar interfaces.ProgressBarAdder,
 	getZipSize utils_zip.GetZipSizeF,
 	unzip utils_zip.UnzipF,
@@ -20,8 +20,8 @@ func ExtractAndShowProgress(
 		doneChan           = make(chan bool, 1)
 		oopsBuilder        = oops.
 					Code("ExtractAndShowProgress").
-					With("zip.Name", zip.Name).
-					With("zip.AbsPath", zip.AbsPath).
+					With("download.Name", download.Name).
+					With("download.AbsPath", download.AbsPath).
 					With("multiProgressBar", multiProgressBar)
 
 		extractedBytes int
@@ -29,9 +29,9 @@ func ExtractAndShowProgress(
 		zipSize        int64
 	)
 
-	if zipSize, err = getZipSize(zip.AbsPath); err != nil {
+	if zipSize, err = getZipSize(download.AbsPath); err != nil {
 		err = oopsBuilder.
-			Wrapf(err, "failed to get zip size for: %v", zip.AbsPath)
+			Wrapf(err, "failed to get zip size for: %v", download.AbsPath)
 		return
 	}
 
@@ -39,13 +39,13 @@ func ExtractAndShowProgress(
 		defer close(errChan)
 		defer close(doneChan)
 
-		zip.SetExtractionBar(multiProgressBar, zipSize)
+		download.SetExtractionBar(multiProgressBar, zipSize)
 
-		if err = unzip(zip.AbsPath, filepath.Dir(zip.AbsPath), extractedBytesChan); err != nil {
+		if err = unzip(download.AbsPath, filepath.Dir(download.AbsPath), extractedBytesChan); err != nil {
 			err = oopsBuilder.
-				With("absPath", zip.AbsPath).
+				With("absPath", download.AbsPath).
 				With("extractedBytesChan", extractedBytesChan).
-				Wrapf(err, "failed to unzip: %v", zip.AbsPath)
+				Wrapf(err, "failed to unzip: %v", download.AbsPath)
 			errChan <- err
 			return
 		}
@@ -58,13 +58,13 @@ OuterLoop:
 		select {
 		case extractedBytes = <-extractedBytesChan:
 			if extractedBytes > 0 {
-				zip.IncrementExtractionBar(extractedBytes)
+				download.IncrementExtractionBar(extractedBytes)
 			}
 
 		case err = <-errChan:
 			if err != nil {
 				err = oopsBuilder.
-					Wrapf(err, "Error occurred while extracting %s", zip.Name)
+					Wrapf(err, "Error occurred while extracting %s", download.Name)
 				return
 			}
 

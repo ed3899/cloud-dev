@@ -7,7 +7,7 @@ import (
 )
 
 func DownloadAndShowProgress(
-	zip Zip,
+	download *Download,
 	multiProgressBar interfaces.ProgressBarAdder,
 ) (err error) {
 	var (
@@ -16,8 +16,8 @@ func DownloadAndShowProgress(
 		doneChan            = make(chan bool, 1)
 		oopsBuilder         = oops.
 					Code("download_and_show_progress_failed").
-					With("zip.Name", zip.Name).
-					With("zip.AbsPath", zip.AbsPath).
+					With("download.Name", download.Name).
+					With("download.AbsPath", download.AbsPath).
 					With("multiProgressBar", multiProgressBar)
 
 		downloadedBytes int
@@ -29,14 +29,14 @@ func DownloadAndShowProgress(
 		defer close(errChan)
 		defer close(doneChan)
 
-		zip.SetDownloadBar(multiProgressBar)
+		download.SetDownloadBar(multiProgressBar)
 
-		if err = url.Download(zip.Url, zip.AbsPath, downloadedBytesChan); err != nil {
+		if err = url.Download(download.Url, download.AbsPath, downloadedBytesChan); err != nil {
 			err = oopsBuilder.
-				With("url", zip.Url).
-				With("absPath", zip.AbsPath).
+				With("url", download.Url).
+				With("absPath", download.AbsPath).
 				With("downloadedBytesChan", downloadedBytesChan).
-				Wrapf(err, "failed to download: %v", zip.Url)
+				Wrapf(err, "failed to download: %v", download.Url)
 			errChan <- err
 			return
 		}
@@ -49,13 +49,13 @@ OuterLoop:
 		select {
 		case downloadedBytes = <-downloadedBytesChan:
 			if downloadedBytes > 0 {
-				zip.IncrementDownloadBar(downloadedBytes)
+				download.IncrementDownloadBar(downloadedBytes)
 			}
 
 		case err = <-errChan:
 			if err != nil {
 				err = oopsBuilder.
-					Wrapf(err, "Error occurred while downloading %s", zip.Name)
+					Wrapf(err, "Error occurred while downloading %s", download.Name)
 				return
 			}
 
