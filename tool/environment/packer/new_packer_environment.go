@@ -38,7 +38,7 @@ func NewPackerEnvironment(
 
 }
 
-func WithGeneralEnvironment(
+func WithPackerGeneralEnvironment(
 	packerGeneralEnvironment *general.PackerGeneralEnvironment,
 	areRequiredFieldsNotFilled environment.IsStructNotCompletelyFilledF,
 ) (option Option) {
@@ -69,7 +69,7 @@ func WithGeneralEnvironment(
 
 }
 
-func WithCloudEnvironment(
+func WithCloudChoice(
 	cloud cloud.Cloud,
 	packerCloudEnvironmentOptions *PackerCloudEnvironmentOptions,
 	areRequiredFieldsNotFilled environment.IsStructNotCompletelyFilledF,
