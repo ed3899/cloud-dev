@@ -4,7 +4,7 @@ import (
 	"github.com/ed3899/kumo/cloud"
 	"github.com/ed3899/kumo/common/interfaces"
 	"github.com/ed3899/kumo/constants"
-	"github.com/ed3899/kumo/tool/environment/packer/general"
+	"github.com/ed3899/kumo/tool_manager/environment/packer/general"
 	"github.com/ed3899/kumo/utils/environment"
 	"github.com/samber/oops"
 )

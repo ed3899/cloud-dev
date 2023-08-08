@@ -5,7 +5,7 @@ import (
 
 	"github.com/ed3899/kumo/cloud"
 	"github.com/ed3899/kumo/constants"
-	"github.com/ed3899/kumo/tool/environment/terraform/aws"
+	"github.com/ed3899/kumo/tool_manager/environment/terraform/aws"
 	"github.com/ed3899/kumo/utils/packer_manifest"
 	"github.com/samber/oops"
 	"github.com/spf13/viper"

@@ -3,7 +3,7 @@ package packer
 import (
 	"github.com/ed3899/kumo/cloud"
 	"github.com/ed3899/kumo/constants"
-	"github.com/ed3899/kumo/tool/environment/packer/aws"
+	"github.com/ed3899/kumo/tool_manager/environment/packer/aws"
 	"github.com/samber/oops"
 	"github.com/spf13/viper"
 )
