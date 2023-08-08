@@ -5,6 +5,7 @@ import (
 
 	"github.com/ed3899/kumo/cloud"
 	"github.com/ed3899/kumo/constants"
+	"github.com/ed3899/kumo/tool_manager"
 	"github.com/ed3899/kumo/utils/file"
 	"github.com/samber/oops"
 )
@@ -26,7 +27,7 @@ func NewMergedTemplate(
 	return
 }
 
-func WithAbsPath(kumoExecAbsPath string) (option Option) {
+func WithAbsPathFor(kumoExecAbsPath string, cloud cloud.Cloud, tool tool_manager.ToolManager) (option Option) {
 	option = func(packerTemplate *MergedTemplate) (err error) {
 		packerTemplate.AbsPath = filepath.Join(
 			kumoExecAbsPath,

@@ -254,6 +254,31 @@ func WithInitialDirAbsPath(kumoExecAbsPath string) (option Option) {
 	return
 }
 
+func TempMergedTemplateFileName(toolKind constants.ToolKind) (option Option) {
+	var (
+		oopsBuilder = oops.
+			Code("TempMergedTemplateFileName").
+			With("toolKind", toolKind)
+	)
+
+	option = func(toolManager *ToolManager) (err error) {
+		switch toolKind {
+		case constants.Packer:
+			toolManager.TempMergedTemplateFileName = constants.PACKER_TEMP
+		case constants.Terraform:
+			toolManager.TempMergedTemplateFileName = constants.TERRAFORM_TEMP
+		default:
+			err = oopsBuilder.
+				Errorf("Unknown tool kind: %d", toolKind)
+			return
+		}
+
+		return
+	}
+
+	return
+}
+
 func (tm *ToolManager) SetPluginsPathWith(environmentSetter EnvironmentSetterF) (err error) {
 	var (
 		oopsBuilder = oops.
@@ -317,14 +342,15 @@ func (tm *ToolManager) ChangeToRunDirWith(dirChanger DirChangerF) (err error) {
 }
 
 type ToolManager struct {
-	Kind              constants.ToolKind
-	Name              string
-	Version           string
-	Url               string
-	ExecutableAbsPath string
-	InitialDirAbsPath string
-	RunDirAbsPath     string
-	PluginsDirAbsPath string
+	Kind                       constants.ToolKind
+	Name                       string
+	Version                    string
+	Url                        string
+	ExecutableAbsPath          string
+	InitialDirAbsPath          string
+	RunDirAbsPath              string
+	PluginsDirAbsPath          string
+	TempMergedTemplateFileName string
 }
 
 type Option func(*ToolManager) error
