@@ -11,6 +11,8 @@ import (
 func ExtractAndShowProgress(
 	zip Zip,
 	multiProgressBar interfaces.ProgressBarAdder,
+	getZipSize utils_zip.GetZipSizeF,
+	unzip utils_zip.UnzipF,
 ) (err error) {
 	var (
 		extractedBytesChan = make(chan int, 1024)
@@ -27,7 +29,7 @@ func ExtractAndShowProgress(
 		zipSize        int64
 	)
 
-	if zipSize, err = utils_zip.GetZipSize(zip.AbsPath); err != nil {
+	if zipSize, err = getZipSize(zip.AbsPath); err != nil {
 		err = oopsBuilder.
 			Wrapf(err, "failed to get zip size for: %v", zip.AbsPath)
 		return
@@ -39,7 +41,7 @@ func ExtractAndShowProgress(
 
 		zip.SetExtractionBar(multiProgressBar, zipSize)
 
-		if err = utils_zip.Unzip(zip.AbsPath, filepath.Dir(zip.AbsPath), extractedBytesChan); err != nil {
+		if err = unzip(zip.AbsPath, filepath.Dir(zip.AbsPath), extractedBytesChan); err != nil {
 			err = oopsBuilder.
 				With("absPath", zip.AbsPath).
 				With("extractedBytesChan", extractedBytesChan).

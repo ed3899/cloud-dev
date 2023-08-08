@@ -9,7 +9,12 @@ import (
 	"github.com/samber/oops"
 )
 
-func GetZipSize(absPathToZip string) (size int64, err error) {
+func GetZipSize(
+	absPathToZip string,
+) (
+	size int64,
+	err error,
+) {
 	var (
 		oopsBuilder = oops.Code("get_zip_size_failed").
 				With("absPathToZip", absPathToZip)
@@ -49,3 +54,9 @@ func GetZipSize(absPathToZip string) (size int64, err error) {
 
 	return
 }
+
+type GetZipSizeF func(
+	absPathToZip string,
+) (
+	size int64,
+	err error)

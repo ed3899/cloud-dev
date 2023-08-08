@@ -12,7 +12,13 @@ import (
 	"github.com/samber/oops"
 )
 
-func Unzip(pathToZip, extractToPath string, bytesUnzipped chan<- int) (err error) {
+func Unzip(
+	pathToZip,
+	extractToPath string,
+	bytesUnzipped chan<- int,
+) (
+	err error,
+) {
 	var (
 		unzipGroup  = new(sync.WaitGroup)
 		oopsBuilder = oops.Code("unzip_failed").
@@ -85,7 +91,13 @@ func Unzip(pathToZip, extractToPath string, bytesUnzipped chan<- int) (err error
 	return
 }
 
-func unzipFile(zf *zip.File, extractToPath string) (bytesCopied int64, err error) {
+func unzipFile(
+	zf *zip.File,
+	extractToPath string,
+) (
+	bytesCopied int64,
+	err error,
+) {
 	var (
 		oopsBuilder = oops.Code("unzipFile_failed").
 				With("zipFile", zf).
@@ -162,3 +174,11 @@ func unzipFile(zf *zip.File, extractToPath string) (bytesCopied int64, err error
 
 	return
 }
+
+type UnzipF func(
+	pathToZip,
+	extractToPath string,
+	bytesUnzipped chan<- int,
+) (
+	err error,
+)
