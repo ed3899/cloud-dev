@@ -1,9 +1,5 @@
 package general
 
-import (
-	"github.com/ed3899/kumo/utils/environment"
-)
-
 // func NewEnvironment() (generalEnvironment PackerGeneralEnvironment) {
 // 	generalEnvironment = PackerGeneralEnvironment{
 // 		Required: PackerGeneralRequired{
@@ -35,8 +31,3 @@ type PackerGeneralEnvironment struct {
 }
 
 type Option func(environment *PackerGeneralEnvironment)
-
-type NewPackerGeneralEnvironmentF func(
-	areRequiredFieldsNotFilled environment.IsStructNotCompletelyFilledF,
-	options ...Option,
-) (packerGeneralEnvironment *PackerGeneralEnvironment, err error)
