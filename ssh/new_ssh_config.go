@@ -6,9 +6,9 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"github.com/ed3899/kumo/common/cloud"
-	"github.com/ed3899/kumo/common/tool"
-	"github.com/ed3899/kumo/common/utils"
+	"github.com/ed3899/kumo/cloud"
+	"github.com/ed3899/kumo/tool"
+	"github.com/ed3899/kumo/utils"
 	"github.com/samber/oops"
 	"github.com/spf13/viper"
 )
