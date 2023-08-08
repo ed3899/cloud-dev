@@ -44,7 +44,7 @@ func New(t tool.Tool) (zip interfaces.ZipI, err error) {
 		return
 	}
 
-	zip = Zip{
+	zip = &Zip{
 		Name:          filepath.Base(absPath),
 		AbsPath:       absPath,
 		Url:           t.Url,
@@ -54,7 +54,7 @@ func New(t tool.Tool) (zip interfaces.ZipI, err error) {
 	return
 }
 
-func (z Zip) SetDownloadBar(p interfaces.ProgressBarAdder) {
+func (z *Zip) SetDownloadBar(p interfaces.ProgressBarAdder) {
 	z.DownloadBar = p.AddBar(int64(z.ContentLength),
 		mpb.BarFillerClearOnComplete(),
 		mpb.PrependDecorators(
@@ -70,11 +70,11 @@ func (z Zip) SetDownloadBar(p interfaces.ProgressBarAdder) {
 	)
 }
 
-func (z Zip) IncrementDownloadBar(downloadedBytes int) {
+func (z *Zip) IncrementDownloadBar(downloadedBytes int) {
 	z.DownloadBar.IncrBy(downloadedBytes)
 }
 
-func (z Zip) SetExtractionBar(p interfaces.ProgressBarAdder, zipSize int64) {
+func (z *Zip) SetExtractionBar(p interfaces.ProgressBarAdder, zipSize int64) {
 	z.ExtractionBar = p.AddBar(zipSize,
 		mpb.BarQueueAfter(z.DownloadBar),
 		mpb.BarFillerClearOnComplete(),
@@ -91,6 +91,6 @@ func (z Zip) SetExtractionBar(p interfaces.ProgressBarAdder, zipSize int64) {
 	)
 }
 
-func (z Zip) IncrementExtractionBar(extractedBytes int) {
+func (z *Zip) IncrementExtractionBar(extractedBytes int) {
 	z.ExtractionBar.IncrBy(extractedBytes)
 }
