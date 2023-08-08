@@ -10,6 +10,7 @@ const (
 
 	PACKER_GENERAL_VARS_TEMPLATE = "packer_general_vars.tmpl"
 	PACKER_AWS_VARS_TEMPLATE     = "packer_aws_vars.tmpl"
+	PACKER_TEMP                  = "packer_temp"
 
 	PACKER_VARS = ".auto.pkrvars.hcl"
 )

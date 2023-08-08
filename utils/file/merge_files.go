@@ -5,20 +5,20 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 
 	"github.com/samber/oops"
 )
 
 func MergeFilesTo(
-	outputDirAbsPath string,
+	outputFileAbsPath string,
 	inputAbsFilePaths ...string,
 ) (
-	mergedFileName string,
 	err error,
 ) {
 	var (
-		oopsBuilder = oops.Code("merge_files_failed").
-				With("outputDirAbsPath", outputDirAbsPath).
+		oopsBuilder = oops.Code("MergeFilesTo").
+				With("outputFileAbsPath", outputFileAbsPath).
 				With("inputAbsFilePaths", inputAbsFilePaths)
 
 		mergedFile    *os.File
@@ -29,7 +29,7 @@ func MergeFilesTo(
 	)
 
 	// Create a new file to write the merged content
-	if mergedFile, err = os.CreateTemp(outputDirAbsPath, "temp_file"); err != nil {
+	if mergedFile, err = os.CreateTemp(filepath.Dir(outputFileAbsPath), filepath.Base(outputFileAbsPath)); err != nil {
 		err = oopsBuilder.Wrapf(err, "error creating merged file")
 		return
 	}
@@ -75,8 +75,6 @@ func MergeFilesTo(
 		}
 	}
 
-	mergedFileName = mergedFile.Name()
-
 	return
 }
 
@@ -84,6 +82,5 @@ type MergeFilesToF func(
 	outputDirAbsPath string,
 	inputAbsFilePaths ...string,
 ) (
-	mergedFileName string,
 	err error,
 )

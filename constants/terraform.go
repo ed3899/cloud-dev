@@ -8,6 +8,7 @@ const (
 
 	TERRAFORM_GENERAL_VARS_TEMPLATE = "terraform_general_vars.tmpl"
 	TERRAFORM_AWS_VARS_TEMPLATE     = "terraform_aws_vars.tmpl"
+	TERRAFORM_TEMP                  = "terraform_temp"
 
 	TERRAFORM_VARS = ".auto.tfvars"
 )
