@@ -10,7 +10,7 @@ import (
 
 func ExtractAndShowProgress(
 	download *Download,
-	multiProgressBar interfaces.MpbV8MultiprogressBar,
+	multiProgressBar interfaces.MpbV8MultiProgressBar,
 	getZipSize utils_zip.GetZipSizeF,
 	unzip utils_zip.UnzipF,
 ) (err error) {
@@ -80,7 +80,7 @@ OuterLoop:
 
 type ExtractAndShowProgressF func(
 	download *Download,
-	multiProgressBar interfaces.MpbV8MultiprogressBar,
+	multiProgressBar interfaces.MpbV8MultiProgressBar,
 	getZipSize utils_zip.GetZipSizeF,
 	unzip utils_zip.UnzipF,
 ) (err error)

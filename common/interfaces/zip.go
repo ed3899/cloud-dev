@@ -1,7 +1,7 @@
 package interfaces
 
 type DownloadBarSetter interface {
-	SetDownloadBar(MpbV8MultiprogressBar)
+	SetDownloadBar(MpbV8MultiProgressBar)
 }
 
 type DownloadBarIncrementor interface {
@@ -14,7 +14,7 @@ type Downloadable interface {
 }
 
 type ExtractBarSetter interface {
-	SetExtractionBar(MpbV8MultiprogressBar, int64)
+	SetExtractionBar(MpbV8MultiProgressBar, int64)
 }
 
 type ExtractBarIncrementor interface {

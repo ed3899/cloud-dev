@@ -8,7 +8,7 @@ import (
 
 func DownloadAndShowProgress(
 	download *Download,
-	multiProgressBar interfaces.MpbV8MultiprogressBar,
+	multiProgressBar interfaces.MpbV8MultiProgressBar,
 	urlDownload url.DownloadF,
 ) (err error) {
 	var (
@@ -72,6 +72,6 @@ OuterLoop:
 
 type DownloadAndShowProgressF func(
 	download *Download,
-	multiProgressBar interfaces.MpbV8MultiprogressBar,
+	multiProgressBar interfaces.MpbV8MultiProgressBar,
 	urlDownload url.DownloadF,
 ) (err error)

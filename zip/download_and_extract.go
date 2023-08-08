@@ -13,21 +13,21 @@ func NewDownloadAndExtract() {
 
 }
 
-func WithDownload()  {
+func WithDownload() {
 
 }
 
-func WithMultiProgressBar()  {
+func WithMultiProgressBar() {
 
 }
 
 type DownloadAndExtract struct {
 	Download         *Download
-	MultiProgressBar interfaces.MpbV8MultiprogressBar
+	MultiProgressBar interfaces.MpbV8MultiProgressBar
 }
 
 func (dae *DownloadAndExtract) DownloadAndShowProgress(
-	multiProgressBar interfaces.MpbV8MultiprogressBar,
+	multiProgressBar interfaces.MpbV8MultiProgressBar,
 	urlDownload url.DownloadF,
 ) (err error) {
 	var (
@@ -90,7 +90,7 @@ OuterLoop:
 }
 
 func (dae *DownloadAndExtract) ExtractAndShowProgress(
-	multiProgressBar interfaces.MpbV8MultiprogressBar,
+	multiProgressBar interfaces.MpbV8MultiProgressBar,
 	getZipSize utils_zip.GetZipSizeF,
 	unzip utils_zip.UnzipF,
 ) (err error) {
@@ -158,7 +158,9 @@ OuterLoop:
 	return
 }
 
-func (dae *DownloadAndExtract) CleanAbsPathToZipDirWith(removeAll RemoverF) (err error) {
+func (dae *DownloadAndExtract) CleanAbsPathToZipDirWith(
+	removeAll RemoverF,
+) (err error) {
 	var (
 		oopsBuilder = oops.
 				Code("RemoveAllWith").
@@ -175,7 +177,9 @@ func (dae *DownloadAndExtract) CleanAbsPathToZipDirWith(removeAll RemoverF) (err
 	return
 }
 
-func (dae *DownloadAndExtract) RemoveDownloadWith(remove RemoverF) (err error) {
+func (dae *DownloadAndExtract) RemoveDownloadWith(
+	remove RemoverF,
+) (err error) {
 	var (
 		oopsBuilder = oops.
 			Code("RemoveWith").
@@ -189,6 +193,10 @@ func (dae *DownloadAndExtract) RemoveDownloadWith(remove RemoverF) (err error) {
 	}
 
 	return
+}
+
+func (dae *DownloadAndExtract) Shutdown() {
+	dae.MultiProgressBar.Shutdown()
 }
 
 type RemoverF func(path string) (err error)
