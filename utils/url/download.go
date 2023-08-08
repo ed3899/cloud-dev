@@ -10,7 +10,13 @@ import (
 	"github.com/samber/oops"
 )
 
-func Download(url, destPath string, bytesDownloadedChan chan<- int) (err error) {
+func Download(
+	url,
+	destPath string,
+	bytesDownloadedChan chan<- int,
+) (
+	err error,
+) {
 	var (
 		destDir     = filepath.Dir(destPath)
 		bytesBuffer = make([]byte, 4096)
@@ -99,3 +105,11 @@ func Download(url, destPath string, bytesDownloadedChan chan<- int) (err error) 
 
 	return
 }
+
+type DownloadF func(
+	url,
+	destPath string,
+	bytesDownloadedChan chan<- int,
+) (
+	err error,
+)

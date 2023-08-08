@@ -9,6 +9,7 @@ import (
 func DownloadAndShowProgress(
 	download *Download,
 	multiProgressBar interfaces.MpbV8MultiprogressBar,
+	urlDownload url.DownloadF,
 ) (err error) {
 	var (
 		downloadedBytesChan = make(chan int, 1024)
@@ -31,7 +32,7 @@ func DownloadAndShowProgress(
 
 		download.SetDownloadBar(multiProgressBar)
 
-		if err = url.Download(download.Url, download.AbsPath, downloadedBytesChan); err != nil {
+		if err = urlDownload(download.Url, download.AbsPath, downloadedBytesChan); err != nil {
 			err = oopsBuilder.
 				With("url", download.Url).
 				With("absPath", download.AbsPath).
