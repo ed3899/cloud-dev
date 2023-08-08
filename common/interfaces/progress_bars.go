@@ -4,10 +4,10 @@ import (
 	"github.com/vbauerster/mpb/v8"
 )
 
-type ProgressBarIncrementor interface {
+type MpbV8BarIncrementor interface {
 	IncrBy(n int)
 }
 
-type ProgressBarAdder interface {
+type MpbV8MultiprogressBar interface {
 	AddBar(total int64, options ...mpb.BarOption) *mpb.Bar
 }

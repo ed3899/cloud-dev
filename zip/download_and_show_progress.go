@@ -8,7 +8,7 @@ import (
 
 func DownloadAndShowProgress(
 	download *Download,
-	multiProgressBar interfaces.ProgressBarAdder,
+	multiProgressBar interfaces.MpbV8MultiprogressBar,
 ) (err error) {
 	var (
 		downloadedBytesChan = make(chan int, 1024)

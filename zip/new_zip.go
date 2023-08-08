@@ -54,7 +54,7 @@ func New(t tool.Tool) (zip interfaces.ZipI, err error) {
 	return
 }
 
-func (z *Zip) SetDownloadBar(p interfaces.ProgressBarAdder) {
+func (z *Zip) SetDownloadBar(p interfaces.MpbV8MultiprogressBar) {
 	z.DownloadBar = p.AddBar(int64(z.ContentLength),
 		mpb.BarFillerClearOnComplete(),
 		mpb.PrependDecorators(
@@ -74,7 +74,7 @@ func (z *Zip) IncrementDownloadBar(downloadedBytes int) {
 	z.DownloadBar.IncrBy(downloadedBytes)
 }
 
-func (z *Zip) SetExtractionBar(p interfaces.ProgressBarAdder, zipSize int64) {
+func (z *Zip) SetExtractionBar(p interfaces.MpbV8MultiprogressBar, zipSize int64) {
 	z.ExtractionBar = p.AddBar(zipSize,
 		mpb.BarQueueAfter(z.DownloadBar),
 		mpb.BarFillerClearOnComplete(),

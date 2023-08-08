@@ -10,7 +10,7 @@ import (
 
 func ExtractAndShowProgress(
 	download *Download,
-	multiProgressBar interfaces.ProgressBarAdder,
+	multiProgressBar interfaces.MpbV8MultiprogressBar,
 	getZipSize utils_zip.GetZipSizeF,
 	unzip utils_zip.UnzipF,
 ) (err error) {
