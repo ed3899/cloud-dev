@@ -7,7 +7,12 @@ import (
 	"github.com/samber/oops"
 )
 
-func GetContentLength(url string) (contentLength int64, err error) {
+func GetContentLength(
+	url string,
+) (
+	contentLength int64,
+	err error,
+) {
 	var (
 		oopsBuilder = oops.Code("get_content_length_failed").
 				With("url", url)
@@ -35,3 +40,10 @@ func GetContentLength(url string) (contentLength int64, err error) {
 
 	return
 }
+
+type GetContentLengthF func(
+	url string,
+) (
+	contentLength int64,
+	err error,
+)
