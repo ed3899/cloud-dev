@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"github.com/ed3899/kumo/common/interfaces"
 	"github.com/ed3899/kumo/constants"
 	"github.com/ed3899/kumo/tool"
 	"github.com/ed3899/kumo/utils/url"
 	"github.com/samber/oops"
 	"github.com/vbauerster/mpb/v8"
+	"github.com/vbauerster/mpb/v8/decor"
 )
 
 func NewDownload(
@@ -89,10 +91,7 @@ func WithContentLength(tool tool.Tool, getContentLength url.GetContentLengthF) O
 	}
 }
 
-type Progress struct {
-	Downloading *mpb.Bar
-	Extracting  *mpb.Bar
-}
+type Option func(*Download) error
 
 type Download struct {
 	Name          string
@@ -102,4 +101,48 @@ type Download struct {
 	Progress      *Progress
 }
 
-type Option func(*Download) error
+type Progress struct {
+	Downloading *mpb.Bar
+	Extracting  *mpb.Bar
+}
+
+func (d *Download) SetDownloadBar(p interfaces.ProgressBarAdder) {
+	d.Progress.Downloading = p.AddBar(int64(d.ContentLength),
+		mpb.BarFillerClearOnComplete(),
+		mpb.PrependDecorators(
+			decor.Name(d.Name),
+			decor.Counters(decor.SizeB1024(0), " % .2f / % .2f"),
+		),
+		mpb.AppendDecorators(
+			decor.OnComplete(
+				decor.Percentage(decor.WCSyncSpace),
+				"downloaded",
+			),
+		),
+	)
+}
+
+func (d *Download) IncrementDownloadBar(downloadedBytes int) {
+	d.Progress.Downloading.IncrBy(downloadedBytes)
+}
+
+func (d *Download) SetExtractionBar(p interfaces.ProgressBarAdder, zipSize int64) {
+	d.Progress.Extracting = p.AddBar(zipSize,
+		mpb.BarQueueAfter(d.Progress.Downloading),
+		mpb.BarFillerClearOnComplete(),
+		mpb.PrependDecorators(
+			decor.Name(d.Name),
+			decor.Counters(decor.SizeB1024(0), " % .2f / % .2f"),
+		),
+		mpb.AppendDecorators(
+			decor.OnComplete(
+				decor.Percentage(decor.WCSyncSpace),
+				"unzipped",
+			),
+		),
+	)
+}
+
+func (d *Download) IncrementExtractionBar(extractedBytes int) {
+	d.Progress.Extracting.IncrBy(extractedBytes)
+}
