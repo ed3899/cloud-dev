@@ -3,6 +3,7 @@ package environment
 import (
 	"path/filepath"
 
+	"github.com/ed3899/kumo/cloud"
 	"github.com/ed3899/kumo/constants"
 	"github.com/ed3899/kumo/tool/environment/terraform/aws"
 	"github.com/ed3899/kumo/utils/packer_manifest"
@@ -10,14 +11,10 @@ import (
 	"github.com/spf13/viper"
 )
 
-type TerraformCloudEnvironmentOptions struct {
-	Aws *aws.TerraformAwsEnvironment
-}
-
 func NewTerraformCloudEnvironmentOptions(
-	cloudKind constants.CloudKind,
+	cloud cloud.Cloud,
 	kumoExecAbsPath string,
-	userSelectedAmiId string,
+	selectedAmiIdFromConfig string,
 	getLastAmiIdFromPackerManifest packer_manifest.GetLastBuiltAmiIdFromPackerManifestF,
 	pickAmiId packer_manifest.PickAmiIdF,
 ) (
@@ -28,7 +25,7 @@ func NewTerraformCloudEnvironmentOptions(
 	var (
 		oopsBuilder = oops.
 				Code("NewTerraformCloudEnvironmentOptions").
-				With("cloudKind", cloudKind).
+				With("cloud", cloud.Name).
 				With("kumoExecAbsPath", kumoExecAbsPath).
 				With("getLastAmiIdFromPackerManifest", getLastAmiIdFromPackerManifest).
 				With("pickAmiId", pickAmiId)
@@ -38,7 +35,7 @@ func NewTerraformCloudEnvironmentOptions(
 		pickedAmiId           string
 	)
 
-	switch cloudKind {
+	switch cloud.Kind {
 	case constants.Aws:
 		packerManifestAbsPath = filepath.Join(kumoExecAbsPath, constants.PACKER, constants.AWS, constants.PACKER_MANIFEST)
 
@@ -48,9 +45,9 @@ func NewTerraformCloudEnvironmentOptions(
 			return
 		}
 
-		if pickedAmiId, err = pickAmiId(lastBuiltAmiId, userSelectedAmiId); err != nil {
+		if pickedAmiId, err = pickAmiId(lastBuiltAmiId, selectedAmiIdFromConfig); err != nil {
 			err = oopsBuilder.
-				Wrapf(err, "Failed to pick AMI ID from last built AMI ID '%s' and user selected AMI ID '%s'", lastBuiltAmiId, userSelectedAmiId)
+				Wrapf(err, "Failed to pick AMI ID from last built AMI ID '%s' and user selected AMI ID '%s'", lastBuiltAmiId, selectedAmiIdFromConfig)
 			return
 		}
 
@@ -74,9 +71,13 @@ func NewTerraformCloudEnvironmentOptions(
 
 	default:
 		err = oopsBuilder.
-			Errorf("Cloud '%s' is not supported", cloudKind)
+			Errorf("Cloud '%v' is not supported", cloud.Name)
 		return
 	}
 
 	return
+}
+
+type TerraformCloudEnvironmentOptions struct {
+	Aws *aws.TerraformAwsEnvironment
 }

@@ -1,10 +1,9 @@
-package environment
+package packer
 
 import (
 	"github.com/ed3899/kumo/cloud"
 	"github.com/ed3899/kumo/common/interfaces"
 	"github.com/ed3899/kumo/constants"
-	"github.com/ed3899/kumo/tool/environment/packer/aws"
 	"github.com/ed3899/kumo/tool/environment/packer/general"
 	"github.com/ed3899/kumo/utils/environment"
 	"github.com/samber/oops"
@@ -97,7 +96,7 @@ func WithCloudEnvironment(
 					Errorf("Required field '%s' is not filled", missingField)
 				return
 			}
-			
+
 			packerEnvironment.Cloud = packerCloudEnvironmentOptions.Aws
 
 		default:
@@ -119,7 +118,3 @@ type PackerEnvironment struct {
 }
 
 type Option func(*PackerEnvironment) (err error)
-
-type PackerCloudEnvironmentOptions struct {
-	Aws *aws.PackerAwsEnvironment
-}
