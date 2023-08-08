@@ -1,4 +1,4 @@
-package packer
+package terraform
 
 import (
 	"path/filepath"
@@ -8,18 +8,18 @@ import (
 	"github.com/samber/oops"
 )
 
-func NewPackerTemplate(
+func NewTerraformTemplateCombo(
 	options ...Option,
 ) (
-	packerTemplate *PackerTemplate,
+	terraformTemplateCombo *TerraformTemplateCombo,
 ) {
 	var (
 		option Option
 	)
 
-	packerTemplate = &PackerTemplate{}
+	terraformTemplateCombo = &TerraformTemplateCombo{}
 	for _, option = range options {
-		option(packerTemplate)
+		option(terraformTemplateCombo)
 	}
 
 	return
@@ -36,13 +36,13 @@ func WithCloudChoice(
 			With("kumoExecAbsPath", kumoExecAbsPath)
 	)
 
-	option = func(packerTemplate *PackerTemplate) (err error) {
+	option = func(packerTemplate *TerraformTemplateCombo) (err error) {
 		packerTemplate.GeneralTemplateAbsPath = filepath.Join(
 			kumoExecAbsPath,
 			constants.TEMPLATES_DIR_NAME,
-			constants.PACKER,
+			constants.TERRAFORM,
 			constants.GENERAL_DIR_NAME,
-			constants.PACKER_GENERAL_VARS_TEMPLATE,
+			constants.TERRAFORM_GENERAL_VARS_TEMPLATE,
 		)
 
 		switch cloud.Kind {
@@ -50,9 +50,9 @@ func WithCloudChoice(
 			packerTemplate.CloudTemplateAbsPath = filepath.Join(
 				kumoExecAbsPath,
 				constants.TEMPLATES_DIR_NAME,
-				constants.PACKER,
+				constants.TERRAFORM,
 				constants.AWS,
-				constants.PACKER_AWS_VARS_TEMPLATE,
+				constants.TERRAFORM_AWS_VARS_TEMPLATE,
 			)
 		default:
 			err = oopsBuilder.
@@ -66,9 +66,9 @@ func WithCloudChoice(
 	return
 }
 
-type PackerTemplate struct {
+type TerraformTemplateCombo struct {
 	GeneralTemplateAbsPath string
 	CloudTemplateAbsPath   string
 }
 
-type Option func(*PackerTemplate) error
+type Option func(*TerraformTemplateCombo) error
