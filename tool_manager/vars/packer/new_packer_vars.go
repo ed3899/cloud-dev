@@ -13,7 +13,8 @@ import (
 	"github.com/samber/oops"
 )
 
-type PackerVarsCombo struct {
+type PackerVars struct {
+	AbsPath     string
 	Environment *environment_packer.PackerEnvironment
 	Template    *template_packer.MergedTemplate
 }
@@ -21,13 +22,13 @@ type PackerVarsCombo struct {
 func NewPackerVars(
 	options ...Option,
 ) (
-	packerVars *PackerVarsCombo,
+	packerVars *PackerVars,
 ) {
 	var (
 		option Option
 	)
 
-	packerVars = &PackerVarsCombo{}
+	packerVars = &PackerVars{}
 
 	for _, option = range options {
 		option(packerVars)
@@ -39,8 +40,7 @@ func NewPackerVars(
 func WithEnvironment(
 	packerEnvironment *environment_packer.PackerEnvironment,
 ) (option Option) {
-
-	option = func(packerVars *PackerVarsCombo) {
+	option = func(packerVars *PackerVars) {
 		packerVars.Environment = packerEnvironment
 
 		return
@@ -52,8 +52,7 @@ func WithEnvironment(
 func WithTemplate(
 	packerTemplateCombo *template_packer.MergedTemplate,
 ) (option Option) {
-
-	option = func(packerVars *PackerVarsCombo) {
+	option = func(packerVars *PackerVars) {
 		packerVars.Template = packerTemplateCombo
 
 		return
@@ -62,11 +61,25 @@ func WithTemplate(
 	return
 }
 
-func (pv *PackerVarsCombo) MergeTemplates() {
+func WithAbsPathFor(
+	kumoExecAbsPath string,
+	cloud cloud.Cloud,
+) (option Option) {
+	option = func(packerVars *PackerVars) {
+		packerVars.AbsPath = filepath.Join(
+			kumoExecAbsPath,
+			constants.PACKER,
+			cloud.Name,
+			constants.PACKER_VARS,
+		)
 
+		return
+	}
+
+	return
 }
 
-func (pv *PackerVarsCombo) OutputVars(
+func (pv *PackerVars) OutputVars(
 	kumoExecAbsPath string,
 	cloud cloud.Cloud,
 	fileMerger file.MergeFilesToF,
@@ -124,4 +137,4 @@ func (pv *PackerVarsCombo) OutputVars(
 	return
 }
 
-type Option func(*PackerVarsCombo)
+type Option func(*PackerVars)

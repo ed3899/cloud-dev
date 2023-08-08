@@ -9,24 +9,24 @@ import (
 	"github.com/samber/oops"
 )
 
-func NewPackerTemplateCombo(
+func NewMergedTemplate(
 	options ...Option,
 ) (
-	packerTemplateCombo *MergedTemplate,
+	packerMergedTemplate *MergedTemplate,
 ) {
 	var (
 		option Option
 	)
 
-	packerTemplateCombo = &MergedTemplate{}
+	packerMergedTemplate = &MergedTemplate{}
 	for _, option = range options {
-		option(packerTemplateCombo)
+		option(packerMergedTemplate)
 	}
 
 	return
 }
 
-func WithMergedTemplateAbsPath(kumoExecAbsPath string) (option Option) {
+func WithAbsPath(kumoExecAbsPath string) (option Option) {
 	option = func(packerTemplate *MergedTemplate) (err error) {
 		packerTemplate.AbsPath = filepath.Join(
 			kumoExecAbsPath,
@@ -40,7 +40,7 @@ func WithMergedTemplateAbsPath(kumoExecAbsPath string) (option Option) {
 	return
 }
 
-func WithCloudChoice(
+func WithTemplatesFor(
 	cloud cloud.Cloud,
 	kumoExecAbsPath string,
 ) (option Option) {
