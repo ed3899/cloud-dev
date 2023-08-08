@@ -244,6 +244,16 @@ func WithPluginsDir(cloud cloud.Cloud, toolKind constants.ToolKind, kumoExecAbsP
 	return
 }
 
+func WithInitialDirAbsPath(kumoExecAbsPath string) (option Option) {
+	option = func(toolManager *ToolManager) (err error) {
+		toolManager.InitialDirAbsPath = kumoExecAbsPath
+
+		return
+	}
+
+	return
+}
+
 func (tm *ToolManager) SetPluginsPathWith(environmentSetter EnvironmentSetterF) (err error) {
 	var (
 		oopsBuilder = oops.
@@ -274,12 +284,45 @@ func (tm *ToolManager) UnsetPluginsPathWith(environmentUnsetter EnvironmentUnset
 	return
 }
 
+func (tm *ToolManager) ChangeToInitialDirWith(dirChanger DirChangerF) (err error) {
+	var (
+		oopsBuilder = oops.
+			Code("ChangeToInitialDir").
+			With("dirChanger", dirChanger)
+	)
+
+	if err = dirChanger(tm.InitialDirAbsPath); err != nil {
+		err = oopsBuilder.
+			Wrapf(err, "Failed to change to initial dir '%s'", tm.InitialDirAbsPath)
+		return
+	}
+
+	return
+}
+
+func (tm *ToolManager) ChangeToRunDirWith(dirChanger DirChangerF) (err error) {
+	var (
+		oopsBuilder = oops.
+			Code("ChangeToRunDir").
+			With("dirChanger", dirChanger)
+	)
+
+	if err = dirChanger(tm.RunDirAbsPath); err != nil {
+		err = oopsBuilder.
+			Wrapf(err, "Failed to change to run dir '%s'", tm.RunDirAbsPath)
+		return
+	}
+
+	return
+}
+
 type ToolManager struct {
 	Kind              constants.ToolKind
 	Name              string
 	Version           string
 	Url               string
 	ExecutableAbsPath string
+	InitialDirAbsPath string
 	RunDirAbsPath     string
 	PluginsDirAbsPath string
 }
@@ -288,3 +331,4 @@ type Option func(*ToolManager) error
 
 type EnvironmentSetterF func(key string, value string) error
 type EnvironmentUnsetterF func(key string) error
+type DirChangerF func(dir string) error
