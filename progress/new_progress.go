@@ -6,7 +6,7 @@ import (
 	"github.com/ed3899/kumo/common/interfaces"
 	"github.com/ed3899/kumo/download"
 	"github.com/ed3899/kumo/utils/url"
-	utils_zip "github.com/ed3899/kumo/utils/zip"
+	"github.com/ed3899/kumo/utils/zip"
 	"github.com/samber/oops"
 )
 
@@ -119,8 +119,8 @@ OuterLoop:
 
 func (dae *Progress) ExtractAndShowProgress(
 	multiProgressBar interfaces.MpbV8MultiProgressBar,
-	getZipSize utils_zip.GetZipSizeF,
-	unzip utils_zip.UnzipF,
+	getZipSize zip.GetZipSizeF,
+	unzip zip.UnzipF,
 ) (err error) {
 	var (
 		extractedBytesChan = make(chan int, 1024)
