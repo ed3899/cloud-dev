@@ -10,17 +10,44 @@ import (
 	"github.com/samber/oops"
 )
 
-func NewDownloadAndExtract() {
+func NewProgress(
+	options ...Option,
+) (
+	progress *Progress,
+) {
+	var (
+		opt Option
+	)
 
+	progress = &Progress{}
+	for _, opt = range options {
+		opt(progress)
+	}
+
+	return
 }
 
-func WithDownload() {
+func WithDownload(d *download.Download) (option Option) {
+	option = func(progress *Progress) {
+		progress.Download = d
 
+		return
+	}
+
+	return
 }
 
-func WithMultiProgressBar() {
+func WithMultiProgressBar(p interfaces.MpbV8MultiProgressBar) (option Option) {
+	option = func(progress *Progress) {
+		progress.MultiProgressBar = p
 
+		return
+	}
+
+	return
 }
+
+type Option func(*Progress)
 
 type Progress struct {
 	Download         *download.Download
