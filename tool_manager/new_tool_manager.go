@@ -11,7 +11,12 @@ import (
 	"github.com/samber/oops"
 )
 
-func NewToolManager(opts ...Option) (toolManager *ToolManager, err error) {
+func NewToolManager(
+	opts ...Option,
+) (
+	toolManager *ToolManager,
+	err error,
+) {
 	var (
 		oopsBuilder = oops.
 				Code("NewTool").
@@ -296,11 +301,11 @@ func WithAbsPathToDirInitial(
 	return
 }
 
-func WithAbsPathToTemplateMerged(
+func WithAbsPathToTemplateFileMerged(
 	toolKind constants.ToolKind,
 ) (option Option) {
 	option = func(toolManager *ToolManager) (err error) {
-		toolManager.AbsPathTo.Template.Merged = filepath.Join(
+		toolManager.AbsPathTo.TemplateFile.Merged = filepath.Join(
 			constants.TEMPLATES_DIR_NAME,
 			constants.MERGED_TEMPLATE,
 		)
@@ -311,13 +316,13 @@ func WithAbsPathToTemplateMerged(
 	return
 }
 
-func WithAbsPathToTemplateGeneral(
+func WithAbsPathToTemplateFileGeneral(
 	toolKind constants.ToolKind,
 	kumoExecAbsPath string,
 ) (option Option) {
 	var (
 		oopsBuilder = oops.
-				Code("WithAbsPathToTemplateGeneral").
+				Code("WithAbsPathToTemplateFileGeneral").
 				With("toolKind", toolKind).
 				With("kumoExecAbsPath", kumoExecAbsPath)
 
@@ -339,10 +344,10 @@ func WithAbsPathToTemplateGeneral(
 	option = func(toolManager *ToolManager) (err error) {
 		switch toolKind {
 		case constants.Packer:
-			toolManager.AbsPathTo.Template.General = templateGeneralPath(constants.PACKER)
+			toolManager.AbsPathTo.TemplateFile.General = templateGeneralPath(constants.PACKER)
 
 		case constants.Terraform:
-			toolManager.AbsPathTo.Template.General = templateGeneralPath(constants.TERRAFORM)
+			toolManager.AbsPathTo.TemplateFile.General = templateGeneralPath(constants.TERRAFORM)
 
 		default:
 			err = oopsBuilder.
@@ -355,7 +360,7 @@ func WithAbsPathToTemplateGeneral(
 	return
 }
 
-func WithAbsPathToTemplateCloud(
+func WithAbsPathToTemplateFileCloud(
 	toolKind constants.ToolKind,
 	cloud cloud.Cloud,
 	kumoExecAbsPath string,
@@ -363,7 +368,7 @@ func WithAbsPathToTemplateCloud(
 
 	var (
 		oopsBuilder = oops.
-				Code("WithAbsPathToTemplateCloud").
+				Code("WithAbsPathToTemplateFileCloud").
 				With("toolKind", toolKind).
 				With("cloud", cloud).
 				With("kumoExecAbsPath", kumoExecAbsPath)
@@ -385,10 +390,10 @@ func WithAbsPathToTemplateCloud(
 	option = func(toolManager *ToolManager) (err error) {
 		switch toolKind {
 		case constants.Packer:
-			toolManager.AbsPathTo.Template.Cloud = absPathToTemplateCloud(constants.PACKER)
+			toolManager.AbsPathTo.TemplateFile.Cloud = absPathToTemplateCloud(constants.PACKER)
 
 		case constants.Terraform:
-			toolManager.AbsPathTo.Template.Cloud = absPathToTemplateCloud(constants.TERRAFORM)
+			toolManager.AbsPathTo.TemplateFile.Cloud = absPathToTemplateCloud(constants.TERRAFORM)
 
 		default:
 			err = oopsBuilder.
@@ -481,9 +486,9 @@ type ToolManager struct {
 }
 
 type AbsPathTo struct {
-	Executable string
-	Dir        *Dir
-	Template   *Template
+	Executable   string
+	Dir          *Dir
+	TemplateFile *TemplateFile
 }
 
 type Dir struct {
@@ -492,7 +497,7 @@ type Dir struct {
 	Initial string
 }
 
-type Template struct {
+type TemplateFile struct {
 	General string
 	Cloud   string
 	Merged  string
