@@ -2,6 +2,7 @@ package template
 
 import (
 	"path/filepath"
+	text_template "text/template"
 
 	"github.com/ed3899/kumo/config/tool"
 	"github.com/ed3899/kumo/constants"
@@ -9,10 +10,10 @@ import (
 	"github.com/samber/oops"
 )
 
-func NewTemplate(
+func NewTemplateFile(
 	options ...Option,
 ) (
-	template *Template,
+	template *TemplateFile,
 	err error,
 ) {
 	var (
@@ -23,7 +24,7 @@ func NewTemplate(
 		option Option
 	)
 
-	template = &Template{}
+	template = &TemplateFile{}
 	for _, option = range options {
 		if err = option(template); err != nil {
 			err = oopsBuilder.
@@ -41,7 +42,7 @@ func WithAbsPath(
 	option Option,
 ) {
 
-	option = func(template *Template) (err error) {
+	option = func(template *TemplateFile) (err error) {
 		template.AbsPath = filepath.Join(
 			kumoExecAbsPath,
 			constants.TEMPLATES_DIR_NAME,
@@ -54,10 +55,12 @@ func WithAbsPath(
 	return
 }
 
-func (t *Template) Create(
+func (t *TemplateFile) Create(
 	file_MergedFilesTo file.MergeFilesToF,
 	toolConfig tool.ToolConfig,
-) (err error) {
+) (
+	err error,
+) {
 	var (
 		oopsBuilder = oops.
 			Code("Merge").
@@ -84,7 +87,33 @@ func (t *Template) Create(
 	return
 }
 
-func (t *Template) Remove(os_Remove func(string) error) (err error) {
+func (t *TemplateFile) TextTemplate(
+	template_ParseFiles func(...string) (*text_template.Template, error),
+) (
+	textTemplate *text_template.Template,
+	err error,
+) {
+	var (
+		oopsBuilder = oops.
+			Code("TextTemplate").
+			With("template_ParseFiles", template_ParseFiles)
+	)
+
+	if textTemplate, err = template_ParseFiles(t.AbsPath); err != nil {
+		err = oopsBuilder.
+			Wrapf(err, "Failed to parse template '%s'", t.AbsPath)
+
+		return
+	}
+
+	return
+}
+
+func (t *TemplateFile) Remove(
+	os_Remove func(string) error,
+) (
+	err error,
+) {
 	var (
 		oopsBuilder = oops.
 			Code("CallRemove")
@@ -100,8 +129,8 @@ func (t *Template) Remove(os_Remove func(string) error) (err error) {
 	return
 }
 
-type Template struct {
+type TemplateFile struct {
 	AbsPath string
 }
 
-type Option func(*Template) error
+type Option func(*TemplateFile) error

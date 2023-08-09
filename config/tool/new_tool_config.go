@@ -195,7 +195,7 @@ func WithAbsPathToExecutable(
 }
 
 func WithAbsPathToDirRun(
-	cloud cloud.Cloud,
+	cloud cloud.CloudConfig,
 	toolKind constants.ToolKind,
 	kumoExecAbsPath string,
 ) (option Option) {
@@ -238,7 +238,7 @@ func WithAbsPathToDirRun(
 }
 
 func WithAbsPathToDirPlugins(
-	cloud cloud.Cloud,
+	cloud cloud.CloudConfig,
 	toolKind constants.ToolKind,
 	kumoExecAbsPath string,
 ) (option Option) {
@@ -337,7 +337,7 @@ func WithAbsPathToTemplateFileGeneral(
 
 func WithAbsPathToTemplateFileCloud(
 	toolKind constants.ToolKind,
-	cloud cloud.Cloud,
+	cloud cloud.CloudConfig,
 	kumoExecAbsPath string,
 ) (option Option) {
 

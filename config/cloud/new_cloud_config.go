@@ -12,7 +12,7 @@ import (
 func NewCloudConfig(
 	options ...Option,
 ) (
-	cloud *Cloud,
+	cloud *CloudConfig,
 	err error,
 ) {
 	var (
@@ -23,7 +23,7 @@ func NewCloudConfig(
 		opt Option
 	)
 
-	cloud = &Cloud{}
+	cloud = &CloudConfig{}
 	for _, opt = range options {
 		if err = opt(cloud); err != nil {
 			err = oopsBuilder.
@@ -46,7 +46,7 @@ func WithKind(
 			With("cloudFromConfig", cloudFromConfig)
 	)
 
-	option = func(cloud *Cloud) (err error) {
+	option = func(cloud *CloudConfig) (err error) {
 		switch cloudFromConfig {
 		case constants.AWS:
 			cloud.Kind = constants.Aws
@@ -73,7 +73,7 @@ func WithName(
 			With("cloudFromConfig", cloudFromConfig)
 	)
 
-	option = func(cloud *Cloud) (err error) {
+	option = func(cloud *CloudConfig) (err error) {
 		switch cloudFromConfig {
 		case constants.AWS:
 			cloud.Name = constants.AWS
@@ -100,7 +100,7 @@ func WithCredentials(
 			With("cloudFromConfig", cloudFromConfig)
 	)
 
-	option = func(cloud *Cloud) (err error) {
+	option = func(cloud *CloudConfig) (err error) {
 		switch cloudFromConfig {
 		case constants.AWS:
 			cloud.Credentials = AwsCredentials{
@@ -131,7 +131,7 @@ func WithPackerManifestPath(
 			With("cloudFromConfig", cloudFromConfig)
 	)
 
-	option = func(cloud *Cloud) (err error) {
+	option = func(cloud *CloudConfig) (err error) {
 		switch cloudFromConfig {
 		case constants.AWS:
 			cloud.PackerManifestPath = filepath.Join(kumoExecAbsPath, constants.PACKER, constants.AWS, constants.PACKER_MANIFEST)
@@ -147,11 +147,11 @@ func WithPackerManifestPath(
 	return
 }
 
-type Cloud struct {
+type CloudConfig struct {
 	Kind               constants.CloudKind
 	Name               string
 	Credentials        interfaces.Credentials
 	PackerManifestPath string
 }
 
-type Option func(*Cloud) error
+type Option func(*CloudConfig) error
