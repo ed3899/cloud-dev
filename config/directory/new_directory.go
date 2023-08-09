@@ -1,7 +1,11 @@
 package dir
 
 import (
+	"path/filepath"
+
+	"github.com/ed3899/kumo/config/cloud"
 	"github.com/ed3899/kumo/config/tool"
+	"github.com/ed3899/kumo/constants"
 )
 
 func NewDirectory(
@@ -24,11 +28,21 @@ func NewDirectory(
 
 func WithPlugins(
 	tool tool.ToolI,
+	cloud cloud.CloudI,
+	kumoExecAbsPath string,
 ) (
 	option Option,
 ) {
+
 	option = func(directory *Directory) {
-		directory.Plugins = plugins
+		directory.Plugins = Plugins(
+			filepath.Join(
+				kumoExecAbsPath,
+				tool.Name().String(),
+				cloud.Name().String(),
+				constants.PLUGINS_DIR_NAME,
+			),
+		)
 	}
 
 	return

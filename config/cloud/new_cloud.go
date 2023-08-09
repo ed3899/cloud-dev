@@ -103,7 +103,7 @@ func WithCredentials(
 	option = func(cloud *Cloud) (err error) {
 		switch cloudFromConfig {
 		case constants.AWS:
-			cloud.credentials = AwsCredentials{
+			cloud.Credentials = AwsCredentials{
 				AccessKeyId:     viper.GetString("AWS.AccessKeyId"),
 				SecretAccessKey: viper.GetString("AWS.SecretAccessKey"),
 			}
@@ -160,14 +160,55 @@ func WithPackerManifestPath(
 	return
 }
 
+func (c *Cloud) Kind() (cloudKind constants.CloudKind) {
+	cloudKind = c.kind
+
+	return
+}
+
+func (c *Cloud) Name() (cloudName CloudName) {
+	cloudName = c.name
+
+	return
+}
+
+func (c *Cloud) PackerManifestPath() (packerManifestPath PackerManifestPath) {
+	packerManifestPath = c.packerManifestPath
+
+	return
+}
+
+type Option func(*Cloud) error
+
 type CloudName string
+
+func (c CloudName) String() (s string) {
+	s = string(c)
+
+	return
+}
+
 type PackerManifestPath string
+
+func (p PackerManifestPath) String() (s string) {
+	s = string(p)
+
+	return
+}
 
 type Cloud struct {
 	kind               constants.CloudKind
 	name               CloudName
-	credentials        interfaces.Credentials
 	packerManifestPath PackerManifestPath
+	Credentials        interfaces.Credentials
 }
 
-type Option func(*Cloud) error
+type PackerManifestPathGetter interface {
+	PackerManifestPath() PackerManifestPath
+}
+
+type CloudI interface {
+	interfaces.KindGetter[constants.CloudKind]
+	interfaces.NameGetter[CloudName]
+	PackerManifestPathGetter
+}
