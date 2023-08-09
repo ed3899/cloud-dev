@@ -303,7 +303,7 @@ func WithAbsPathToTemplateFileGeneral(
 				With("toolKind", toolKind).
 				With("kumoExecAbsPath", kumoExecAbsPath)
 
-		templateGeneralPath = func(toolDir string) (tgpath string) {
+		absPathToTemplateFileGeneral = func(toolDir string) (tgpath string) {
 			tgpath = filepath.Join(
 				kumoExecAbsPath,
 				constants.TEMPLATES_DIR_NAME,
@@ -319,10 +319,10 @@ func WithAbsPathToTemplateFileGeneral(
 	option = func(toolManager *ToolConfig) (err error) {
 		switch toolKind {
 		case constants.Packer:
-			toolManager.AbsPathTo.TemplateFile.General = templateGeneralPath(constants.PACKER)
+			toolManager.AbsPathTo.TemplateFile.General = absPathToTemplateFileGeneral(constants.PACKER)
 
 		case constants.Terraform:
-			toolManager.AbsPathTo.TemplateFile.General = templateGeneralPath(constants.TERRAFORM)
+			toolManager.AbsPathTo.TemplateFile.General = absPathToTemplateFileGeneral(constants.TERRAFORM)
 
 		default:
 			err = oopsBuilder.
@@ -348,7 +348,7 @@ func WithAbsPathToTemplateFileCloud(
 				With("cloud", cloud).
 				With("kumoExecAbsPath", kumoExecAbsPath)
 
-		absPathToTemplateCloud = func(toolDir string) (tcpath string) {
+		absPathToTemplateFileCloud = func(toolDir string) (tcpath string) {
 			tcpath = filepath.Join(
 				kumoExecAbsPath,
 				constants.TEMPLATES_DIR_NAME,
@@ -363,10 +363,10 @@ func WithAbsPathToTemplateFileCloud(
 	option = func(toolManager *ToolConfig) (err error) {
 		switch toolKind {
 		case constants.Packer:
-			toolManager.AbsPathTo.TemplateFile.Cloud = absPathToTemplateCloud(constants.PACKER)
+			toolManager.AbsPathTo.TemplateFile.Cloud = absPathToTemplateFileCloud(constants.PACKER)
 
 		case constants.Terraform:
-			toolManager.AbsPathTo.TemplateFile.Cloud = absPathToTemplateCloud(constants.TERRAFORM)
+			toolManager.AbsPathTo.TemplateFile.Cloud = absPathToTemplateFileCloud(constants.TERRAFORM)
 
 		default:
 			err = oopsBuilder.
