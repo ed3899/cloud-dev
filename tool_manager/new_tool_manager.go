@@ -200,26 +200,32 @@ func WithAbsPathToDirRun(
 ) (option Option) {
 	var (
 		oopsBuilder = oops.
-			Code("WithAbsPathToDirRun").
-			With("toolKind", toolKind).
-			With("cloud", cloud).
-			With("kumoExecAbsPath", kumoExecAbsPath)
+				Code("WithAbsPathToDirRun").
+				With("toolKind", toolKind).
+				With("cloud", cloud).
+				With("kumoExecAbsPath", kumoExecAbsPath)
+
+		absPathToDirRun func(toolDir string) (aptdr string)
 	)
+
+	absPathToDirRun = func(toolDir string) (aptdr string) {
+		aptdr = filepath.Join(
+			kumoExecAbsPath,
+			toolDir,
+			cloud.Name,
+		)
+
+		return
+	}
 
 	option = func(toolManager *ToolManager) (err error) {
 		switch toolKind {
 		case constants.Packer:
-			toolManager.AbsPathTo.Dir.Run = filepath.Join(
-				kumoExecAbsPath,
-				constants.PACKER,
-				cloud.Name,
-			)
+			toolManager.AbsPathTo.Dir.Run = absPathToDirRun(constants.PACKER)
+
 		case constants.Terraform:
-			toolManager.AbsPathTo.Dir.Run = filepath.Join(
-				kumoExecAbsPath,
-				constants.TERRAFORM,
-				cloud.Name,
-			)
+			toolManager.AbsPathTo.Dir.Run = absPathToDirRun(constants.TERRAFORM)
+
 		default:
 			err = oopsBuilder.
 				Errorf("Unknown tool kind: %d", toolKind)
