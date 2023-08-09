@@ -41,34 +41,18 @@ func NewTool(
 }
 
 func WithKind(
-	toolKind constants.ToolKind,
+	toolKind constants.Tool,
 ) (option Option) {
-	var (
-		oopsBuilder = oops.
-			Code("WithKind").
-			With("toolKind", toolKind)
-	)
 
-	option = func(toolManager *Tool) (err error) {
-		switch toolKind {
-		case constants.Packer:
-			toolManager.kind = constants.Packer
-		case constants.Terraform:
-			toolManager.kind = constants.Terraform
-		default:
-			err = oopsBuilder.
-				Errorf("Unknown tool kind: %d", toolKind)
-			return
-		}
-
-		return
+	option = func(toolManager *Tool) {
+		toolManager.kind = toolKind
 	}
 
 	return
 }
 
 func WithName(
-	toolKind constants.ToolKind,
+	toolKind constants.Tool,
 ) (option Option) {
 	var (
 		oopsBuilder = oops.
@@ -95,7 +79,7 @@ func WithName(
 }
 
 func WithVersion(
-	toolKind constants.ToolKind,
+	toolKind constants.Tool,
 ) (option Option) {
 	var (
 		oopsBuilder = oops.
@@ -122,7 +106,7 @@ func WithVersion(
 }
 
 func WithUrl(
-	toolKind constants.ToolKind,
+	toolKind constants.Tool,
 	createHashicorpUrl url.CreateHashicorpURLF,
 	getCurrentHostSpecs host.GetCurrentHostSpecsF,
 ) (option Option) {
@@ -157,7 +141,7 @@ func WithUrl(
 }
 
 func WithAbsPathToExecutable(
-	toolKind constants.ToolKind,
+	toolKind constants.Tool,
 	kumoExecAbsPath string,
 ) (option Option) {
 	var (
@@ -199,7 +183,7 @@ func WithAbsPathToExecutable(
 
 func WithAbsPathToDirRun(
 	cloud cloud.Cloud,
-	toolKind constants.ToolKind,
+	toolKind constants.Tool,
 	kumoExecAbsPath string,
 ) (option Option) {
 	var (
@@ -242,7 +226,7 @@ func WithAbsPathToDirRun(
 
 func WithAbsPathToDirPlugins(
 	cloud cloud.Cloud,
-	toolKind constants.ToolKind,
+	toolKind constants.Tool,
 	kumoExecAbsPath string,
 ) (option Option) {
 	var (
@@ -297,7 +281,7 @@ func WithAbsPathToDirInitial(
 }
 
 func WithAbsPathToTemplateFileGeneral(
-	toolKind constants.ToolKind,
+	toolKind constants.Tool,
 	kumoExecAbsPath string,
 ) (option Option) {
 	var (
@@ -339,7 +323,7 @@ func WithAbsPathToTemplateFileGeneral(
 }
 
 func WithAbsPathToTemplateFileCloud(
-	toolKind constants.ToolKind,
+	toolKind constants.Tool,
 	cloud cloud.Cloud,
 	kumoExecAbsPath string,
 ) (option Option) {
@@ -383,7 +367,7 @@ func WithAbsPathToTemplateFileCloud(
 	return
 }
 
-func (tc *Tool) Kind() (toolKind constants.ToolKind) {
+func (tc *Tool) Kind() (toolKind constants.Tool) {
 	toolKind = tc.kind
 	return
 }
@@ -404,7 +388,7 @@ func (tc *Tool) Url() (toolUrl alias.ToolUrl) {
 }
 
 type Tool struct {
-	kind    constants.ToolKind
+	kind    constants.Tool
 	name    alias.ToolName
 	version alias.ToolVersion
 	url     alias.ToolUrl

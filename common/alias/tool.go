@@ -20,3 +20,4 @@ func (tu ToolUrl) String() (toolUrl string) {
 	toolUrl = string(tu)
 	return
 }
+

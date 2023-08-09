@@ -168,23 +168,7 @@ func (d *Paths) GoInitial(
 	return
 }
 
-func (p Plugins) String() (plugins string) {
-	plugins = string(p)
 
-	return
-}
-
-func (r Run) String() (run string) {
-	run = string(r)
-
-	return
-}
-
-func (i Initial) String() (initial string) {
-	initial = string(i)
-
-	return
-}
 
 type Paths struct {
 	plugins Plugins
@@ -192,35 +176,7 @@ type Paths struct {
 	initial Initial
 }
 
-type Plugins string
-
-type Run string
-
-type Initial string
 
 type Option func(*Paths)
 
-type PluginSetter interface {
-	SetPluginsPath(os_Setenv func(key string, value string) error) (err error)
-}
 
-type PluginUnsetter interface {
-	UnsetPluginsPath(os_Unset func(key string) error) (err error)
-}
-
-type RunChanger interface {
-	GoRun(os_Chdir DirChangerF) (err error)
-}
-
-type InitialChanger interface {
-	GoInitial(os_Chdir DirChangerF) (err error)
-}
-
-type DirChangerF func(dir string) error
-
-type PathsI interface {
-	PluginSetter
-	PluginUnsetter
-	RunChanger
-	InitialChanger
-}
