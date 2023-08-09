@@ -17,14 +17,14 @@ func NewToolManager(opts ...Option) (toolManager *ToolManager, err error) {
 				Code("NewTool").
 				With("opts", opts)
 
-		o Option
+		option Option
 	)
 
 	toolManager = &ToolManager{}
-	for _, o = range opts {
-		if err = o(toolManager); err != nil {
+	for _, option = range opts {
+		if err = option(toolManager); err != nil {
 			err = oopsBuilder.
-				Wrapf(err, "Option %v", o)
+				Wrapf(err, "Option %v", option)
 			return
 		}
 	}
@@ -147,14 +147,14 @@ func WithExecutableAbsPath(toolKind constants.ToolKind, kumoExecAbsPath string) 
 	option = func(toolManager *ToolManager) (err error) {
 		switch toolKind {
 		case constants.Packer:
-			toolManager.ExecutableAbsPath = filepath.Join(
+			toolManager.AbsPathTo.Executable = filepath.Join(
 				kumoExecAbsPath,
 				constants.DEPENDENCIES_DIR_NAME,
 				constants.PACKER,
 				fmt.Sprintf("%s.exe", constants.PACKER),
 			)
 		case constants.Terraform:
-			toolManager.ExecutableAbsPath = filepath.Join(
+			toolManager.AbsPathTo.Executable = filepath.Join(
 				kumoExecAbsPath,
 				constants.DEPENDENCIES_DIR_NAME,
 				constants.TERRAFORM,
@@ -184,13 +184,13 @@ func WithRunDirAbsPath(cloud cloud.Cloud, toolKind constants.ToolKind, kumoExecA
 	option = func(toolManager *ToolManager) (err error) {
 		switch toolKind {
 		case constants.Packer:
-			toolManager.RunDirAbsPath = filepath.Join(
+			toolManager.AbsPathTo.Dir.Run = filepath.Join(
 				kumoExecAbsPath,
 				constants.PACKER,
 				cloud.Name,
 			)
 		case constants.Terraform:
-			toolManager.RunDirAbsPath = filepath.Join(
+			toolManager.AbsPathTo.Dir.Run = filepath.Join(
 				kumoExecAbsPath,
 				constants.TERRAFORM,
 				cloud.Name,
@@ -219,14 +219,14 @@ func WithPluginsDir(cloud cloud.Cloud, toolKind constants.ToolKind, kumoExecAbsP
 	option = func(toolManager *ToolManager) (err error) {
 		switch toolKind {
 		case constants.Packer:
-			toolManager.PluginsDirAbsPath = filepath.Join(
+			toolManager.AbsPathTo.Dir.Plugins = filepath.Join(
 				kumoExecAbsPath,
 				constants.PACKER,
 				cloud.Name,
 				constants.PLUGINS_DIR_NAME,
 			)
 		case constants.Terraform:
-			toolManager.PluginsDirAbsPath = filepath.Join(
+			toolManager.AbsPathTo.Dir.Plugins = filepath.Join(
 				kumoExecAbsPath,
 				constants.TERRAFORM,
 				cloud.Name,
@@ -246,7 +246,7 @@ func WithPluginsDir(cloud cloud.Cloud, toolKind constants.ToolKind, kumoExecAbsP
 
 func WithInitialDirAbsPath(kumoExecAbsPath string) (option Option) {
 	option = func(toolManager *ToolManager) (err error) {
-		toolManager.InitialDirAbsPath = kumoExecAbsPath
+		toolManager.AbsPathTo.Dir.Initial = kumoExecAbsPath
 
 		return
 	}
@@ -264,9 +264,9 @@ func WithTempMergedTemplateFileName(toolKind constants.ToolKind) (option Option)
 	option = func(toolManager *ToolManager) (err error) {
 		switch toolKind {
 		case constants.Packer:
-			toolManager.TempMergedTemplateAbsPath = filepath.Join(constants.TEMPLATES_DIR_NAME, constants.PACKER_TEMP)
+			toolManager.AbsPathTo.Template.Merged = filepath.Join(constants.TEMPLATES_DIR_NAME, constants.PACKER_TEMP)
 		case constants.Terraform:
-			toolManager.TempMergedTemplateAbsPath = filepath.Join(constants.TEMPLATES_DIR_NAME, constants.TERRAFORM_TEMP)
+			toolManager.AbsPathTo.Template.Merged = filepath.Join(constants.TEMPLATES_DIR_NAME, constants.TERRAFORM_TEMP)
 		default:
 			err = oopsBuilder.
 				Errorf("Unknown tool kind: %d", toolKind)
@@ -293,7 +293,7 @@ func WithAbsPathToGeneralTemplate(
 	option = func(toolManager *ToolManager) (err error) {
 		switch toolKind {
 		case constants.Packer:
-			toolManager.GeneralTemplateAbsPath = filepath.Join(
+			toolManager.AbsPathTo.Template.General = filepath.Join(
 				kumoExecAbsPath,
 				constants.TEMPLATES_DIR_NAME,
 				constants.PACKER,
@@ -302,7 +302,7 @@ func WithAbsPathToGeneralTemplate(
 			)
 
 		case constants.Terraform:
-			toolManager.GeneralTemplateAbsPath = filepath.Join(
+			toolManager.AbsPathTo.Template.General = filepath.Join(
 				kumoExecAbsPath,
 				constants.TEMPLATES_DIR_NAME,
 				constants.TERRAFORM,
@@ -341,7 +341,7 @@ func WithAbsPathToCloudTemplate(
 
 			switch cloud.Kind {
 			case constants.Aws:
-				toolManager.CloudTemplateAbsPath = filepath.Join(
+				toolManager.AbsPathTo.Template.Cloud = filepath.Join(
 					kumoExecAbsPath,
 					constants.TEMPLATES_DIR_NAME,
 					constants.PACKER,
@@ -359,7 +359,7 @@ func WithAbsPathToCloudTemplate(
 
 			switch cloud.Kind {
 			case constants.Aws:
-				toolManager.CloudTemplateAbsPath = filepath.Join(
+				toolManager.AbsPathTo.Template.Cloud = filepath.Join(
 					kumoExecAbsPath,
 					constants.TEMPLATES_DIR_NAME,
 					constants.TERRAFORM,
@@ -391,9 +391,9 @@ func (tm *ToolManager) SetPluginsPathWith(environmentSetter EnvironmentSetterF) 
 			Code("SetPluginsDir")
 	)
 
-	if err = environmentSetter(constants.PACKER_PLUGIN_PATH, tm.PluginsDirAbsPath); err != nil {
+	if err = environmentSetter(constants.PACKER_PLUGIN_PATH, tm.AbsPathTo.Dir.Plugins); err != nil {
 		err = oopsBuilder.
-			Wrapf(err, "Failed to set plugins dir '%s'", tm.PluginsDirAbsPath)
+			Wrapf(err, "Failed to set plugins dir '%s'", tm.AbsPathTo.Dir.Plugins)
 		return
 	}
 
@@ -422,9 +422,9 @@ func (tm *ToolManager) ChangeToInitialDirWith(dirChanger DirChangerF) (err error
 			With("dirChanger", dirChanger)
 	)
 
-	if err = dirChanger(tm.InitialDirAbsPath); err != nil {
+	if err = dirChanger(tm.AbsPathTo.Dir.Initial); err != nil {
 		err = oopsBuilder.
-			Wrapf(err, "Failed to change to initial dir '%s'", tm.InitialDirAbsPath)
+			Wrapf(err, "Failed to change to initial dir '%s'", tm.AbsPathTo.Dir.Initial)
 		return
 	}
 
@@ -438,9 +438,9 @@ func (tm *ToolManager) ChangeToRunDirWith(dirChanger DirChangerF) (err error) {
 			With("dirChanger", dirChanger)
 	)
 
-	if err = dirChanger(tm.RunDirAbsPath); err != nil {
+	if err = dirChanger(tm.AbsPathTo.Dir.Run); err != nil {
 		err = oopsBuilder.
-			Wrapf(err, "Failed to change to run dir '%s'", tm.RunDirAbsPath)
+			Wrapf(err, "Failed to change to run dir '%s'", tm.AbsPathTo.Dir.Run)
 		return
 	}
 
@@ -448,17 +448,29 @@ func (tm *ToolManager) ChangeToRunDirWith(dirChanger DirChangerF) (err error) {
 }
 
 type ToolManager struct {
-	Kind                      constants.ToolKind
-	Name                      string
-	Version                   string
-	Url                       string
-	ExecutableAbsPath         string
-	InitialDirAbsPath         string
-	RunDirAbsPath             string
-	PluginsDirAbsPath         string
-	GeneralTemplateAbsPath    string
-	CloudTemplateAbsPath      string
-	TempMergedTemplateAbsPath string
+	Kind      constants.ToolKind
+	Name      string
+	Version   string
+	Url       string
+	AbsPathTo *AbsPathTo
+}
+
+type AbsPathTo struct {
+	Executable string
+	Dir        *Dir
+	Template   *Template
+}
+
+type Dir struct {
+	Plugins string
+	Run     string
+	Initial string
+}
+
+type Template struct {
+	General string
+	Cloud   string
+	Merged  string
 }
 
 type Option func(*ToolManager) error
