@@ -123,14 +123,21 @@ func WithUrl(
 				Code("WithUrl").
 				With("toolKind", toolKind)
 		currentOs, currentArch = getCurrentHostSpecs()
+		toolManagerUrl         func(tool string, version string) (url string)
 	)
+
+	toolManagerUrl = func(tool string, version string) (url string) {
+		url = createHashicorpUrl(tool, version, currentOs, currentArch)
+
+		return
+	}
 
 	option = func(toolManager *ToolManager) (err error) {
 		switch toolKind {
 		case constants.Packer:
-			toolManager.Url = createHashicorpUrl(constants.PACKER, constants.PACKER_VERSION, currentOs, currentArch)
+			toolManager.Url = toolManagerUrl(constants.PACKER, constants.PACKER_VERSION)
 		case constants.Terraform:
-			toolManager.Url = createHashicorpUrl(constants.TERRAFORM, constants.TERRAFORM_VERSION, currentOs, currentArch)
+			toolManager.Url = toolManagerUrl(constants.TERRAFORM, constants.TERRAFORM_VERSION)
 		default:
 			err = oopsBuilder.
 				Errorf("Unknown tool kind: %d", toolKind)
@@ -399,7 +406,7 @@ func WithAbsPathToTemplateCloud(
 	return
 }
 
-func (tm *ToolManager) SetPluginsPathWith(environmentSetter EnvironmentSetterF) (err error) {
+func (tm *ToolManager) SetPluginsPath(environmentSetter EnvironmentSetterF) (err error) {
 	var (
 		oopsBuilder = oops.
 			Code("SetPluginsDir")
@@ -414,7 +421,7 @@ func (tm *ToolManager) SetPluginsPathWith(environmentSetter EnvironmentSetterF) 
 	return
 }
 
-func (tm *ToolManager) UnsetPluginsPathWith(environmentUnsetter EnvironmentUnsetterF) (err error) {
+func (tm *ToolManager) UnsetPluginsPath(environmentUnsetter EnvironmentUnsetterF) (err error) {
 	var (
 		oopsBuilder = oops.
 			Code("UnsetPluginsDir")
@@ -429,7 +436,7 @@ func (tm *ToolManager) UnsetPluginsPathWith(environmentUnsetter EnvironmentUnset
 	return
 }
 
-func (tm *ToolManager) ChangeToInitialDirWith(dirChanger DirChangerF) (err error) {
+func (tm *ToolManager) ChangeToInitialDir(dirChanger DirChangerF) (err error) {
 	var (
 		oopsBuilder = oops.
 			Code("ChangeToInitialDir").
@@ -445,7 +452,7 @@ func (tm *ToolManager) ChangeToInitialDirWith(dirChanger DirChangerF) (err error
 	return
 }
 
-func (tm *ToolManager) ChangeToRunDirWith(dirChanger DirChangerF) (err error) {
+func (tm *ToolManager) ChangeToRunDir(dirChanger DirChangerF) (err error) {
 	var (
 		oopsBuilder = oops.
 			Code("ChangeToRunDir").
