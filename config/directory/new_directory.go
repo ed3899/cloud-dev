@@ -3,6 +3,7 @@ package dir
 import (
 	"path/filepath"
 
+	"github.com/ed3899/kumo/common/interfaces"
 	"github.com/ed3899/kumo/config/cloud"
 	"github.com/ed3899/kumo/config/tool"
 	"github.com/ed3899/kumo/constants"
@@ -26,9 +27,12 @@ func NewDirectory(
 	return
 }
 
-func WithPlugins(
-	tool tool.ToolI,
-	cloud cloud.CloudI,
+func WithPlugins[
+	T interfaces.NameGetter[tool.ToolName],
+	C interfaces.NameGetter[cloud.CloudName],
+](
+	tool T,
+	cloud C,
 	kumoExecAbsPath string,
 ) (
 	option Option,
