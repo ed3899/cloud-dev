@@ -15,7 +15,7 @@ var rootCmd = &cobra.Command{
 
 func init() {
 	var (
-		kumoConfigFile = file.NewKumoConfigFile(
+		kumoConfigFile = file.NewConfigFile(
 			file.WithName("kumo.config"),
 			file.WithType("yaml"),
 			file.WithPath("."),

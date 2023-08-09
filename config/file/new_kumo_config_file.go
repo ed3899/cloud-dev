@@ -5,22 +5,22 @@ import (
 	"github.com/spf13/viper"
 )
 
-type KumoConfigFile struct {
+type ConfigFile struct {
 	Name string
 	Type string
 	Path string
 }
 
-func NewKumoConfigFile(
+func NewConfigFile(
 	options ...Option,
 ) (
-	kc *KumoConfigFile,
+	kc *ConfigFile,
 ) {
 	var (
 		option Option
 	)
 
-	kc = &KumoConfigFile{}
+	kc = &ConfigFile{}
 	for _, option = range options {
 		option(kc)
 	}
@@ -33,7 +33,7 @@ func WithName(
 ) (
 	option Option,
 ) {
-	option = func(kc *KumoConfigFile) {
+	option = func(kc *ConfigFile) {
 		kc.Name = name
 	}
 
@@ -45,7 +45,7 @@ func WithType(
 ) (
 	option Option,
 ) {
-	option = func(kc *KumoConfigFile) {
+	option = func(kc *ConfigFile) {
 		kc.Type = _type
 	}
 
@@ -57,29 +57,29 @@ func WithPath(
 ) (
 	option Option,
 ) {
-	option = func(kc *KumoConfigFile) {
+	option = func(kc *ConfigFile) {
 		kc.Path = path
 	}
 
 	return
 }
 
-func (kc *KumoConfigFile) CallSetConfigName(setConfigName func(string)) (self *KumoConfigFile) {
+func (kc *ConfigFile) CallSetConfigName(setConfigName func(string)) (self *ConfigFile) {
 	setConfigName(kc.Name)
 	return
 }
 
-func (kc *KumoConfigFile) CallSetConfigType(setConfigType func(string)) (self *KumoConfigFile) {
+func (kc *ConfigFile) CallSetConfigType(setConfigType func(string)) (self *ConfigFile) {
 	setConfigType(kc.Type)
 	return
 }
 
-func (kc *KumoConfigFile) CallAddConfigPath(addConfigPath func(string)) (self *KumoConfigFile) {
+func (kc *ConfigFile) CallAddConfigPath(addConfigPath func(string)) (self *ConfigFile) {
 	addConfigPath(kc.Path)
 	return
 }
 
-func (kc *KumoConfigFile) CallReadInConfig(readInConfig func() error) (err error) {
+func (kc *ConfigFile) CallReadInConfig(readInConfig func() error) (err error) {
 	var (
 		oopsBuilder = oops.
 			Code("ReadInConfig").
@@ -96,7 +96,7 @@ func (kc *KumoConfigFile) CallReadInConfig(readInConfig func() error) (err error
 
 }
 
-func ReadKumoConfig(kc *KumoConfigFile) (err error) {
+func ReadKumoConfig(kc *ConfigFile) (err error) {
 	var (
 		oopsBuilder = oops.Code("read_kumo_config_failed").
 			With("kc", kc)
@@ -114,4 +114,4 @@ func ReadKumoConfig(kc *KumoConfigFile) (err error) {
 	return
 }
 
-type Option func(*KumoConfigFile)
+type Option func(*ConfigFile)
