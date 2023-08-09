@@ -402,7 +402,9 @@ func WithAbsPathToTemplateCloud(
 	return
 }
 
-func (tm *ToolManager) SetPluginsPath(environmentSetter EnvironmentSetterF) (err error) {
+func (tm *ToolManager) SetPluginsPath(
+	environmentSetter EnvironmentSetterF,
+) (err error) {
 	var (
 		oopsBuilder = oops.
 			Code("SetPluginsDir")
@@ -417,7 +419,9 @@ func (tm *ToolManager) SetPluginsPath(environmentSetter EnvironmentSetterF) (err
 	return
 }
 
-func (tm *ToolManager) UnsetPluginsPath(environmentUnsetter EnvironmentUnsetterF) (err error) {
+func (tm *ToolManager) UnsetPluginsPath(
+	environmentUnsetter EnvironmentUnsetterF,
+) (err error) {
 	var (
 		oopsBuilder = oops.
 			Code("UnsetPluginsDir")
@@ -432,7 +436,9 @@ func (tm *ToolManager) UnsetPluginsPath(environmentUnsetter EnvironmentUnsetterF
 	return
 }
 
-func (tm *ToolManager) ChangeToInitialDir(dirChanger DirChangerF) (err error) {
+func (tm *ToolManager) ChangeToInitialDir(
+	dirChanger DirChangerF,
+) (err error) {
 	var (
 		oopsBuilder = oops.
 			Code("ChangeToInitialDir").
@@ -448,7 +454,9 @@ func (tm *ToolManager) ChangeToInitialDir(dirChanger DirChangerF) (err error) {
 	return
 }
 
-func (tm *ToolManager) ChangeToRunDir(dirChanger DirChangerF) (err error) {
+func (tm *ToolManager) ChangeToRunDir(
+	dirChanger DirChangerF,
+) (err error) {
 	var (
 		oopsBuilder = oops.
 			Code("ChangeToRunDir").
