@@ -11,7 +11,7 @@ type KumoConfigFile struct {
 	Path string
 }
 
-func NewKumoConfig(
+func NewKumoConfigFile(
 	options ...Option,
 ) (
 	kc *KumoConfigFile,
@@ -64,29 +64,29 @@ func WithPath(
 	return
 }
 
-func (kc *KumoConfigFile) SetConfigName(configNameSetter func(string)) (self *KumoConfigFile) {
-	configNameSetter(kc.Name)
+func (kc *KumoConfigFile) CallSetConfigName(setConfigName func(string)) (self *KumoConfigFile) {
+	setConfigName(kc.Name)
 	return
 }
 
-func (kc *KumoConfigFile) SetConfigType(configTypeSetter func(string)) (self *KumoConfigFile) {
-	configTypeSetter(kc.Type)
+func (kc *KumoConfigFile) CallSetConfigType(setConfigType func(string)) (self *KumoConfigFile) {
+	setConfigType(kc.Type)
 	return
 }
 
-func (kc *KumoConfigFile) AddConfigPath(configPathAdder func(string)) (self *KumoConfigFile) {
-	configPathAdder(kc.Path)
+func (kc *KumoConfigFile) CallAddConfigPath(addConfigPath func(string)) (self *KumoConfigFile) {
+	addConfigPath(kc.Path)
 	return
 }
 
-func (kc *KumoConfigFile) ReadInConfig(configReader func() error) (err error) {
+func (kc *KumoConfigFile) CallReadInConfig(readInConfig func() error) (err error) {
 	var (
 		oopsBuilder = oops.
 			Code("ReadInConfig").
-			With("configReader", configReader)
+			With("configReader", readInConfig)
 	)
 
-	if err = configReader(); err != nil {
+	if err = readInConfig(); err != nil {
 		err = oopsBuilder.
 			Wrapf(err, "Error while calling configReader")
 		return

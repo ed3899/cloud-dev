@@ -15,18 +15,18 @@ var rootCmd = &cobra.Command{
 
 func init() {
 	var (
-		kumoConfigFile = file.NewKumoConfig(
+		kumoConfigFile = file.NewKumoConfigFile(
 			file.WithName("kumo.config"),
 			file.WithType("yaml"),
 			file.WithPath("."),
-		).SetConfigName(viper.SetConfigName).
-			SetConfigType(viper.SetConfigType).
-			AddConfigPath(viper.AddConfigPath)
+		).CallSetConfigName(viper.SetConfigName).
+			CallSetConfigType(viper.SetConfigType).
+			CallAddConfigPath(viper.AddConfigPath)
 
 		err error
 	)
 
-	if err = kumoConfigFile.ReadInConfig(viper.ReadInConfig); err != nil {
+	if err = kumoConfigFile.CallReadInConfig(viper.ReadInConfig); err != nil {
 		log.Fatalf(
 			"%+v",
 			oops.Code("cmd-root.go-init").
