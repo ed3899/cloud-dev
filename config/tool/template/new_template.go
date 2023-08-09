@@ -2,7 +2,6 @@ package template
 
 import (
 	"path/filepath"
-	text_template "text/template"
 
 	"github.com/ed3899/kumo/config/tool"
 	"github.com/ed3899/kumo/constants"
@@ -36,45 +35,64 @@ func NewTemplate(
 	return
 }
 
-func WithInstance(
-	toolConfig tool.ToolConfig,
-	mergedFilesTo file.MergeFilesToF,
+func WithAbsPath(
 	kumoExecAbsPath string,
-) (option Option) {
-	var (
-		oopsBuilder = oops.
-				Code("WithInstance").
-				With("tool", toolConfig)
+) (
+	option Option,
+) {
 
-		mergedTemplateAbsPath = filepath.Join(
+	option = func(template *Template) (err error) {
+		template.AbsPath = filepath.Join(
 			kumoExecAbsPath,
 			constants.TEMPLATES_DIR_NAME,
 			constants.MERGED_TEMPLATE,
 		)
+
+		return
+	}
+
+	return
+}
+
+func (t *Template) Create(
+	file_MergedFilesTo file.MergeFilesToF,
+	toolConfig tool.ToolConfig,
+) (err error) {
+	var (
+		oopsBuilder = oops.
+			Code("Merge").
+			With("template", t).
+			With("tool", toolConfig)
 	)
 
-	option = func(template *Template) (err error) {
-		if err = mergedFilesTo(
-			mergedTemplateAbsPath,
-			toolConfig.AbsPathTo.TemplateFile.General,
-			toolConfig.AbsPathTo.TemplateFile.Cloud,
-		); err != nil {
-			err = oopsBuilder.
-				Wrapf(
-					err,
-					"Failed to merge general and cloud template '%s' and '%s'",
-					toolConfig.AbsPathTo.TemplateFile.General,
-					toolConfig.AbsPathTo.TemplateFile.Cloud,
-				)
+	if err = file_MergedFilesTo(
+		t.AbsPath,
+		toolConfig.AbsPathTo.TemplateFile.General,
+		toolConfig.AbsPathTo.TemplateFile.Cloud,
+	); err != nil {
+		err = oopsBuilder.
+			Wrapf(
+				err,
+				"Failed to merge general and cloud template '%s' and '%s'",
+				toolConfig.AbsPathTo.TemplateFile.General,
+				toolConfig.AbsPathTo.TemplateFile.Cloud,
+			)
 
-			return
-		}
+		return
+	}
 
-		if template.Instance, err = text_template.ParseFiles(mergedTemplateAbsPath); err != nil {
-			err = oopsBuilder.
-				Wrapf(err, "Failed to parse merged template '%s'", mergedTemplateAbsPath)
-			return
-		}
+	return
+}
+
+func (t *Template) Remove(os_Remove func(string) error) (err error) {
+	var (
+		oopsBuilder = oops.
+			Code("CallRemove")
+	)
+
+	if err = os_Remove(t.AbsPath); err != nil {
+		err = oopsBuilder.
+			Wrapf(err, "Failed to remove template '%s'", t.AbsPath)
 
 		return
 	}
@@ -83,7 +101,7 @@ func WithInstance(
 }
 
 type Template struct {
-	Instance *text_template.Template
+	AbsPath string
 }
 
 type Option func(*Template) error

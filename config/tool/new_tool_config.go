@@ -381,14 +381,14 @@ func WithAbsPathToTemplateFileCloud(
 }
 
 func (tm *ToolConfig) SetPluginsPath(
-	environmentSetter EnvironmentSetterF,
+	os_Setenv func(key string, value string) error,
 ) (err error) {
 	var (
 		oopsBuilder = oops.
 			Code("SetPluginsDir")
 	)
 
-	if err = environmentSetter(constants.PACKER_PLUGIN_PATH, tm.AbsPathTo.Dir.Plugins); err != nil {
+	if err = os_Setenv(constants.PACKER_PLUGIN_PATH, tm.AbsPathTo.Dir.Plugins); err != nil {
 		err = oopsBuilder.
 			Wrapf(err, "Failed to set plugins dir '%s'", tm.AbsPathTo.Dir.Plugins)
 		return
@@ -398,14 +398,14 @@ func (tm *ToolConfig) SetPluginsPath(
 }
 
 func (tm *ToolConfig) UnsetPluginsPath(
-	environmentUnsetter EnvironmentUnsetterF,
+	os_Unset func(key string) error,
 ) (err error) {
 	var (
 		oopsBuilder = oops.
 			Code("UnsetPluginsDir")
 	)
 
-	if err = environmentUnsetter(constants.PACKER_PLUGIN_PATH); err != nil {
+	if err = os_Unset(constants.PACKER_PLUGIN_PATH); err != nil {
 		err = oopsBuilder.
 			Wrapf(err, "Failed to unset plugins dir '%s'", constants.PACKER_PLUGIN_PATH)
 		return
@@ -415,15 +415,15 @@ func (tm *ToolConfig) UnsetPluginsPath(
 }
 
 func (tm *ToolConfig) ChangeToInitialDir(
-	dirChanger DirChangerF,
+	os_Chdir DirChangerF,
 ) (err error) {
 	var (
 		oopsBuilder = oops.
 			Code("ChangeToInitialDir").
-			With("dirChanger", dirChanger)
+			With("dirChanger", os_Chdir)
 	)
 
-	if err = dirChanger(tm.AbsPathTo.Dir.Initial); err != nil {
+	if err = os_Chdir(tm.AbsPathTo.Dir.Initial); err != nil {
 		err = oopsBuilder.
 			Wrapf(err, "Failed to change to initial dir '%s'", tm.AbsPathTo.Dir.Initial)
 		return
@@ -433,15 +433,15 @@ func (tm *ToolConfig) ChangeToInitialDir(
 }
 
 func (tm *ToolConfig) ChangeToRunDir(
-	dirChanger DirChangerF,
+	os_Chdir DirChangerF,
 ) (err error) {
 	var (
 		oopsBuilder = oops.
 			Code("ChangeToRunDir").
-			With("dirChanger", dirChanger)
+			With("dirChanger", os_Chdir)
 	)
 
-	if err = dirChanger(tm.AbsPathTo.Dir.Run); err != nil {
+	if err = os_Chdir(tm.AbsPathTo.Dir.Run); err != nil {
 		err = oopsBuilder.
 			Wrapf(err, "Failed to change to run dir '%s'", tm.AbsPathTo.Dir.Run)
 		return
@@ -477,6 +477,4 @@ type TemplateFile struct {
 
 type Option func(*ToolConfig) error
 
-type EnvironmentSetterF func(key string, value string) error
-type EnvironmentUnsetterF func(key string) error
 type DirChangerF func(dir string) error
