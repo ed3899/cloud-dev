@@ -70,15 +70,15 @@ func (t *TemplateFile) Create(
 
 	if err = file_MergedFilesTo(
 		t.AbsPath,
-		toolConfig.AbsPathTo.TemplateFile.General,
-		toolConfig.AbsPathTo.TemplateFile.Cloud,
+		toolConfig.AbsPath.TemplateFile.General,
+		toolConfig.AbsPath.TemplateFile.Cloud,
 	); err != nil {
 		err = oopsBuilder.
 			Wrapf(
 				err,
 				"Failed to merge general and cloud template '%s' and '%s'",
-				toolConfig.AbsPathTo.TemplateFile.General,
-				toolConfig.AbsPathTo.TemplateFile.Cloud,
+				toolConfig.AbsPath.TemplateFile.General,
+				toolConfig.AbsPath.TemplateFile.Cloud,
 			)
 
 		return
