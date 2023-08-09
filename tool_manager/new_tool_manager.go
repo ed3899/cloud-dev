@@ -318,28 +318,28 @@ func WithAbsPathToTemplateGeneral(
 				With("toolKind", toolKind).
 				With("kumoExecAbsPath", kumoExecAbsPath)
 
-		templatePath func(toolDir string) (tpath string)
+		templateGeneralPath func(toolDir string) (tgpath string)
 	)
 
-	templatePath = func(toolDir string) (tpath string) {
-		tpath = filepath.Join(
+	templateGeneralPath = func(toolDir string) (tgpath string) {
+		tgpath = filepath.Join(
 			kumoExecAbsPath,
 			constants.TEMPLATES_DIR_NAME,
 			toolDir,
 			constants.GENERAL_DIR_NAME,
 			constants.GENERAL_TEMPLATE,
 		)
-g
+
 		return
 	}
 
 	option = func(toolManager *ToolManager) (err error) {
 		switch toolKind {
 		case constants.Packer:
-			toolManager.AbsPathTo.Template.General = templatePath(constants.PACKER)
+			toolManager.AbsPathTo.Template.General = templateGeneralPath(constants.PACKER)
 
 		case constants.Terraform:
-			toolManager.AbsPathTo.Template.General = templatePath(constants.TERRAFORM)
+			toolManager.AbsPathTo.Template.General = templateGeneralPath(constants.TERRAFORM)
 
 		default:
 			err = oopsBuilder.
@@ -352,7 +352,7 @@ g
 	return
 }
 
-func WithAbsPathToCloudTemplate(
+func WithAbsPathToTemplateCloud(
 	toolKind constants.ToolKind,
 	cloud cloud.Cloud,
 	kumoExecAbsPath string,
@@ -360,29 +360,32 @@ func WithAbsPathToCloudTemplate(
 
 	var (
 		oopsBuilder = oops.
-			Code("WithAbsPathToCloudTemplateFor").
-			With("toolKind", toolKind).
-			With("cloud", cloud).
-			With("kumoExecAbsPath", kumoExecAbsPath)
+				Code("WithAbsPathToTemplateCloud").
+				With("toolKind", toolKind).
+				With("cloud", cloud).
+				With("kumoExecAbsPath", kumoExecAbsPath)
+
+		templateCloudPath func(toolDir string) (tcpath string)
 	)
+
+	templateCloudPath = func(toolDir string) (tcpath string) {
+		tcpath = filepath.Join(
+			kumoExecAbsPath,
+			constants.TEMPLATES_DIR_NAME,
+			toolDir,
+			fmt.Sprintf("%s.tmpl", cloud.Name),
+		)
+
+		return
+	}
 
 	option = func(toolManager *ToolManager) (err error) {
 		switch toolKind {
 		case constants.Packer:
-			toolManager.AbsPathTo.Template.Cloud = filepath.Join(
-				kumoExecAbsPath,
-				constants.TEMPLATES_DIR_NAME,
-				constants.PACKER,
-				fmt.Sprintf("%s.tmpl", cloud.Name),
-			)
+			toolManager.AbsPathTo.Template.Cloud = templateCloudPath(constants.PACKER)
 
 		case constants.Terraform:
-			toolManager.AbsPathTo.Template.Cloud = filepath.Join(
-				kumoExecAbsPath,
-				constants.TEMPLATES_DIR_NAME,
-				constants.TERRAFORM,
-				fmt.Sprintf("%s.tmpl", cloud.Name),
-			)
+			toolManager.AbsPathTo.Template.Cloud = templateCloudPath(constants.TERRAFORM)
 
 		default:
 			err = oopsBuilder.
