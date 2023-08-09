@@ -27,8 +27,8 @@ func NewVars(
 
 func WithAbsPath(
 	kumoExecAbsPath string,
-	toolConfig tool.ToolConfig,
-	cloudConfig cloud.CloudConfig,
+	toolConfig tool.Tool,
+	cloudConfig cloud.Cloud,
 ) (
 	option Option,
 ) {

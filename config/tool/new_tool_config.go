@@ -12,10 +12,10 @@ import (
 	"github.com/samber/oops"
 )
 
-func NewToolConfig(
+func NewTool(
 	opts ...Option,
 ) (
-	toolManager *ToolConfig,
+	tool *Tool,
 	err error,
 ) {
 	var (
@@ -26,9 +26,9 @@ func NewToolConfig(
 		option Option
 	)
 
-	toolManager = &ToolConfig{}
+	tool = &Tool{}
 	for _, option = range opts {
-		if err = option(toolManager); err != nil {
+		if err = option(tool); err != nil {
 			err = oopsBuilder.
 				Wrapf(err, "Option %v", option)
 			return
@@ -47,7 +47,7 @@ func WithKind(
 			With("toolKind", toolKind)
 	)
 
-	option = func(toolManager *ToolConfig) (err error) {
+	option = func(toolManager *Tool) (err error) {
 		switch toolKind {
 		case constants.Packer:
 			toolManager.kind = constants.Packer
@@ -74,7 +74,7 @@ func WithName(
 			With("toolKind", toolKind)
 	)
 
-	option = func(toolManager *ToolConfig) (err error) {
+	option = func(toolManager *Tool) (err error) {
 		switch toolKind {
 		case constants.Packer:
 			toolManager.name = constants.PACKER
@@ -101,7 +101,7 @@ func WithVersion(
 			With("toolKind", toolKind)
 	)
 
-	option = func(toolManager *ToolConfig) (err error) {
+	option = func(toolManager *Tool) (err error) {
 		switch toolKind {
 		case constants.Packer:
 			toolManager.version = constants.PACKER_VERSION
@@ -136,7 +136,7 @@ func WithUrl(
 		}
 	)
 
-	option = func(toolManager *ToolConfig) (err error) {
+	option = func(toolManager *Tool) (err error) {
 		switch toolKind {
 		case constants.Packer:
 			toolManager.url = url(constants.PACKER, constants.PACKER_VERSION)
@@ -175,7 +175,7 @@ func WithAbsPathToExecutable(
 		}
 	)
 
-	option = func(toolManager *ToolConfig) (err error) {
+	option = func(toolManager *Tool) (err error) {
 		switch toolKind {
 		case constants.Packer:
 			toolManager.AbsPath.Executable = absPathToExecutable(constants.PACKER)
@@ -196,7 +196,7 @@ func WithAbsPathToExecutable(
 }
 
 func WithAbsPathToDirRun(
-	cloud cloud.CloudConfig,
+	cloud cloud.Cloud,
 	toolKind constants.ToolKind,
 	kumoExecAbsPath string,
 ) (option Option) {
@@ -218,7 +218,7 @@ func WithAbsPathToDirRun(
 		}
 	)
 
-	option = func(toolManager *ToolConfig) (err error) {
+	option = func(toolManager *Tool) (err error) {
 		switch toolKind {
 		case constants.Packer:
 			toolManager.AbsPath.Dir.Run = absPathToDirRun(constants.PACKER)
@@ -239,7 +239,7 @@ func WithAbsPathToDirRun(
 }
 
 func WithAbsPathToDirPlugins(
-	cloud cloud.CloudConfig,
+	cloud cloud.Cloud,
 	toolKind constants.ToolKind,
 	kumoExecAbsPath string,
 ) (option Option) {
@@ -262,7 +262,7 @@ func WithAbsPathToDirPlugins(
 		}
 	)
 
-	option = func(toolManager *ToolConfig) (err error) {
+	option = func(toolManager *Tool) (err error) {
 		switch toolKind {
 		case constants.Packer:
 			toolManager.AbsPath.Dir.Plugins = absPathToDirPlugins(constants.PACKER)
@@ -285,7 +285,7 @@ func WithAbsPathToDirPlugins(
 func WithAbsPathToDirInitial(
 	kumoExecAbsPath string,
 ) (option Option) {
-	option = func(toolManager *ToolConfig) (err error) {
+	option = func(toolManager *Tool) (err error) {
 		toolManager.AbsPath.Dir.Initial = kumoExecAbsPath
 
 		return
@@ -317,7 +317,7 @@ func WithAbsPathToTemplateFileGeneral(
 		}
 	)
 
-	option = func(toolManager *ToolConfig) (err error) {
+	option = func(toolManager *Tool) (err error) {
 		switch toolKind {
 		case constants.Packer:
 			toolManager.AbsPath.TemplateFile.General = absPathToTemplateFileGeneral(constants.PACKER)
@@ -338,7 +338,7 @@ func WithAbsPathToTemplateFileGeneral(
 
 func WithAbsPathToTemplateFileCloud(
 	toolKind constants.ToolKind,
-	cloud cloud.CloudConfig,
+	cloud cloud.Cloud,
 	kumoExecAbsPath string,
 ) (option Option) {
 
@@ -361,7 +361,7 @@ func WithAbsPathToTemplateFileCloud(
 		}
 	)
 
-	option = func(toolManager *ToolConfig) (err error) {
+	option = func(toolManager *Tool) (err error) {
 		switch toolKind {
 		case constants.Packer:
 			toolManager.AbsPath.TemplateFile.Cloud = absPathToTemplateFileCloud(constants.PACKER)
@@ -381,7 +381,7 @@ func WithAbsPathToTemplateFileCloud(
 	return
 }
 
-func (tm *ToolConfig) SetPluginsPath(
+func (tm *Tool) SetPluginsPath(
 	os_Setenv func(key string, value string) error,
 ) (err error) {
 	var (
@@ -398,7 +398,7 @@ func (tm *ToolConfig) SetPluginsPath(
 	return
 }
 
-func (tm *ToolConfig) UnsetPluginsPath(
+func (tm *Tool) UnsetPluginsPath(
 	os_Unset func(key string) error,
 ) (err error) {
 	var (
@@ -415,7 +415,7 @@ func (tm *ToolConfig) UnsetPluginsPath(
 	return
 }
 
-func (tm *ToolConfig) ChangeToInitialDir(
+func (tm *Tool) ChangeToInitialDir(
 	os_Chdir DirChangerF,
 ) (err error) {
 	var (
@@ -433,7 +433,7 @@ func (tm *ToolConfig) ChangeToInitialDir(
 	return
 }
 
-func (tm *ToolConfig) ChangeToRunDir(
+func (tm *Tool) ChangeToRunDir(
 	os_Chdir DirChangerF,
 ) (err error) {
 	var (
@@ -451,35 +451,35 @@ func (tm *ToolConfig) ChangeToRunDir(
 	return
 }
 
-func (tc *ToolConfig) Kind() (toolKind constants.ToolKind) {
+func (tc *Tool) Kind() (toolKind constants.ToolKind) {
 	toolKind = tc.kind
 	return
 }
 
-func (tc *ToolConfig) Name() (toolName ToolName) {
+func (tc *Tool) Name() (toolName ToolName) {
 	toolName = tc.name
 	return
 }
 
-func (tc *ToolConfig) Version() (toolVersion ToolVersion) {
+func (tc *Tool) Version() (toolVersion ToolVersion) {
 	toolVersion = tc.version
 	return
 }
 
-func (tc *ToolConfig) Url() (toolUrl ToolUrl) {
+func (tc *Tool) Url() (toolUrl ToolUrl) {
 	toolUrl = tc.url
 	return
 }
 
 type DirChangerF func(dir string) error
 
-type Option func(*ToolConfig) error
+type Option func(*Tool) error
 
 type ToolName string
 type ToolVersion string
 type ToolUrl string
 
-type ToolConfig struct {
+type Tool struct {
 	kind    constants.ToolKind
 	name    ToolName
 	version ToolVersion
@@ -489,14 +489,8 @@ type ToolConfig struct {
 
 type ToolAbsPath struct {
 	Executable   string
-	Dir          *Dir
+	Dir          *ToolDir
 	TemplateFile *TemplateFileCombo
-}
-
-type Dir struct {
-	Plugins string
-	Run     string
-	Initial string
 }
 
 type TemplateFileCombo struct {
@@ -504,7 +498,7 @@ type TemplateFileCombo struct {
 	Cloud   string
 }
 
-type ToolConfigI interface {
+type ToolI interface {
 	interfaces.KindGetter[constants.ToolKind]
 	interfaces.NameGetter[ToolName]
 	interfaces.VersionGetter[ToolVersion]

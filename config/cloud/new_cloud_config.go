@@ -9,10 +9,10 @@ import (
 	"github.com/spf13/viper"
 )
 
-func NewCloudConfig(
+func NewCloud(
 	options ...Option,
 ) (
-	cloud *CloudConfig,
+	cloud *Cloud,
 	err error,
 ) {
 	var (
@@ -23,7 +23,7 @@ func NewCloudConfig(
 		opt Option
 	)
 
-	cloud = &CloudConfig{}
+	cloud = &Cloud{}
 	for _, opt = range options {
 		if err = opt(cloud); err != nil {
 			err = oopsBuilder.
@@ -46,10 +46,10 @@ func WithKind(
 			With("cloudFromConfig", cloudFromConfig)
 	)
 
-	option = func(cloud *CloudConfig) (err error) {
+	option = func(cloud *Cloud) (err error) {
 		switch cloudFromConfig {
 		case constants.AWS:
-			cloud.Kind = constants.Aws
+			cloud.kind = constants.Aws
 		default:
 			err = oopsBuilder.
 				Wrapf(err, "Cloud %s is not supported", cloudFromConfig)
@@ -73,10 +73,10 @@ func WithName(
 			With("cloudFromConfig", cloudFromConfig)
 	)
 
-	option = func(cloud *CloudConfig) (err error) {
+	option = func(cloud *Cloud) (err error) {
 		switch cloudFromConfig {
 		case constants.AWS:
-			cloud.Name = constants.AWS
+			cloud.name = constants.AWS
 		default:
 			err = oopsBuilder.
 				Wrapf(err, "Cloud %s is not supported", cloudFromConfig)
@@ -100,10 +100,10 @@ func WithCredentials(
 			With("cloudFromConfig", cloudFromConfig)
 	)
 
-	option = func(cloud *CloudConfig) (err error) {
+	option = func(cloud *Cloud) (err error) {
 		switch cloudFromConfig {
 		case constants.AWS:
-			cloud.Credentials = AwsCredentials{
+			cloud.credentials = AwsCredentials{
 				AccessKeyId:     viper.GetString("AWS.AccessKeyId"),
 				SecretAccessKey: viper.GetString("AWS.SecretAccessKey"),
 			}
@@ -127,14 +127,27 @@ func WithPackerManifestPath(
 ) {
 	var (
 		oopsBuilder = oops.
-			Code("WithPackerManifestPath").
-			With("cloudFromConfig", cloudFromConfig)
+				Code("WithPackerManifestPath").
+				With("cloudFromConfig", cloudFromConfig)
+
+		packerManifestPath = func(cloudName string) (path PackerManifestPath) {
+			path = PackerManifestPath(
+				filepath.Join(
+					kumoExecAbsPath,
+					constants.PACKER,
+					cloudName,
+					constants.PACKER_MANIFEST,
+				),
+			)
+
+			return
+		}
 	)
 
-	option = func(cloud *CloudConfig) (err error) {
+	option = func(cloud *Cloud) (err error) {
 		switch cloudFromConfig {
 		case constants.AWS:
-			cloud.PackerManifestPath = filepath.Join(kumoExecAbsPath, constants.PACKER, constants.AWS, constants.PACKER_MANIFEST)
+			cloud.packerManifestPath = packerManifestPath(constants.AWS)
 		default:
 			err = oopsBuilder.
 				Wrapf(err, "Cloud %s is not supported", cloudFromConfig)
@@ -147,11 +160,14 @@ func WithPackerManifestPath(
 	return
 }
 
-type CloudConfig struct {
-	Kind               constants.CloudKind
-	Name               string
-	Credentials        interfaces.Credentials
-	PackerManifestPath string
+type CloudName string
+type PackerManifestPath string
+
+type Cloud struct {
+	kind               constants.CloudKind
+	name               CloudName
+	credentials        interfaces.Credentials
+	packerManifestPath PackerManifestPath
 }
 
-type Option func(*CloudConfig) error
+type Option func(*Cloud) error
