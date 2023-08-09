@@ -2,18 +2,18 @@ package template
 
 import (
 	"path/filepath"
-	"text/template"
+	text_template "text/template"
 
+	"github.com/ed3899/kumo/config/tool"
 	"github.com/ed3899/kumo/constants"
-	"github.com/ed3899/kumo/tool_manager"
 	"github.com/ed3899/kumo/utils/file"
 	"github.com/samber/oops"
 )
 
-func NewMergedTemplate(
+func NewTemplate(
 	options ...Option,
 ) (
-	template *MergedTemplate,
+	template *Template,
 	err error,
 ) {
 	var (
@@ -24,7 +24,7 @@ func NewMergedTemplate(
 		option Option
 	)
 
-	template = &MergedTemplate{}
+	template = &Template{}
 	for _, option = range options {
 		if err = option(template); err != nil {
 			err = oopsBuilder.
@@ -37,14 +37,14 @@ func NewMergedTemplate(
 }
 
 func WithInstance(
-	tool tool_manager.ToolManager,
+	toolConfig tool.ToolConfig,
 	mergedFilesTo file.MergeFilesToF,
 	kumoExecAbsPath string,
 ) (option Option) {
 	var (
 		oopsBuilder = oops.
 				Code("WithInstance").
-				With("tool", tool)
+				With("tool", toolConfig)
 
 		mergedTemplateAbsPath = filepath.Join(
 			kumoExecAbsPath,
@@ -53,24 +53,24 @@ func WithInstance(
 		)
 	)
 
-	option = func(template *MergedTemplate) (err error) {
+	option = func(template *Template) (err error) {
 		if err = mergedFilesTo(
 			mergedTemplateAbsPath,
-			tool.AbsPathTo.TemplateFile.General,
-			tool.AbsPathTo.TemplateFile.Cloud,
+			toolConfig.AbsPathTo.TemplateFile.General,
+			toolConfig.AbsPathTo.TemplateFile.Cloud,
 		); err != nil {
 			err = oopsBuilder.
 				Wrapf(
 					err,
 					"Failed to merge general and cloud template '%s' and '%s'",
-					tool.AbsPathTo.TemplateFile.General,
-					tool.AbsPathTo.TemplateFile.Cloud,
+					toolConfig.AbsPathTo.TemplateFile.General,
+					toolConfig.AbsPathTo.TemplateFile.Cloud,
 				)
 
 			return
 		}
 
-		if template.Instance, err = template.Instance.ParseFiles(mergedTemplateAbsPath); err != nil {
+		if template.Instance, err = text_template.ParseFiles(mergedTemplateAbsPath); err != nil {
 			err = oopsBuilder.
 				Wrapf(err, "Failed to parse merged template '%s'", mergedTemplateAbsPath)
 			return
@@ -82,8 +82,8 @@ func WithInstance(
 	return
 }
 
-type MergedTemplate struct {
-	Instance *template.Template
+type Template struct {
+	Instance *text_template.Template
 }
 
-type Option func(*MergedTemplate) error
+type Option func(*Template) error

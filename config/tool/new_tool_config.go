@@ -128,14 +128,12 @@ func WithUrl(
 				Code("WithUrl").
 				With("toolKind", toolKind)
 		currentOs, currentArch = getCurrentHostSpecs()
-		url                    func(tool string, version string) (toolUrl string)
+		url                    = func(tool string, version string) (toolUrl string) {
+			toolUrl = createHashicorpUrl(tool, version, currentOs, currentArch)
+
+			return
+		}
 	)
-
-	url = func(tool string, version string) (toolUrl string) {
-		toolUrl = createHashicorpUrl(tool, version, currentOs, currentArch)
-
-		return
-	}
 
 	option = func(toolManager *ToolConfig) (err error) {
 		switch toolKind {
@@ -164,19 +162,17 @@ func WithAbsPathToExecutable(
 				Code("WithAbsPathToExecutable").
 				With("toolKind", toolKind)
 
-		absPathToExecutable func(toolDir string) (apte string)
+		absPathToExecutable = func(toolDir string) (apte string) {
+			apte = filepath.Join(
+				kumoExecAbsPath,
+				constants.DEPENDENCIES_DIR_NAME,
+				toolDir,
+				fmt.Sprintf("%s.exe", toolDir),
+			)
+
+			return
+		}
 	)
-
-	absPathToExecutable = func(toolDir string) (apte string) {
-		apte = filepath.Join(
-			kumoExecAbsPath,
-			constants.DEPENDENCIES_DIR_NAME,
-			toolDir,
-			fmt.Sprintf("%s.exe", toolDir),
-		)
-
-		return
-	}
 
 	option = func(toolManager *ToolConfig) (err error) {
 		switch toolKind {
@@ -210,18 +206,16 @@ func WithAbsPathToDirRun(
 				With("cloud", cloud).
 				With("kumoExecAbsPath", kumoExecAbsPath)
 
-		absPathToDirRun func(toolDir string) (aptdr string)
+		absPathToDirRun = func(toolDir string) (aptdr string) {
+			aptdr = filepath.Join(
+				kumoExecAbsPath,
+				toolDir,
+				cloud.Name,
+			)
+
+			return
+		}
 	)
-
-	absPathToDirRun = func(toolDir string) (aptdr string) {
-		aptdr = filepath.Join(
-			kumoExecAbsPath,
-			toolDir,
-			cloud.Name,
-		)
-
-		return
-	}
 
 	option = func(toolManager *ToolConfig) (err error) {
 		switch toolKind {
@@ -255,19 +249,17 @@ func WithAbsPathToDirPlugins(
 				With("cloud", cloud).
 				With("kumoExecAbsPath", kumoExecAbsPath)
 
-		absPathToDirPlugins func(toolDir string) (aptdp string)
+		absPathToDirPlugins = func(toolDir string) (aptdp string) {
+			aptdp = filepath.Join(
+				kumoExecAbsPath,
+				toolDir,
+				cloud.Name,
+				constants.PLUGINS_DIR_NAME,
+			)
+
+			return
+		}
 	)
-
-	absPathToDirPlugins = func(toolDir string) (aptdp string) {
-		aptdp = filepath.Join(
-			kumoExecAbsPath,
-			toolDir,
-			cloud.Name,
-			constants.PLUGINS_DIR_NAME,
-		)
-
-		return
-	}
 
 	option = func(toolManager *ToolConfig) (err error) {
 		switch toolKind {
@@ -311,20 +303,18 @@ func WithAbsPathToTemplateFileGeneral(
 				With("toolKind", toolKind).
 				With("kumoExecAbsPath", kumoExecAbsPath)
 
-		templateGeneralPath func(toolDir string) (tgpath string)
+		templateGeneralPath = func(toolDir string) (tgpath string) {
+			tgpath = filepath.Join(
+				kumoExecAbsPath,
+				constants.TEMPLATES_DIR_NAME,
+				toolDir,
+				constants.GENERAL_DIR_NAME,
+				constants.GENERAL_TEMPLATE,
+			)
+
+			return
+		}
 	)
-
-	templateGeneralPath = func(toolDir string) (tgpath string) {
-		tgpath = filepath.Join(
-			kumoExecAbsPath,
-			constants.TEMPLATES_DIR_NAME,
-			toolDir,
-			constants.GENERAL_DIR_NAME,
-			constants.GENERAL_TEMPLATE,
-		)
-
-		return
-	}
 
 	option = func(toolManager *ToolConfig) (err error) {
 		switch toolKind {
@@ -358,19 +348,17 @@ func WithAbsPathToTemplateFileCloud(
 				With("cloud", cloud).
 				With("kumoExecAbsPath", kumoExecAbsPath)
 
-		absPathToTemplateCloud func(toolDir string) (tcpath string)
+		absPathToTemplateCloud = func(toolDir string) (tcpath string) {
+			tcpath = filepath.Join(
+				kumoExecAbsPath,
+				constants.TEMPLATES_DIR_NAME,
+				toolDir,
+				fmt.Sprintf("%s.tmpl", cloud.Name),
+			)
+
+			return
+		}
 	)
-
-	absPathToTemplateCloud = func(toolDir string) (tcpath string) {
-		tcpath = filepath.Join(
-			kumoExecAbsPath,
-			constants.TEMPLATES_DIR_NAME,
-			toolDir,
-			fmt.Sprintf("%s.tmpl", cloud.Name),
-		)
-
-		return
-	}
 
 	option = func(toolManager *ToolConfig) (err error) {
 		switch toolKind {
