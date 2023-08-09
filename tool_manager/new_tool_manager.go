@@ -123,11 +123,11 @@ func WithUrl(
 				Code("WithUrl").
 				With("toolKind", toolKind)
 		currentOs, currentArch = getCurrentHostSpecs()
-		toolManagerUrl         func(tool string, version string) (url string)
+		url                    func(tool string, version string) (toolUrl string)
 	)
 
-	toolManagerUrl = func(tool string, version string) (url string) {
-		url = createHashicorpUrl(tool, version, currentOs, currentArch)
+	url = func(tool string, version string) (toolUrl string) {
+		toolUrl = createHashicorpUrl(tool, version, currentOs, currentArch)
 
 		return
 	}
@@ -135,9 +135,9 @@ func WithUrl(
 	option = func(toolManager *ToolManager) (err error) {
 		switch toolKind {
 		case constants.Packer:
-			toolManager.Url = toolManagerUrl(constants.PACKER, constants.PACKER_VERSION)
+			toolManager.Url = url(constants.PACKER, constants.PACKER_VERSION)
 		case constants.Terraform:
-			toolManager.Url = toolManagerUrl(constants.TERRAFORM, constants.TERRAFORM_VERSION)
+			toolManager.Url = url(constants.TERRAFORM, constants.TERRAFORM_VERSION)
 		default:
 			err = oopsBuilder.
 				Errorf("Unknown tool kind: %d", toolKind)
@@ -156,26 +156,31 @@ func WithAbsPathToExecutable(
 ) (option Option) {
 	var (
 		oopsBuilder = oops.
-			Code("WithAbsPathToExecutable").
-			With("toolKind", toolKind)
+				Code("WithAbsPathToExecutable").
+				With("toolKind", toolKind)
+
+		absPathToExecutable func(toolDir string) (apte string)
 	)
+
+	absPathToExecutable = func(toolDir string) (apte string) {
+		apte = filepath.Join(
+			kumoExecAbsPath,
+			constants.DEPENDENCIES_DIR_NAME,
+			toolDir,
+			fmt.Sprintf("%s.exe", toolDir),
+		)
+
+		return
+	}
 
 	option = func(toolManager *ToolManager) (err error) {
 		switch toolKind {
 		case constants.Packer:
-			toolManager.AbsPathTo.Executable = filepath.Join(
-				kumoExecAbsPath,
-				constants.DEPENDENCIES_DIR_NAME,
-				constants.PACKER,
-				fmt.Sprintf("%s.exe", constants.PACKER),
-			)
+			toolManager.AbsPathTo.Executable = absPathToExecutable(constants.PACKER)
+
 		case constants.Terraform:
-			toolManager.AbsPathTo.Executable = filepath.Join(
-				kumoExecAbsPath,
-				constants.DEPENDENCIES_DIR_NAME,
-				constants.TERRAFORM,
-				fmt.Sprintf("%s.exe", constants.TERRAFORM),
-			)
+			toolManager.AbsPathTo.Executable = absPathToExecutable(constants.TERRAFORM)
+
 		default:
 			err = oopsBuilder.
 				Errorf("Unknown tool kind: %d", toolKind)
@@ -372,10 +377,10 @@ func WithAbsPathToTemplateCloud(
 				With("cloud", cloud).
 				With("kumoExecAbsPath", kumoExecAbsPath)
 
-		templateCloudPath func(toolDir string) (tcpath string)
+		absPathToTemplateCloud func(toolDir string) (tcpath string)
 	)
 
-	templateCloudPath = func(toolDir string) (tcpath string) {
+	absPathToTemplateCloud = func(toolDir string) (tcpath string) {
 		tcpath = filepath.Join(
 			kumoExecAbsPath,
 			constants.TEMPLATES_DIR_NAME,
@@ -389,10 +394,10 @@ func WithAbsPathToTemplateCloud(
 	option = func(toolManager *ToolManager) (err error) {
 		switch toolKind {
 		case constants.Packer:
-			toolManager.AbsPathTo.Template.Cloud = templateCloudPath(constants.PACKER)
+			toolManager.AbsPathTo.Template.Cloud = absPathToTemplateCloud(constants.PACKER)
 
 		case constants.Terraform:
-			toolManager.AbsPathTo.Template.Cloud = templateCloudPath(constants.TERRAFORM)
+			toolManager.AbsPathTo.Template.Cloud = absPathToTemplateCloud(constants.TERRAFORM)
 
 		default:
 			err = oopsBuilder.
