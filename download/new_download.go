@@ -39,7 +39,7 @@ func NewDownload(
 	return
 }
 
-func WithName(tool tool.ToolManager) Option {
+func WithName(tool tool.ToolConfig) Option {
 	return func(download *Download) (err error) {
 		download.Name = tool.Name
 
@@ -47,7 +47,7 @@ func WithName(tool tool.ToolManager) Option {
 	}
 }
 
-func WithAbsPath(tool tool.ToolManager) Option {
+func WithAbsPath(tool tool.ToolConfig) Option {
 	return func(download *Download) (err error) {
 		download.AbsPath = filepath.Join(
 			constants.DEPENDENCIES_DIR_NAME,
@@ -62,7 +62,7 @@ func WithAbsPath(tool tool.ToolManager) Option {
 	}
 }
 
-func WithUrl(tool tool.ToolManager) Option {
+func WithUrl(tool tool.ToolConfig) Option {
 	return func(download *Download) (err error) {
 		download.Url = tool.Url
 
@@ -70,7 +70,7 @@ func WithUrl(tool tool.ToolManager) Option {
 	}
 }
 
-func WithContentLength(tool tool.ToolManager, getContentLength url.GetContentLengthF) Option {
+func WithContentLength(tool tool.ToolConfig, getContentLength url.GetContentLengthF) Option {
 	var (
 		oopsBuilder = oops.
 				Code("WithContentLength").

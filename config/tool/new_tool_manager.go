@@ -1,20 +1,20 @@
-package tool_manager
+package tool
 
 import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/ed3899/kumo/cloud"
+	"github.com/ed3899/kumo/config/cloud"
 	"github.com/ed3899/kumo/constants"
 	"github.com/ed3899/kumo/utils/host"
 	"github.com/ed3899/kumo/utils/url"
 	"github.com/samber/oops"
 )
 
-func NewToolManager(
+func NewToolConfig(
 	opts ...Option,
 ) (
-	toolManager *ToolManager,
+	toolManager *ToolConfig,
 	err error,
 ) {
 	var (
@@ -25,7 +25,7 @@ func NewToolManager(
 		option Option
 	)
 
-	toolManager = &ToolManager{}
+	toolManager = &ToolConfig{}
 	for _, option = range opts {
 		if err = option(toolManager); err != nil {
 			err = oopsBuilder.
@@ -46,7 +46,7 @@ func WithKind(
 			With("toolKind", toolKind)
 	)
 
-	option = func(toolManager *ToolManager) (err error) {
+	option = func(toolManager *ToolConfig) (err error) {
 		switch toolKind {
 		case constants.Packer:
 			toolManager.Kind = constants.Packer
@@ -73,7 +73,7 @@ func WithName(
 			With("toolKind", toolKind)
 	)
 
-	option = func(toolManager *ToolManager) (err error) {
+	option = func(toolManager *ToolConfig) (err error) {
 		switch toolKind {
 		case constants.Packer:
 			toolManager.Name = constants.PACKER
@@ -100,7 +100,7 @@ func WithVersion(
 			With("toolKind", toolKind)
 	)
 
-	option = func(toolManager *ToolManager) (err error) {
+	option = func(toolManager *ToolConfig) (err error) {
 		switch toolKind {
 		case constants.Packer:
 			toolManager.Version = constants.PACKER_VERSION
@@ -137,7 +137,7 @@ func WithUrl(
 		return
 	}
 
-	option = func(toolManager *ToolManager) (err error) {
+	option = func(toolManager *ToolConfig) (err error) {
 		switch toolKind {
 		case constants.Packer:
 			toolManager.Url = url(constants.PACKER, constants.PACKER_VERSION)
@@ -178,7 +178,7 @@ func WithAbsPathToExecutable(
 		return
 	}
 
-	option = func(toolManager *ToolManager) (err error) {
+	option = func(toolManager *ToolConfig) (err error) {
 		switch toolKind {
 		case constants.Packer:
 			toolManager.AbsPathTo.Executable = absPathToExecutable(constants.PACKER)
@@ -223,7 +223,7 @@ func WithAbsPathToDirRun(
 		return
 	}
 
-	option = func(toolManager *ToolManager) (err error) {
+	option = func(toolManager *ToolConfig) (err error) {
 		switch toolKind {
 		case constants.Packer:
 			toolManager.AbsPathTo.Dir.Run = absPathToDirRun(constants.PACKER)
@@ -269,7 +269,7 @@ func WithAbsPathToDirPlugins(
 		return
 	}
 
-	option = func(toolManager *ToolManager) (err error) {
+	option = func(toolManager *ToolConfig) (err error) {
 		switch toolKind {
 		case constants.Packer:
 			toolManager.AbsPathTo.Dir.Plugins = absPathToDirPlugins(constants.PACKER)
@@ -292,7 +292,7 @@ func WithAbsPathToDirPlugins(
 func WithAbsPathToDirInitial(
 	kumoExecAbsPath string,
 ) (option Option) {
-	option = func(toolManager *ToolManager) (err error) {
+	option = func(toolManager *ToolConfig) (err error) {
 		toolManager.AbsPathTo.Dir.Initial = kumoExecAbsPath
 
 		return
@@ -326,7 +326,7 @@ func WithAbsPathToTemplateFileGeneral(
 		return
 	}
 
-	option = func(toolManager *ToolManager) (err error) {
+	option = func(toolManager *ToolConfig) (err error) {
 		switch toolKind {
 		case constants.Packer:
 			toolManager.AbsPathTo.TemplateFile.General = templateGeneralPath(constants.PACKER)
@@ -372,7 +372,7 @@ func WithAbsPathToTemplateFileCloud(
 		return
 	}
 
-	option = func(toolManager *ToolManager) (err error) {
+	option = func(toolManager *ToolConfig) (err error) {
 		switch toolKind {
 		case constants.Packer:
 			toolManager.AbsPathTo.TemplateFile.Cloud = absPathToTemplateCloud(constants.PACKER)
@@ -392,7 +392,7 @@ func WithAbsPathToTemplateFileCloud(
 	return
 }
 
-func (tm *ToolManager) SetPluginsPath(
+func (tm *ToolConfig) SetPluginsPath(
 	environmentSetter EnvironmentSetterF,
 ) (err error) {
 	var (
@@ -409,7 +409,7 @@ func (tm *ToolManager) SetPluginsPath(
 	return
 }
 
-func (tm *ToolManager) UnsetPluginsPath(
+func (tm *ToolConfig) UnsetPluginsPath(
 	environmentUnsetter EnvironmentUnsetterF,
 ) (err error) {
 	var (
@@ -426,7 +426,7 @@ func (tm *ToolManager) UnsetPluginsPath(
 	return
 }
 
-func (tm *ToolManager) ChangeToInitialDir(
+func (tm *ToolConfig) ChangeToInitialDir(
 	dirChanger DirChangerF,
 ) (err error) {
 	var (
@@ -444,7 +444,7 @@ func (tm *ToolManager) ChangeToInitialDir(
 	return
 }
 
-func (tm *ToolManager) ChangeToRunDir(
+func (tm *ToolConfig) ChangeToRunDir(
 	dirChanger DirChangerF,
 ) (err error) {
 	var (
@@ -462,7 +462,7 @@ func (tm *ToolManager) ChangeToRunDir(
 	return
 }
 
-type ToolManager struct {
+type ToolConfig struct {
 	Kind      constants.ToolKind
 	Name      string
 	Version   string
@@ -487,7 +487,7 @@ type TemplateFile struct {
 	Cloud   string
 }
 
-type Option func(*ToolManager) error
+type Option func(*ToolConfig) error
 
 type EnvironmentSetterF func(key string, value string) error
 type EnvironmentUnsetterF func(key string) error
