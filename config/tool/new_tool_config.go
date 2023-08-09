@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"github.com/ed3899/kumo/common/interfaces"
 	"github.com/ed3899/kumo/config/cloud"
 	"github.com/ed3899/kumo/constants"
 	"github.com/ed3899/kumo/utils/host"
@@ -128,8 +129,8 @@ func WithUrl(
 				Code("WithUrl").
 				With("toolKind", toolKind)
 		currentOs, currentArch = getCurrentHostSpecs()
-		url                    = func(tool string, version string) (toolUrl string) {
-			toolUrl = createHashicorpUrl(tool, version, currentOs, currentArch)
+		url                    = func(tool string, version string) (toolUrl ToolUrl) {
+			toolUrl = ToolUrl(createHashicorpUrl(tool, version, currentOs, currentArch))
 
 			return
 		}
@@ -177,10 +178,10 @@ func WithAbsPathToExecutable(
 	option = func(toolManager *ToolConfig) (err error) {
 		switch toolKind {
 		case constants.Packer:
-			toolManager.absPath.executable = absPathToExecutable(constants.PACKER)
+			toolManager.AbsPath.Executable = absPathToExecutable(constants.PACKER)
 
 		case constants.Terraform:
-			toolManager.absPath.executable = absPathToExecutable(constants.TERRAFORM)
+			toolManager.AbsPath.Executable = absPathToExecutable(constants.TERRAFORM)
 
 		default:
 			err = oopsBuilder.
@@ -220,10 +221,10 @@ func WithAbsPathToDirRun(
 	option = func(toolManager *ToolConfig) (err error) {
 		switch toolKind {
 		case constants.Packer:
-			toolManager.absPath.dir.run = absPathToDirRun(constants.PACKER)
+			toolManager.AbsPath.Dir.Run = absPathToDirRun(constants.PACKER)
 
 		case constants.Terraform:
-			toolManager.absPath.dir.run = absPathToDirRun(constants.TERRAFORM)
+			toolManager.AbsPath.Dir.Run = absPathToDirRun(constants.TERRAFORM)
 
 		default:
 			err = oopsBuilder.
@@ -264,10 +265,10 @@ func WithAbsPathToDirPlugins(
 	option = func(toolManager *ToolConfig) (err error) {
 		switch toolKind {
 		case constants.Packer:
-			toolManager.absPath.dir.plugins = absPathToDirPlugins(constants.PACKER)
+			toolManager.AbsPath.Dir.Plugins = absPathToDirPlugins(constants.PACKER)
 
 		case constants.Terraform:
-			toolManager.absPath.dir.plugins = absPathToDirPlugins(constants.TERRAFORM)
+			toolManager.AbsPath.Dir.Plugins = absPathToDirPlugins(constants.TERRAFORM)
 
 		default:
 			err = oopsBuilder.
@@ -285,7 +286,7 @@ func WithAbsPathToDirInitial(
 	kumoExecAbsPath string,
 ) (option Option) {
 	option = func(toolManager *ToolConfig) (err error) {
-		toolManager.absPath.dir.initial = kumoExecAbsPath
+		toolManager.AbsPath.Dir.Initial = kumoExecAbsPath
 
 		return
 	}
@@ -319,10 +320,10 @@ func WithAbsPathToTemplateFileGeneral(
 	option = func(toolManager *ToolConfig) (err error) {
 		switch toolKind {
 		case constants.Packer:
-			toolManager.absPath.templateFile.general = absPathToTemplateFileGeneral(constants.PACKER)
+			toolManager.AbsPath.TemplateFile.General = absPathToTemplateFileGeneral(constants.PACKER)
 
 		case constants.Terraform:
-			toolManager.absPath.templateFile.general = absPathToTemplateFileGeneral(constants.TERRAFORM)
+			toolManager.AbsPath.TemplateFile.General = absPathToTemplateFileGeneral(constants.TERRAFORM)
 
 		default:
 			err = oopsBuilder.
@@ -363,10 +364,10 @@ func WithAbsPathToTemplateFileCloud(
 	option = func(toolManager *ToolConfig) (err error) {
 		switch toolKind {
 		case constants.Packer:
-			toolManager.absPath.templateFile.cloud = absPathToTemplateFileCloud(constants.PACKER)
+			toolManager.AbsPath.TemplateFile.Cloud = absPathToTemplateFileCloud(constants.PACKER)
 
 		case constants.Terraform:
-			toolManager.absPath.templateFile.cloud = absPathToTemplateFileCloud(constants.TERRAFORM)
+			toolManager.AbsPath.TemplateFile.Cloud = absPathToTemplateFileCloud(constants.TERRAFORM)
 
 		default:
 			err = oopsBuilder.
@@ -388,9 +389,9 @@ func (tm *ToolConfig) SetPluginsPath(
 			Code("SetPluginsDir")
 	)
 
-	if err = os_Setenv(constants.PACKER_PLUGIN_PATH, tm.absPath.dir.plugins); err != nil {
+	if err = os_Setenv(constants.PACKER_PLUGIN_PATH, tm.AbsPath.Dir.Plugins); err != nil {
 		err = oopsBuilder.
-			Wrapf(err, "Failed to set plugins dir '%s'", tm.absPath.dir.plugins)
+			Wrapf(err, "Failed to set plugins dir '%s'", tm.AbsPath.Dir.Plugins)
 		return
 	}
 
@@ -423,9 +424,9 @@ func (tm *ToolConfig) ChangeToInitialDir(
 			With("dirChanger", os_Chdir)
 	)
 
-	if err = os_Chdir(tm.absPath.dir.initial); err != nil {
+	if err = os_Chdir(tm.AbsPath.Dir.Initial); err != nil {
 		err = oopsBuilder.
-			Wrapf(err, "Failed to change to initial dir '%s'", tm.absPath.dir.initial)
+			Wrapf(err, "Failed to change to initial dir '%s'", tm.AbsPath.Dir.Initial)
 		return
 	}
 
@@ -441,118 +442,71 @@ func (tm *ToolConfig) ChangeToRunDir(
 			With("dirChanger", os_Chdir)
 	)
 
-	if err = os_Chdir(tm.absPath.dir.run); err != nil {
+	if err = os_Chdir(tm.AbsPath.Dir.Run); err != nil {
 		err = oopsBuilder.
-			Wrapf(err, "Failed to change to run dir '%s'", tm.absPath.dir.run)
+			Wrapf(err, "Failed to change to run dir '%s'", tm.AbsPath.Dir.Run)
 		return
 	}
 
 	return
 }
 
-func (tc *ToolConfig) Kind() (kind constants.ToolKind) {
-	kind = tc.kind
-
+func (tc *ToolConfig) Kind() (toolKind constants.ToolKind) {
+	toolKind = tc.kind
 	return
 }
 
-func (tc *ToolConfig) Name() (name string) {
-	name = tc.name
-
+func (tc *ToolConfig) Name() (toolName ToolName) {
+	toolName = tc.name
 	return
 }
 
-func (tc *ToolConfig) Version() (version string) {
-	version = tc.version
-
+func (tc *ToolConfig) Version() (toolVersion ToolVersion) {
+	toolVersion = tc.version
 	return
 }
 
-func (tc *ToolConfig) Url() (url string) {
-	url = tc.url
-
+func (tc *ToolConfig) Url() (toolUrl ToolUrl) {
+	toolUrl = tc.url
 	return
 }
 
-func (tc *ToolConfig) AbsPath() (absPath *AbsPath) {
-	absPath = tc.absPath
-
-	return
-}
-
-type ToolConfig struct {
-	kind    constants.ToolKind
-	name    string
-	version string
-	url     string
-	absPath *AbsPath
-}
-
-type AbsPath struct {
-	executable   string
-	dir          *Dir
-	templateFile *TemplateFileCombo
-}
-
-func (ap *AbsPath) Executable() (executable string) {
-	executable = ap.executable
-
-	return
-}
-
-func (ap *AbsPath) Dir() (dir *Dir) {
-	dir = ap.dir
-
-	return
-}
-
-func (ap *AbsPath) TemplateFile() (templateFile *TemplateFileCombo) {
-	templateFile = ap.templateFile
-
-	return
-}
-
-type Dir struct {
-	plugins string
-	run     string
-	initial string
-}
-
-func (d *Dir) Plugins() (plugins string) {
-	plugins = d.plugins
-
-	return
-}
-
-func (d *Dir) Run() (run string) {
-	run = d.run
-
-	return
-}
-
-func (d *Dir) Initial() (initial string) {
-	initial = d.initial
-
-	return
-}
-
-type TemplateFileCombo struct {
-	general string
-	cloud   string
-}
-
-func (tf *TemplateFileCombo) General() (general string) {
-	general = tf.general
-
-	return
-}
-
-func (tf *TemplateFileCombo) Cloud() (cloud string) {
-	cloud = tf.cloud
-
-	return
-}
+type DirChangerF func(dir string) error
 
 type Option func(*ToolConfig) error
 
-type DirChangerF func(dir string) error
+type ToolName string
+type ToolVersion string
+type ToolUrl string
+
+type ToolConfig struct {
+	kind    constants.ToolKind
+	name    ToolName
+	version ToolVersion
+	url     ToolUrl
+	AbsPath *ToolAbsPath
+}
+
+type ToolAbsPath struct {
+	Executable   string
+	Dir          *Dir
+	TemplateFile *TemplateFileCombo
+}
+
+type Dir struct {
+	Plugins string
+	Run     string
+	Initial string
+}
+
+type TemplateFileCombo struct {
+	General string
+	Cloud   string
+}
+
+type ToolConfigI interface {
+	interfaces.KindGetter[constants.ToolKind]
+	interfaces.NameGetter[ToolName]
+	interfaces.VersionGetter[ToolVersion]
+	interfaces.UrlGetter[ToolUrl]
+}

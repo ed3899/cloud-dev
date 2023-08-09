@@ -5,6 +5,7 @@ import (
 	text_template "text/template"
 
 	"github.com/ed3899/kumo/config/tool"
+	"github.com/ed3899/kumo/common/interfaces"
 	"github.com/ed3899/kumo/constants"
 	"github.com/ed3899/kumo/utils/file"
 	"github.com/samber/oops"
@@ -57,7 +58,7 @@ func WithAbsPath(
 
 func (t *TemplateFile) Create(
 	file_MergedFilesTo file.MergeFilesToF,
-	toolConfig tool.ToolConfig,
+	toolConfig interfaces.ToolConfig,
 ) (
 	err error,
 ) {
@@ -70,15 +71,15 @@ func (t *TemplateFile) Create(
 
 	if err = file_MergedFilesTo(
 		t.AbsPath,
-		toolConfig.AbsPath.TemplateFile.General,
-		toolConfig.AbsPath.TemplateFile.Cloud,
+		toolConfig.AbsPath().TemplateFile().General(),
+		toolConfig.AbsPath().TemplateFile().Cloud(),
 	); err != nil {
 		err = oopsBuilder.
 			Wrapf(
 				err,
 				"Failed to merge general and cloud template '%s' and '%s'",
-				toolConfig.AbsPath.TemplateFile.General,
-				toolConfig.AbsPath.TemplateFile.Cloud,
+				toolConfig.AbsPath().TemplateFile().General(),
+				toolConfig.AbsPath().TemplateFile().Cloud(),
 			)
 
 		return

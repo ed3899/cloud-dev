@@ -35,7 +35,7 @@ func WithAbsPath(
 	option = func(vars *Vars) {
 		vars.AbsPath = filepath.Join(
 			kumoExecAbsPath,
-			toolConfig.Name,
+			toolConfig.Name(),
 			cloudConfig.Name,
 		)
 	}
