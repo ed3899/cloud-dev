@@ -264,9 +264,9 @@ func WithTempMergedTemplateFileName(toolKind constants.ToolKind) (option Option)
 	option = func(toolManager *ToolManager) (err error) {
 		switch toolKind {
 		case constants.Packer:
-			toolManager.AbsPathTo.Template.Merged = filepath.Join(constants.TEMPLATES_DIR_NAME, constants.PACKER_TEMP)
+			toolManager.AbsPathTo.Template.Merged = filepath.Join(constants.TEMPLATES_DIR_NAME, constants.MERGED_TEMPLATE)
 		case constants.Terraform:
-			toolManager.AbsPathTo.Template.Merged = filepath.Join(constants.TEMPLATES_DIR_NAME, constants.TERRAFORM_TEMP)
+			toolManager.AbsPathTo.Template.Merged = filepath.Join(constants.TEMPLATES_DIR_NAME, constants.MERGED_TEMPLATE)
 		default:
 			err = oopsBuilder.
 				Errorf("Unknown tool kind: %d", toolKind)
@@ -298,7 +298,7 @@ func WithAbsPathToGeneralTemplate(
 				constants.TEMPLATES_DIR_NAME,
 				constants.PACKER,
 				constants.GENERAL_DIR_NAME,
-				constants.PACKER_GENERAL_VARS_TEMPLATE,
+				constants.GENERAL_TEMPLATE,
 			)
 
 		case constants.Terraform:
@@ -307,7 +307,7 @@ func WithAbsPathToGeneralTemplate(
 				constants.TEMPLATES_DIR_NAME,
 				constants.TERRAFORM,
 				constants.GENERAL_DIR_NAME,
-				constants.TERRAFORM_GENERAL_VARS_TEMPLATE,
+				constants.GENERAL_TEMPLATE,
 			)
 
 		default:
@@ -338,40 +338,20 @@ func WithAbsPathToCloudTemplate(
 	option = func(toolManager *ToolManager) (err error) {
 		switch toolKind {
 		case constants.Packer:
-
-			switch cloud.Kind {
-			case constants.Aws:
-				toolManager.AbsPathTo.Template.Cloud = filepath.Join(
-					kumoExecAbsPath,
-					constants.TEMPLATES_DIR_NAME,
-					constants.PACKER,
-					constants.AWS,
-					constants.PACKER_AWS_VARS_TEMPLATE,
-				)
-
-			default:
-				err = oopsBuilder.
-					Wrapf(err, "Unsupported cloud '%v'", cloud.Kind)
-				return
-			}
+			toolManager.AbsPathTo.Template.Cloud = filepath.Join(
+				kumoExecAbsPath,
+				constants.TEMPLATES_DIR_NAME,
+				constants.PACKER,
+				fmt.Sprintf("%s.tmpl", cloud.Name),
+			)
 
 		case constants.Terraform:
-
-			switch cloud.Kind {
-			case constants.Aws:
-				toolManager.AbsPathTo.Template.Cloud = filepath.Join(
-					kumoExecAbsPath,
-					constants.TEMPLATES_DIR_NAME,
-					constants.TERRAFORM,
-					constants.AWS,
-					constants.TERRAFORM_AWS_VARS_TEMPLATE,
-				)
-
-			default:
-				err = oopsBuilder.
-					Wrapf(err, "Unsupported cloud '%v'", cloud.Kind)
-				return
-			}
+			toolManager.AbsPathTo.Template.Cloud = filepath.Join(
+				kumoExecAbsPath,
+				constants.TEMPLATES_DIR_NAME,
+				constants.TERRAFORM,
+				fmt.Sprintf("%s.tmpl", cloud.Name),
+			)
 
 		default:
 			err = oopsBuilder.
