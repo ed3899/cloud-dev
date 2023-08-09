@@ -245,28 +245,33 @@ func WithAbsPathToDirPlugins(
 ) (option Option) {
 	var (
 		oopsBuilder = oops.
-			Code("WithAbsPathToDirPlugins").
-			With("toolKind", toolKind).
-			With("cloud", cloud).
-			With("kumoExecAbsPath", kumoExecAbsPath)
+				Code("WithAbsPathToDirPlugins").
+				With("toolKind", toolKind).
+				With("cloud", cloud).
+				With("kumoExecAbsPath", kumoExecAbsPath)
+
+		absPathToDirPlugins func(toolDir string) (aptdp string)
 	)
+
+	absPathToDirPlugins = func(toolDir string) (aptdp string) {
+		aptdp = filepath.Join(
+			kumoExecAbsPath,
+			toolDir,
+			cloud.Name,
+			constants.PLUGINS_DIR_NAME,
+		)
+
+		return
+	}
 
 	option = func(toolManager *ToolManager) (err error) {
 		switch toolKind {
 		case constants.Packer:
-			toolManager.AbsPathTo.Dir.Plugins = filepath.Join(
-				kumoExecAbsPath,
-				constants.PACKER,
-				cloud.Name,
-				constants.PLUGINS_DIR_NAME,
-			)
+			toolManager.AbsPathTo.Dir.Plugins = absPathToDirPlugins(constants.PACKER)
+
 		case constants.Terraform:
-			toolManager.AbsPathTo.Dir.Plugins = filepath.Join(
-				kumoExecAbsPath,
-				constants.TERRAFORM,
-				cloud.Name,
-				constants.PLUGINS_DIR_NAME,
-			)
+			toolManager.AbsPathTo.Dir.Plugins = absPathToDirPlugins(constants.TERRAFORM)
+
 		default:
 			err = oopsBuilder.
 				Errorf("Unknown tool kind: %d", toolKind)
