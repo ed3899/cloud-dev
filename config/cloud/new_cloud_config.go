@@ -9,7 +9,12 @@ import (
 	"github.com/spf13/viper"
 )
 
-func NewCloud(options ...Option) (cloud *Cloud, err error) {
+func NewCloudConfig(
+	options ...Option,
+) (
+	cloud *Cloud,
+	err error,
+) {
 	var (
 		oopsBuilder = oops.
 				Code("NewCloud").
@@ -30,7 +35,11 @@ func NewCloud(options ...Option) (cloud *Cloud, err error) {
 	return
 }
 
-func WithKind(cloudFromConfig string) (option Option) {
+func WithKind(
+	cloudFromConfig string,
+) (
+	option Option,
+) {
 	var (
 		oopsBuilder = oops.
 			Code("WithKind").
@@ -53,7 +62,11 @@ func WithKind(cloudFromConfig string) (option Option) {
 	return
 }
 
-func WithName(cloudFromConfig string) (option Option) {
+func WithName(
+	cloudFromConfig string,
+) (
+	option Option,
+) {
 	var (
 		oopsBuilder = oops.
 			Code("WithName").
@@ -76,7 +89,11 @@ func WithName(cloudFromConfig string) (option Option) {
 	return
 }
 
-func WithCredentials(cloudFromConfig string) (option Option) {
+func WithCredentials(
+	cloudFromConfig string,
+) (
+	option Option,
+) {
 	var (
 		oopsBuilder = oops.
 			Code("WithCredentials").
@@ -102,7 +119,12 @@ func WithCredentials(cloudFromConfig string) (option Option) {
 	return
 }
 
-func WithPackerManifestPath(cloudFromConfig, kumoExecAbsPath string) (option Option) {
+func WithPackerManifestPath(
+	cloudFromConfig,
+	kumoExecAbsPath string,
+) (
+	option Option,
+) {
 	var (
 		oopsBuilder = oops.
 			Code("WithPackerManifestPath").
