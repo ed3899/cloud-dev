@@ -32,7 +32,9 @@ func NewToolManager(opts ...Option) (toolManager *ToolManager, err error) {
 	return
 }
 
-func WithKind(toolKind constants.ToolKind) (option Option) {
+func WithKind(
+	toolKind constants.ToolKind,
+) (option Option) {
 	var (
 		oopsBuilder = oops.
 			Code("WithKind").
@@ -57,7 +59,9 @@ func WithKind(toolKind constants.ToolKind) (option Option) {
 	return
 }
 
-func WithName(toolKind constants.ToolKind) (option Option) {
+func WithName(
+	toolKind constants.ToolKind,
+) (option Option) {
 	var (
 		oopsBuilder = oops.
 			Code("WithName").
@@ -82,7 +86,9 @@ func WithName(toolKind constants.ToolKind) (option Option) {
 	return
 }
 
-func WithVersion(toolKind constants.ToolKind) (option Option) {
+func WithVersion(
+	toolKind constants.ToolKind,
+) (option Option) {
 	var (
 		oopsBuilder = oops.
 			Code("WithVersion").
@@ -137,10 +143,13 @@ func WithUrl(
 	return
 }
 
-func WithExecutableAbsPath(toolKind constants.ToolKind, kumoExecAbsPath string) (option Option) {
+func WithAbsPathToExecutable(
+	toolKind constants.ToolKind,
+	kumoExecAbsPath string,
+) (option Option) {
 	var (
 		oopsBuilder = oops.
-			Code("WithExecutableAbsPath").
+			Code("WithAbsPathToExecutable").
 			With("toolKind", toolKind)
 	)
 
@@ -172,10 +181,14 @@ func WithExecutableAbsPath(toolKind constants.ToolKind, kumoExecAbsPath string) 
 	return
 }
 
-func WithRunDirAbsPath(cloud cloud.Cloud, toolKind constants.ToolKind, kumoExecAbsPath string) (option Option) {
+func WithAbsPathToDirRun(
+	cloud cloud.Cloud,
+	toolKind constants.ToolKind,
+	kumoExecAbsPath string,
+) (option Option) {
 	var (
 		oopsBuilder = oops.
-			Code("WithRunDir").
+			Code("WithAbsPathToDirRun").
 			With("toolKind", toolKind).
 			With("cloud", cloud).
 			With("kumoExecAbsPath", kumoExecAbsPath)
@@ -207,10 +220,14 @@ func WithRunDirAbsPath(cloud cloud.Cloud, toolKind constants.ToolKind, kumoExecA
 	return
 }
 
-func WithPluginsDir(cloud cloud.Cloud, toolKind constants.ToolKind, kumoExecAbsPath string) (option Option) {
+func WithAbsPathToDirPlugins(
+	cloud cloud.Cloud,
+	toolKind constants.ToolKind,
+	kumoExecAbsPath string,
+) (option Option) {
 	var (
 		oopsBuilder = oops.
-			Code("WithPluginsDir").
+			Code("WithAbsPathToDirPlugins").
 			With("toolKind", toolKind).
 			With("cloud", cloud).
 			With("kumoExecAbsPath", kumoExecAbsPath)
@@ -244,7 +261,9 @@ func WithPluginsDir(cloud cloud.Cloud, toolKind constants.ToolKind, kumoExecAbsP
 	return
 }
 
-func WithInitialDirAbsPath(kumoExecAbsPath string) (option Option) {
+func WithAbsPathToDirInitial(
+	kumoExecAbsPath string,
+) (option Option) {
 	option = func(toolManager *ToolManager) (err error) {
 		toolManager.AbsPathTo.Dir.Initial = kumoExecAbsPath
 
@@ -254,7 +273,9 @@ func WithInitialDirAbsPath(kumoExecAbsPath string) (option Option) {
 	return
 }
 
-func WithTempMergedTemplateFileName(toolKind constants.ToolKind) (option Option) {
+func WithAbsPathToTemplateMerged(
+	toolKind constants.ToolKind,
+) (option Option) {
 	var (
 		oopsBuilder = oops.
 			Code("TempMergedTemplateFileName").
@@ -264,9 +285,17 @@ func WithTempMergedTemplateFileName(toolKind constants.ToolKind) (option Option)
 	option = func(toolManager *ToolManager) (err error) {
 		switch toolKind {
 		case constants.Packer:
-			toolManager.AbsPathTo.Template.Merged = filepath.Join(constants.TEMPLATES_DIR_NAME, constants.MERGED_TEMPLATE)
+			toolManager.AbsPathTo.Template.Merged = filepath.Join(
+				constants.TEMPLATES_DIR_NAME,
+				constants.MERGED_TEMPLATE,
+			)
+
 		case constants.Terraform:
-			toolManager.AbsPathTo.Template.Merged = filepath.Join(constants.TEMPLATES_DIR_NAME, constants.MERGED_TEMPLATE)
+			toolManager.AbsPathTo.Template.Merged = filepath.Join(
+				constants.TEMPLATES_DIR_NAME,
+				constants.MERGED_TEMPLATE,
+			)
+
 		default:
 			err = oopsBuilder.
 				Errorf("Unknown tool kind: %d", toolKind)
@@ -279,36 +308,38 @@ func WithTempMergedTemplateFileName(toolKind constants.ToolKind) (option Option)
 	return
 }
 
-func WithAbsPathToGeneralTemplate(
+func WithAbsPathToTemplateGeneral(
 	toolKind constants.ToolKind,
 	kumoExecAbsPath string,
 ) (option Option) {
 	var (
 		oopsBuilder = oops.
-			Code("WithAbsPathToGeneralTemplateFor").
-			With("toolKind", toolKind).
-			With("kumoExecAbsPath", kumoExecAbsPath)
+				Code("WithAbsPathToTemplateGeneral").
+				With("toolKind", toolKind).
+				With("kumoExecAbsPath", kumoExecAbsPath)
+
+		templatePath func(toolDir string) (tpath string)
 	)
+
+	templatePath = func(toolDir string) (tpath string) {
+		tpath = filepath.Join(
+			kumoExecAbsPath,
+			constants.TEMPLATES_DIR_NAME,
+			toolDir,
+			constants.GENERAL_DIR_NAME,
+			constants.GENERAL_TEMPLATE,
+		)
+g
+		return
+	}
 
 	option = func(toolManager *ToolManager) (err error) {
 		switch toolKind {
 		case constants.Packer:
-			toolManager.AbsPathTo.Template.General = filepath.Join(
-				kumoExecAbsPath,
-				constants.TEMPLATES_DIR_NAME,
-				constants.PACKER,
-				constants.GENERAL_DIR_NAME,
-				constants.GENERAL_TEMPLATE,
-			)
+			toolManager.AbsPathTo.Template.General = templatePath(constants.PACKER)
 
 		case constants.Terraform:
-			toolManager.AbsPathTo.Template.General = filepath.Join(
-				kumoExecAbsPath,
-				constants.TEMPLATES_DIR_NAME,
-				constants.TERRAFORM,
-				constants.GENERAL_DIR_NAME,
-				constants.GENERAL_TEMPLATE,
-			)
+			toolManager.AbsPathTo.Template.General = templatePath(constants.TERRAFORM)
 
 		default:
 			err = oopsBuilder.
