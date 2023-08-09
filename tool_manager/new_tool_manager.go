@@ -301,21 +301,6 @@ func WithAbsPathToDirInitial(
 	return
 }
 
-func WithAbsPathToTemplateFileMerged(
-	toolKind constants.ToolKind,
-) (option Option) {
-	option = func(toolManager *ToolManager) (err error) {
-		toolManager.AbsPathTo.TemplateFile.Merged = filepath.Join(
-			constants.TEMPLATES_DIR_NAME,
-			constants.MERGED_TEMPLATE,
-		)
-
-		return
-	}
-
-	return
-}
-
 func WithAbsPathToTemplateFileGeneral(
 	toolKind constants.ToolKind,
 	kumoExecAbsPath string,
@@ -500,7 +485,6 @@ type Dir struct {
 type TemplateFile struct {
 	General string
 	Cloud   string
-	Merged  string
 }
 
 type Option func(*ToolManager) error
