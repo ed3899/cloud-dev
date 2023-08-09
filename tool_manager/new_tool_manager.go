@@ -299,31 +299,11 @@ func WithAbsPathToDirInitial(
 func WithAbsPathToTemplateMerged(
 	toolKind constants.ToolKind,
 ) (option Option) {
-	var (
-		oopsBuilder = oops.
-			Code("TempMergedTemplateFileName").
-			With("toolKind", toolKind)
-	)
-
 	option = func(toolManager *ToolManager) (err error) {
-		switch toolKind {
-		case constants.Packer:
-			toolManager.AbsPathTo.Template.Merged = filepath.Join(
-				constants.TEMPLATES_DIR_NAME,
-				constants.MERGED_TEMPLATE,
-			)
-
-		case constants.Terraform:
-			toolManager.AbsPathTo.Template.Merged = filepath.Join(
-				constants.TEMPLATES_DIR_NAME,
-				constants.MERGED_TEMPLATE,
-			)
-
-		default:
-			err = oopsBuilder.
-				Errorf("Unknown tool kind: %d", toolKind)
-			return
-		}
+		toolManager.AbsPathTo.Template.Merged = filepath.Join(
+			constants.TEMPLATES_DIR_NAME,
+			constants.MERGED_TEMPLATE,
+		)
 
 		return
 	}
