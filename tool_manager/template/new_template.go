@@ -66,6 +66,13 @@ func WithInstance(
 					tool.AbsPathTo.TemplateFile.General,
 					tool.AbsPathTo.TemplateFile.Cloud,
 				)
+
+			return
+		}
+
+		if template.Instance, err = template.Instance.ParseFiles(mergedTemplateAbsPath); err != nil {
+			err = oopsBuilder.
+				Wrapf(err, "Failed to parse merged template '%s'", mergedTemplateAbsPath)
 			return
 		}
 	}
