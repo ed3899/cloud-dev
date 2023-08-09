@@ -75,6 +75,8 @@ func WithInstance(
 				Wrapf(err, "Failed to parse merged template '%s'", mergedTemplateAbsPath)
 			return
 		}
+
+		return
 	}
 
 	return
