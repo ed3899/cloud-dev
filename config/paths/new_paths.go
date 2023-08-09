@@ -1,4 +1,4 @@
-package dir
+package path
 
 import (
 	"path/filepath"
@@ -10,17 +10,17 @@ import (
 	"github.com/samber/oops"
 )
 
-func NewDirectory(
+func NewPaths(
 	options ...Option,
 ) (
-	directory *Directory,
+	directory *Paths,
 ) {
 
 	var (
 		option Option
 	)
 
-	directory = &Directory{}
+	directory = &Paths{}
 	for _, option = range options {
 		option(directory)
 	}
@@ -39,7 +39,7 @@ func WithPlugins[
 	option Option,
 ) {
 
-	option = func(directory *Directory) {
+	option = func(directory *Paths) {
 		directory.plugins = Plugins(
 			filepath.Join(
 				kumoExecAbsPath,
@@ -64,7 +64,7 @@ func WithRun[
 	option Option,
 ) {
 
-	option = func(directory *Directory) {
+	option = func(directory *Paths) {
 		directory.run = Run(
 			filepath.Join(
 				kumoExecAbsPath,
@@ -83,7 +83,7 @@ func WithInitial(
 	option Option,
 ) {
 
-	option = func(directory *Directory) {
+	option = func(directory *Paths) {
 		directory.initial = Initial(
 			kumoExecAbsPath,
 		)
@@ -92,7 +92,7 @@ func WithInitial(
 	return
 }
 
-func (d *Directory) SetPluginsPath(
+func (d *Paths) SetPluginsPath(
 	os_Setenv func(key string, value string) error,
 ) (
 	err error,
@@ -111,7 +111,7 @@ func (d *Directory) SetPluginsPath(
 	return
 }
 
-func (d *Directory) UnsetPluginsPath(
+func (d *Paths) UnsetPluginsPath(
 	os_Unset func(key string) error,
 ) (
 	err error,
@@ -130,7 +130,7 @@ func (d *Directory) UnsetPluginsPath(
 	return
 }
 
-func (d *Directory) GoToRunDirectory(
+func (d *Paths) GoRun(
 	os_Chdir func(dir string) error,
 ) (
 	err error,
@@ -149,7 +149,7 @@ func (d *Directory) GoToRunDirectory(
 	return
 }
 
-func (d *Directory) GoToInitialDirectory(
+func (d *Paths) GoInitial(
 	os_Chdir func(dir string) error,
 ) (
 	err error,
@@ -186,7 +186,7 @@ func (i Initial) String() (initial string) {
 	return
 }
 
-type Directory struct {
+type Paths struct {
 	plugins Plugins
 	run     Run
 	initial Initial
@@ -198,4 +198,29 @@ type Run string
 
 type Initial string
 
-type Option func(*Directory)
+type Option func(*Paths)
+
+type PluginSetter interface {
+	SetPluginsPath(os_Setenv func(key string, value string) error) (err error)
+}
+
+type PluginUnsetter interface {
+	UnsetPluginsPath(os_Unset func(key string) error) (err error)
+}
+
+type RunChanger interface {
+	GoRun(os_Chdir DirChangerF) (err error)
+}
+
+type InitialChanger interface {
+	GoInitial(os_Chdir DirChangerF) (err error)
+}
+
+type DirChangerF func(dir string) error
+
+type PathsI interface {
+	PluginSetter
+	PluginUnsetter
+	RunChanger
+	InitialChanger
+}

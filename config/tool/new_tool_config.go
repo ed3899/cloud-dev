@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/ed3899/kumo/common/interfaces"
+	"github.com/ed3899/kumo/common/alias"
+	"github.com/ed3899/kumo/common/constants"
 	"github.com/ed3899/kumo/config/cloud"
+	"github.com/ed3899/kumo/config/paths"
 	"github.com/ed3899/kumo/constants"
 	"github.com/ed3899/kumo/utils/host"
 	"github.com/ed3899/kumo/utils/url"
@@ -130,7 +132,7 @@ func WithUrl(
 				With("toolKind", toolKind)
 		currentOs, currentArch = getCurrentHostSpecs()
 		url                    = func(tool string, version string) (toolUrl ToolUrl) {
-			toolUrl = ToolUrl(createHashicorpUrl(tool, version, currentOs, currentArch))
+			toolUrl = alias.ToolUrl(createHashicorpUrl(tool, version, currentOs, currentArch))
 
 			return
 		}
@@ -381,127 +383,32 @@ func WithAbsPathToTemplateFileCloud(
 	return
 }
 
-func (tm *Tool) SetPluginsPath(
-	os_Setenv func(key string, value string) error,
-) (err error) {
-	var (
-		oopsBuilder = oops.
-			Code("SetPluginsDir")
-	)
-
-	if err = os_Setenv(constants.PACKER_PLUGIN_PATH, tm.AbsPath.Dir.Plugins); err != nil {
-		err = oopsBuilder.
-			Wrapf(err, "Failed to set plugins dir '%s'", tm.AbsPath.Dir.Plugins)
-		return
-	}
-
-	return
-}
-
-func (tm *Tool) UnsetPluginsPath(
-	os_Unset func(key string) error,
-) (err error) {
-	var (
-		oopsBuilder = oops.
-			Code("UnsetPluginsDir")
-	)
-
-	if err = os_Unset(constants.PACKER_PLUGIN_PATH); err != nil {
-		err = oopsBuilder.
-			Wrapf(err, "Failed to unset plugins dir '%s'", constants.PACKER_PLUGIN_PATH)
-		return
-	}
-
-	return
-}
-
-func (tm *Tool) ChangeToInitialDir(
-	os_Chdir DirChangerF,
-) (err error) {
-	var (
-		oopsBuilder = oops.
-			Code("ChangeToInitialDir").
-			With("dirChanger", os_Chdir)
-	)
-
-	if err = os_Chdir(tm.AbsPath.Dir.Initial); err != nil {
-		err = oopsBuilder.
-			Wrapf(err, "Failed to change to initial dir '%s'", tm.AbsPath.Dir.Initial)
-		return
-	}
-
-	return
-}
-
-func (tm *Tool) ChangeToRunDir(
-	os_Chdir DirChangerF,
-) (err error) {
-	var (
-		oopsBuilder = oops.
-			Code("ChangeToRunDir").
-			With("dirChanger", os_Chdir)
-	)
-
-	if err = os_Chdir(tm.AbsPath.Dir.Run); err != nil {
-		err = oopsBuilder.
-			Wrapf(err, "Failed to change to run dir '%s'", tm.AbsPath.Dir.Run)
-		return
-	}
-
-	return
-}
-
 func (tc *Tool) Kind() (toolKind constants.ToolKind) {
 	toolKind = tc.kind
 	return
 }
 
-func (tc *Tool) Name() (toolName ToolName) {
+func (tc *Tool) Name() (toolName alias.ToolName) {
 	toolName = tc.name
 	return
 }
 
-func (tc *Tool) Version() (toolVersion ToolVersion) {
+func (tc *Tool) Version() (toolVersion alias.ToolVersion) {
 	toolVersion = tc.version
 	return
 }
 
-func (tc *Tool) Url() (toolUrl ToolUrl) {
+func (tc *Tool) Url() (toolUrl alias.ToolUrl) {
 	toolUrl = tc.url
-	return
-}
-
-type DirChangerF func(dir string) error
-
-type Option func(*Tool) error
-
-type ToolName string
-
-func (tn ToolName) String() (toolName string) {
-	toolName = string(tn)
-	return
-}
-
-type ToolVersion string
-
-func (tv ToolVersion) String() (toolVersion string) {
-	toolVersion = string(tv)
-	return
-}
-
-type ToolUrl string
-
-func (tu ToolUrl) String() (toolUrl string) {
-	toolUrl = string(tu)
 	return
 }
 
 type Tool struct {
 	kind    constants.ToolKind
-	name    ToolName
-	version ToolVersion
-	url     ToolUrl
-	AbsPath *ToolAbsPath
+	name    alias.ToolName
+	version alias.ToolVersion
+	url     alias.ToolUrl
+	paths   paths.PathsI
 }
 
 type ToolAbsPath struct {
@@ -510,14 +417,6 @@ type ToolAbsPath struct {
 	TemplateFile *TemplateFileCombo
 }
 
-type TemplateFileCombo struct {
-	General string
-	Cloud   string
-}
+type DirChangerF func(dir string) error
 
-type ToolI interface {
-	interfaces.KindGetter[constants.ToolKind]
-	interfaces.NameGetter[ToolName]
-	interfaces.VersionGetter[ToolVersion]
-	interfaces.UrlGetter[ToolUrl]
-}
+type Option func(*Tool) error
