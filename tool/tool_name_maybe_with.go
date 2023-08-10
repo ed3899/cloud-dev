@@ -5,26 +5,26 @@ import (
 	"github.com/samber/oops"
 )
 
-func ToolNameWithMaybe[
+func ToolNameMaybeWith[
 	ToolName ~func() string,
 ](
 	toolIota iota.Tool,
-	PackerName ToolName,
-	TerraformName ToolName,
+	packerName ToolName,
+	terraformName ToolName,
 ) (
 	ToolName,
 	error,
 ) {
 
 	oopsBuilder := oops.
-		Code("ToolNameWithMaybe").
+		Code("ToolNameMaybeWith").
 		With("toolIota", toolIota)
 
 	switch toolIota {
 	case iota.Packer:
-		return PackerName, nil
+		return packerName, nil
 	case iota.Terraform:
-		return TerraformName, nil
+		return terraformName, nil
 	default:
 		return nil, oopsBuilder.Errorf(
 			"Unknown tool '%#v'",
