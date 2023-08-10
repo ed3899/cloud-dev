@@ -9,7 +9,7 @@ import (
 func ToolNameMaybe(
 	args *functions.ToolNameMaybeArgs,
 ) (
-	ToolName func() string,
+	ToolName functions.ToolName,
 	err error,
 ) {
 	oopsBuilder := oops.
