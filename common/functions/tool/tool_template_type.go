@@ -1,4 +1,4 @@
-package functions
+package tool
 
 type ToolTemplateWith func(*ToolTemplateArgs) string
 
