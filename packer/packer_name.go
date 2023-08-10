@@ -1,5 +1,5 @@
 package packer
 
-func PackerName() (string) {
+func PackerName() string {
 	return "packer"
 }

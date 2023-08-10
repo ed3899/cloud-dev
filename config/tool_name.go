@@ -5,11 +5,11 @@ import (
 	"github.com/samber/oops"
 )
 
-func ToolName(
-	args *ToolNameArgs,
+func ToolNameMaybe(
+	args *ToolNameMaybeArgs,
 ) (
-	string,
-	error,
+	ToolName func() string,
+	err error,
 ) {
 	oopsBuilder := oops.
 		Code("PickToolName").
@@ -17,18 +17,18 @@ func ToolName(
 
 	switch args.Tool {
 	case iota.Packer:
-		return args.PackerName(), nil
+		return args.PackerName, nil
 	case iota.Terraform:
-		return args.TerraformName(), nil
+		return args.TerraformName, nil
 	default:
-		return "", oopsBuilder.Errorf(
+		return nil, oopsBuilder.Errorf(
 			"Unknown tool '%#v'",
 			args.Tool,
 		)
 	}
 }
 
-type ToolNameArgs struct {
+type ToolNameMaybeArgs struct {
 	Tool          iota.Tool
 	PackerName    func() string
 	TerraformName func() string
