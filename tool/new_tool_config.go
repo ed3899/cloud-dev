@@ -6,8 +6,8 @@ import (
 
 	"github.com/ed3899/kumo/common/alias"
 	"github.com/ed3899/kumo/common/constants"
+	"github.com/ed3899/kumo/common/iota"
 	"github.com/ed3899/kumo/config/cloud"
-	"github.com/ed3899/kumo/config/paths"
 	"github.com/ed3899/kumo/constants"
 	"github.com/ed3899/kumo/utils/host"
 	"github.com/ed3899/kumo/utils/url"
@@ -40,18 +40,19 @@ func NewTool(
 	return
 }
 
-func WithKind(
-	toolKind constants.Tool,
-) (option Option) {
-
-	option = func(toolManager *Tool) {
-		toolManager.kind = toolKind
-	}
-
-	return
+type Tool[
+	ToolName ~func() string,
+	ToolVersion ~func() string,
+	ToolUrl ~func() string,
+] struct {
+	Name    ToolName
+	Version ToolVersion
+	Url     ToolUrl
 }
 
-func WithName(
+func WithName[
+	ToolNameWithMaybe ~func(iota.Tool) (alias.ToolName, error),
+](
 	toolKind constants.Tool,
 ) (option Option) {
 	var (
@@ -365,34 +366,6 @@ func WithAbsPathToTemplateFileCloud(
 	}
 
 	return
-}
-
-func (tc *Tool) Kind() (toolKind constants.Tool) {
-	toolKind = tc.kind
-	return
-}
-
-func (tc *Tool) Name() (toolName alias.ToolName) {
-	toolName = tc.name
-	return
-}
-
-func (tc *Tool) Version() (toolVersion alias.ToolVersion) {
-	toolVersion = tc.version
-	return
-}
-
-func (tc *Tool) Url() (toolUrl alias.ToolUrl) {
-	toolUrl = tc.url
-	return
-}
-
-type Tool struct {
-	kind    constants.Tool
-	name    alias.ToolName
-	version alias.ToolVersion
-	url     alias.ToolUrl
-	paths   paths.PathsI
 }
 
 type ToolAbsPath struct {
