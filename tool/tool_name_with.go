@@ -3,32 +3,33 @@ package tool
 import (
 	"github.com/ed3899/kumo/common/iota"
 	"github.com/samber/oops"
+
+	"github.com/samber/mo"
 )
 
-func ToolNameWithMaybe[
+func ToolNameWith[
 	ToolName ~func() string,
 ](
 	toolIota iota.Tool,
 	packerName ToolName,
 	terraformName ToolName,
-) (
-	ToolName,
-	error,
-) {
-
+) mo.Result[ToolName] {
 	oopsBuilder := oops.
-		Code("ToolNameWithMaybe").
+		Code("ToolNameWith").
 		With("toolIota", toolIota)
 
 	switch toolIota {
 	case iota.Packer:
-		return packerName, nil
+		return mo.Ok[ToolName](packerName)
+
 	case iota.Terraform:
-		return terraformName, nil
+		return mo.Ok[ToolName](packerName)
+
 	default:
-		return nil, oopsBuilder.Errorf(
+		err := oopsBuilder.Errorf(
 			"Unknown tool '%#v'",
 			toolIota,
 		)
+		return mo.Err[ToolName](err)
 	}
 }

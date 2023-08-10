@@ -22,5 +22,5 @@ func CurrentExecutablePath[
 		return mo.Err[CurrentExecutablePath](err)
 	}
 
-	return mo.Ok[CurrentExecutablePath](currentExecutablePath)
+	return mo.Ok(currentExecutablePath)
 }
