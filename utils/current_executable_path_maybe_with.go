@@ -2,17 +2,18 @@ package utils
 
 import "github.com/samber/oops"
 
-func CurrentExecutablePathMaybe(
-	os_Executable func() (string, error),
+func CurrentExecutablePathMaybeWith[
+	OsExecutable ~func() (string, error),
+](
+	osExecutable OsExecutable,
 ) (
-	func() string,
+	CurrentExecutablePath,
 	error,
 ) {
-
 	oopsBuilder := oops.
 		Code("ExecutablePathMaybe")
 
-	currentExecutablePath, err := os_Executable()
+	currentExecutablePath, err := osExecutable()
 	if err != nil {
 		err = oopsBuilder.
 			Wrapf(err, "Failed to get current executable path")
@@ -24,3 +25,5 @@ func CurrentExecutablePathMaybe(
 		return currentExecutablePath
 	}, nil
 }
+
+type CurrentExecutablePath func() string
