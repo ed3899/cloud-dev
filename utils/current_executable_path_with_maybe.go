@@ -1,29 +1,26 @@
 package utils
 
-import "github.com/samber/oops"
+import (
+	"github.com/samber/mo"
+	"github.com/samber/oops"
+)
 
-func CurrentExecutablePathWithMaybe[
-	OsExecutable ~func() (string, error),
+func CurrentExecutablePath[
+	CurrentExecutablePath ~string,
+	OsExecutable ~func() (CurrentExecutablePath, error),
 ](
 	osExecutable OsExecutable,
-) (
-	CurrentExecutablePath,
-	error,
-) {
+) mo.Result[CurrentExecutablePath] {
 	oopsBuilder := oops.
-		Code("CurrentExecutablePathWithMaybe")
+		Code("CurrentExecutablePath")
 
 	currentExecutablePath, err := osExecutable()
 	if err != nil {
 		err = oopsBuilder.
 			Wrapf(err, "Failed to get current executable path")
 
-		return nil, err
+		return mo.Err[CurrentExecutablePath](err)
 	}
 
-	return func() string {
-		return currentExecutablePath
-	}, nil
+	return mo.Ok[CurrentExecutablePath](currentExecutablePath)
 }
-
-type CurrentExecutablePath func() string
