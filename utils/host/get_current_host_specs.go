@@ -4,8 +4,10 @@ import (
 	"runtime"
 )
 
-type GetCurrentHostSpecsF func() (os, arch string)
+func currentOs() string {
+	return runtime.GOOS
+}
 
-func GetCurrentHostSpecs() (os, arch string) {
-	return runtime.GOOS, runtime.GOARCH
+func currentArch() string {
+	return runtime.GOARCH
 }

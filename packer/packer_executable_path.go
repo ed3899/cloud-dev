@@ -6,7 +6,7 @@ import (
 	"github.com/samber/oops"
 )
 
-func PackerExecutable(
+func PackerExecutablePath(
 	args PackerExecutableArgs,
 ) (string, error) {
 	oopsBuilder := oops.Code("PackerExecutable")

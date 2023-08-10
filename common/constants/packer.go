@@ -5,3 +5,4 @@ const (
 
 	PACKER_PLUGIN_PATH = "PACKER_PLUGIN_PATH"
 )
+

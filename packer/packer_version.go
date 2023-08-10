@@ -1,6 +1,5 @@
 package packer
 
-func PackerVersion() (version string) {
-	version = "1.6.5"
-	return
+func PackerVersion() string {
+	return "1.6.5"
 }
