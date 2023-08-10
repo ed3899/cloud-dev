@@ -1,4 +1,4 @@
-package config
+package tool
 
 import (
 	"github.com/ed3899/kumo/common/iota"

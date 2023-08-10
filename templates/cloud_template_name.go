@@ -1,8 +1,14 @@
 package templates
 
 func CloudTemplateName(
-	CloudName func() string,
-	fmt_Sprintf func(string, ...any) string,
+	args *CloudTemplateNameArgs,
 ) string {
-	return fmt_Sprintf("%s.tmpl", CloudName())
+	return args.fmt_Sprintf("%s.tmpl", args.CloudName())
+}
+
+type CloudTemplateNameF func(*CloudTemplateNameArgs) string
+
+type CloudTemplateNameArgs struct {
+	CloudName   func() string
+	fmt_Sprintf func(string, ...any) string
 }
