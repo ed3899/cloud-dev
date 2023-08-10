@@ -1,14 +1,13 @@
 package templates
 
-func CloudTemplateName(
-	args *CloudTemplateNameArgs,
-) string {
-	return args.fmt_Sprintf("%s.tmpl", args.CloudName())
-}
+import (
+	"github.com/ed3899/kumo/common/functions"
+)
 
-type CloudTemplateNameF func(*CloudTemplateNameArgs) string
-
-type CloudTemplateNameArgs struct {
-	CloudName   func() string
-	fmt_Sprintf func(string, ...any) string
+func CloudTemplateNameWith(
+	args *functions.CloudTemplateNameArgs,
+) functions.CloudTemplateName {
+	return func() string {
+		return args.Fmt_Sprintf("%s.tmpl", args.CloudName())
+	}
 }

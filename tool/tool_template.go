@@ -1,18 +1,13 @@
 package tool
 
+import (
+	"github.com/ed3899/kumo/common/functions"
+)
+
 func ToolTemplate(
-	CloudName func() string,
-	fmt_Sprintf func(string, ...any) string,
+	args *functions.ToolTemplateArgs,
 ) string {
-	return fmt_Sprintf("%s.tmpl", CloudName())
+	return args.Fmt_Sprintf("%s.tmpl", args.CloudTemplateName)
 }
 
-type ToolTemplateF func(*ToolTemplateArgs) string
 
-type ToolTemplateArgs struct {
-	CloudTemplateName func(func() string, func(string, ...any) string) string
-}
-
-func T(
-	ToolTemplate *ToolTemplateArgs,
-) {}
