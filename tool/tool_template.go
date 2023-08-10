@@ -4,10 +4,10 @@ import (
 	"github.com/ed3899/kumo/common/functions"
 )
 
-func ToolTemplate(
+func ToolTemplateWith(
 	args *functions.ToolTemplateArgs,
-) string {
-	return args.Fmt_Sprintf("%s.tmpl", args.CloudTemplateName)
+) functions.ToolTemplate {
+	return func() string {
+		return args.Fmt_Sprintf("%s.tmpl", args.CloudTemplateName)
+	}
 }
-
-

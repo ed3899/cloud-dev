@@ -1,6 +1,8 @@
 package functions
 
-type ToolTemplate func(*ToolTemplateArgs) string
+type ToolTemplateWith func(*ToolTemplateArgs) string
+
+type ToolTemplate func() string
 
 type ToolTemplateArgs struct {
 	CloudTemplateName string
