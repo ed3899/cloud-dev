@@ -6,10 +6,12 @@ import (
 	"github.com/samber/oops"
 )
 
-func PackerExecutablePath(
-	args PackerExecutableArgs,
+func PackerExecutablePathMaybe(
+	args *PackerExecutableMaybeArgs,
 ) (string, error) {
-	oopsBuilder := oops.Code("PackerExecutable")
+	oopsBuilder := oops.
+		Code("PackerExecutable").
+		With("args", args)
 
 	currentExecutablePath, err := args.os_Executable()
 	if err != nil {
@@ -26,7 +28,7 @@ func PackerExecutablePath(
 	), nil
 }
 
-type PackerExecutableArgs struct {
+type PackerExecutableMaybeArgs struct {
 	os_Executable func() (string, error)
 	filepath_Join func(...string) string
 	PackerName    func() string

@@ -7,7 +7,3 @@ import (
 func currentOs() string {
 	return runtime.GOOS
 }
-
-func currentArch() string {
-	return runtime.GOARCH
-}
