@@ -5,7 +5,7 @@ import (
 	"github.com/samber/oops"
 )
 
-func ToolNameMaybeWith[
+func ToolNameWithMaybe[
 	ToolName ~func() string,
 ](
 	toolIota iota.Tool,
@@ -17,7 +17,7 @@ func ToolNameMaybeWith[
 ) {
 
 	oopsBuilder := oops.
-		Code("ToolNameMaybeWith").
+		Code("ToolNameWithMaybe").
 		With("toolIota", toolIota)
 
 	switch toolIota {

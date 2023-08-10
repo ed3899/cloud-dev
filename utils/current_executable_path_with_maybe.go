@@ -2,7 +2,7 @@ package utils
 
 import "github.com/samber/oops"
 
-func CurrentExecutablePathMaybeWith[
+func CurrentExecutablePathWithMaybe[
 	OsExecutable ~func() (string, error),
 ](
 	osExecutable OsExecutable,
@@ -11,7 +11,7 @@ func CurrentExecutablePathMaybeWith[
 	error,
 ) {
 	oopsBuilder := oops.
-		Code("ExecutablePathMaybe")
+		Code("CurrentExecutablePathWithMaybe")
 
 	currentExecutablePath, err := osExecutable()
 	if err != nil {
