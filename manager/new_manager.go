@@ -33,6 +33,7 @@ func NewManager(
 	cloud iota.Cloud,
 	tool iota.Tool,
 ) Manager {
+	osExecutableDir := filepath.Dir(osExecutablePath)
 	cloudTemplateName, baseTemplateName := cloud.Templates()
 
 	return Manager{
@@ -41,29 +42,29 @@ func NewManager(
 		path: Path{
 			template: Template{
 				cloud: filepath.Join(
-					osExecutablePath,
+					osExecutableDir,
+					iota.Templates.Name(),
 					tool.Name(),
-					cloud.Name(),
 					cloudTemplateName,
 				),
 				base: filepath.Join(
-					osExecutablePath,
+					osExecutableDir,
+					iota.Templates.Name(),
 					tool.Name(),
-					cloud.Name(),
 					baseTemplateName,
 				),
 			},
 			vars: filepath.Join(
-				osExecutablePath,
+				osExecutableDir,
 				tool.Name(),
 				cloud.Name(),
 				tool.VarsName(),
 			),
 		},
 		dirs: Dir{
-			initial: osExecutablePath,
+			initial: osExecutableDir,
 			run: filepath.Join(
-				osExecutablePath,
+				osExecutableDir,
 				tool.Name(),
 				cloud.Name(),
 			),
