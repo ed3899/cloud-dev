@@ -8,6 +8,7 @@ import (
 func ToolExecutablePathWith(
 	filepathJoin func(...string) string,
 	osExecutable func() (string, error),
+	fmtSprintf func(string, ...any) string,
 ) mo.Result[ToolExecutablePath] {
 	oopsBuilder := oops.
 		Code("ToolExecutablePathWith")
@@ -23,7 +24,7 @@ func ToolExecutablePathWith(
 		return filepathJoin(
 			executablePath,
 			toolName,
-			toolExecutableName,
+			fmtSprintf("%s.exe", toolName),
 		)
 	}
 
