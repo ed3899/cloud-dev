@@ -6,28 +6,6 @@ import (
 	"github.com/ed3899/kumo/common/iota"
 )
 
-type Manager struct {
-	cloud iota.Cloud
-	tool  iota.Tool
-	path  Path
-	dirs  Dir
-}
-
-type Path struct {
-	template Template
-	vars     string
-}
-
-type Template struct {
-	cloud string
-	base  string
-}
-
-type Dir struct {
-	initial string
-	run     string
-}
-
 func NewManager(
 	osExecutablePath string,
 	cloud iota.Cloud,
@@ -61,7 +39,7 @@ func NewManager(
 				tool.VarsName(),
 			),
 		},
-		dirs: Dir{
+		dir: Dir{
 			initial: osExecutableDir,
 			run: filepath.Join(
 				osExecutableDir,
@@ -70,4 +48,66 @@ func NewManager(
 			),
 		},
 	}
+}
+
+func (m Manager) Cloud() iota.Cloud {
+	return m.cloud
+}
+
+func (m Manager) Tool() iota.Tool {
+	return m.tool
+}
+
+func (m Manager) Path() Path {
+	return m.path
+}
+
+func (m Manager) Dir() Dir {
+	return m.dir
+}
+
+type Manager struct {
+	cloud iota.Cloud
+	tool  iota.Tool
+	path  Path
+	dir   Dir
+}
+
+type Path struct {
+	template Template
+	vars     string
+}
+
+func (p Path) Template() Template {
+	return p.template
+}
+
+func (p Path) Vars() string {
+	return p.vars
+}
+
+type Template struct {
+	cloud string
+	base  string
+}
+
+func (t Template) Cloud() string {
+	return t.cloud
+}
+
+func (t Template) Base() string {
+	return t.base
+}
+
+type Dir struct {
+	initial string
+	run     string
+}
+
+func (d Dir) Initial() string {
+	return d.initial
+}
+
+func (d Dir) Run() string {
+	return d.run
 }
