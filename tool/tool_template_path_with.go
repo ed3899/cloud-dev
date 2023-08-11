@@ -20,9 +20,10 @@ func ToolTemplatePathWith(
 		return mo.Err[ToolTemplatePath](err)
 	}
 
-	toolTemplatePath := func(toolName, cloudName, templateName string) string {
+	toolTemplatePath := func(toolName, templateDir, cloudName, templateName string) string {
 		return filepathJoin(
 			osExecutablePath,
+			templateDir,
 			toolName,
 			cloudName,
 			templateName,
@@ -32,4 +33,4 @@ func ToolTemplatePathWith(
 	return mo.Ok[ToolTemplatePath](toolTemplatePath)
 }
 
-type ToolTemplatePath func(cloudName, toolName, templateName string) string
+type ToolTemplatePath func(cloudName, templateDir, toolName, templateName string) string

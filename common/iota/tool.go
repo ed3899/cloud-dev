@@ -39,3 +39,14 @@ func (t Tool) Version() string {
 		panic("Unknown tool")
 	}
 }
+
+func (t Tool) PluginPathEnvironmentVariable() string {
+	switch t {
+	case Packer:
+		return "PACKER_PLUGIN_PATH"
+	case Terraform:
+		return "TF_PLUGIN_CACHE_DIR"
+	default:
+		panic("Unknown tool")
+	}
+}
