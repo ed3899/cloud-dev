@@ -1,18 +1,25 @@
 package tool
 
-func ToolExecutableNameWith[
-	Fmt_Sprintf ~func(format string, a ...any) string,
-	ToolName ~func() string,
-](
-	fmt_Sprintf Fmt_Sprintf,
-	toolName ToolName,
+import (
+	"fmt"
+
+	"github.com/ed3899/kumo/common/iota"
+)
+
+func ToolExecutableNameWith(
+	fmt_Sprintf func(format string, a ...any) string,
 ) ToolExecutableName {
-	return func() string {
+	return func(toolName string) string {
 		return fmt_Sprintf(
 			"%s.exe",
-			toolName(),
+			toolName,
 		)
 	}
 }
 
-type ToolExecutableName func() string
+type ToolExecutableName func(string) string
+
+func T() {
+
+
+}

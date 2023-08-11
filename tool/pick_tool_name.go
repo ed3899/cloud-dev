@@ -7,29 +7,25 @@ import (
 	"github.com/samber/mo"
 )
 
-func ToolNameWith[
-	ToolName ~func() string,
-](
+func PickToolName(
 	toolIota iota.Tool,
-	packerName ToolName,
-	terraformName ToolName,
-) mo.Result[ToolName] {
+) mo.Result[string] {
 	oopsBuilder := oops.
 		Code("ToolNameWith").
 		With("toolIota", toolIota)
 
 	switch toolIota {
 	case iota.Packer:
-		return mo.Ok[ToolName](packerName)
+		return mo.Ok("packer")
 
 	case iota.Terraform:
-		return mo.Ok[ToolName](packerName)
+		return mo.Ok("terraform")
 
 	default:
 		err := oopsBuilder.Errorf(
 			"Unknown tool '%#v'",
 			toolIota,
 		)
-		return mo.Err[ToolName](err)
+		return mo.Err[string](err)
 	}
 }
