@@ -10,19 +10,20 @@ type CloudManager struct {
 }
 
 func (c CloudManager) PickCloud(rawCloud string) CloudManager {
-	err := oops.
+	oops.
 		In("cloud").
 		Tags("CloudManager").
 		Code("PickCloud").Recoverf(
-		func() {},
+		func() {
+			switch rawCloud {
+			case "aws":
+				c.cloud = iota.Aws
+			default:
+				panic(rawCloud)
+			}
+		},
+		"Unknown raw cloud",
 	)
-
-	switch rawCloud {
-	case "aws":
-		c.cloud = iota.Aws
-	default:
-		panic("Unknown cloud")
-	}
 
 	return c
 }
