@@ -1,5 +1,7 @@
 package iota
 
+import "github.com/samber/oops"
+
 type Cloud int
 
 const (
@@ -8,23 +10,43 @@ const (
 )
 
 func (c Cloud) Name() string {
-	switch c {
-	case Base:
-		return "general"
-	case Aws:
-		return "aws"
-	default:
-		panic("Unknown cloud")
-	}
+	var choice string
+
+	oops.
+		In("iota").
+		Tags("Cloud").
+		Code("Name").
+		Recoverf(func() {
+			switch c {
+			case Base:
+				choice = "base"
+			case Aws:
+				choice = "aws"
+			default:
+				panic(c)
+			}
+		}, "Unknown cloud")
+
+	return choice
 }
 
 func (c Cloud) TemplateName() string {
-	switch c {
-	case Base:
-		return "general.tmpl"
-	case Aws:
-		return "aws.tmpl"
-	default:
-		panic("Unknown cloud")
-	}
+	var choice string
+
+	oops.
+		In("iota").
+		Tags("Cloud").
+		Code("TemplateName").
+		Recoverf(func() {
+			switch c {
+			case Base:
+				choice = "base"
+			case Aws:
+				choice = "aws"
+			default:
+				panic(c)
+			}
+		}, "Unknown cloud")
+
+	return choice
 }
