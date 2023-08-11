@@ -17,3 +17,14 @@ func (t Tool) String() string {
 		panic("Unknown tool")
 	}
 }
+
+func (t Tool) VarsName() string {
+	switch t {
+	case Packer:
+		return ".auto.pkrvars.hcl"
+	case Terraform:
+		return ".auto.tfvars"
+	default:
+		panic("Unknown tool")
+	}
+}
