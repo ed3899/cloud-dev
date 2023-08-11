@@ -1,23 +1,33 @@
 package tool
 
-func ToolExecutablePathWith[
-	FilepathJoin ~func(...string) string,
-	CurrentExecutablePath ~func() string,
-	ToolName ~func() string,
-	ToolExecutableName ~func() string,
-](
-	filepathJoin FilepathJoin,
-	currentExecutablePath CurrentExecutablePath,
-	toolName ToolName,
-	toolExecutableName ToolExecutableName,
-) ToolExecutablePath {
-	return func() string {
+import (
+	"github.com/samber/mo"
+	"github.com/samber/oops"
+)
+
+func ToolExecutablePathWith(
+	filepathJoin func(...string) string,
+	osExecutable func() (string, error),
+) mo.Result[ToolExecutablePath] {
+	oopsBuilder := oops.
+		Code("ToolExecutablePathWith")
+
+	executablePath, err := osExecutable()
+	if err != nil {
+		err := oopsBuilder.
+			Wrapf(err, "Failed to get current executable path")
+		return mo.Err[ToolExecutablePath](err)
+	}
+
+	toolExecutablePath := func(toolName string, toolExecutableName string) string {
 		return filepathJoin(
-			currentExecutablePath(),
-			toolName(),
-			toolExecutableName(),
+			executablePath,
+			toolName,
+			toolExecutableName,
 		)
 	}
+
+	return mo.Ok[ToolExecutablePath](toolExecutablePath)
 }
 
-type ToolExecutablePath func() string
+type ToolExecutablePath func(string, string) string
