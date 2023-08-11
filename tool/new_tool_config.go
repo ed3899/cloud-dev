@@ -6,7 +6,6 @@ import (
 
 	"github.com/ed3899/kumo/common/alias"
 	"github.com/ed3899/kumo/common/constants"
-	"github.com/ed3899/kumo/common/iota"
 	"github.com/ed3899/kumo/config/cloud"
 	"github.com/ed3899/kumo/constants"
 	"github.com/ed3899/kumo/utils/host"
@@ -16,67 +15,32 @@ import (
 
 func NewTool(
 	opts ...Option,
-) (
-	tool *Tool,
-	err error,
-) {
-	var (
-		oopsBuilder = oops.
-				Code("NewTool").
-				With("opts", opts)
+) *Tool {
+	tool := &Tool{}
 
-		option Option
-	)
-
-	tool = &Tool{}
-	for _, option = range opts {
-		if err = option(tool); err != nil {
-			err = oopsBuilder.
-				Wrapf(err, "Option %v", option)
-			return
-		}
+	for _, option := range opts {
+		option(tool)
 	}
 
-	return
+	return tool
 }
 
-type Tool[
-	ToolName ~func() string,
-	ToolVersion ~func() string,
-	ToolUrl ~func() string,
-] struct {
-	Name    ToolName
-	Version ToolVersion
-	Url     ToolUrl
+type Tool struct {
+	Name    func() string
+	Version func() string
+	Url     func() string
 }
 
 func WithName[
-	ToolNameWithMaybe ~func(iota.Tool) (alias.ToolName, error),
+	ToolName ~func() string,
 ](
-	toolKind constants.Tool,
-) (option Option) {
-	var (
-		oopsBuilder = oops.
-			Code("WithName").
-			With("toolKind", toolKind)
-	)
-
-	option = func(toolManager *Tool) (err error) {
-		switch toolKind {
-		case constants.Packer:
-			toolManager.name = constants.PACKER
-		case constants.Terraform:
-			toolManager.name = constants.TERRAFORM
-		default:
-			err = oopsBuilder.
-				Errorf("Unknown tool kind: %d", toolKind)
-			return
-		}
+	toolName ToolName,
+) Option {
+	return func(toolManager *Tool) {
+		toolManager.Name = toolName
 
 		return
 	}
-
-	return
 }
 
 func WithVersion(
@@ -376,4 +340,4 @@ type ToolAbsPath struct {
 
 type DirChangerF func(dir string) error
 
-type Option func(*Tool) error
+type Option func(*Tool)
