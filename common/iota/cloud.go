@@ -30,23 +30,21 @@ func (c Cloud) Name() string {
 	return choice
 }
 
-func (c Cloud) TemplateName() string {
-	var choice string
-
+func (c Cloud) Templates() (cloud string, base string) {
 	oops.
 		In("iota").
 		Tags("Cloud").
 		Code("TemplateName").
 		Recoverf(func() {
 			switch c {
-			case Base:
-				choice = "base"
 			case Aws:
-				choice = "aws"
+				cloud = "aws.tmpl"
 			default:
 				panic(c)
 			}
 		}, "Unknown cloud")
 
-	return choice
+	base = "base.tmpl"
+
+	return cloud, base
 }
