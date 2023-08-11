@@ -13,4 +13,4 @@ func ToolExecutableNameWith(
 	return toolExecutableName
 }
 
-type ToolExecutableName func(string) string
+type ToolExecutableName func(toolName string) string

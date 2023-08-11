@@ -1,15 +1,13 @@
 package tool
 
-func ToolTemplateWith[
-	Formatter ~func(string, ...any) string,
-	CloudName ~func() string,
-](
-	fmt_Sprintf Formatter,
-	cloudName CloudName,
+func ToolTemplateWith(
+	fmtSprintf func(string, ...any) string,
 ) ToolTemplate {
-	return func() string {
-		return fmt_Sprintf("%s.tmpl", cloudName())
+	toolTemplate := func(cloudName string) string {
+		return fmtSprintf("%s.tmpl", cloudName)
 	}
+
+	return toolTemplate
 }
 
-type ToolTemplate func() string
+type ToolTemplate func(cloudName string) string

@@ -30,4 +30,4 @@ func ToolExecutablePathWith(
 	return mo.Ok[ToolExecutablePath](toolExecutablePath)
 }
 
-type ToolExecutablePath func(string, string) string
+type ToolExecutablePath func(toolName string, toolExecutableName string) string

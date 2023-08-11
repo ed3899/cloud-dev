@@ -1,29 +1,21 @@
 package tool
 
-func ToolUrlWith[
-	ToolName ~func() string,
-	ToolVersion ~func() string,
-	CurrentOs ~func() string,
-	CurrentArch ~func() string,
-	Formatter ~func(string, ...interface{}) string,
-](
-	toolName ToolName,
-	toolVersion ToolVersion,
-	currentOs CurrentOs,
-	currentArch CurrentArch,
-	fmt_Sprintf Formatter,
+func ToolUrlWith(
+	fmtSprintf func(string, ...any) string,
 ) ToolUrl {
-	return func() string {
-		return fmt_Sprintf(
+	toolUrl := func(toolName, toolVersion, currentOs, currentArch string) string {
+		return fmtSprintf(
 			"https://releases.hashicorp.com/%s/%s/%s_%s_%s_%s.zip",
-			toolName(),
-			toolVersion(),
-			toolName(),
-			toolVersion(),
-			currentOs(),
-			currentArch(),
+			toolName,
+			toolVersion,
+			toolName,
+			toolVersion,
+			currentOs,
+			currentArch,
 		)
 	}
+
+	return toolUrl
 }
 
-type ToolUrl func() string
+type ToolUrl func(toolName, toolVersion, currentOs, currentArch string) string
