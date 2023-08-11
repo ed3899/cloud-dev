@@ -3,13 +3,13 @@ package iota
 type Cloud int
 
 const (
-	General Cloud = iota
+	Base Cloud = iota
 	Aws
 )
 
 func (c Cloud) Name() string {
 	switch c {
-	case General:
+	case Base:
 		return "general"
 	case Aws:
 		return "aws"
@@ -20,7 +20,7 @@ func (c Cloud) Name() string {
 
 func (c Cloud) TemplateName() string {
 	switch c {
-	case General:
+	case Base:
 		return "general.tmpl"
 	case Aws:
 		return "aws.tmpl"
