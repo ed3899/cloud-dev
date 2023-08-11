@@ -7,7 +7,7 @@ const (
 	Aws
 )
 
-func (c Cloud) String() string {
+func (c Cloud) Name() string {
 	switch c {
 	case General:
 		return "general"

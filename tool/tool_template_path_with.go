@@ -20,18 +20,16 @@ func ToolTemplatePathWith(
 		return mo.Err[ToolTemplatePath](err)
 	}
 
-	toolTemplateName := func(cloudName string) string {
-		return fmtSprintf("%s.tmpl", cloudName)
-	}
-
-	toolTemplatePath := func(cloudName, toolName string) string {
+	toolTemplatePath := func(toolName, cloudName, templateName string) string {
 		return filepathJoin(
 			osExecutablePath,
 			toolName,
 			cloudName,
-			toolTemplateName(cloudName),
+			templateName,
 		)
 	}
+
+	return mo.Ok[ToolTemplatePath](toolTemplatePath)
 }
 
-type ToolTemplatePath func(cloudName, toolName string) string
+type ToolTemplatePath func(cloudName, toolName, templateName string) string

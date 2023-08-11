@@ -7,7 +7,7 @@ const (
 	Terraform
 )
 
-func (t Tool) String() string {
+func (t Tool) Name() string {
 	switch t {
 	case Packer:
 		return "packer"
@@ -24,6 +24,17 @@ func (t Tool) VarsName() string {
 		return ".auto.pkrvars.hcl"
 	case Terraform:
 		return ".auto.tfvars"
+	default:
+		panic("Unknown tool")
+	}
+}
+
+func (t Tool) Version() string {
+	switch t {
+	case Packer:
+		return "1.6.5"
+	case Terraform:
+		return "1.5.3"
 	default:
 		panic("Unknown tool")
 	}
