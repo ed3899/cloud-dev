@@ -1,14 +1,16 @@
 package cmd
 
 import (
-	"log"
+	"os"
+	"path/filepath"
 
-	"github.com/ed3899/kumo/workflows"
+	"github.com/ed3899/kumo/common/iota"
+	"github.com/ed3899/kumo/tool"
 	"github.com/samber/oops"
 	"github.com/spf13/cobra"
 )
 
-func BuildCommand() *cobra.Command {
+func Build() *cobra.Command {
 	return &cobra.Command{
 		Use:   "build",
 		Short: "Build an AMI with ready to use tools",
@@ -17,18 +19,30 @@ func BuildCommand() *cobra.Command {
 		to SSH into your instance.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			var (
-				oopsBuilder = oops.Code("build_command_failed").
+				oopsBuilder = oops.Code("Build").
 					With("command", cmd.Name()).
 					With("args", args)
 			)
 
-			if err := workflows.Build(); err != nil {
-				log.Fatalf(
-					"%+v",
-					oopsBuilder.
-						Wrapf(err, "Error occurred running build workflow"),
-				)
+			currentExecutablePath, err := os.Executable()
+			if err != nil {
+				err := oopsBuilder.
+					Wrapf(err, "failed to get current executable path")
+				panic(err)
 			}
+
+			toolManager := new(tool.ToolManager)
+			toolManager.
+				SetDirInitial(
+					filepath.Dir(currentExecutablePath),
+				).
+				SetDirRun(
+					filepath.Join(
+						currentExecutablePath,
+						iota.Packer.Name(),
+					),
+				)
+
 		},
 	}
 }
