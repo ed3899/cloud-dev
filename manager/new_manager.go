@@ -13,9 +13,32 @@ func NewManager(
 	osExecutablePath string,
 	cloud iota.Cloud,
 	tool iota.Tool,
-) Manager {
+) (Manager, error) {
+	oopsBuilder := oops.
+		In("manager").
+		Tags("Manager").
+		Code("NewManager").
+		With("cloud", cloud).
+		With("tool", tool).
+		With("osExecutablePath", osExecutablePath)
+
 	osExecutableDir := filepath.Dir(osExecutablePath)
-	cloudTemplateName, baseTemplateName := cloud.Templates()
+
+	cloudTemplate, err := cloud.Template()
+	if err != nil {
+		err := oopsBuilder.
+			Wrapf(err, "failed to get cloud template")
+
+		return Manager{}, err
+	}
+
+	cloudName, err := cloud.Name()
+	if err != nil {
+		err := oopsBuilder.
+			Wrapf(err, "failed to get cloud name")
+
+		return Manager{}, err
+	}
 
 	return Manager{
 		cloud: cloud,
@@ -24,7 +47,7 @@ func NewManager(
 			packerManifest: filepath.Join(
 				osExecutableDir,
 				iota.Packer.Name(),
-				cloud.Name(),
+				cloudName,
 				constants.PACKER_MANIFEST,
 			),
 			template: Template{
@@ -32,19 +55,19 @@ func NewManager(
 					osExecutableDir,
 					iota.Templates.Name(),
 					tool.Name(),
-					cloudTemplateName,
+					cloudTemplate.Cloud(),
 				),
 				base: filepath.Join(
 					osExecutableDir,
 					iota.Templates.Name(),
 					tool.Name(),
-					baseTemplateName,
+					cloudTemplate.Base(),
 				),
 			},
 			vars: filepath.Join(
 				osExecutableDir,
 				tool.Name(),
-				cloud.Name(),
+				cloudName,
 				tool.VarsName(),
 			),
 		},
@@ -53,10 +76,10 @@ func NewManager(
 			run: filepath.Join(
 				osExecutableDir,
 				tool.Name(),
-				cloud.Name(),
+				cloudName,
 			),
 		},
-	}
+	}, nil
 }
 
 func (m Manager) Cloud() iota.Cloud {
@@ -144,10 +167,9 @@ func UnsetCredentialsWith(
 	return forManager
 }
 
-
 func ChangeToRunDirWith(
 	osChdir func(string) error,
-	) ForManager {
+) ForManager {
 	oopsBuilder := oops.
 		In("manager").
 		Tags("Manager").
@@ -156,8 +178,8 @@ func ChangeToRunDirWith(
 	forManager := func(manager Manager) error {
 		if err := osChdir(manager.Dir().Run()); err != nil {
 			return oopsBuilder.
-			With("runDir", manager.Dir().Run()).
-			Wrapf(err, "failed to change to run dir")
+				With("runDir", manager.Dir().Run()).
+				Wrapf(err, "failed to change to run dir")
 		}
 
 		return nil
@@ -168,7 +190,7 @@ func ChangeToRunDirWith(
 
 func ChangeToInitialDirWith(
 	osChdir func(string) error,
-	) ForManager {
+) ForManager {
 	oopsBuilder := oops.
 		In("manager").
 		Tags("Manager").
@@ -177,8 +199,8 @@ func ChangeToInitialDirWith(
 	forManager := func(manager Manager) error {
 		if err := osChdir(manager.Dir().Initial()); err != nil {
 			return oopsBuilder.
-			With("initialDir", manager.Dir().Initial()).
-			Wrapf(err, "failed to change to initial dir")
+				With("initialDir", manager.Dir().Initial()).
+				Wrapf(err, "failed to change to initial dir")
 		}
 
 		return nil

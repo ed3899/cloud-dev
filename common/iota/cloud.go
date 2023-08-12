@@ -5,44 +5,59 @@ import "github.com/samber/oops"
 type Cloud int
 
 const (
-	Base Cloud = iota
-	Aws
+	Aws Cloud = iota
 )
 
-func (c Cloud) Name() (name string) {
-	oops.
+func (c Cloud) Name() (string, error) {
+	oopsBuilder := oops.
+		In("common").
 		In("iota").
 		Tags("Cloud").
-		Code("Name").
-		Recoverf(func() {
-			switch c {
-			case Base:
-				name = "base"
-			case Aws:
-				name = "aws"
-			default:
-				panic(c)
-			}
-		}, "Unknown cloud")
+		Code("Name")
 
-	return
+	switch c {
+	case Aws:
+		return "aws", nil
+
+	default:
+		err := oopsBuilder.
+			Errorf("unknown cloud: %#v", c)
+
+		return "", err
+	}
 }
 
-func (c Cloud) Templates() (cloud string, base string) {
-	oops.
+func (c Cloud) Template() (Template, error) {
+	oopsBuilder := oops.
+		In("common").
 		In("iota").
 		Tags("Cloud").
-		Code("TemplateName").
-		Recoverf(func() {
-			switch c {
-			case Aws:
-				cloud = "aws.tmpl"
-			default:
-				panic(c)
-			}
-		}, "Unknown cloud")
+		Code("Templates")
 
-	base = "base.tmpl"
+	switch c {
+	case Aws:
+		return Template{
+			cloud: "aws.tmpl",
+			base:  "base.tmpl",
+		}, nil
 
-	return cloud, base
+	default:
+		err := oopsBuilder.
+			Errorf("unknown cloud: %#v", c)
+
+		return Template{}, err
+	}
+}
+
+type Template struct {
+	cloud string
+	base  string
+}
+
+func (t Template) Cloud() string {
+	return t.cloud
+}
+
+func (t Template) Base() string {
+	return t.base
 }
