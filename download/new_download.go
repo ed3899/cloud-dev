@@ -1,129 +1,131 @@
 package download
 
 import (
-	"fmt"
-	"path/filepath"
-
-	"github.com/ed3899/kumo/common/interfaces"
-	"github.com/ed3899/kumo/constants"
-	"github.com/ed3899/kumo/tool"
-	"github.com/ed3899/kumo/utils/url"
-	"github.com/samber/oops"
 	"github.com/vbauerster/mpb/v8"
 	"github.com/vbauerster/mpb/v8/decor"
 )
 
-func NewDownload(
-	options ...Option,
-) (
-	download *Download,
-	err error,
-) {
-	var (
-		oopsBuilder = oops.
-				Code("NewDownload").
-				With("options", options)
-
-		opt Option
-	)
-
-	download = &Download{}
-	for _, opt = range options {
-		if err = opt(download); err != nil {
-			err = oopsBuilder.
-				Wrapf(err, "failed to apply option '%v'", opt)
-			return
-		}
-	}
-
-	return
+func (d Download) Name() string {
+	return d.name
 }
 
-func WithName(tool tool.ToolConfig) Option {
-	return func(download *Download) (err error) {
-		download.Name = tool.Name
-
-		return
-	}
+type INameGetter interface {
+	Name() string
 }
 
-func WithAbsPath(tool tool.ToolConfig) Option {
-	return func(download *Download) (err error) {
-		download.AbsPath = filepath.Join(
-			constants.DEPENDENCIES_DIR_NAME,
-			tool.Name,
-			fmt.Sprintf(
-				"%s.zip",
-				tool.Name,
-			),
-		)
-
-		return
-	}
+func (d Download) Path() string {
+	return d.path
 }
 
-func WithUrl(tool tool.ToolConfig) Option {
-	return func(download *Download) (err error) {
-		download.Url = tool.Url
-
-		return
-	}
+type IPathGetter interface {
+	Path() string
 }
 
-func WithContentLength(tool tool.ToolConfig, getContentLength url.GetContentLengthF) Option {
-	var (
-		oopsBuilder = oops.
-				Code("WithContentLength").
-				With("tool", tool)
-
-		contentLength int64
-	)
-
-	return func(download *Download) (err error) {
-		if contentLength, err = getContentLength(tool.Url); err != nil {
-			err = oopsBuilder.
-				Wrapf(err, "failed to get zip content length for '%s'", tool.Url)
-			return
-		}
-		download.ContentLength = contentLength
-
-		return
-	}
+func (d Download) Url() string {
+	return d.url
 }
 
-type Option func(*Download) error
+type IUrlGetter interface {
+	Url() string
+}
+
+func (d Download) ContentLength() int64 {
+	return d.contentLength
+}
+
+type IContentLengthGetter interface {
+	ContentLength() int64
+}
+
+func (d Download) Bars() Bars {
+	return d.bars
+}
+
+type IBarsGetter interface {
+	Bars() Bars
+}
+
+type IDownload interface {
+	INameGetter
+	IPathGetter
+	IUrlGetter
+	IContentLengthGetter
+	IBarsGetter
+}
 
 type Download struct {
-	Name          string
-	AbsPath       string
-	Url           string
-	ContentLength int64
-	Bars          *Bars[*mpb.Bar]
+	name, path, url string
+	contentLength   int64
+	bars            IBars
 }
 
-type Bars[B interfaces.MpbV8BarIncrementor] struct {
-	Downloading B
-	Extracting  B
+func (b Bars) Downloading() IIncrBy {
+	return b.downloading
 }
 
-func (d *Download) SetDownloadBar(p interfaces.MpbV8MultiProgressBar) {
-	d.Bars.Downloading = p.AddBar(int64(d.ContentLength),
-		mpb.BarFillerClearOnComplete(),
-		mpb.PrependDecorators(
-			decor.Name(d.Name),
-			decor.Counters(decor.SizeB1024(0), " % .2f / % .2f"),
-		),
-		mpb.AppendDecorators(
-			decor.OnComplete(
-				decor.Percentage(decor.WCSyncSpace),
-				"downloaded",
+type IDownloading interface {
+	Downloading() IIncrBy
+}
+
+func (b Bars) SetDownloading(mpbBar IIncrBy) {
+	b.downloading = mpbBar
+}
+
+type ISetDownloading interface {
+	SetDownloading(IIncrBy)
+}
+
+func (b Bars) Extracting() IIncrBy {
+	return b.extracting
+}
+
+type IExtracting interface {
+	Extracting() IIncrBy
+}
+
+type IBars interface {
+	IDownloading
+	ISetDownloading
+	IExtracting
+}
+
+type Bars struct {
+	downloading, extracting IIncrBy
+}
+
+type IIncrBy interface {
+	IncrBy(int)
+}
+
+func SetDownloadBarWith(
+	progress IAddBar,
+) {
+}
+
+type IAddBar interface {
+	AddBar(int64, ...any) IIncrBy
+}
+
+func (d Download) SetDownloadBar(p *mpb.Progress) {
+	d.bars.SetDownloading(
+		p.AddBar(int64(d.contentLength),
+			mpb.BarFillerClearOnComplete(),
+			mpb.PrependDecorators(
+				decor.Name(d.name),
+				decor.Counters(decor.SizeB1024(0), " % .2f / % .2f"),
+			),
+			mpb.AppendDecorators(
+				decor.OnComplete(
+					decor.Percentage(decor.WCSyncSpace),
+					"downloaded",
+				),
 			),
 		),
 	)
 }
 
-func (d *Download) IncrementDownloadBar(downloadedBytes int) {
-	d.Bars.Downloading.IncrBy(downloadedBytes)
+func (d Download) IncrementDownloadBar(downloadedBytes int) {
+	d.bars.downloading.IncrBy(downloadedBytes)
 }
 
 func (d *Download) SetExtractionBar(p interfaces.MpbV8MultiProgressBar, zipSize int64) {
