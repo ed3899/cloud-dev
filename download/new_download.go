@@ -37,12 +37,12 @@ type IContentLengthGetter interface {
 	ContentLength() int64
 }
 
-func (d Download) Bars() Bars {
-	return d.bars
+func (d Download) Bar() IBar {
+	return d.bar
 }
 
 type IBarsGetter interface {
-	Bars() Bars
+	Bar() IBar
 }
 
 type IDownload interface {
@@ -56,7 +56,7 @@ type IDownload interface {
 type Download struct {
 	name, path, url string
 	contentLength   int64
-	bars            IBars
+	bar             IBar
 }
 
 func (b Bars) Downloading() IIncrBy {
@@ -83,9 +83,18 @@ type IExtracting interface {
 	Extracting() IIncrBy
 }
 
-type IBars interface {
+func (b Bars) SetExtracting(mpbBar IIncrBy) {
+	b.extracting = mpbBar
+}
+
+type ISetExtracting interface {
+	SetExtracting(IIncrBy)
+}
+
+type IBar interface {
 	IDownloading
 	ISetDownloading
+	ISetExtracting
 	IExtracting
 }
 
@@ -106,8 +115,8 @@ type IAddBar interface {
 	AddBar(int64, ...any) IIncrBy
 }
 
-func (d Download) SetDownloadBar(p *mpb.Progress) {
-	d.bars.SetDownloading(
+func (d Download) SetDownloadBar(p IAddBar) {
+	d.bar.SetDownloading(
 		p.AddBar(int64(d.contentLength),
 			mpb.BarFillerClearOnComplete(),
 			mpb.PrependDecorators(
@@ -125,26 +134,29 @@ func (d Download) SetDownloadBar(p *mpb.Progress) {
 }
 
 func (d Download) IncrementDownloadBar(downloadedBytes int) {
-	d.bars.downloading.IncrBy(downloadedBytes)
+	d.bar.Downloading().IncrBy(downloadedBytes)
 }
 
-func (d *Download) SetExtractionBar(p interfaces.MpbV8MultiProgressBar, zipSize int64) {
-	d.Bars.Extracting = p.AddBar(zipSize,
-		mpb.BarQueueAfter(d.Bars.Downloading),
-		mpb.BarFillerClearOnComplete(),
-		mpb.PrependDecorators(
-			decor.Name(d.Name),
-			decor.Counters(decor.SizeB1024(0), " % .2f / % .2f"),
-		),
-		mpb.AppendDecorators(
-			decor.OnComplete(
-				decor.Percentage(decor.WCSyncSpace),
-				"unzipped",
+func (d Download) SetExtractionBar(p IAddBar, zipSize int64) {
+	d.bar.SetExtracting(
+		p.AddBar(zipSize,
+			mpb.BarQueueAfter(d.bar.Downloading().(*mpb.Bar)),
+			mpb.BarFillerClearOnComplete(),
+			mpb.PrependDecorators(
+				decor.Name(d.Name()),
+				decor.Counters(decor.SizeB1024(0), " % .2f / % .2f"),
+			),
+			mpb.AppendDecorators(
+				decor.OnComplete(
+					decor.Percentage(decor.WCSyncSpace),
+					"unzipped",
+				),
 			),
 		),
 	)
+
 }
 
 func (d *Download) IncrementExtractionBar(extractedBytes int) {
-	d.Bars.Extracting.IncrBy(extractedBytes)
+	d.bar.Extracting().IncrBy(extractedBytes)
 }
