@@ -64,6 +64,14 @@ func NewManager(
 		return Manager{}, err
 	}
 
+	iotaTemplatesName, err := iota.Templates.Name()
+	if err != nil {
+		err := oopsBuilder.
+			Wrapf(err, "failed to get iota templates name")
+
+		return Manager{}, err
+	}
+
 	return Manager{
 		cloud: cloud,
 		tool:  tool,
@@ -77,13 +85,13 @@ func NewManager(
 			template: Template{
 				cloud: filepath.Join(
 					osExecutableDir,
-					iota.Templates.Name(),
+					iotaTemplatesName,
 					toolName,
 					cloudTemplate.Cloud(),
 				),
 				base: filepath.Join(
 					osExecutableDir,
-					iota.Templates.Name(),
+					iotaTemplatesName,
 					toolName,
 					cloudTemplate.Base(),
 				),
