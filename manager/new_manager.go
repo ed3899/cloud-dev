@@ -101,6 +101,38 @@ func SetCredentialsWith(
 						Wrapf(err, "failed to set environment variable %s to %s", key, value)
 				}
 			}
+
+		default:
+			return oopsBuilder.
+				With("cloudName", manager.Cloud().Name()).
+				Errorf("unknown cloud: %#v", manager.Cloud())
+		}
+
+		return nil
+	}
+
+	return forManager
+}
+
+func UnsetCredentialsWith(
+	osUnsetenv func(string) error,
+) ForManager {
+	oopsBuilder := oops.
+		In("manager").
+		Tags("Manager").
+		Code("UnsetCredentialsWith")
+
+	forManager := func(manager Manager) error {
+		switch manager.Cloud() {
+		case iota.Aws:
+			for key := range awsCredentials {
+				if err := osUnsetenv(key); err != nil {
+					return oopsBuilder.
+						With("cloudName", manager.Cloud().Name()).
+						Wrapf(err, "failed to unset environment variable %s", key)
+				}
+			}
+
 		default:
 			return oopsBuilder.
 				With("cloudName", manager.Cloud().Name()).
