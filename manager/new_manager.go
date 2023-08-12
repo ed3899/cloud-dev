@@ -139,7 +139,7 @@ func (m Manager) Path() Path {
 }
 
 type IPathGetter interface {
-	Path() Path
+	Path() IPath
 }
 
 func (m Manager) Dir() Dir {
