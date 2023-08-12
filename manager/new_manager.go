@@ -3,6 +3,7 @@ package manager
 import (
 	"path/filepath"
 
+	"github.com/ed3899/kumo/common/constants"
 	"github.com/ed3899/kumo/common/iota"
 )
 
@@ -18,6 +19,12 @@ func NewManager(
 		cloud: cloud,
 		tool:  tool,
 		path: Path{
+			packerManifest: filepath.Join(
+				osExecutableDir,
+				iota.Packer.Name(),
+				cloud.Name(),
+				constants.PACKER_MANIFEST,
+			),
 			template: Template{
 				cloud: filepath.Join(
 					osExecutableDir,
@@ -74,8 +81,9 @@ type Manager struct {
 }
 
 type Path struct {
-	template Template
-	vars     string
+	packerManifest string
+	vars           string
+	template       Template
 }
 
 func (p Path) Template() Template {
