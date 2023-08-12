@@ -5,6 +5,7 @@ import (
 
 	"github.com/ed3899/kumo/common/constants"
 	"github.com/ed3899/kumo/common/iota"
+	"github.com/samber/oops"
 )
 
 func NewManager(
@@ -72,6 +73,44 @@ func (m Manager) Path() Path {
 func (m Manager) Dir() Dir {
 	return m.dir
 }
+
+func SetCredentialsWith(
+	osSetenv func(string, string) error,
+	viperGetString func(string) string,
+) ForManager {
+	oopsBuilder := oops.
+		In("manager").
+		Tags("Manager").
+		Code("SetCredentialsWith")
+
+	awsCredentials := map[string]string{
+		"AWS_ACCESS_KEY_ID":     viperGetString("AWS.AccessKeyId"),
+		"AWS_SECRET_ACCESS_KEY": viperGetString("AWS.SecretAccessKey"),
+	}
+
+	forManager := func(manager Manager) error {
+		switch manager.Cloud() {
+		case iota.Aws:
+			for key, value := range awsCredentials {
+				if err := osSetenv(key, value); err != nil {
+					return oopsBuilder.
+						With("cloudName", manager.Cloud().Name()).
+						Wrapf(err, "failed to set environment variable %s to %s", key, value)
+				}
+			}
+		default:
+			return oopsBuilder.
+				With("cloudName", manager.Cloud().Name()).
+				Errorf("unknown cloud: %#v", manager.Cloud())
+		}
+
+		return nil
+	}
+
+	return forManager
+}
+
+type ForManager func(manager Manager) error
 
 type Manager struct {
 	cloud iota.Cloud
