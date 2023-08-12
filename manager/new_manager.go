@@ -173,6 +173,14 @@ type Path struct {
 	template       Template
 }
 
+func (p Path) Executable() string {
+	return p.executable
+}
+
+func (p Path) PackerManifest() string {
+	return p.packerManifest
+}
+
 func (p Path) Template() Template {
 	return p.template
 }

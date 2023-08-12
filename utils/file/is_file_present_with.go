@@ -5,15 +5,15 @@ import (
 )
 
 // Returns true if the file at the given os.File exists, false otherwise.
-func FilePresentWith(
+func IsFilePresentWith(
 	osStat func(string) (fs.FileInfo, error),
 	osIsNotExist func(error) bool,
-) ForPath {
+) IsFilePresent {
 	var (
 		err error
 	)
 
-	forPath := func(absolutePath string) bool {
+	isFilePresent := func(absolutePath string) bool {
 		// Check if the file at the given absolute path exists
 		_, err = osStat(absolutePath)
 		// If there is no error, it means the file exists
@@ -30,7 +30,7 @@ func FilePresentWith(
 		return false
 	}
 
-	return forPath
+	return isFilePresent
 }
 
-type ForPath func(string) bool
+type IsFilePresent func(string) bool
