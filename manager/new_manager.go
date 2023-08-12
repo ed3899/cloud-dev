@@ -150,28 +150,28 @@ func (m Manager) Cloud() iota.Cloud {
 	return m.cloud
 }
 
-func (m Manager) Tool() iota.Tool {
-	return m.tool
-}
-
-func (m Manager) Path() Path {
-	return m.path
-}
-
-func (m Manager) Dir() Dir {
-	return m.dir
-}
-
 type ICloudGetter interface {
 	Cloud() iota.Cloud
+}
+
+func (m Manager) Tool() iota.Tool {
+	return m.tool
 }
 
 type IToolGetter interface {
 	Tool() iota.Tool
 }
 
+func (m Manager) Path() Path {
+	return m.path
+}
+
 type IPathGetter interface {
 	Path() Path
+}
+
+func (m Manager) Dir() Dir {
+	return m.dir
 }
 
 type IDirGetter interface {
@@ -194,13 +194,13 @@ var (
 
 func SetCredentialsWith(
 	osSetenv func(string, string) error,
-) ForSomeManagerMaybe {
+) ForSomeCloudGetterMaybe {
 	oopsBuilder := oops.
 		In("manager").
 		Tags("Manager").
 		Code("SetCredentialsWith")
 
-	forManager := func(manager Manager) error {
+	forManager := func(manager ICloudGetter) error {
 		managerCloudName, err := manager.Cloud().Name()
 		if err != nil {
 			return oopsBuilder.
@@ -231,13 +231,13 @@ func SetCredentialsWith(
 
 func UnsetCredentialsWith(
 	osUnsetenv func(string) error,
-) ForSomeManagerMaybe {
+) ForSomeCloudGetterMaybe {
 	oopsBuilder := oops.
 		In("manager").
 		Tags("Manager").
 		Code("UnsetCredentialsWith")
 
-	forManager := func(manager Manager) error {
+	forManager := func(manager ICloudGetter) error {
 		managerCloudName, err := manager.Cloud().Name()
 		if err != nil {
 			return oopsBuilder.
@@ -266,15 +266,17 @@ func UnsetCredentialsWith(
 	return forManager
 }
 
+type ForSomeCloudGetterMaybe func(cloudGetter ICloudGetter) error
+
 func ChangeToRunDirWith(
 	osChdir func(string) error,
-) ForSomeManagerMaybe {
+) ForSomeDirGetterMaybe {
 	oopsBuilder := oops.
 		In("manager").
 		Tags("Manager").
 		Code("ChangeToRunDirWith")
 
-	forManager := func(manager Manager) error {
+	forManager := func(manager IDirGetter) error {
 		if err := osChdir(manager.Dir().Run()); err != nil {
 			return oopsBuilder.
 				With("runDir", manager.Dir().Run()).
@@ -289,13 +291,13 @@ func ChangeToRunDirWith(
 
 func ChangeToInitialDirWith(
 	osChdir func(string) error,
-) ForSomeManagerMaybe {
+) ForSomeDirGetterMaybe {
 	oopsBuilder := oops.
 		In("manager").
 		Tags("Manager").
 		Code("ChangeToInitialDirWith")
 
-	forManager := func(manager Manager) error {
+	forManager := func(manager IDirGetter) error {
 		if err := osChdir(manager.Dir().Initial()); err != nil {
 			return oopsBuilder.
 				With("initialDir", manager.Dir().Initial()).
@@ -308,7 +310,7 @@ func ChangeToInitialDirWith(
 	return forManager
 }
 
-type ForSomeManagerMaybe func(manager Manager) error
+type ForSomeDirGetterMaybe func(manager IDirGetter) error
 
 type Manager struct {
 	cloud iota.Cloud
