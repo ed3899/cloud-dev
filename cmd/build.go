@@ -38,6 +38,9 @@ func Build() *cobra.Command {
 				file.IsFilePresentWith(os.Stat, os.IsNotExist),
 			)(toolManager)
 
+			if !isExecutablePresent {
+				
+			}
 		},
 	}
 }

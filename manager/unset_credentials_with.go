@@ -13,7 +13,7 @@ func UnsetCredentialsWith(
 		Tags("Manager").
 		Code("UnsetCredentialsWith")
 
-	forManager := func(manager ICloudGetter) error {
+	forManager := func(manager ICloudGetter[iota.Cloud]) error {
 		managerCloudName := manager.Cloud().Name()
 
 		switch manager.Cloud() {
