@@ -1,6 +1,7 @@
 package manager
 
 import (
+	"fmt"
 	"path/filepath"
 
 	"github.com/ed3899/kumo/common/constants"
@@ -72,10 +73,24 @@ func NewManager(
 		return Manager{}, err
 	}
 
+	iotaDependenciesName, err := iota.Dependencies.Name()
+	if err != nil {
+		err := oopsBuilder.
+			Wrapf(err, "failed to get iota dependencies name")
+
+		return Manager{}, err
+	}
+
 	return Manager{
 		cloud: cloud,
 		tool:  tool,
 		path: Path{
+			executable: filepath.Join(
+				osExecutableDir,
+				iotaDependenciesName,
+				toolName,
+				fmt.Sprintf("%s.exe", toolName),
+			),
 			packerManifest: filepath.Join(
 				osExecutableDir,
 				packerName,
@@ -263,6 +278,7 @@ type Manager struct {
 }
 
 type Path struct {
+	executable     string
 	packerManifest string
 	vars           string
 	template       Template
