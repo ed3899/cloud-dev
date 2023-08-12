@@ -8,7 +8,6 @@ import (
 	"github.com/ed3899/kumo/common/constants"
 	"github.com/ed3899/kumo/common/iota"
 	"github.com/samber/oops"
-	"github.com/spf13/viper"
 )
 
 type IIotaGetter[I any] interface {
@@ -41,7 +40,7 @@ type IVersionGetter interface {
 	Version() string
 }
 
-type ITool interface {                             
+type ITool interface {
 	IIotaGetter[iota.Tool]
 	INameGetter
 	IPluginPathEnvironmentVariableGetter
@@ -121,6 +120,8 @@ func (m Manager) Cloud() iota.Cloud {
 	return m.cloud
 }
 
+type ForCloudGetter func(cloudGetter ICloudGetter) error
+
 type ICloudGetter interface {
 	Cloud() iota.Cloud
 }
@@ -145,6 +146,8 @@ func (m Manager) Dir() Dir {
 	return m.dir
 }
 
+type ForDirGetter func(manager IDirGetter) error
+
 type IDirGetter interface {
 	Dir() Dir
 }
@@ -155,125 +158,6 @@ type IManager interface {
 	IPathGetter
 	IDirGetter
 }
-
-var (
-	awsCredentials = map[string]string{
-		"AWS_ACCESS_KEY_ID":     viper.GetString("AWS.AccessKeyId"),
-		"AWS_SECRET_ACCESS_KEY": viper.GetString("AWS.SecretAccessKey"),
-	}
-)
-
-func SetCredentialsWith(
-	osSetenv func(string, string) error,
-) ForSomeCloudGetterMaybe {
-	oopsBuilder := oops.
-		In("manager").
-		Tags("Manager").
-		Code("SetCredentialsWith")
-
-	forManager := func(manager ICloudGetter) error {
-		managerCloudName := manager.Cloud().Name()
-
-		switch manager.Cloud() {
-		case iota.Aws:
-			for key, value := range awsCredentials {
-				if err := osSetenv(key, value); err != nil {
-					return oopsBuilder.
-						With("cloudName", managerCloudName).
-						Wrapf(err, "failed to set environment variable %s to %s", key, value)
-				}
-			}
-
-		default:
-			return oopsBuilder.
-				With("cloudName", managerCloudName).
-				Errorf("unknown cloud: %#v", manager.Cloud())
-		}
-
-		return nil
-	}
-
-	return forManager
-}
-
-func UnsetCredentialsWith(
-	osUnsetenv func(string) error,
-) ForSomeCloudGetterMaybe {
-	oopsBuilder := oops.
-		In("manager").
-		Tags("Manager").
-		Code("UnsetCredentialsWith")
-
-	forManager := func(manager ICloudGetter) error {
-		managerCloudName := manager.Cloud().Name()
-
-		switch manager.Cloud() {
-		case iota.Aws:
-			for key := range awsCredentials {
-				if err := osUnsetenv(key); err != nil {
-					return oopsBuilder.
-						With("cloudName", managerCloudName).
-						Wrapf(err, "failed to unset environment variable %s", key)
-				}
-			}
-
-		default:
-			return oopsBuilder.
-				With("cloudName", managerCloudName).
-				Errorf("unknown cloud: %#v", manager.Cloud())
-		}
-
-		return nil
-	}
-
-	return forManager
-}
-
-type ForSomeCloudGetterMaybe func(cloudGetter ICloudGetter) error
-
-func ChangeToRunDirWith(
-	osChdir func(string) error,
-) ForSomeDirGetterMaybe {
-	oopsBuilder := oops.
-		In("manager").
-		Tags("Manager").
-		Code("ChangeToRunDirWith")
-
-	forManager := func(manager IDirGetter) error {
-		if err := osChdir(manager.Dir().Run()); err != nil {
-			return oopsBuilder.
-				With("runDir", manager.Dir().Run()).
-				Wrapf(err, "failed to change to run dir")
-		}
-
-		return nil
-	}
-
-	return forManager
-}
-
-func ChangeToInitialDirWith(
-	osChdir func(string) error,
-) ForSomeDirGetterMaybe {
-	oopsBuilder := oops.
-		In("manager").
-		Tags("Manager").
-		Code("ChangeToInitialDirWith")
-
-	forManager := func(manager IDirGetter) error {
-		if err := osChdir(manager.Dir().Initial()); err != nil {
-			return oopsBuilder.
-				With("initialDir", manager.Dir().Initial()).
-				Wrapf(err, "failed to change to initial dir")
-		}
-
-		return nil
-	}
-
-	return forManager
-}
-
-type ForSomeDirGetterMaybe func(manager IDirGetter) error
 
 type Manager struct {
 	cloud iota.Cloud
