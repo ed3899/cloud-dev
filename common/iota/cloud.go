@@ -12,7 +12,7 @@ const (
 	Aws Cloud = iota
 )
 
-func Iota(c Cloud) Cloud {
+func (c Cloud) Iota() Cloud {
 	return c
 }
 

@@ -41,7 +41,7 @@ type IVersionGetter interface {
 	Version() string
 }
 
-type ITool interface {
+type ITool interface {                             
 	IIotaGetter[iota.Tool]
 	INameGetter
 	IPluginPathEnvironmentVariableGetter
