@@ -84,7 +84,6 @@ var (
 
 func SetCredentialsWith(
 	osSetenv func(string, string) error,
-	viperGetString func(string) string,
 ) ForManager {
 	oopsBuilder := oops.
 		In("manager").
@@ -137,6 +136,49 @@ func UnsetCredentialsWith(
 			return oopsBuilder.
 				With("cloudName", manager.Cloud().Name()).
 				Errorf("unknown cloud: %#v", manager.Cloud())
+		}
+
+		return nil
+	}
+
+	return forManager
+}
+
+
+func ChangeToRunDirWith(
+	osChdir func(string) error,
+	) ForManager {
+	oopsBuilder := oops.
+		In("manager").
+		Tags("Manager").
+		Code("ChangeToRunDirWith")
+
+	forManager := func(manager Manager) error {
+		if err := osChdir(manager.Dir().Run()); err != nil {
+			return oopsBuilder.
+			With("runDir", manager.Dir().Run()).
+			Wrapf(err, "failed to change to run dir")
+		}
+
+		return nil
+	}
+
+	return forManager
+}
+
+func ChangeToInitialDirWith(
+	osChdir func(string) error,
+	) ForManager {
+	oopsBuilder := oops.
+		In("manager").
+		Tags("Manager").
+		Code("ChangeToInitialDirWith")
+
+	forManager := func(manager Manager) error {
+		if err := osChdir(manager.Dir().Initial()); err != nil {
+			return oopsBuilder.
+			With("initialDir", manager.Dir().Initial()).
+			Wrapf(err, "failed to change to initial dir")
 		}
 
 		return nil
