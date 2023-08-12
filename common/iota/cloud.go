@@ -12,6 +12,10 @@ const (
 	Aws Cloud = iota
 )
 
+func Iota(c Cloud) Cloud {
+	return c
+}
+
 func (c Cloud) Name() string {
 	oopsBuilder := oops.
 		In("common").

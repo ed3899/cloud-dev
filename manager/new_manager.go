@@ -11,10 +11,48 @@ import (
 	"github.com/spf13/viper"
 )
 
+type IIotaGetter[I any] interface {
+	Iota() I
+}
+
+type INameGetter interface {
+	Name() string
+}
+
+type ITemplateGetter interface {
+	Template() iota.Template
+}
+
+type ICloud interface {
+	IIotaGetter[iota.Cloud]
+	INameGetter
+	ITemplateGetter
+}
+
+type IPluginPathEnvironmentVariableGetter interface {
+	PluginPathEnvironmentVariable() string
+}
+
+type IVarsNameGetter interface {
+	VarsName() string
+}
+
+type IVersionGetter interface {
+	Version() string
+}
+
+type ITool interface {
+	IIotaGetter[iota.Tool]
+	INameGetter
+	IPluginPathEnvironmentVariableGetter
+	IVarsNameGetter
+	IVersionGetter
+}
+
 func NewManagerWith(
 	osExecutable func() (string, error),
-	cloud iota.Cloud,
-	tool iota.Tool,
+	cloud ICloud,
+	tool ITool,
 ) Manager {
 	oopsBuilder := oops.
 		In("manager").
@@ -42,8 +80,8 @@ func NewManagerWith(
 	}
 
 	return Manager{
-		cloud: cloud,
-		tool:  tool,
+		cloud: cloud.Iota(),
+		tool:  tool.Iota(),
 		path: Path{
 			executable: filepath.Join(
 				osExecutableDir,

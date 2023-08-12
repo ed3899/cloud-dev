@@ -13,6 +13,10 @@ const (
 	Terraform
 )
 
+func (t Tool) Iota() Tool {
+	return t
+}
+
 func (t Tool) Name() string {
 	oopsBuilder := oops.
 		In("common").
