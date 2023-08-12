@@ -17,12 +17,19 @@ func (t Tool) Iota() Tool {
 	return t
 }
 
-func (t Tool) Name() string {
+func (t Tool) Name() (n string) {
 	oopsBuilder := oops.
 		In("common").
 		In("iota").
 		Tags("Tool").
 		Code("Name")
+
+	defer func() {
+		if r := recover(); r != nil {
+			err := oopsBuilder.Errorf("%v", r)
+			log.Fatalf("panic: %+v", err)
+		}
+	}()
 
 	switch t {
 	case Packer:
@@ -32,12 +39,7 @@ func (t Tool) Name() string {
 		return "terraform"
 
 	default:
-		err := oopsBuilder.
-			Errorf("unknown tool: %#v", t)
-
-		log.Fatalf("%+v", err)
-
-		return ""
+		panic(t)
 	}
 }
 
@@ -48,6 +50,13 @@ func (t Tool) VarsName() string {
 		Tags("Tool").
 		Code("VarsName")
 
+	defer func() {
+		if r := recover(); r != nil {
+			err := oopsBuilder.Errorf("%v", r)
+			log.Fatalf("panic: %+v", err)
+		}
+	}()
+
 	switch t {
 	case Packer:
 		return ".auto.pkrvars.hcl"
@@ -56,12 +65,7 @@ func (t Tool) VarsName() string {
 		return ".auto.tfvars"
 
 	default:
-		err := oopsBuilder.
-			Errorf("unknown tool: %#v", t)
-
-		log.Fatalf("%+v", err)
-
-		return ""
+		panic(t)
 	}
 }
 
@@ -72,6 +76,13 @@ func (t Tool) Version() string {
 		Tags("Tool").
 		Code("Version")
 
+	defer func() {
+		if r := recover(); r != nil {
+			err := oopsBuilder.Errorf("%v", r)
+			log.Fatalf("panic: %+v", err)
+		}
+	}()
+
 	switch t {
 	case Packer:
 		return "1.6.5"
@@ -80,12 +91,7 @@ func (t Tool) Version() string {
 		return "1.5.3"
 
 	default:
-		err := oopsBuilder.
-			Errorf("unknown tool: %#v", t)
-
-		log.Fatalf("%+v", err)
-
-		return ""
+		panic(t)
 	}
 }
 
@@ -96,6 +102,13 @@ func (t Tool) PluginPathEnvironmentVariable() string {
 		Tags("Tool").
 		Code("PluginPathEnvironmentVariable")
 
+	defer func() {
+		if r := recover(); r != nil {
+			err := oopsBuilder.Errorf("%v", r)
+			log.Fatalf("panic: %+v", err)
+		}
+	}()
+
 	switch t {
 	case Packer:
 		return "PACKER_PLUGIN_PATH"
@@ -104,11 +117,6 @@ func (t Tool) PluginPathEnvironmentVariable() string {
 		return "TF_PLUGIN_CACHE_DIR"
 
 	default:
-		err := oopsBuilder.
-			Errorf("unknown tool: %#v", t)
-
-		log.Fatalf("%+v", err)
-
-		return ""
+		panic(t)
 	}
 }
