@@ -1,6 +1,10 @@
 package iota
 
-import "github.com/samber/oops"
+import (
+	"log"
+
+	"github.com/samber/oops"
+)
 
 type Cloud int
 
@@ -8,7 +12,7 @@ const (
 	Aws Cloud = iota
 )
 
-func (c Cloud) Name() (string, error) {
+func (c Cloud) Name() string {
 	oopsBuilder := oops.
 		In("common").
 		In("iota").
@@ -17,17 +21,19 @@ func (c Cloud) Name() (string, error) {
 
 	switch c {
 	case Aws:
-		return "aws", nil
+		return "aws"
 
 	default:
 		err := oopsBuilder.
 			Errorf("unknown cloud: %#v", c)
 
-		return "", err
+		log.Fatalf("%+v", err)
+
+		return ""
 	}
 }
 
-func (c Cloud) Template() (Template, error) {
+func (c Cloud) Template() Template {
 	oopsBuilder := oops.
 		In("common").
 		In("iota").
@@ -39,13 +45,15 @@ func (c Cloud) Template() (Template, error) {
 		return Template{
 			cloud: "aws.tmpl",
 			base:  "base.tmpl",
-		}, nil
+		}
 
 	default:
 		err := oopsBuilder.
 			Errorf("unknown cloud: %#v", c)
 
-		return Template{}, err
+		log.Fatalf("%+v", err)
+
+		return Template{}
 	}
 }
 

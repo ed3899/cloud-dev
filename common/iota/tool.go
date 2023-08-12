@@ -1,6 +1,10 @@
 package iota
 
-import "github.com/samber/oops"
+import (
+	"log"
+
+	"github.com/samber/oops"
+)
 
 type Tool int
 
@@ -9,7 +13,7 @@ const (
 	Terraform
 )
 
-func (t Tool) Name() (string, error) {
+func (t Tool) Name() string {
 	oopsBuilder := oops.
 		In("common").
 		In("iota").
@@ -18,20 +22,22 @@ func (t Tool) Name() (string, error) {
 
 	switch t {
 	case Packer:
-		return "packer", nil
+		return "packer"
 
 	case Terraform:
-		return "terraform", nil
+		return "terraform"
 
 	default:
 		err := oopsBuilder.
 			Errorf("unknown tool: %#v", t)
 
-		return "", err
+		log.Fatalf("%+v", err)
+
+		return ""
 	}
 }
 
-func (t Tool) VarsName() (string, error) {
+func (t Tool) VarsName() string {
 	oopsBuilder := oops.
 		In("common").
 		In("iota").
@@ -40,20 +46,22 @@ func (t Tool) VarsName() (string, error) {
 
 	switch t {
 	case Packer:
-		return ".auto.pkrvars.hcl", nil
+		return ".auto.pkrvars.hcl"
 
 	case Terraform:
-		return ".auto.tfvars", nil
-		
+		return ".auto.tfvars"
+
 	default:
 		err := oopsBuilder.
 			Errorf("unknown tool: %#v", t)
 
-		return "", err
+		log.Fatalf("%+v", err)
+
+		return ""
 	}
 }
 
-func (t Tool) Version() (string, error) {
+func (t Tool) Version() string {
 	oopsBuilder := oops.
 		In("common").
 		In("iota").
@@ -62,20 +70,22 @@ func (t Tool) Version() (string, error) {
 
 	switch t {
 	case Packer:
-		return "1.6.5", nil
+		return "1.6.5"
 
 	case Terraform:
-		return "1.5.3", nil
+		return "1.5.3"
 
 	default:
 		err := oopsBuilder.
 			Errorf("unknown tool: %#v", t)
 
-		return "", err
+		log.Fatalf("%+v", err)
+
+		return ""
 	}
 }
 
-func (t Tool) PluginPathEnvironmentVariable() (string, error) {
+func (t Tool) PluginPathEnvironmentVariable() string {
 	oopsBuilder := oops.
 		In("common").
 		In("iota").
@@ -84,15 +94,17 @@ func (t Tool) PluginPathEnvironmentVariable() (string, error) {
 
 	switch t {
 	case Packer:
-		return "PACKER_PLUGIN_PATH", nil
+		return "PACKER_PLUGIN_PATH"
 
 	case Terraform:
-		return "TF_PLUGIN_CACHE_DIR", nil
+		return "TF_PLUGIN_CACHE_DIR"
 
 	default:
 		err := oopsBuilder.
 			Errorf("unknown tool: %#v", t)
 
-		return "", err
+		log.Fatalf("%+v", err)
+
+		return ""
 	}
 }

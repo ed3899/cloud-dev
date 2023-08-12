@@ -1,6 +1,10 @@
 package iota
 
-import "github.com/samber/oops"
+import (
+	"log"
+
+	"github.com/samber/oops"
+)
 
 type Dirs int
 
@@ -10,7 +14,7 @@ const (
 	Templates
 )
 
-func (d Dirs) Name() (string, error) {
+func (d Dirs) Name() string {
 	oopsBuilder := oops.
 		In("common").
 		In("iota").
@@ -19,15 +23,20 @@ func (d Dirs) Name() (string, error) {
 
 	switch d {
 	case Dependencies:
-		return "dependencies", nil
+		return "dependencies"
+
 	case Plugins:
-		return "plugins", nil
+		return "plugins"
+
 	case Templates:
-		return "templates", nil
+		return "templates"
+
 	default:
 		err := oopsBuilder.
 			Errorf("unknown dir: %#v", d)
 
-		return "", err
+		log.Fatalf("%+v", err)
+
+		return ""
 	}
 }

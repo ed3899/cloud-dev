@@ -11,36 +11,18 @@ import (
 )
 
 func NewManagerWith(
-	osExecutable func() (string, error),
-	rawCloudToIota func(string) (iota.Cloud, error),
-	viperGetString func(string) string,
-	rawCloudFromConfig string,
+	osExecutablePath string,
+	cloud iota.Cloud,
 	tool iota.Tool,
 ) (Manager, error) {
 	oopsBuilder := oops.
 		In("manager").
 		Tags("Manager").
 		Code("NewManager").
-		With("rawCloudFromConfig", rawCloudFromConfig).
+		With("cloud", cloud).
 		With("tool", tool)
 
-	osExecutablePath, err := osExecutable()
-	if err != nil {
-		err := oopsBuilder.
-			Wrapf(err, "failed to get os executable path")
-
-		return Manager{}, err
-	}
-
-	cloudIota, err := rawCloudToIota(viperGetString("Cloud"))
-	if err != nil {
-		err := oopsBuilder.
-			Wrapf(err, "failed to convert raw cloud to iota cloud")
-
-		return Manager{}, err
-	}
-
-	cloudTemplate, err := cloudIota.Template()
+	cloudTemplate, err := cloud.Template()
 	if err != nil {
 		err := oopsBuilder.
 			Wrapf(err, "failed to get cloud template")
@@ -48,7 +30,7 @@ func NewManagerWith(
 		return Manager{}, err
 	}
 
-	cloudName, err := cloudIota.Name()
+	cloudName, err := cloud.Name()
 	if err != nil {
 		err := oopsBuilder.
 			Wrapf(err, "failed to get cloud name")
@@ -108,7 +90,7 @@ func NewManagerWith(
 	}
 
 	return Manager{
-		cloud: cloudIota,
+		cloud: cloud,
 		tool:  tool,
 		path: Path{
 			executable: filepath.Join(

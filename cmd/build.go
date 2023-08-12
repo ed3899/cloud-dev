@@ -28,22 +28,22 @@ func Build() *cobra.Command {
 					With("args", args)
 			)
 
-			currentExecutablePath, err := os.Executable()
+			osExecutablePath, err := os.Executable()
 			if err != nil {
 				err := oopsBuilder.
-					Wrapf(err, "failed to get current executable path")
+					Wrapf(err, "failed to get executable path")
 				log.Fatalf("%+v", err)
 			}
 
 			cloudIota, err := iota.RawCloudToCloudIota(viper.GetString("Cloud"))
 			if err != nil {
 				err := oopsBuilder.
-					Wrapf(err, "failed to convert raw cloud to iota cloud")
+					Wrapf(err, "failed to get cloud iota")
 				log.Fatalf("%+v", err)
 			}
 
-			manager, err := manager.NewManager(
-				currentExecutablePath,
+			manager, err := manager.NewManagerWith(
+				osExecutablePath,
 				cloudIota,
 				iota.Packer,
 			)
