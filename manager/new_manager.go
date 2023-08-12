@@ -10,22 +10,37 @@ import (
 	"github.com/spf13/viper"
 )
 
-func NewManager(
-	osExecutablePath string,
-	cloud iota.Cloud,
+func NewManagerWith(
+	osExecutable func() (string, error),
+	rawCloudToIota func(string) (iota.Cloud, error),
+	viperGetString func(string) string,
+	rawCloudFromConfig string,
 	tool iota.Tool,
 ) (Manager, error) {
 	oopsBuilder := oops.
 		In("manager").
 		Tags("Manager").
 		Code("NewManager").
-		With("cloud", cloud).
-		With("tool", tool).
-		With("osExecutablePath", osExecutablePath)
+		With("rawCloudFromConfig", rawCloudFromConfig).
+		With("tool", tool)
 
-	osExecutableDir := filepath.Dir(osExecutablePath)
+	osExecutablePath, err := osExecutable()
+	if err != nil {
+		err := oopsBuilder.
+			Wrapf(err, "failed to get os executable path")
 
-	cloudTemplate, err := cloud.Template()
+		return Manager{}, err
+	}
+
+	cloudIota, err := rawCloudToIota(viperGetString("Cloud"))
+	if err != nil {
+		err := oopsBuilder.
+			Wrapf(err, "failed to convert raw cloud to iota cloud")
+
+		return Manager{}, err
+	}
+
+	cloudTemplate, err := cloudIota.Template()
 	if err != nil {
 		err := oopsBuilder.
 			Wrapf(err, "failed to get cloud template")
@@ -33,7 +48,7 @@ func NewManager(
 		return Manager{}, err
 	}
 
-	cloudName, err := cloud.Name()
+	cloudName, err := cloudIota.Name()
 	if err != nil {
 		err := oopsBuilder.
 			Wrapf(err, "failed to get cloud name")
@@ -81,8 +96,19 @@ func NewManager(
 		return Manager{}, err
 	}
 
+	osExecutableDir := filepath.Dir(osExecutablePath)
+
+	templatePath := func(templateName string) string {
+		return filepath.Join(
+			osExecutableDir,
+			iotaTemplatesName,
+			toolName,
+			templateName,
+		)
+	}
+
 	return Manager{
-		cloud: cloud,
+		cloud: cloudIota,
 		tool:  tool,
 		path: Path{
 			executable: filepath.Join(
@@ -98,18 +124,8 @@ func NewManager(
 				constants.PACKER_MANIFEST,
 			),
 			template: Template{
-				cloud: filepath.Join(
-					osExecutableDir,
-					iotaTemplatesName,
-					toolName,
-					cloudTemplate.Cloud(),
-				),
-				base: filepath.Join(
-					osExecutableDir,
-					iotaTemplatesName,
-					toolName,
-					cloudTemplate.Base(),
-				),
+				cloud: templatePath(cloudTemplate.Cloud()),
+				base:  templatePath(cloudTemplate.Base()),
 			},
 			vars: filepath.Join(
 				osExecutableDir,
@@ -127,6 +143,7 @@ func NewManager(
 			),
 		},
 	}, nil
+
 }
 
 func (m Manager) Cloud() iota.Cloud {
@@ -154,7 +171,7 @@ var (
 
 func SetCredentialsWith(
 	osSetenv func(string, string) error,
-) ForManager {
+) ForManagerMaybe {
 	oopsBuilder := oops.
 		In("manager").
 		Tags("Manager").
@@ -191,7 +208,7 @@ func SetCredentialsWith(
 
 func UnsetCredentialsWith(
 	osUnsetenv func(string) error,
-) ForManager {
+) ForManagerMaybe {
 	oopsBuilder := oops.
 		In("manager").
 		Tags("Manager").
@@ -228,7 +245,7 @@ func UnsetCredentialsWith(
 
 func ChangeToRunDirWith(
 	osChdir func(string) error,
-) ForManager {
+) ForManagerMaybe {
 	oopsBuilder := oops.
 		In("manager").
 		Tags("Manager").
@@ -249,7 +266,7 @@ func ChangeToRunDirWith(
 
 func ChangeToInitialDirWith(
 	osChdir func(string) error,
-) ForManager {
+) ForManagerMaybe {
 	oopsBuilder := oops.
 		In("manager").
 		Tags("Manager").
@@ -268,7 +285,7 @@ func ChangeToInitialDirWith(
 	return forManager
 }
 
-type ForManager func(manager Manager) error
+type ForManagerMaybe func(manager Manager) error
 
 type Manager struct {
 	cloud iota.Cloud
