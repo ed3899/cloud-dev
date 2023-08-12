@@ -4,6 +4,11 @@ import "github.com/samber/oops"
 
 type Cloud int
 
+type awsC struct {
+
+}
+
+
 const (
 	Base Cloud = iota
 	Aws
