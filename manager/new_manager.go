@@ -6,6 +6,7 @@ import (
 	"github.com/ed3899/kumo/common/constants"
 	"github.com/ed3899/kumo/common/iota"
 	"github.com/samber/oops"
+	"github.com/spf13/viper"
 )
 
 func NewManager(
@@ -74,6 +75,13 @@ func (m Manager) Dir() Dir {
 	return m.dir
 }
 
+var (
+	awsCredentials = map[string]string{
+		"AWS_ACCESS_KEY_ID":     viper.GetString("AWS.AccessKeyId"),
+		"AWS_SECRET_ACCESS_KEY": viper.GetString("AWS.SecretAccessKey"),
+	}
+)
+
 func SetCredentialsWith(
 	osSetenv func(string, string) error,
 	viperGetString func(string) string,
@@ -82,11 +90,6 @@ func SetCredentialsWith(
 		In("manager").
 		Tags("Manager").
 		Code("SetCredentialsWith")
-
-	awsCredentials := map[string]string{
-		"AWS_ACCESS_KEY_ID":     viperGetString("AWS.AccessKeyId"),
-		"AWS_SECRET_ACCESS_KEY": viperGetString("AWS.SecretAccessKey"),
-	}
 
 	forManager := func(manager Manager) error {
 		switch manager.Cloud() {

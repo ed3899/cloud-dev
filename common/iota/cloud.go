@@ -9,9 +9,7 @@ const (
 	Aws
 )
 
-func (c Cloud) Name() string {
-	var choice string
-
+func (c Cloud) Name() (name string) {
 	oops.
 		In("iota").
 		Tags("Cloud").
@@ -19,15 +17,15 @@ func (c Cloud) Name() string {
 		Recoverf(func() {
 			switch c {
 			case Base:
-				choice = "base"
+				name = "base"
 			case Aws:
-				choice = "aws"
+				name = "aws"
 			default:
 				panic(c)
 			}
 		}, "Unknown cloud")
 
-	return choice
+	return
 }
 
 func (c Cloud) Templates() (cloud string, base string) {
