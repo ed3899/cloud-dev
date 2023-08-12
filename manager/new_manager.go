@@ -18,14 +18,14 @@ type INameGetter interface {
 	Name() string
 }
 
-type ITemplateGetter interface {
-	Template() iota.Template
+type ITemplateGetter[T any] interface {
+	Template() T
 }
 
 type ICloud interface {
 	IIotaGetter[iota.Cloud]
 	INameGetter
-	ITemplateGetter
+	ITemplateGetter[iota.Template]
 }
 
 type IPluginPathEnvironmentVariableGetter interface {
@@ -120,11 +120,11 @@ func (m Manager) Cloud() iota.Cloud {
 	return m.cloud
 }
 
-type ForCloudGetter func(cloudGetter ICloudGetter) error
-
-type ICloudGetter interface {
-	Cloud() iota.Cloud
+type ICloudGetter[C any] interface {
+	Cloud() C
 }
+
+type ForCloudGetter func(cloudGetter ICloudGetter[iota.Cloud]) error
 
 func (m Manager) Tool() iota.Tool {
 	return m.tool
@@ -135,7 +135,7 @@ type IToolGetter interface {
 }
 
 func (m Manager) Path() Path {
-	return m.path
+	return m.path.(Path)
 }
 
 type IPathGetter interface {
@@ -143,17 +143,17 @@ type IPathGetter interface {
 }
 
 func (m Manager) Dir() Dir {
-	return m.dir
+	return m.dir.(Dir)
 }
-
-type ForDirGetter func(manager IDirGetter) error
 
 type IDirGetter interface {
 	Dir() Dir
 }
 
+type ForDirGetter func(manager IDirGetter) error
+
 type IManager interface {
-	ICloudGetter
+	ICloudGetter[iota.Cloud]
 	IToolGetter
 	IPathGetter
 	IDirGetter
@@ -162,36 +162,50 @@ type IManager interface {
 type Manager struct {
 	cloud iota.Cloud
 	tool  iota.Tool
-	path  Path
-	dir   Dir
-}
-
-type Path struct {
-	executable     string
-	packerManifest string
-	vars           string
-	template       Template
+	path  IPath
+	dir   IDir
 }
 
 func (p Path) Executable() string {
 	return p.executable
 }
 
+type IExecutableGetter interface {
+	Executable() string
+}
+
 func (p Path) PackerManifest() string {
 	return p.packerManifest
 }
 
+type IPackerManifestGetter interface {
+	PackerManifest() string
+}
+
 func (p Path) Template() Template {
-	return p.template
+	return p.template.(Template)
 }
 
 func (p Path) Vars() string {
 	return p.vars
 }
 
-type Template struct {
-	cloud string
-	base  string
+type IVarsGetter interface {
+	Vars() string
+}
+
+type IPath interface {
+	IExecutableGetter
+	IPackerManifestGetter
+	ITemplateGetter[Template]
+	IVarsGetter
+}
+
+type Path struct {
+	executable     string
+	packerManifest string
+	vars           string
+	template       ITemplate
 }
 
 func (t Template) Cloud() string {
@@ -202,15 +216,42 @@ func (t Template) Base() string {
 	return t.base
 }
 
-type Dir struct {
-	initial string
-	run     string
+type IBaseGetter interface {
+	Base() string
+}
+
+type ITemplate interface {
+	ICloudGetter[string]
+	IBaseGetter
+}
+
+type Template struct {
+	cloud string
+	base  string
 }
 
 func (d Dir) Initial() string {
 	return d.initial
 }
 
+type IInitialGetter interface {
+	Initial() string
+}
+
 func (d Dir) Run() string {
 	return d.run
+}
+
+type IRunGetter interface {
+	Run() string
+}
+
+type IDir interface {
+	IInitialGetter
+	IRunGetter
+}
+
+type Dir struct {
+	initial string
+	run     string
 }
