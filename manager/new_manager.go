@@ -134,8 +134,8 @@ type IToolGetter interface {
 	Tool() iota.Tool
 }
 
-func (m Manager) Path() Path {
-	return m.path.(Path)
+func (m Manager) Path() IPath {
+	return m.path
 }
 
 type IPathGetter interface {

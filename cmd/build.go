@@ -5,6 +5,7 @@ import (
 
 	"github.com/ed3899/kumo/common/iota"
 	"github.com/ed3899/kumo/manager"
+	"github.com/ed3899/kumo/utils/file"
 	"github.com/samber/oops"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -27,13 +28,15 @@ func Build() *cobra.Command {
 					With("args", args)
 			)
 
-			manager := manager.NewManagerWith(
+			toolManager := manager.NewManagerWith(
 				os.Executable,
 				iota.CloudIota(viper.GetString("Cloud")),
 				iota.Packer,
 			)
 
-			
+			isExecutablePresent := manager.IsExecutablePresentWith(
+				file.IsFilePresentWith(os.Stat, os.IsNotExist),
+			)(toolManager)
 
 		},
 	}
