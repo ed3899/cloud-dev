@@ -59,46 +59,46 @@ type Download struct {
 	bar             IBar
 }
 
-func (b Bars) Downloading() IIncrBy {
+func (b Bar) Downloading() IIncrBy {
 	return b.downloading
 }
 
-type IDownloading interface {
+type IDownloadingGetter interface {
 	Downloading() IIncrBy
 }
 
-func (b Bars) SetDownloading(mpbBar IIncrBy) {
+func (b Bar) SetDownloading(mpbBar IIncrBy) {
 	b.downloading = mpbBar
 }
 
-type ISetDownloading interface {
+type ISetDownloadingSetter interface {
 	SetDownloading(IIncrBy)
 }
 
-func (b Bars) Extracting() IIncrBy {
+func (b Bar) Extracting() IIncrBy {
 	return b.extracting
 }
 
-type IExtracting interface {
+type IExtractingGetter interface {
 	Extracting() IIncrBy
 }
 
-func (b Bars) SetExtracting(mpbBar IIncrBy) {
+func (b Bar) SetExtracting(mpbBar IIncrBy) {
 	b.extracting = mpbBar
 }
 
-type ISetExtracting interface {
+type ISetExtractingSetter interface {
 	SetExtracting(IIncrBy)
 }
 
 type IBar interface {
-	IDownloading
-	ISetDownloading
-	ISetExtracting
-	IExtracting
+	IDownloadingGetter
+	ISetDownloadingSetter
+	ISetExtractingSetter
+	IExtractingGetter
 }
 
-type Bars struct {
+type Bar struct {
 	downloading, extracting IIncrBy
 }
 
