@@ -35,18 +35,23 @@ func Build() *cobra.Command {
 				log.Fatalf("%+v", err)
 			}
 
-			cloud, err := iota.RawCloudToCloudIota(viper.GetString("Cloud"))
+			cloudIota, err := iota.RawCloudToCloudIota(viper.GetString("Cloud"))
 			if err != nil {
 				err := oopsBuilder.
 					Wrapf(err, "failed to convert raw cloud to iota cloud")
 				log.Fatalf("%+v", err)
 			}
 
-			manager := manager.NewManager(
+			manager, err := manager.NewManager(
 				currentExecutablePath,
-				cloud,
+				cloudIota,
 				iota.Packer,
 			)
+			if err != nil {
+				err := oopsBuilder.
+					Wrapf(err, "failed to create manager")
+				log.Fatalf("%+v", err)
+			}
 
 		},
 	}

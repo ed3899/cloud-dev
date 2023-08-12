@@ -11,9 +11,11 @@ func RawCloudToCloudIota(rawCloud string) (Cloud, error) {
 	switch rawCloud {
 	case "aws":
 		return Aws, nil
+
 	default:
 		err := oopsBuilder.
 			Errorf("unknown cloud: %#v", rawCloud)
+			
 		return -1, err
 	}
 }
