@@ -9,86 +9,90 @@ const (
 	Terraform
 )
 
-func (t Tool) Name() string {
-	var choice string
-
-	oops.
+func (t Tool) Name() (string, error) {
+	oopsBuilder := oops.
+		In("common").
 		In("iota").
-		Tags("tool").
-		Code("Name").
-		Recoverf(func() {
-			switch t {
-			case Packer:
-				choice = "packer"
-			case Terraform:
-				choice = "terraform"
-			default:
-				panic(t)
-			}
-		}, "Unknown tool")
+		Tags("Tool").
+		Code("Name")
 
-	return choice
+	switch t {
+	case Packer:
+		return "packer", nil
+
+	case Terraform:
+		return "terraform", nil
+
+	default:
+		err := oopsBuilder.
+			Errorf("unknown tool: %#v", t)
+
+		return "", err
+	}
 }
 
-func (t Tool) VarsName() string {
-	var choice string
-
-	oops.
+func (t Tool) VarsName() (string, error) {
+	oopsBuilder := oops.
+		In("common").
 		In("iota").
-		Tags("tool").
-		Code("VarsName").
-		Recoverf(func() {
-			switch t {
-			case Packer:
-				choice = ".auto.pkrvars.hcl"
-			case Terraform:
-				choice = ".auto.tfvars"
-			default:
-				panic(t)
-			}
-		}, "Unknown tool")
+		Tags("Tool").
+		Code("VarsName")
 
-	return choice
+	switch t {
+	case Packer:
+		return ".auto.pkrvars.hcl", nil
+
+	case Terraform:
+		return ".auto.tfvars", nil
+		
+	default:
+		err := oopsBuilder.
+			Errorf("unknown tool: %#v", t)
+
+		return "", err
+	}
 }
 
-func (t Tool) Version() string {
-	var choice string
-
-	oops.
+func (t Tool) Version() (string, error) {
+	oopsBuilder := oops.
+		In("common").
 		In("iota").
-		Tags("tool").
-		Code("Version").
-		Recoverf(func() {
-			switch t {
-			case Packer:
-				choice = "1.6.5"
-			case Terraform:
-				choice = "1.5.3"
-			default:
-				panic(t)
-			}
-		}, "Unknown tool")
+		Tags("Tool").
+		Code("Version")
 
-	return choice
+	switch t {
+	case Packer:
+		return "1.6.5", nil
+
+	case Terraform:
+		return "1.5.3", nil
+
+	default:
+		err := oopsBuilder.
+			Errorf("unknown tool: %#v", t)
+
+		return "", err
+	}
 }
 
-func (t Tool) PluginPathEnvironmentVariable() string {
-	var choice string
-
-	oops.
+func (t Tool) PluginPathEnvironmentVariable() (string, error) {
+	oopsBuilder := oops.
+		In("common").
 		In("iota").
-		Tags("tool").
-		Code("PluginPathEnvironmentVariable").
-		Recoverf(func() {
-			switch t {
-			case Packer:
-				choice = "PACKER_PLUGIN_PATH"
-			case Terraform:
-				choice = "TF_PLUGIN_CACHE_DIR"
-			default:
-				panic(t)
-			}
-		}, "Unknown tool")
+		Tags("Tool").
+		Code("PluginPathEnvironmentVariable")
 
-	return choice
+	switch t {
+	case Packer:
+		return "PACKER_PLUGIN_PATH", nil
+
+	case Terraform:
+		return "TF_PLUGIN_CACHE_DIR", nil
+
+	default:
+		err := oopsBuilder.
+			Errorf("unknown tool: %#v", t)
+
+		return "", err
+	}
 }

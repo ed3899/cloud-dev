@@ -40,13 +40,37 @@ func NewManager(
 		return Manager{}, err
 	}
 
+	packerName, err := iota.Packer.Name()
+	if err != nil {
+		err := oopsBuilder.
+			Wrapf(err, "failed to get packer name")
+
+		return Manager{}, err
+	}
+
+	toolName, err := tool.Name()
+	if err != nil {
+		err := oopsBuilder.
+			Wrapf(err, "failed to get tool name")
+
+		return Manager{}, err
+	}
+
+	toolVarsName, err := tool.VarsName()
+	if err != nil {
+		err := oopsBuilder.
+			Wrapf(err, "failed to get tool vars name")
+
+		return Manager{}, err
+	}
+
 	return Manager{
 		cloud: cloud,
 		tool:  tool,
 		path: Path{
 			packerManifest: filepath.Join(
 				osExecutableDir,
-				iota.Packer.Name(),
+				packerName,
 				cloudName,
 				constants.PACKER_MANIFEST,
 			),
@@ -54,28 +78,28 @@ func NewManager(
 				cloud: filepath.Join(
 					osExecutableDir,
 					iota.Templates.Name(),
-					tool.Name(),
+					toolName,
 					cloudTemplate.Cloud(),
 				),
 				base: filepath.Join(
 					osExecutableDir,
 					iota.Templates.Name(),
-					tool.Name(),
+					toolName,
 					cloudTemplate.Base(),
 				),
 			},
 			vars: filepath.Join(
 				osExecutableDir,
-				tool.Name(),
+				toolName,
 				cloudName,
-				tool.VarsName(),
+				toolVarsName,
 			),
 		},
 		dir: Dir{
 			initial: osExecutableDir,
 			run: filepath.Join(
 				osExecutableDir,
-				tool.Name(),
+				toolName,
 				cloudName,
 			),
 		},
@@ -114,19 +138,25 @@ func SetCredentialsWith(
 		Code("SetCredentialsWith")
 
 	forManager := func(manager Manager) error {
+		managerCloudName, err := manager.Cloud().Name()
+		if err != nil {
+			return oopsBuilder.
+				Wrapf(err, "failed to get manager cloud name")
+		}
+
 		switch manager.Cloud() {
 		case iota.Aws:
 			for key, value := range awsCredentials {
 				if err := osSetenv(key, value); err != nil {
 					return oopsBuilder.
-						With("cloudName", manager.Cloud().Name()).
+						With("cloudName", managerCloudName).
 						Wrapf(err, "failed to set environment variable %s to %s", key, value)
 				}
 			}
 
 		default:
 			return oopsBuilder.
-				With("cloudName", manager.Cloud().Name()).
+				With("cloudName", managerCloudName).
 				Errorf("unknown cloud: %#v", manager.Cloud())
 		}
 
@@ -145,19 +175,25 @@ func UnsetCredentialsWith(
 		Code("UnsetCredentialsWith")
 
 	forManager := func(manager Manager) error {
+		managerCloudName, err := manager.Cloud().Name()
+		if err != nil {
+			return oopsBuilder.
+				Wrapf(err, "failed to get manager cloud name")
+		}
+
 		switch manager.Cloud() {
 		case iota.Aws:
 			for key := range awsCredentials {
 				if err := osUnsetenv(key); err != nil {
 					return oopsBuilder.
-						With("cloudName", manager.Cloud().Name()).
+						With("cloudName", managerCloudName).
 						Wrapf(err, "failed to unset environment variable %s", key)
 				}
 			}
 
 		default:
 			return oopsBuilder.
-				With("cloudName", manager.Cloud().Name()).
+				With("cloudName", managerCloudName).
 				Errorf("unknown cloud: %#v", manager.Cloud())
 		}
 
