@@ -1,6 +1,8 @@
 package iota
 
 import (
+	"log"
+
 	"github.com/samber/oops"
 )
 
@@ -14,50 +16,53 @@ func (c Cloud) Iota() Cloud {
 	return c
 }
 
-func (c Cloud) Name() (name string) {
-	oops.
+func (c Cloud) Name() string {
+	oopsBuilder := oops.
 		In("common").
 		In("iota").
 		Tags("Cloud").
-		Code("Name").Recoverf(
-		func() {
-			switch c {
-			case Aws:
-				name = "aws"
+		Code("Name")
 
-			default:
-				panic(c)
-			}
-		},
-		"unknown cloud",
-	)
+	defer func() {
+		if r := recover(); r != nil {
+			err := oopsBuilder.Errorf("%v", r)
+			log.Fatalf("panic: %+v", err)
+		}
+	}()
 
-	return
+	switch c {
+	case Aws:
+		return "aws"
+
+	default:
+		panic(c)
+	}
 }
 
-func (c Cloud) Template() (template Template) {
-	oops.
+func (c Cloud) Template() Template {
+	oopsBuilder := oops.
 		In("common").
 		In("iota").
 		Tags("Cloud").
-		Code("Templates").
-		Recoverf(
-			func() {
-				switch c {
-				case Aws:
-					template = Template{
-						cloud: "aws.tmpl",
-						base:  "base.tmpl",
-					}
+		Code("Templates")
 
-				default:
-					panic(c)
-				}
-			},
-			"unknown cloud",
-		)
+	defer func() {
+		if r := recover(); r != nil {
+			err := oopsBuilder.Errorf("%v", r)
+			log.Fatalf("panic: %+v", err)
+		}
+	}()
 
-	return
+	switch c {
+	case Aws:
+		return Template{
+			cloud: "aws.tmpl",
+			base:  "base.tmpl",
+		}
+
+	default:
+		panic(c)
+	}
 }
 
 type Template struct {
