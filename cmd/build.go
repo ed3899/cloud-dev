@@ -1,13 +1,14 @@
 package cmd
 
 import (
+	"log"
 	"os"
-	"path/filepath"
 
 	"github.com/ed3899/kumo/common/iota"
-	"github.com/ed3899/kumo/tool"
+	"github.com/ed3899/kumo/manager"
 	"github.com/samber/oops"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 func Build() *cobra.Command {
@@ -19,7 +20,10 @@ func Build() *cobra.Command {
 		to SSH into your instance.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			var (
-				oopsBuilder = oops.Code("Build").
+				oopsBuilder = oops.
+					Code("Build").
+					In("cmd").
+					Tags("cobra.Command").
 					With("command", cmd.Name()).
 					With("args", args)
 			)
@@ -28,20 +32,21 @@ func Build() *cobra.Command {
 			if err != nil {
 				err := oopsBuilder.
 					Wrapf(err, "failed to get current executable path")
-				panic(err)
+				log.Fatalf("%+v", err)
 			}
 
-			toolManager := new(tool.ToolManager)
-			toolManager.
-				SetDirInitial(
-					filepath.Dir(currentExecutablePath),
-				).
-				SetDirRun(
-					filepath.Join(
-						currentExecutablePath,
-						iota.Packer.Name(),
-					),
-				)
+			cloud, err := iota.RawCloudToCloudIota(viper.GetString("Cloud"))
+			if err != nil {
+				err := oopsBuilder.
+					Wrapf(err, "failed to convert raw cloud to iota cloud")
+				log.Fatalf("%+v", err)
+			}
+
+			manager := manager.NewManager(
+				currentExecutablePath,
+				cloud,
+				iota.Packer,
+			)
 
 		},
 	}

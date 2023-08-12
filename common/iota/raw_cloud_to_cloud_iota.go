@@ -2,23 +2,18 @@ package iota
 
 import "github.com/samber/oops"
 
-func RawCloudToCloudIota(rawCloud string) Cloud {
-	var cloud Cloud
-
-	oops.
+func RawCloudToCloudIota(rawCloud string) (Cloud, error) {
+	oopsBuilder := oops.
 		In("iota").
 		Code("RawCloudToCloudIota").
-		Recoverf(
-			func() {
-				switch rawCloud {
-				case "aws":
-					cloud = Aws
-				default:
-					panic(rawCloud)
-				}
-			},
-			"Unknown cloud",
-		)
+		With("rawCloud", rawCloud)
 
-	return cloud
+	switch rawCloud {
+	case "aws":
+		return Aws, nil
+	default:
+		err := oopsBuilder.
+			Errorf("unknown cloud: %#v", rawCloud)
+		return -1, err
+	}
 }
