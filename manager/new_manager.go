@@ -2,6 +2,7 @@ package manager
 
 import (
 	"fmt"
+	"log"
 	"path/filepath"
 
 	"github.com/ed3899/kumo/common/constants"
@@ -11,10 +12,10 @@ import (
 )
 
 func NewManagerWith(
-	osExecutablePath string,
+	osExecutable func() (string, error),
 	cloud iota.Cloud,
 	tool iota.Tool,
-) (Manager, error) {
+) Manager {
 	oopsBuilder := oops.
 		In("manager").
 		Tags("Manager").
@@ -22,60 +23,11 @@ func NewManagerWith(
 		With("cloud", cloud).
 		With("tool", tool)
 
-	cloudTemplate, err := cloud.Template()
+	osExecutablePath, err := osExecutable()
 	if err != nil {
 		err := oopsBuilder.
-			Wrapf(err, "failed to get cloud template")
-
-		return Manager{}, err
-	}
-
-	cloudName, err := cloud.Name()
-	if err != nil {
-		err := oopsBuilder.
-			Wrapf(err, "failed to get cloud name")
-
-		return Manager{}, err
-	}
-
-	packerName, err := iota.Packer.Name()
-	if err != nil {
-		err := oopsBuilder.
-			Wrapf(err, "failed to get packer name")
-
-		return Manager{}, err
-	}
-
-	toolName, err := tool.Name()
-	if err != nil {
-		err := oopsBuilder.
-			Wrapf(err, "failed to get tool name")
-
-		return Manager{}, err
-	}
-
-	toolVarsName, err := tool.VarsName()
-	if err != nil {
-		err := oopsBuilder.
-			Wrapf(err, "failed to get tool vars name")
-
-		return Manager{}, err
-	}
-
-	iotaTemplatesName, err := iota.Templates.Name()
-	if err != nil {
-		err := oopsBuilder.
-			Wrapf(err, "failed to get iota templates name")
-
-		return Manager{}, err
-	}
-
-	iotaDependenciesName, err := iota.Dependencies.Name()
-	if err != nil {
-		err := oopsBuilder.
-			Wrapf(err, "failed to get iota dependencies name")
-
-		return Manager{}, err
+			Wrapf(err, "failed to get executable path")
+		log.Fatalf("%+v", err)
 	}
 
 	osExecutableDir := filepath.Dir(osExecutablePath)
@@ -83,8 +35,8 @@ func NewManagerWith(
 	templatePath := func(templateName string) string {
 		return filepath.Join(
 			osExecutableDir,
-			iotaTemplatesName,
-			toolName,
+			iota.Templates.Name(),
+			tool.Name(),
 			templateName,
 		)
 	}
@@ -95,37 +47,36 @@ func NewManagerWith(
 		path: Path{
 			executable: filepath.Join(
 				osExecutableDir,
-				iotaDependenciesName,
-				toolName,
-				fmt.Sprintf("%s.exe", toolName),
+				iota.Dependencies.Name(),
+				tool.Name(),
+				fmt.Sprintf("%s.exe", tool.Name()),
 			),
 			packerManifest: filepath.Join(
 				osExecutableDir,
-				packerName,
-				cloudName,
+				iota.Packer.Name(),
+				cloud.Name(),
 				constants.PACKER_MANIFEST,
 			),
 			template: Template{
-				cloud: templatePath(cloudTemplate.Cloud()),
-				base:  templatePath(cloudTemplate.Base()),
+				cloud: templatePath(cloud.Template().Cloud()),
+				base:  templatePath(cloud.Template().Base()),
 			},
 			vars: filepath.Join(
 				osExecutableDir,
-				toolName,
-				cloudName,
-				toolVarsName,
+				tool.Name(),
+				cloud.Name(),
+				tool.VarsName(),
 			),
 		},
 		dir: Dir{
 			initial: osExecutableDir,
 			run: filepath.Join(
 				osExecutableDir,
-				toolName,
-				cloudName,
+				tool.Name(),
+				cloud.Name(),
 			),
 		},
-	}, nil
-
+	}
 }
 
 func (m Manager) Cloud() iota.Cloud {
@@ -183,11 +134,7 @@ func SetCredentialsWith(
 		Code("SetCredentialsWith")
 
 	forManager := func(manager ICloudGetter) error {
-		managerCloudName, err := manager.Cloud().Name()
-		if err != nil {
-			return oopsBuilder.
-				Wrapf(err, "failed to get manager cloud name")
-		}
+		managerCloudName := manager.Cloud().Name()
 
 		switch manager.Cloud() {
 		case iota.Aws:
@@ -220,11 +167,7 @@ func UnsetCredentialsWith(
 		Code("UnsetCredentialsWith")
 
 	forManager := func(manager ICloudGetter) error {
-		managerCloudName, err := manager.Cloud().Name()
-		if err != nil {
-			return oopsBuilder.
-				Wrapf(err, "failed to get manager cloud name")
-		}
+		managerCloudName := manager.Cloud().Name()
 
 		switch manager.Cloud() {
 		case iota.Aws:
