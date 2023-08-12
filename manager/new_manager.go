@@ -162,6 +162,29 @@ func (m Manager) Dir() Dir {
 	return m.dir
 }
 
+type ICloudGetter interface {
+	Cloud() iota.Cloud
+}
+
+type IToolGetter interface {
+	Tool() iota.Tool
+}
+
+type IPathGetter interface {
+	Path() Path
+}
+
+type IDirGetter interface {
+	Dir() Dir
+}
+
+type IManager interface {
+	ICloudGetter
+	IToolGetter
+	IPathGetter
+	IDirGetter
+}
+
 var (
 	awsCredentials = map[string]string{
 		"AWS_ACCESS_KEY_ID":     viper.GetString("AWS.AccessKeyId"),
@@ -171,7 +194,7 @@ var (
 
 func SetCredentialsWith(
 	osSetenv func(string, string) error,
-) ForManagerMaybe {
+) ForSomeManagerMaybe {
 	oopsBuilder := oops.
 		In("manager").
 		Tags("Manager").
@@ -208,7 +231,7 @@ func SetCredentialsWith(
 
 func UnsetCredentialsWith(
 	osUnsetenv func(string) error,
-) ForManagerMaybe {
+) ForSomeManagerMaybe {
 	oopsBuilder := oops.
 		In("manager").
 		Tags("Manager").
@@ -245,7 +268,7 @@ func UnsetCredentialsWith(
 
 func ChangeToRunDirWith(
 	osChdir func(string) error,
-) ForManagerMaybe {
+) ForSomeManagerMaybe {
 	oopsBuilder := oops.
 		In("manager").
 		Tags("Manager").
@@ -266,7 +289,7 @@ func ChangeToRunDirWith(
 
 func ChangeToInitialDirWith(
 	osChdir func(string) error,
-) ForManagerMaybe {
+) ForSomeManagerMaybe {
 	oopsBuilder := oops.
 		In("manager").
 		Tags("Manager").
@@ -285,7 +308,7 @@ func ChangeToInitialDirWith(
 	return forManager
 }
 
-type ForManagerMaybe func(manager Manager) error
+type ForSomeManagerMaybe func(manager Manager) error
 
 type Manager struct {
 	cloud iota.Cloud
