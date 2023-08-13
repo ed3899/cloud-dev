@@ -1,6 +1,6 @@
 package download
 
-func IncrementDownloading(
+func BarDownloadingIncrBy(
 	downloadedBytes int,
 ) ForIBarGetter {
 	barGetter := func(d IBarGetter) {

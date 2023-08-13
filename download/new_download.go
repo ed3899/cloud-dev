@@ -110,10 +110,6 @@ type IAddBar interface {
 	AddBar(int64, ...any) IIncrBy
 }
 
-func (d Download) IncrementDownloadBar(downloadedBytes int) {
-	d.Bar().Downloading().IncrBy(downloadedBytes)
-}
-
 func (d Download) SetExtractionBar(p IAddBar, zipSize int64) {
 	d.bar.SetExtracting(
 		p.AddBar(zipSize,
