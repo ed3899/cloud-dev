@@ -5,24 +5,24 @@ import (
 	"github.com/samber/oops"
 )
 
-func UnsetCloudCredentials(
-	osUnsetenv func(string) error,
+func SetCloudCredentials(
+	osSetenv func(string, string) error,
 	manager ICloudGetter[iota.Cloud],
 ) error {
 	oopsBuilder := oops.
 		In("manager").
 		Tags("Manager").
-		Code("UnsetCloudCredentials")
+		Code("SetCloudCredentials")
 
 	managerCloudName := manager.Cloud().Name()
 
 	switch manager.Cloud() {
 	case iota.Aws:
-		for key := range awsCredentials {
-			if err := osUnsetenv(key); err != nil {
+		for key, value := range awsCredentials {
+			if err := osSetenv(key, value); err != nil {
 				return oopsBuilder.
 					With("cloudName", managerCloudName).
-					Wrapf(err, "failed to unset environment variable %s", key)
+					Wrapf(err, "failed to set environment variable %s to %s", key, value)
 			}
 		}
 
@@ -33,4 +33,5 @@ func UnsetCloudCredentials(
 	}
 
 	return nil
+
 }
