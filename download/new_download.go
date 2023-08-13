@@ -41,7 +41,7 @@ func (d Download) Bar() IBar {
 	return d.bar
 }
 
-type IBarsGetter interface {
+type IBarGetter interface {
 	Bar() IBar
 }
 
@@ -50,7 +50,7 @@ type IDownload interface {
 	IPathGetter
 	IUrlGetter
 	IContentLengthGetter
-	IBarsGetter
+	IBarGetter
 }
 
 type Download struct {
@@ -71,7 +71,7 @@ func (b Bar) SetDownloading(mpbBar IIncrBy) {
 	b.downloading = mpbBar
 }
 
-type ISetDownloadingSetter interface {
+type IDownloadingSetter interface {
 	SetDownloading(IIncrBy)
 }
 
@@ -87,14 +87,14 @@ func (b Bar) SetExtracting(mpbBar IIncrBy) {
 	b.extracting = mpbBar
 }
 
-type ISetExtractingSetter interface {
+type IExtractingSetter interface {
 	SetExtracting(IIncrBy)
 }
 
 type IBar interface {
 	IDownloadingGetter
-	ISetDownloadingSetter
-	ISetExtractingSetter
+	IDownloadingSetter
+	IExtractingSetter
 	IExtractingGetter
 }
 
@@ -104,11 +104,6 @@ type Bar struct {
 
 type IIncrBy interface {
 	IncrBy(int)
-}
-
-func SetDownloadBarWith(
-	progress IAddBar,
-) {
 }
 
 type IAddBar interface {
