@@ -2,12 +2,7 @@ package download
 
 func BarDownloadingIncrBy(
 	downloadedBytes int,
-) ForIBarGetter {
-	barGetter := func(d IBarGetter) {
-		d.Bar().Downloading().IncrBy(downloadedBytes)
-	}
-
-	return barGetter
+	download IBarGetter,
+) {
+	download.Bar().Downloading().IncrBy(downloadedBytes)
 }
-
-type ForIBarGetter func(IBarGetter)
