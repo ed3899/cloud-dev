@@ -110,26 +110,8 @@ type IAddBar interface {
 	AddBar(int64, ...any) IIncrBy
 }
 
-func (d Download) SetDownloadBar(p IAddBar) {
-	d.bar.SetDownloading(
-		p.AddBar(int64(d.contentLength),
-			mpb.BarFillerClearOnComplete(),
-			mpb.PrependDecorators(
-				decor.Name(d.name),
-				decor.Counters(decor.SizeB1024(0), " % .2f / % .2f"),
-			),
-			mpb.AppendDecorators(
-				decor.OnComplete(
-					decor.Percentage(decor.WCSyncSpace),
-					"downloaded",
-				),
-			),
-		),
-	)
-}
-
 func (d Download) IncrementDownloadBar(downloadedBytes int) {
-	d.bar.Downloading().IncrBy(downloadedBytes)
+	d.Bar().Downloading().IncrBy(downloadedBytes)
 }
 
 func (d Download) SetExtractionBar(p IAddBar, zipSize int64) {

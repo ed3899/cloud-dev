@@ -5,9 +5,9 @@ import (
 	"github.com/vbauerster/mpb/v8/decor"
 )
 
-func SetDownloadBarWith(
+func BarSetDownloadingWith(
 	progress IAddBar,
-) ForDownloadingSetter {
+) ForIDownloader {
 	return func(d IDownloader) {
 		d.Bar().SetDownloading(
 			progress.AddBar(int64(d.ContentLength()),
@@ -33,4 +33,4 @@ type IDownloader interface {
 	INameGetter
 }
 
-type ForDownloadingSetter func(IDownloader)
+type ForIDownloader func(IDownloader)
