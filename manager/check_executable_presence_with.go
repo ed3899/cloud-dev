@@ -1,11 +1,8 @@
 package manager
 
-func IsExecutablePresentWith(
+func IsPathExecutablePresent(
 	utilsFileIsFilePresent func(string) bool,
-) ForPathGetter {
-	return func(m IPathGetter) bool {
-		return utilsFileIsFilePresent(m.Path().Executable())
-	}
+	manager IPathGetter,
+) bool {
+	return utilsFileIsFilePresent(manager.Path().Executable())
 }
-
-type ForPathGetter func(IPathGetter) bool
