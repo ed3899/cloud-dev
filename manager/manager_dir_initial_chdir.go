@@ -2,15 +2,15 @@ package manager
 
 import "github.com/samber/oops"
 
-func ChangeToDirInitialWith(
+func ManagerDirInitialChdirWith(
 	osChdir func(string) error,
-) ChangeToDirInitial {
+) ManagerDirInitialChdir {
 	oopsBuilder := oops.
 		In("manager").
 		Tags("Manager").
 		Code("ChangeToInitialDirWith")
 
-	changeToDirInitial := func(manager IDirGetter) error {
+	managerDirInitialChdir := func(manager IDirGetter) error {
 		if err := osChdir(manager.Dir().Initial()); err != nil {
 			return oopsBuilder.
 				With("initialDir", manager.Dir().Initial()).
@@ -20,7 +20,7 @@ func ChangeToDirInitialWith(
 		return nil
 	}
 
-	return changeToDirInitial
+	return managerDirInitialChdir
 }
 
-type ChangeToDirInitial func(IDirGetter) error
+type ManagerDirInitialChdir func(IDirGetter) error
