@@ -5,32 +5,36 @@ import (
 	"github.com/samber/oops"
 )
 
-func UnsetCloudCredentials(
+func UnsetCloudCredentialsWith(
 	osUnsetenv func(string) error,
 	manager ICloudGetter[iota.Cloud],
-) error {
+) UnsetCloudCredentials {
 	oopsBuilder := oops.
 		In("manager").
 		Tags("Manager").
 		Code("UnsetCloudCredentials")
 
-	managerCloudName := manager.Cloud().Name()
-
-	switch manager.Cloud() {
-	case iota.Aws:
-		for key := range awsCredentials {
-			if err := osUnsetenv(key); err != nil {
-				return oopsBuilder.
-					With("cloudName", managerCloudName).
-					Wrapf(err, "failed to unset environment variable %s", key)
+	unsetCloudCredentials := func(ICloudGetter[iota.Cloud]) error {
+		switch manager.Cloud() {
+		case iota.Aws:
+			for key := range awsCredentials {
+				if err := osUnsetenv(key); err != nil {
+					return oopsBuilder.
+						With("cloudName", manager.Cloud().Name()).
+						Wrapf(err, "failed to unset environment variable %s", key)
+				}
 			}
+
+		default:
+			return oopsBuilder.
+				With("cloudName", manager.Cloud().Name()).
+				Errorf("unknown cloud: %#v", manager.Cloud())
 		}
 
-	default:
-		return oopsBuilder.
-			With("cloudName", managerCloudName).
-			Errorf("unknown cloud: %#v", manager.Cloud())
+		return nil
 	}
 
-	return nil
+	return unsetCloudCredentials
 }
+
+type UnsetCloudCredentials func(ICloudGetter[iota.Cloud]) error
