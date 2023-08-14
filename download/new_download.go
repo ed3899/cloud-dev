@@ -42,7 +42,7 @@ func (d Download) Bar() Bar {
 	return d.bar
 }
 
-type IBarGetter interface {
+type IBarGetter[Bar any] interface {
 	Bar() Bar
 }
 
@@ -61,7 +61,7 @@ type IDownload interface {
 	IPathGetter
 	IUrlGetter
 	IContentLengthGetter
-	IBarGetter
+	IBarGetter[Bar]
 	interfaces.IClone[Download]
 }
 

@@ -5,31 +5,34 @@ import (
 	"github.com/vbauerster/mpb/v8/decor"
 )
 
-func BarSetDownloading(
+func BarSetDownloadingWith(
 	progress IAddBar,
-	download IDownloader,
-) {
-
-	download.Bar().SetDownloading(
-		progress.AddBar(int64(download.ContentLength()),
-			mpb.BarFillerClearOnComplete(),
-			mpb.PrependDecorators(
-				decor.Name(download.Name()),
-				decor.Counters(decor.SizeB1024(0), " % .2f / % .2f"),
-			),
-			mpb.AppendDecorators(
-				decor.OnComplete(
-					decor.Percentage(decor.WCSyncSpace),
-					"downloaded",
+) BarSetDownloading {
+	barSetDownload := func(download IDownloader) {
+		download.Bar().SetDownloading(
+			progress.AddBar(int64(download.ContentLength()),
+				mpb.BarFillerClearOnComplete(),
+				mpb.PrependDecorators(
+					decor.Name(download.Name()),
+					decor.Counters(decor.SizeB1024(0), " % .2f / % .2f"),
+				),
+				mpb.AppendDecorators(
+					decor.OnComplete(
+						decor.Percentage(decor.WCSyncSpace),
+						"downloaded",
+					),
 				),
 			),
-		),
-	)
+		)
+	}
 
+	return barSetDownload
 }
 
+type BarSetDownloading func(IDownloader)
+
 type IDownloader interface {
-	IBarGetter
+	IBarGetter[IDownloadingSetter]
 	IContentLengthGetter
 	INameGetter
 }
