@@ -134,36 +134,36 @@ type IToolGetter interface {
 	Tool() iota.Tool
 }
 
-func (m Manager) Path() IPath {
+func (m Manager) Path() Path {
 	return m.path
 }
 
-type IPathGetter interface {
-	Path() IPath
+type IPathGetter[Path any] interface {
+	Path() Path
 }
 
 func (m Manager) Dir() Dir {
-	return m.dir.(Dir)
+	return m.dir
 }
 
-type IDirGetter interface {
+type IDirGetter[Dir any] interface {
 	Dir() Dir
 }
 
-type ForDirGetter func(manager IDirGetter) error
+type ForDirGetter func(manager IDirGetter[Dir]) error
 
 type IManager interface {
 	ICloudGetter[iota.Cloud]
 	IToolGetter
-	IPathGetter
-	IDirGetter
+	IPathGetter[Path]
+	IDirGetter[Dir]
 }
 
 type Manager struct {
 	cloud iota.Cloud
 	tool  iota.Tool
-	path  IPath
-	dir   IDir
+	path  Path
+	dir   Dir
 }
 
 func (p Path) Executable() string {
