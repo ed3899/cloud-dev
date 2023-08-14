@@ -126,8 +126,6 @@ type ICloudGetter[C any] interface {
 	Cloud() C
 }
 
-type ForCloudGetter func(cloudGetter ICloudGetter[iota.Cloud]) error
-
 func (m Manager) Tool() iota.Tool {
 	return m.tool
 }
@@ -151,8 +149,6 @@ func (m Manager) Dir() Dir {
 type IDirGetter[Dir any] interface {
 	Dir() Dir
 }
-
-type ForDirGetter func(manager IDirGetter[Dir]) error
 
 type IManager interface {
 	ICloudGetter[iota.Cloud]
