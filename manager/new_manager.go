@@ -138,7 +138,7 @@ func (m Manager) Path() Path {
 	return m.path
 }
 
-type IPathGetter[Path any] interface {
+type IPathGetter interface {
 	Path() Path
 }
 
@@ -146,15 +146,15 @@ func (m Manager) Dir() Dir {
 	return m.dir
 }
 
-type IDirGetter[Dir any] interface {
+type IDirGetter interface {
 	Dir() Dir
 }
 
 type IManager interface {
 	ICloudGetter[iota.Cloud]
 	IToolGetter
-	IPathGetter[Path]
-	IDirGetter[Dir]
+	IPathGetter
+	IDirGetter
 }
 
 type Manager struct {
@@ -181,7 +181,7 @@ type IPackerManifestGetter interface {
 }
 
 func (p Path) Template() Template {
-	return p.template.(Template)
+	return p.template
 }
 
 func (p Path) Vars() string {
@@ -203,7 +203,7 @@ type Path struct {
 	executable     string
 	packerManifest string
 	vars           string
-	template       ITemplate
+	template       Template
 }
 
 func (t Template) Cloud() string {
