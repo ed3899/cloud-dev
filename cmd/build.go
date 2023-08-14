@@ -35,13 +35,13 @@ func Build() *cobra.Command {
 				iota.Packer,
 			)
 
-			isExecutablePresent := _manager.ManagerPathExecutableIsPresentWith(
+			managerPathExecutableIsPresent := _manager.ManagerPathExecutableIsPresentWith(
 				file.IsFilePresentWith(os.Stat, os.IsNotExist),
 			)(
 				manager,
 			)
 
-			if !isExecutablePresent {
+			if !managerPathExecutableIsPresent {
 
 			}
 		},
