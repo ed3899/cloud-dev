@@ -1,6 +1,7 @@
 package download
 
 import (
+	"github.com/ed3899/kumo/common/interfaces"
 	"github.com/vbauerster/mpb/v8"
 	"github.com/vbauerster/mpb/v8/decor"
 )
@@ -8,14 +9,16 @@ import (
 func BarSetExtractingWith(
 	progress IAddBar,
 	zipSize int64,
-) BarSetExtracting {
-	barSetExtracting := func(extracter IExtracter) {
-		extracter.Bar().SetExtracting(
+) BarSetExtracting[Download] {
+	barSetExtracting := func(download interfaces.IClone[Download]) Download {
+		downloadClone := download.Clone()
+
+		downloadClone.Bar().SetExtracting(
 			progress.AddBar(zipSize,
-				mpb.BarQueueAfter(extracter.Bar().Downloading().(*mpb.Bar)),
+				mpb.BarQueueAfter(downloadClone.Bar().Downloading()),
 				mpb.BarFillerClearOnComplete(),
 				mpb.PrependDecorators(
-					decor.Name(extracter.Name()),
+					decor.Name(downloadClone.Name()),
 					decor.Counters(decor.SizeB1024(0), " % .2f / % .2f"),
 				),
 				mpb.AppendDecorators(
@@ -26,19 +29,11 @@ func BarSetExtractingWith(
 				),
 			),
 		)
+
+		return downloadClone
 	}
 
 	return barSetExtracting
 }
 
-type BarSetExtracting func(IExtracter)
-
-type IExtracter interface {
-	INameGetter
-	IBarGetter[IDownloadingAndSetExtracting]
-}
-
-type IDownloadingAndSetExtracting interface {
-	IExtractingSetter
-	IDownloadingGetter
-}
+type BarSetExtracting[D IDownload] func(interfaces.IClone[D]) D
