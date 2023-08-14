@@ -1,6 +1,7 @@
 package download
 
 import (
+	"github.com/ed3899/kumo/common/interfaces"
 	"github.com/vbauerster/mpb/v8"
 	"github.com/vbauerster/mpb/v8/decor"
 )
@@ -37,12 +38,22 @@ type IContentLengthGetter interface {
 	ContentLength() int64
 }
 
-func (d Download) Bar() IBar {
+func (d Download) Bar() Bar {
 	return d.bar
 }
 
 type IBarGetter interface {
-	Bar() IBar
+	Bar() Bar
+}
+
+func (d Download) Clone() Download {
+	return Download{
+		name:          d.name,
+		path:          d.path,
+		url:           d.url,
+		contentLength: d.contentLength,
+		bar:           d.bar.Clone(),
+	}
 }
 
 type IDownload interface {
@@ -51,12 +62,13 @@ type IDownload interface {
 	IUrlGetter
 	IContentLengthGetter
 	IBarGetter
+	interfaces.IClone[Download]
 }
 
 type Download struct {
 	name, path, url string
 	contentLength   int64
-	bar             IBar
+	bar             Bar
 }
 
 func (b Bar) Downloading() IIncrBy {
@@ -91,11 +103,19 @@ type IExtractingSetter interface {
 	SetExtracting(IIncrBy)
 }
 
+func (b Bar) Clone() Bar {
+	return Bar{
+		downloading: b.downloading,
+		extracting:  b.extracting,
+	}
+}
+
 type IBar interface {
 	IDownloadingGetter
 	IDownloadingSetter
-	IExtractingSetter
 	IExtractingGetter
+	IExtractingSetter
+	interfaces.IClone[Bar]
 }
 
 type Bar struct {
@@ -104,10 +124,6 @@ type Bar struct {
 
 type IIncrBy interface {
 	IncrBy(int)
-}
-
-type IAddBar interface {
-	AddBar(int64, ...any) IIncrBy
 }
 
 func (d Download) SetExtractionBar(p IAddBar, zipSize int64) {
@@ -128,6 +144,10 @@ func (d Download) SetExtractionBar(p IAddBar, zipSize int64) {
 		),
 	)
 
+}
+
+type IAddBar interface {
+	AddBar(int64, ...any) IIncrBy
 }
 
 func (d *Download) IncrementExtractionBar(extractedBytes int) {
