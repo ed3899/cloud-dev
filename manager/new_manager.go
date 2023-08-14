@@ -50,15 +50,11 @@ type ITool interface {
 
 func NewManagerWith(
 	osExecutable func() (string, error),
-	cloud ICloud,
-	tool ITool,
-) Manager {
+) NewManager {
 	oopsBuilder := oops.
 		In("manager").
 		Tags("Manager").
-		Code("NewManager").
-		With("cloud", cloud).
-		With("tool", tool)
+		Code("NewManager")
 
 	osExecutablePath, err := osExecutable()
 	if err != nil {
@@ -69,52 +65,58 @@ func NewManagerWith(
 
 	osExecutableDir := filepath.Dir(osExecutablePath)
 
-	templatePath := func(templateName string) string {
-		return filepath.Join(
-			osExecutableDir,
-			iota.Templates.Name(),
-			tool.Name(),
-			templateName,
-		)
+	newManager := func(cloud ICloud, tool ITool) Manager {
+		templatePath := func(templateName string) string {
+			return filepath.Join(
+				osExecutableDir,
+				iota.Templates.Name(),
+				tool.Name(),
+				templateName,
+			)
+		}
+
+		return Manager{
+			cloud: cloud.Iota(),
+			tool:  tool.Iota(),
+			path: Path{
+				executable: filepath.Join(
+					osExecutableDir,
+					iota.Dependencies.Name(),
+					tool.Name(),
+					fmt.Sprintf("%s.exe", tool.Name()),
+				),
+				packerManifest: filepath.Join(
+					osExecutableDir,
+					iota.Packer.Name(),
+					cloud.Name(),
+					constants.PACKER_MANIFEST,
+				),
+				template: Template{
+					cloud: templatePath(cloud.Template().Cloud()),
+					base:  templatePath(cloud.Template().Base()),
+				},
+				vars: filepath.Join(
+					osExecutableDir,
+					tool.Name(),
+					cloud.Name(),
+					tool.VarsName(),
+				),
+			},
+			dir: Dir{
+				initial: osExecutableDir,
+				run: filepath.Join(
+					osExecutableDir,
+					tool.Name(),
+					cloud.Name(),
+				),
+			},
+		}
 	}
 
-	return Manager{
-		cloud: cloud.Iota(),
-		tool:  tool.Iota(),
-		path: Path{
-			executable: filepath.Join(
-				osExecutableDir,
-				iota.Dependencies.Name(),
-				tool.Name(),
-				fmt.Sprintf("%s.exe", tool.Name()),
-			),
-			packerManifest: filepath.Join(
-				osExecutableDir,
-				iota.Packer.Name(),
-				cloud.Name(),
-				constants.PACKER_MANIFEST,
-			),
-			template: Template{
-				cloud: templatePath(cloud.Template().Cloud()),
-				base:  templatePath(cloud.Template().Base()),
-			},
-			vars: filepath.Join(
-				osExecutableDir,
-				tool.Name(),
-				cloud.Name(),
-				tool.VarsName(),
-			),
-		},
-		dir: Dir{
-			initial: osExecutableDir,
-			run: filepath.Join(
-				osExecutableDir,
-				tool.Name(),
-				cloud.Name(),
-			),
-		},
-	}
+	return newManager
 }
+
+type NewManager func(cloud ICloud, tool ITool) Manager
 
 func (m Manager) Cloud() iota.Cloud {
 	return m.cloud
