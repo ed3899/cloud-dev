@@ -62,6 +62,7 @@ func NewDownloadWith(
 				runtime.GOARCH,
 			),
 			contentLength: contentLength,
+			bar:           Bar{},
 		}, nil
 	}
 
