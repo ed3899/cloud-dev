@@ -1,17 +1,46 @@
 package download
 
 import (
+	"path/filepath"
+
 	"github.com/ed3899/kumo/common/interfaces"
+	"github.com/ed3899/kumo/common/iota"
+	_manager "github.com/ed3899/kumo/manager"
+	"github.com/samber/oops"
 	"github.com/vbauerster/mpb/v8"
 )
 
-type IManager interface {
+func NewDownloadWith(
+	osExecutable func() (string, error),
+) (NewDownload, error) {
+	oopsBuilder := oops.
+		In("download").
+		Code("NewDownloadWith")
 
+	osExecutablePath, err := osExecutable()
+	if err != nil {
+		err := oopsBuilder.
+			Wrapf(err, "failed to get executable path")
+		return nil, err
+	}
+
+	osExecutableDir := filepath.Dir(osExecutablePath)
+
+	newDownload := func(manager _manager.Manager) Download {
+		return Download{
+			name: manager.Tool().Name(),
+			path: filepath.Join(
+				osExecutableDir,
+				iota.Dependencies.Name(),
+				manager.Tool().Name(),
+			),
+		}
+	}
+
+	return newDownload, nil
 }
 
-func NewDownload(manager IManager) Download {
-	
-}
+type NewDownload func(_manager.Manager) Download
 
 type INameGetter interface {
 	Name() string
