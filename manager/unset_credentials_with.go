@@ -7,14 +7,13 @@ import (
 
 func UnsetCloudCredentialsWith(
 	osUnsetenv func(string) error,
-	manager ICloudGetter[iota.Cloud],
 ) UnsetCloudCredentials {
 	oopsBuilder := oops.
 		In("manager").
 		Tags("Manager").
 		Code("UnsetCloudCredentials")
 
-	unsetCloudCredentials := func(ICloudGetter[iota.Cloud]) error {
+	unsetCloudCredentials := func( manager ICloudGetter[iota.Cloud]) error {
 		switch manager.Cloud() {
 		case iota.Aws:
 			for key := range awsCredentials {

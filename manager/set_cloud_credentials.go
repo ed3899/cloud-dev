@@ -7,7 +7,6 @@ import (
 
 func SetCloudCredentialsWith(
 	osSetenv func(string, string) error,
-	manager ICloudGetter[iota.Cloud],
 ) SetCloudCredentials {
 	oopsBuilder := oops.
 		In("manager").
