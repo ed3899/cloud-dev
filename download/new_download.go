@@ -5,6 +5,14 @@ import (
 	"github.com/vbauerster/mpb/v8"
 )
 
+type IManager interface {
+
+}
+
+func NewDownload(manager IManager) Download {
+	
+}
+
 type INameGetter interface {
 	Name() string
 }

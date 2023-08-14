@@ -2,7 +2,6 @@ package manager
 
 import (
 	"fmt"
-	"log"
 	"path/filepath"
 
 	"github.com/ed3899/kumo/common/constants"
@@ -51,7 +50,7 @@ type ITool interface {
 
 func NewManagerWith(
 	osExecutable func() (string, error),
-) NewManager {
+) (NewManager, error) {
 	oopsBuilder := oops.
 		In("manager").
 		Tags("Manager").
@@ -61,7 +60,7 @@ func NewManagerWith(
 	if err != nil {
 		err := oopsBuilder.
 			Wrapf(err, "failed to get executable path")
-		log.Fatalf("%+v", err)
+		return nil, err
 	}
 
 	osExecutableDir := filepath.Dir(osExecutablePath)
@@ -114,7 +113,7 @@ func NewManagerWith(
 		}
 	}
 
-	return newManager
+	return newManager, nil
 }
 
 type NewManager func(cloud ICloud, tool ITool) Manager

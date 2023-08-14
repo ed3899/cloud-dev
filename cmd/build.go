@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"log"
 	"os"
 
 	"github.com/ed3899/kumo/common/iota"
@@ -28,12 +29,17 @@ func Build() *cobra.Command {
 					With("args", args)
 			)
 
-			manager := _manager.NewManagerWith(
+			newManager, err := _manager.NewManagerWith(
 				os.Executable,
-			)(
-				iota.CloudIota(viper.GetString("Cloud")),
-				iota.Packer,
 			)
+			if err != nil {
+				err := oopsBuilder.
+					Wrapf(err, "failed to create new manager")
+
+				log.Fatalf("%+v", err)
+			}
+
+			manager := newManager(iota.CloudIota(viper.GetString("cloud")), iota.Packer)
 
 			managerPathExecutableIsPresent := _manager.ManagerPathExecutableIsPresentWith(
 				file.IsFilePresentWith(os.Stat, os.IsNotExist),
