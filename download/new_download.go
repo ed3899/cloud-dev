@@ -127,7 +127,3 @@ type IIncrBy interface {
 type IAddBar interface {
 	AddBar(int64, ...any) IIncrBy
 }
-
-func (d *Download) IncrementExtractionBar(extractedBytes int) {
-	d.bar.Extracting().IncrBy(extractedBytes)
-}
