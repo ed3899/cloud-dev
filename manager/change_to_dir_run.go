@@ -10,7 +10,7 @@ func ChangeToDirRunWith(
 		Tags("Manager").
 		Code("ChangeToRunDirWith")
 
-	changeToDirRun := func(manager IDirGetter[IRunGetter]) error {
+	changeToDirRun := func(manager IDirGetter) error {
 		if err := osChdir(manager.Dir().Run()); err != nil {
 			return oopsBuilder.
 				With("runDir", manager.Dir().Run()).
@@ -23,4 +23,4 @@ func ChangeToDirRunWith(
 	return changeToDirRun
 }
 
-type ChangeToDirRun func(IDirGetter[IRunGetter]) error
+type ChangeToDirRun func(IDirGetter) error

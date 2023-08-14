@@ -10,7 +10,7 @@ func ChangeToDirInitialWith(
 		Tags("Manager").
 		Code("ChangeToInitialDirWith")
 
-	changeToDirInitial := func(manager IDirGetter[IInitialGetter]) error {
+	changeToDirInitial := func(manager IDirGetter) error {
 		if err := osChdir(manager.Dir().Initial()); err != nil {
 			return oopsBuilder.
 				With("initialDir", manager.Dir().Initial()).
@@ -23,4 +23,4 @@ func ChangeToDirInitialWith(
 	return changeToDirInitial
 }
 
-type ChangeToDirInitial func(IDirGetter[IInitialGetter]) error
+type ChangeToDirInitial func(IDirGetter) error
