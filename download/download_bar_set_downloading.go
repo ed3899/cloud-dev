@@ -6,16 +6,14 @@ import (
 	"github.com/vbauerster/mpb/v8/decor"
 )
 
-func BarSetExtractingWith(
+func DownloadBarSetDownloadingWith(
 	progress IAddBar,
-	zipSize int64,
-) BarSetExtracting[Download] {
-	barSetExtracting := func(download interfaces.IClone[Download]) Download {
+) DownloadBarSetDownloading[Download] {
+	downloadBarSetDownloading := func(download interfaces.IClone[Download]) Download {
 		downloadClone := download.Clone()
 
-		downloadClone.Bar().SetExtracting(
-			progress.AddBar(zipSize,
-				mpb.BarQueueAfter(downloadClone.Bar().Downloading()),
+		downloadClone.Bar().SetDownloading(
+			progress.AddBar(int64(downloadClone.ContentLength()),
 				mpb.BarFillerClearOnComplete(),
 				mpb.PrependDecorators(
 					decor.Name(downloadClone.Name()),
@@ -24,7 +22,7 @@ func BarSetExtractingWith(
 				mpb.AppendDecorators(
 					decor.OnComplete(
 						decor.Percentage(decor.WCSyncSpace),
-						"unzipped",
+						"downloaded",
 					),
 				),
 			),
@@ -33,7 +31,7 @@ func BarSetExtractingWith(
 		return downloadClone
 	}
 
-	return barSetExtracting
+	return downloadBarSetDownloading
 }
 
-type BarSetExtracting[D IDownload] func(interfaces.IClone[D]) D
+type DownloadBarSetDownloading[D IDownload] func(interfaces.IClone[D]) D

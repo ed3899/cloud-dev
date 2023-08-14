@@ -1,17 +1,19 @@
 package download
 
-func BarDownloadingIncrByWith(
+import "github.com/ed3899/kumo/common/interfaces"
+
+func DownloadBarDownloadingIncrByWith(
 	downloadedBytes int,
-) BarDownloadingIncryBy {
-	barDownloadingIncryBy := func(download IBarGetter) {
-		download.Bar().Downloading().IncrBy(downloadedBytes)
+) DownloadBarDownloadingIncryBy[Download] {
+	downloadBarDownloadingIncryBy := func(download interfaces.IClone[Download]) Download {
+		downloadClone := download.Clone()
+
+		downloadClone.Bar().Clone().Downloading().IncrBy(downloadedBytes)
+
+		return downloadClone
 	}
 
-	return barDownloadingIncryBy
+	return downloadBarDownloadingIncryBy
 }
 
-type Cloneable interface {
-
-}
-
-type BarDownloadingIncryBy func(IBarGetter)
+type DownloadBarDownloadingIncryBy[D IDownload] func(interfaces.IClone[D]) D
