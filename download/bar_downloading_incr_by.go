@@ -1,8 +1,13 @@
 package download
 
-func BarDownloadingIncrBy(
+func BarDownloadingIncrByWith(
 	downloadedBytes int,
-	download IBarGetter,
-) {
-	download.Bar().Downloading().IncrBy(downloadedBytes)
+) BarDownloadingIncryBy {
+	barDownloadingIncryBy := func(download IBarGetter[IDownloadingGetter]) {
+		download.Bar().Downloading().IncrBy(downloadedBytes)
+	}
+
+	return barDownloadingIncryBy
 }
+
+type BarDownloadingIncryBy func(IBarGetter[IDownloadingGetter])
