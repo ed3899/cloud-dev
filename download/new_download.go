@@ -1,7 +1,9 @@
 package download
 
 import (
+	"fmt"
 	"path/filepath"
+	"runtime"
 
 	"github.com/ed3899/kumo/common/interfaces"
 	"github.com/ed3899/kumo/common/iota"
@@ -10,37 +12,63 @@ import (
 	"github.com/vbauerster/mpb/v8"
 )
 
+type ITool interface {
+	Name() string
+	Version() string
+}
+
 func NewDownloadWith(
 	osExecutable func() (string, error),
-) (NewDownload, error) {
+	utilsUrlBuildHashicorpUrl func(ITool, string, string) string,
+	utilsUrlGetContentLength func(string) (int64, error),
+) NewDownload {
 	oopsBuilder := oops.
 		In("download").
 		Code("NewDownloadWith")
 
-	osExecutablePath, err := osExecutable()
-	if err != nil {
-		err := oopsBuilder.
-			Wrapf(err, "failed to get executable path")
-		return nil, err
-	}
+	newDownload := func(manager _manager.Manager) (Download, error) {
+		osExecutablePath, err := osExecutable()
+		if err != nil {
+			err := oopsBuilder.
+				Wrapf(err, "failed to get executable path")
+			return Download{}, err
+		}
 
-	osExecutableDir := filepath.Dir(osExecutablePath)
+		osExecutableDir := filepath.Dir(osExecutablePath)
 
-	newDownload := func(manager _manager.Manager) Download {
+		url := utilsUrlBuildHashicorpUrl(
+			manager.Tool(),
+			runtime.GOOS,
+			runtime.GOARCH,
+		)
+
+		contentLength, err := utilsUrlGetContentLength(url)
+		if err != nil {
+			err := oopsBuilder.
+				Wrapf(err, "failed to get content length")
+			return Download{}, err
+		}
+
 		return Download{
 			name: manager.Tool().Name(),
 			path: filepath.Join(
 				osExecutableDir,
 				iota.Dependencies.Name(),
-				manager.Tool().Name(),
+				fmt.Sprintf("%s.zip", manager.Tool().Name()),
 			),
-		}
+			url: utilsUrlBuildHashicorpUrl(
+				manager.Tool(),
+				runtime.GOOS,
+				runtime.GOARCH,
+			),
+			contentLength: contentLength,
+		}, nil
 	}
 
-	return newDownload, nil
+	return newDownload
 }
 
-type NewDownload func(_manager.Manager) Download
+type NewDownload func(_manager.Manager) (Download, error)
 
 type INameGetter interface {
 	Name() string
