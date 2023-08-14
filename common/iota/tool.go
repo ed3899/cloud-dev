@@ -17,7 +17,7 @@ func (t Tool) Iota() Tool {
 	return t
 }
 
-func (t Tool) Name() (n string) {
+func (t Tool) Name() (string) {
 	oopsBuilder := oops.
 		In("common").
 		In("iota").
