@@ -8,7 +8,7 @@ import (
 func BarSetDownloadingWith(
 	progress IAddBar,
 ) BarSetDownloading {
-	barSetDownload := func(download IDownloader) {
+	barSetDownloading := func(download IDownloader) {
 		download.Bar().SetDownloading(
 			progress.AddBar(int64(download.ContentLength()),
 				mpb.BarFillerClearOnComplete(),
@@ -26,7 +26,7 @@ func BarSetDownloadingWith(
 		)
 	}
 
-	return barSetDownload
+	return barSetDownloading
 }
 
 type BarSetDownloading func(IDownloader)

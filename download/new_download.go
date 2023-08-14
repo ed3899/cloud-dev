@@ -2,8 +2,6 @@ package download
 
 import (
 	"github.com/ed3899/kumo/common/interfaces"
-	"github.com/vbauerster/mpb/v8"
-	"github.com/vbauerster/mpb/v8/decor"
 )
 
 func (d Download) Name() string {
@@ -124,26 +122,6 @@ type Bar struct {
 
 type IIncrBy interface {
 	IncrBy(int)
-}
-
-func (d Download) SetExtractionBar(p IAddBar, zipSize int64) {
-	d.bar.SetExtracting(
-		p.AddBar(zipSize,
-			mpb.BarQueueAfter(d.bar.Downloading().(*mpb.Bar)),
-			mpb.BarFillerClearOnComplete(),
-			mpb.PrependDecorators(
-				decor.Name(d.Name()),
-				decor.Counters(decor.SizeB1024(0), " % .2f / % .2f"),
-			),
-			mpb.AppendDecorators(
-				decor.OnComplete(
-					decor.Percentage(decor.WCSyncSpace),
-					"unzipped",
-				),
-			),
-		),
-	)
-
 }
 
 type IAddBar interface {

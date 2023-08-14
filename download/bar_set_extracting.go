@@ -5,11 +5,11 @@ import (
 	"github.com/vbauerster/mpb/v8/decor"
 )
 
-func SetExtractingBarWith(gi
+func BarSetExtractingWith(
 	progress IAddBar,
 	zipSize int64,
-) SetExtractingBar {
-	setExtractingBar := func(extracter IExtracter) {
+) BarSetExtracting {
+	barSetExtracting := func(extracter IExtracter) {
 		extracter.Bar().SetExtracting(
 			progress.AddBar(zipSize,
 				mpb.BarQueueAfter(extracter.Bar().Downloading().(*mpb.Bar)),
@@ -28,10 +28,10 @@ func SetExtractingBarWith(gi
 		)
 	}
 
-	return setExtractingBar
+	return barSetExtracting
 }
 
-type SetExtractingBar func(IExtracter)
+type BarSetExtracting func(IExtracter)
 
 type IExtracter interface {
 	INameGetter
