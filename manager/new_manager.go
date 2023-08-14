@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/ed3899/kumo/common/constants"
+	"github.com/ed3899/kumo/common/interfaces"
 	"github.com/ed3899/kumo/common/iota"
 	"github.com/samber/oops"
 )
@@ -150,11 +151,21 @@ type IDirGetter interface {
 	Dir() Dir
 }
 
+func (m Manager) Clone() Manager {
+	return Manager{
+		cloud: m.cloud,
+		tool:  m.tool,
+		path:  m.path.Clone(),
+		dir:   m.dir.Clone(),
+	}
+}
+
 type IManager interface {
 	ICloudGetter[iota.Cloud]
 	IToolGetter
 	IPathGetter
 	IDirGetter
+	interfaces.IClone[Manager]
 }
 
 type Manager struct {
@@ -192,11 +203,21 @@ type IVarsGetter interface {
 	Vars() string
 }
 
+func (p Path) Clone() Path {
+	return Path{
+		executable:     p.executable,
+		packerManifest: p.packerManifest,
+		vars:           p.vars,
+		template:       p.template.Clone(),
+	}
+}
+
 type IPath interface {
 	IExecutableGetter
 	IPackerManifestGetter
 	ITemplateGetter[Template]
 	IVarsGetter
+	interfaces.IClone[Path]
 }
 
 type Path struct {
@@ -218,9 +239,17 @@ type IBaseGetter interface {
 	Base() string
 }
 
+func (t Template) Clone() Template {
+	return Template{
+		cloud: t.cloud,
+		base:  t.base,
+	}
+}
+
 type ITemplate interface {
 	ICloudGetter[string]
 	IBaseGetter
+	interfaces.IClone[Template]
 }
 
 type Template struct {
@@ -244,9 +273,17 @@ type IRunGetter interface {
 	Run() string
 }
 
+func (d Dir) Clone() Dir {
+	return Dir{
+		initial: d.initial,
+		run:     d.run,
+	}
+}
+
 type IDir interface {
 	IInitialGetter
 	IRunGetter
+	interfaces.IClone[Dir]
 }
 
 type Dir struct {
