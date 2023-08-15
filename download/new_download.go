@@ -51,11 +51,19 @@ func NewDownloadWith(
 
 		return Download{
 			name: manager.Tool().Name(),
-			path: filepath.Join(
-				osExecutableDir,
-				iota.Dependencies.Name(),
-				fmt.Sprintf("%s.zip", manager.Tool().Name()),
-			),
+			path: Path{
+				zip: filepath.Join(
+					osExecutableDir,
+					iota.Dependencies.Name(),
+					fmt.Sprintf("%s.zip", manager.Tool().Name()),
+				),
+				executable: filepath.Join(
+					osExecutableDir,
+					iota.Dependencies.Name(),
+					manager.Tool().Name(),
+					fmt.Sprintf("%s.exe", manager.Tool().Name()),
+				),
+			},
 			url: utilsUrlBuildHashicorpUrl(
 				manager.Tool(),
 				runtime.GOOS,
@@ -92,7 +100,7 @@ type IPathGetter interface {
 	Path() string
 }
 
-func (d Download) Path() string {
+func (d Download) Path() Path {
 	return d.path
 }
 
@@ -100,8 +108,8 @@ type IPathSetter interface {
 	SetPath(string) Download
 }
 
-func (d Download) SetPath(path string) Download {
-	d.path = path
+func (d Download) SetPath(path IPath) Download {
+	d.path = path.(Path)
 	return d
 }
 
@@ -159,17 +167,11 @@ func (d Download) SetBar(bar IBar) Download {
 func (d Download) Clone() Download {
 	return Download{
 		name:          d.name,
-		path:          d.path,
+		path:          d.path.Clone(),
 		url:           d.url,
 		contentLength: d.contentLength,
 		bar:           d.bar.Clone(),
 	}
-}
-
-type Download struct {
-	name, path, url string
-	contentLength   int64
-	bar             Bar
 }
 
 type IDownload interface {
@@ -184,6 +186,67 @@ type IDownload interface {
 	IBarGetter
 	IBarSetter
 	interfaces.IClone[Download]
+}
+
+type Download struct {
+	name, url     string
+	contentLength int64
+	path          Path
+	bar           Bar
+}
+
+type IZipGetter interface {
+	Zip() string
+}
+
+func (p Path) Zip() string {
+	return p.zip
+}
+
+type IZipSetter interface {
+	SetZip(string) Path
+}
+
+func (p Path) SetZip(zip string) Path {
+	p.zip = zip
+	return p
+}
+
+type IExecutableGetter interface {
+	Executable() string
+}
+
+func (p Path) Executable() string {
+	return p.executable
+}
+
+type IExecutableSetter interface {
+	SetExecutable(string) Path
+}
+
+func (p Path) SetExecutable(executable string) Path {
+	p.executable = executable
+	return p
+}
+
+func (p Path) Clone() Path {
+	return Path{
+		zip:        p.zip,
+		executable: p.executable,
+	}
+}
+
+type IPath interface {
+	IZipGetter
+	IZipSetter
+	IExecutableGetter
+	IExecutableSetter
+	interfaces.IClone[Path]
+}
+
+type Path struct {
+	zip        string
+	executable string
 }
 
 type IDownloadingGetter interface {
