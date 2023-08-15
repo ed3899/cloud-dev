@@ -8,14 +8,11 @@ import (
 )
 
 func DownloadAndShowProgress(
-	progress *mpb.Progress,
 	download *Download,
 ) (*Download, error) {
 	oopsBuilder := oops.
 		Code("DownloadAndShowProgress")
 
-	// var wg sync.WaitGroup
-	// mpb.New(mpb.WithWaitGroup(&wg), mpb.WithAutoRefresh(), mpb.WithWidth(64))
 	downloadedBytesChan := make(chan int, 1024)
 	errChan := make(chan error, 1)
 	doneChan := make(chan bool, 1)
@@ -25,7 +22,7 @@ func DownloadAndShowProgress(
 		defer close(errChan)
 		defer close(doneChan)
 
-		download.Bar.Downloading = progress.AddBar(
+		download.Bar.Downloading = download.Progress.AddBar(
 			download.ContentLength,
 			mpb.BarFillerClearOnComplete(),
 			mpb.PrependDecorators(

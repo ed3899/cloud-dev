@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"sync"
 
 	"github.com/ed3899/kumo/common/iota"
 	_manager "github.com/ed3899/kumo/manager"
@@ -45,6 +46,8 @@ func NewDownload(
 		return nil, err
 	}
 
+	progress := mpb.New(mpb.WithWaitGroup(&sync.WaitGroup{}), mpb.WithAutoRefresh(), mpb.WithWidth(64))
+
 	return &Download{
 		Name: manager.Tool.Name(),
 		Path: &Path{
@@ -63,6 +66,7 @@ func NewDownload(
 		Url:           hashicorpUrl,
 		ContentLength: contentLength,
 		Bar:           &Bar{},
+		Progress:      progress,
 	}, nil
 }
 
@@ -70,6 +74,7 @@ type Download struct {
 	Name, Url     string
 	ContentLength int64
 	Path          *Path
+	Progress      *mpb.Progress
 	Bar           *Bar
 }
 

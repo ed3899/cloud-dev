@@ -8,13 +8,11 @@ import (
 )
 
 func ExtractAndShowProgress(
-	progress *mpb.Progress,
 	download *Download,
 ) error {
 	oopsBuilder := oops.
 		Code("ExtractAndShowProgress").
-		With("download", download).
-		With("progress", progress)
+		With("download", download)
 
 	extractedBytesChan := make(chan int, 1024)
 	errChan := make(chan error, 1)
@@ -32,7 +30,7 @@ func ExtractAndShowProgress(
 		defer close(errChan)
 		defer close(doneChan)
 
-		download.Bar.Extracting = progress.AddBar(zipSize,
+		download.Bar.Extracting = download.Progress.AddBar(zipSize,
 			mpb.BarQueueAfter(download.Bar.Downloading),
 			mpb.BarFillerClearOnComplete(),
 			mpb.PrependDecorators(
