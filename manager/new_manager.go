@@ -50,22 +50,22 @@ type ITool interface {
 
 func NewManagerWith(
 	osExecutable func() (string, error),
-) (NewManager, error) {
+) NewManager {
 	oopsBuilder := oops.
 		In("manager").
 		Tags("Manager").
 		Code("NewManager")
 
-	osExecutablePath, err := osExecutable()
-	if err != nil {
-		err := oopsBuilder.
-			Wrapf(err, "failed to get executable path")
-		return nil, err
-	}
+	newManager := func(cloud ICloud, tool ITool) (*Manager, error) {
+		osExecutablePath, err := osExecutable()
+		if err != nil {
+			err := oopsBuilder.
+				Wrapf(err, "failed to get executable path")
+			return nil, err
+		}
 
-	osExecutableDir := filepath.Dir(osExecutablePath)
+		osExecutableDir := filepath.Dir(osExecutablePath)
 
-	newManager := func(cloud ICloud, tool ITool) Manager {
 		templatePath := func(templateName string) string {
 			return filepath.Join(
 				osExecutableDir,
@@ -75,7 +75,7 @@ func NewManagerWith(
 			)
 		}
 
-		return Manager{
+		return &Manager{
 			cloud: cloud.Iota(),
 			tool:  tool.Iota(),
 			path: Path{
@@ -110,13 +110,13 @@ func NewManagerWith(
 					cloud.Name(),
 				),
 			},
-		}
+		}, nil
 	}
 
-	return newManager, nil
+	return newManager
 }
 
-type NewManager func(cloud ICloud, tool ITool) Manager
+type NewManager func(cloud ICloud, tool ITool) (*Manager, error)
 
 func (m Manager) Cloud() iota.Cloud {
 	return m.cloud

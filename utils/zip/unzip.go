@@ -10,13 +10,13 @@ import (
 	"github.com/samber/oops"
 )
 
-type IPath interface {
+type IZipAndExecutable interface {
 	Zip() string
 	Executable() string
 }
 
-type IDownload interface {
-	Path() IPath
+type IPathAndName interface {
+	Path() IZipAndExecutable
 	Name() string
 }
 
@@ -27,7 +27,7 @@ func UnzipWith(
 	oopsBuilder := oops.
 		Code("UnzipWith")
 
-	unzip := func(download IDownload, bytesUnzipped chan<- int) error {
+	unzip := func(download IPathAndName, bytesUnzipped chan<- int) error {
 		// Open the zip file and defer closing it
 		reader, err := zip.OpenReader(download.Path().Zip())
 		if err != nil {
@@ -84,7 +84,7 @@ func UnzipWith(
 	return unzip
 }
 
-type Unzip func(download IDownload, bytesUnzipped chan<- int) error
+type Unzip func(download IPathAndName, bytesUnzipped chan<- int) error
 
 func unzipFileWith(
 	osMkdirAll func(path string, perm os.FileMode) error,
