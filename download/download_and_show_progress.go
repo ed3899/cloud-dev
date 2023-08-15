@@ -4,10 +4,11 @@ import (
 	"github.com/ed3899/kumo/utils/url"
 	"github.com/samber/oops"
 	"github.com/vbauerster/mpb/v8"
+	"github.com/vbauerster/mpb/v8/decor"
 )
 
 func DownloadAndShowProgress(
-	bar *mpb.Bar,
+	progress *mpb.Progress,
 	download *Download,
 ) (*Download, error) {
 	oopsBuilder := oops.
@@ -19,21 +20,32 @@ func DownloadAndShowProgress(
 	errChan := make(chan error, 1)
 	doneChan := make(chan bool, 1)
 
-	downloadClone := download.Clone()
-
 	go func() {
 		defer close(downloadedBytesChan)
 		defer close(errChan)
 		defer close(doneChan)
 
-		downloadClone.Bar.Downloading = bar
+		download.Bar.Downloading = progress.AddBar(
+			download.ContentLength,
+			mpb.BarFillerClearOnComplete(),
+			mpb.PrependDecorators(
+				decor.Name(download.Name),
+				decor.Counters(decor.SizeB1024(0), " % .2f / % .2f"),
+			),
+			mpb.AppendDecorators(
+				decor.OnComplete(
+					decor.Percentage(decor.WCSyncSpace),
+					"unzipped",
+				),
+			),
+		)
 
-		err := url.Download(downloadClone.Url, downloadClone.Path.Zip, downloadedBytesChan)
+		err := url.Download(download.Url, download.Path.Zip, downloadedBytesChan)
 		if err != nil {
 			err = oopsBuilder.
-				With("path", downloadClone.Path).
+				With("path", download.Path).
 				With("downloadedBytesChan", downloadedBytesChan).
-				Wrapf(err, "failed to download: %v", downloadClone.Url)
+				Wrapf(err, "failed to download: %v", download.Url)
 			errChan <- err
 			return
 		}
@@ -46,14 +58,14 @@ OuterLoop:
 		select {
 		case downloadedBytes := <-downloadedBytesChan:
 			if downloadedBytes > 0 {
-				downloadClone.Bar.Downloading.IncrBy(downloadedBytes)
+				download.Bar.Downloading.IncrBy(downloadedBytes)
 			}
 
 		case err := <-errChan:
 			if err != nil {
 				err := oopsBuilder.
-					Wrapf(err, "Error occurred while downloading %s", downloadClone.Name)
-				return downloadClone, err
+					Wrapf(err, "Error occurred while downloading %s", download.Name)
+				return download, err
 			}
 
 		case done := <-doneChan:
@@ -63,5 +75,5 @@ OuterLoop:
 		}
 	}
 
-	return downloadClone, nil
+	return download, nil
 }
