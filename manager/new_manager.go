@@ -6,7 +6,6 @@ import (
 
 	"github.com/ed3899/kumo/common/constants"
 	"github.com/ed3899/kumo/common/iota"
-	"github.com/samber/oops"
 )
 
 type IIotaGetter[I any] interface {
@@ -47,75 +46,57 @@ type ITool interface {
 	IVersionGetter
 }
 
-func NewManagerWith(
-	osExecutable func() (string, error),
-) NewManager {
-	oopsBuilder := oops.
-		In("manager").
-		Tags("Manager").
-		Code("NewManager")
-
-	newManager := func(cloud ICloud, tool ITool) (*Manager, error) {
-		osExecutablePath, err := osExecutable()
-		if err != nil {
-			err := oopsBuilder.
-				Wrapf(err, "failed to get executable path")
-			return nil, err
-		}
-
-		osExecutableDir := filepath.Dir(osExecutablePath)
-
-		templatePath := func(templateName string) string {
-			return filepath.Join(
-				osExecutableDir,
-				iota.Templates.Name(),
-				tool.Name(),
-				templateName,
-			)
-		}
-
-		return &Manager{
-			Cloud: cloud.Iota(),
-			Tool:  tool.Iota(),
-			Path: &Path{
-				Executable: filepath.Join(
-					osExecutableDir,
-					iota.Dependencies.Name(),
-					tool.Name(),
-					fmt.Sprintf("%s.exe", tool.Name()),
-				),
-				PackerManifest: filepath.Join(
-					osExecutableDir,
-					iota.Packer.Name(),
-					cloud.Name(),
-					constants.PACKER_MANIFEST,
-				),
-				Template: &Template{
-					Cloud: templatePath(cloud.Template().Cloud()),
-					Base:  templatePath(cloud.Template().Base()),
-				},
-				Vars: filepath.Join(
-					osExecutableDir,
-					tool.Name(),
-					cloud.Name(),
-					tool.VarsName(),
-				),
-			},
-			Dir: &Dir{
-				Initial: osExecutableDir,
-				Run: filepath.Join(
-					osExecutableDir,
-					tool.Name(),
-					cloud.Name(),
-				),
-			},
-		}, nil
+func NewManager(
+	currentExecutableDir string,
+	cloud ICloud,
+	tool ITool,
+) *Manager {
+	templatePath := func(templateName string) string {
+		return filepath.Join(
+			currentExecutableDir,
+			iota.Templates.Name(),
+			tool.Name(),
+			templateName,
+		)
 	}
 
-	return newManager
+	return &Manager{
+		Cloud: cloud.Iota(),
+		Tool:  tool.Iota(),
+		Path: &Path{
+			Executable: filepath.Join(
+				currentExecutableDir,
+				iota.Dependencies.Name(),
+				tool.Name(),
+				fmt.Sprintf("%s.exe", tool.Name()),
+			),
+			PackerManifest: filepath.Join(
+				currentExecutableDir,
+				iota.Packer.Name(),
+				cloud.Name(),
+				constants.PACKER_MANIFEST,
+			),
+			Template: &Template{
+				Cloud: templatePath(cloud.Template().Cloud()),
+				Base:  templatePath(cloud.Template().Base()),
+			},
+			Vars: filepath.Join(
+				currentExecutableDir,
+				tool.Name(),
+				cloud.Name(),
+				tool.VarsName(),
+			),
+		},
+		Dir: &Dir{
+			Initial: currentExecutableDir,
+			Run: filepath.Join(
+				currentExecutableDir,
+				tool.Name(),
+				cloud.Name(),
+			),
+		},
+	}
 }
-
-type NewManager func(cloud ICloud, tool ITool) (*Manager, error)
 
 func (m *Manager) Clone() *Manager {
 	return &Manager{

@@ -29,7 +29,7 @@ func Build() *cobra.Command {
 					With("args", args)
 			)
 
-			newManager, err := _manager.NewManagerWith(
+			newManager, err := _manager.NewManager(
 				os.Executable,
 			)
 			if err != nil {
