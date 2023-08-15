@@ -118,7 +118,7 @@ func NewManagerWith(
 
 type NewManager func(cloud ICloud, tool ITool) (*Manager, error)
 
-func (m Manager) Cloud() iota.Cloud {
+func (m *Manager) Cloud() iota.Cloud {
 	return m.cloud
 }
 
@@ -126,7 +126,7 @@ type ICloudGetter[C any] interface {
 	Cloud() C
 }
 
-func (m Manager) Tool() iota.Tool {
+func (m *Manager) Tool() iota.Tool {
 	return m.tool
 }
 
@@ -134,7 +134,7 @@ type IToolGetter interface {
 	Tool() iota.Tool
 }
 
-func (m Manager) Path() Path {
+func (m *Manager) Path() Path {
 	return m.path
 }
 
@@ -142,7 +142,7 @@ type IPathGetter interface {
 	Path() Path
 }
 
-func (m Manager) Dir() Dir {
+func (m *Manager) Dir() Dir {
 	return m.dir
 }
 
@@ -150,8 +150,8 @@ type IDirGetter interface {
 	Dir() Dir
 }
 
-func (m Manager) Clone() Manager {
-	return Manager{
+func (m *Manager) Clone() *Manager {
+	return &Manager{
 		cloud: m.cloud,
 		tool:  m.tool,
 		path:  m.path.Clone(),
@@ -170,11 +170,11 @@ type IManager interface {
 type Manager struct {
 	cloud iota.Cloud
 	tool  iota.Tool
-	path  Path
-	dir   Dir
+	path  *Path
+	dir   *Dir
 }
 
-func (p Path) Executable() string {
+func (p *Path) Executable() string {
 	return p.executable
 }
 
@@ -182,7 +182,7 @@ type IExecutableGetter interface {
 	Executable() string
 }
 
-func (p Path) PackerManifest() string {
+func (p *Path) PackerManifest() string {
 	return p.packerManifest
 }
 
@@ -190,11 +190,11 @@ type IPackerManifestGetter interface {
 	PackerManifest() string
 }
 
-func (p Path) Template() Template {
+func (p *Path) Template() Template {
 	return p.template
 }
 
-func (p Path) Vars() string {
+func (p *Path) Vars() string {
 	return p.vars
 }
 
@@ -202,8 +202,8 @@ type IVarsGetter interface {
 	Vars() string
 }
 
-func (p Path) Clone() Path {
-	return Path{
+func (p *Path) Clone() *Path {
+	return &Path{
 		executable:     p.executable,
 		packerManifest: p.packerManifest,
 		vars:           p.vars,
@@ -223,14 +223,14 @@ type Path struct {
 	executable     string
 	packerManifest string
 	vars           string
-	template       Template
+	template       *Template
 }
 
-func (t Template) Cloud() string {
+func (t *Template) Cloud() string {
 	return t.cloud
 }
 
-func (t Template) Base() string {
+func (t *Template) Base() string {
 	return t.base
 }
 
@@ -238,8 +238,8 @@ type IBaseGetter interface {
 	Base() string
 }
 
-func (t Template) Clone() Template {
-	return Template{
+func (t *Template) Clone() *Template {
+	return &Template{
 		cloud: t.cloud,
 		base:  t.base,
 	}
@@ -256,7 +256,7 @@ type Template struct {
 	base  string
 }
 
-func (d Dir) Initial() string {
+func (d *Dir) Initial() string {
 	return d.initial
 }
 
@@ -264,7 +264,7 @@ type IInitialGetter interface {
 	Initial() string
 }
 
-func (d Dir) Run() string {
+func (d *Dir) Run() string {
 	return d.run
 }
 
@@ -272,8 +272,8 @@ type IRunGetter interface {
 	Run() string
 }
 
-func (d Dir) Clone() Dir {
-	return Dir{
+func (d *Dir) Clone() *Dir {
+	return &Dir{
 		initial: d.initial,
 		run:     d.run,
 	}
