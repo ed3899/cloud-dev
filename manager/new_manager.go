@@ -2,55 +2,32 @@ package manager
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 
 	"github.com/ed3899/kumo/common/constants"
 	"github.com/ed3899/kumo/common/iota"
+	"github.com/samber/oops"
 )
 
-type IIotaGetter[I any] interface {
-	Iota() I
-}
-
-type INameGetter interface {
-	Name() string
-}
-
-type ITemplateGetter[T any] interface {
-	Template() T
-}
-
-type ICloud interface {
-	IIotaGetter[iota.Cloud]
-	INameGetter
-	ITemplateGetter[iota.Template]
-}
-
-type IPluginPathEnvironmentVariableGetter interface {
-	PluginPathEnvironmentVariable() string
-}
-
-type IVarsNameGetter interface {
-	VarsName() string
-}
-
-type IVersionGetter interface {
-	Version() string
-}
-
-type ITool interface {
-	IIotaGetter[iota.Tool]
-	INameGetter
-	IPluginPathEnvironmentVariableGetter
-	IVarsNameGetter
-	IVersionGetter
-}
-
 func NewManager(
-	currentExecutableDir string,
-	cloud ICloud,
-	tool ITool,
-) *Manager {
+	cloud iota.Cloud,
+	tool iota.Tool,
+) (*Manager, error) {
+	oopsBuilder := oops.
+		Code("NewManager").
+		In("manager")
+
+	currentExecutablePath, err := os.Executable()
+	if err != nil {
+		err := oopsBuilder.
+			Wrapf(err, "failed to get current executable path")
+
+		return nil, err
+	}
+
+	currentExecutableDir := filepath.Dir(currentExecutablePath)
+
 	templatePath := func(templateName string) string {
 		return filepath.Join(
 			currentExecutableDir,
@@ -95,16 +72,7 @@ func NewManager(
 				cloud.Name(),
 			),
 		},
-	}
-}
-
-func (m *Manager) Clone() *Manager {
-	return &Manager{
-		Cloud: m.Cloud,
-		Tool:  m.Tool,
-		Path:  m.Path.Clone(),
-		Dir:   m.Dir.Clone(),
-	}
+	}, nil
 }
 
 type Manager struct {
@@ -114,15 +82,6 @@ type Manager struct {
 	Dir   *Dir
 }
 
-func (p *Path) Clone() *Path {
-	return &Path{
-		Executable:     p.Executable,
-		PackerManifest: p.PackerManifest,
-		Vars:           p.Vars,
-		Template:       p.Template.Clone(),
-	}
-}
-
 type Path struct {
 	Executable     string
 	PackerManifest string
@@ -130,23 +89,9 @@ type Path struct {
 	Template       *Template
 }
 
-func (t *Template) Clone() *Template {
-	return &Template{
-		Cloud: t.Cloud,
-		Base:  t.Base,
-	}
-}
-
 type Template struct {
 	Cloud string
 	Base  string
-}
-
-func (d *Dir) Clone() *Dir {
-	return &Dir{
-		Initial: d.Initial,
-		Run:     d.Run,
-	}
 }
 
 type Dir struct {
