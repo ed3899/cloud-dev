@@ -8,6 +8,7 @@ import (
 	"github.com/ed3899/kumo/utils/url"
 	"github.com/ed3899/kumo/utils/zip"
 	"github.com/samber/oops"
+	"github.com/vbauerster/mpb/v8"
 )
 
 func NewProgress(
@@ -38,6 +39,7 @@ func WithDownload(d *download.Download) (option Option) {
 }
 
 func WithMultiProgressBar(p interfaces.MpbV8MultiProgressBar) (option Option) {
+	pr := mpb.WithWaitGroup()
 	option = func(progress *Progress) {
 		progress.MultiProgressBar = p
 
