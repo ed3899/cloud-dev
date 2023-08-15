@@ -1,7 +1,6 @@
 package download
 
 import (
-	"github.com/ed3899/kumo/common/interfaces"
 	"github.com/samber/oops"
 )
 
@@ -26,7 +25,7 @@ func ExtractAndShowProgressWith(
 	extractAndShowProgress := func(download IDownload) (Download, error) {
 		downloadClone := download.Clone()
 
-		zipSize, err := utilsZipGetZipSize(downloadClone.path.zip)
+		zipSize, err := utilsZipGetZipSize(downloadClone.Path.zip)
 		if err != nil {
 			err := oopsBuilder.
 				Wrapf(err, "failed to get zip size for: %v", dae.Download.AbsPath)
@@ -36,4 +35,3 @@ func ExtractAndShowProgressWith(
 }
 
 type ExtractAndShowProgress func(IDownload) (Download, error)
-
