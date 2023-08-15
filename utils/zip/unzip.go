@@ -2,9 +2,7 @@ package zip
 
 import (
 	"archive/zip"
-	"fmt"
 	"io"
-	"log"
 	"os"
 	"path/filepath"
 	"sync"
@@ -12,8 +10,13 @@ import (
 	"github.com/samber/oops"
 )
 
+type IPath interface {
+	Zip() string
+	Executable() string
+}
+
 type IDownload interface {
-	Path() string
+	Path() IPath
 	Name() string
 }
 
@@ -25,15 +28,56 @@ func UnzipWith(
 		Code("UnzipWith")
 
 	unzip := func(download IDownload, bytesUnzipped chan<- int) error {
-		pathToZipDir := filepath.Dir(download.Path())
-		pathToExecutable := filepath.Join(pathToZipDir, fmt.Sprintf("%s.exe", download.Name()))
 		// Open the zip file and defer closing it
-		reader, err := zip.OpenReader(pathToZip)
+		reader, err := zip.OpenReader(download.Path().Zip())
 		if err != nil {
 			err := oopsBuilder.
-				Wrapf(err, "failed to open zip file: %s", pathToZip)
+				Wrapf(err, "failed to open zip file: %s", download.Path().Zip())
 			return err
 		}
+		defer reader.Close()
+
+		unzipGroup := new(sync.WaitGroup)
+		errChan := make(chan error, len(reader.File))
+
+		// Unzip each file concurrently
+		for _, zipFile := range reader.File {
+			unzipGroup.Add(1)
+			go func(zf *zip.File) {
+				defer unzipGroup.Done()
+
+				var (
+					bytesCopied int64
+				)
+
+				if bytesCopied, err = unzipFile(zf, download.Path().Executable()); err != nil {
+					err = oopsBuilder.
+						With("bytesCopied", bytesCopied).
+						With("zipFile", zf.Name).
+						With("extractToPath", download.Path().Executable()).
+						Wrapf(err, "failed to unzip file: %s", zf.Name)
+					errChan <- err
+					return
+				}
+
+				bytesUnzipped <- int(bytesCopied)
+			}(zipFile)
+		}
+
+		// Wait for all files to be unzipped
+		go func() {
+			unzipGroup.Wait()
+			close(errChan)
+			close(bytesUnzipped)
+		}()
+
+		// Check for errors
+		for err := range errChan {
+			if err != nil {
+				return err
+			}
+		}
+
 		return nil
 	}
 
@@ -41,85 +85,6 @@ func UnzipWith(
 }
 
 type Unzip func(download IDownload, bytesUnzipped chan<- int) error
-
-func Unzip(
-	pathToZip,
-	extractToPath string,
-	bytesUnzipped chan<- int,
-) (
-	err error,
-) {
-	var (
-		unzipGroup  = new(sync.WaitGroup)
-		oopsBuilder = oops.Code("unzip_failed").
-				With("pathToZip", pathToZip).
-				With("extractToPath", extractToPath).
-				With("bytesUnzipped", bytesUnzipped)
-
-		reader  *zip.ReadCloser
-		errChan chan error
-		zipFile *zip.File
-	)
-
-	// Open the zip file and defer closing it
-	if reader, err = zip.OpenReader(pathToZip); err != nil {
-		err = oopsBuilder.
-			Wrapf(err, "failed to open zip file: %s", pathToZip)
-		return
-	}
-	defer func(reader *zip.ReadCloser) {
-		if err := reader.Close(); err != nil {
-			log.Fatalf(
-				"%+v",
-				oopsBuilder.
-					Wrapf(err, "failed to close zip reader: %#v", reader.File),
-			)
-		}
-	}(reader)
-
-	// Declare error channel
-	errChan = make(chan error, len(reader.File))
-
-	// Unzip each file concurrently
-	for _, zipFile = range reader.File {
-		unzipGroup.Add(1)
-		go func(zf *zip.File) {
-			defer unzipGroup.Done()
-
-			var (
-				bytesCopied int64
-			)
-
-			if bytesCopied, err = unzipFile(zf, extractToPath); err != nil {
-				err = oopsBuilder.
-					With("bytesCopied", bytesCopied).
-					With("zipFile", zf.Name).
-					With("extractToPath", extractToPath).
-					Wrapf(err, "failed to unzip file: %s", zf.Name)
-				errChan <- err
-				return
-			}
-
-			bytesUnzipped <- int(bytesCopied)
-		}(zipFile)
-	}
-
-	// Wait for all files to be unzipped
-	go func() {
-		unzipGroup.Wait()
-		close(errChan)
-		close(bytesUnzipped)
-	}()
-
-	// Check for errors
-	for err = range errChan {
-		if err != nil {
-			return
-		}
-	}
-
-	return
-}
 
 func unzipFileWith(
 	osMkdirAll func(path string, perm os.FileMode) error,
