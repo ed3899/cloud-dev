@@ -11,7 +11,7 @@ import (
 	"github.com/samber/oops"
 )
 
-func UnzipWith(
+func Unzip(
 	pathToZip, pathToUnzip string,
 	bytesUnzipped chan<- int,
 ) error {
