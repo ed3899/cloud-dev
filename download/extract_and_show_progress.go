@@ -1,37 +1,29 @@
 package download
 
 import (
+	"github.com/ed3899/kumo/utils/zip"
 	"github.com/samber/oops"
+	"github.com/vbauerster/mpb/v8"
 )
 
-type IZipAndExecutable interface {
-	Zip() string
-	Executable() string
-}
-
-type IPathAndName interface {
-	Path() IZipAndExecutable
-	Name() string
-}
-
-func ExtractAndShowProgressWith(
-	bar IIncrBy,
-	utilsZipGetZipSize func(absPathToZip string) (size int64, err error),
-	utilsZipUnzip func(download IPathAndName, bytesUnzipped chan<- int) error,
+func ExtractAndShowProgress(
+	progress *mpb.Progress,
+	download *Download,
 ) {
 	oopsBuilder := oops.
-		Code("ExtractAndShowProgress")
+		Code("ExtractAndShowProgress").
+		With("download", download).
+		With("progress", progress)
 
-	extractAndShowProgress := func(download IDownload) (Download, error) {
-		downloadClone := download.Clone()
+	extractedBytesChan := make(chan int, 1024)
+	errChan := make(chan error, 1)
+	doneChan := make(chan bool, 1)
 
-		zipSize, err := utilsZipGetZipSize(downloadClone.Path.zip)
-		if err != nil {
-			err := oopsBuilder.
-				Wrapf(err, "failed to get zip size for: %v", dae.Download.AbsPath)
-			return
-		}
+	zipSize, err := url.GetContentLength()
+	if err != nil {
+		err = oopsBuilder.
+			Wrapf(err, "failed to get zip size for: %v", download.Path.Zip)
+		return
 	}
-}
 
-type ExtractAndShowProgress func(IDownload) (Download, error)
+}
