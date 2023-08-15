@@ -97,7 +97,7 @@ func (d Download) SetName(name string) Download {
 }
 
 type IPathGetter interface {
-	Path() string
+	Path() Path
 }
 
 func (d Download) Path() Path {
