@@ -2,7 +2,6 @@ package download
 
 import (
 	"github.com/samber/oops"
-	"github.com/vbauerster/mpb/v8"
 )
 
 type IDownloadUrlAndPath interface {
@@ -11,7 +10,7 @@ type IDownloadUrlAndPath interface {
 }
 
 func DownloadAndShowProgressWith(
-	bar *mpb.Bar,
+	bar IIncrBy,
 	utilsUrlDownload func(download IDownloadUrlAndPath, downloadedBytesChan chan<- int) error,
 ) DownloadAndShowProgress {
 	oopsBuilder := oops.
