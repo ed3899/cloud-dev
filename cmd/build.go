@@ -41,7 +41,7 @@ func Build() *cobra.Command {
 
 			manager := newManager(iota.CloudIota(viper.GetString("cloud")), iota.Packer)
 
-			managerPathExecutableIsPresent := _manager.ManagerPathExecutableIsPresentWith(
+			managerPathExecutableIsPresent := _manager.CheckIfManagerPathExecutableExists(
 				file.IsFilePresentWith(os.Stat, os.IsNotExist),
 			)(
 				manager,
