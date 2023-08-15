@@ -2,57 +2,68 @@ package download
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"runtime"
 
 	"github.com/ed3899/kumo/common/iota"
 	_manager "github.com/ed3899/kumo/manager"
 	"github.com/ed3899/kumo/utils/url"
+	"github.com/samber/oops"
 	"github.com/vbauerster/mpb/v8"
 )
 
 func NewDownload(
-	currentExecutableDir string,
-	urlContentLength int64,
 	manager *_manager.Manager,
-) *Download {
-	managerClone := manager.Clone()
+) (*Download, error) {
+	oopsBuilder := oops.
+		Code("NewDownload").
+		In("download")
+
+	currentExecutablePath, err := os.Executable()
+	if err != nil {
+		err := oopsBuilder.
+			Wrapf(err, "failed to get current executable path")
+
+		return nil, err
+	}
+
+	currentExecutableDir := filepath.Dir(currentExecutablePath)
 
 	hashicorpUrl := url.BuildHashicorpUrl(
-		managerClone.Tool,
+		manager.Tool.Name(),
+		manager.Tool.Version(),
 		runtime.GOOS,
 		runtime.GOARCH,
 	)
 
+	contentLength, err := url.GetContentLength(hashicorpUrl)
+	if err != nil {
+		err := oopsBuilder.
+			Wrapf(err, "failed to get content length")
+
+		return nil, err
+	}
+
 	return &Download{
-		Name: managerClone.Tool.Name(),
+		Name: manager.Tool.Name(),
 		Path: &Path{
 			Zip: filepath.Join(
 				currentExecutableDir,
 				iota.Dependencies.Name(),
-				fmt.Sprintf("%s.zip", managerClone.Tool.Name()),
+				fmt.Sprintf("%s.zip", manager.Tool.Name()),
 			),
 			Executable: filepath.Join(
 				currentExecutableDir,
 				iota.Dependencies.Name(),
-				managerClone.Tool.Name(),
-				fmt.Sprintf("%s.exe", managerClone.Tool.Name()),
+				manager.Tool.Name(),
+				fmt.Sprintf("%s.exe", manager.Tool.Name()),
 			),
 		},
 		Url:           hashicorpUrl,
-		ContentLength: urlContentLength,
+		ContentLength: contentLength,
 		Bar:           &Bar{},
-	}
-}
-
-func (d *Download) Clone() *Download {
-	return &Download{
-		Name:          d.Name,
-		Path:          d.Path.Clone(),
-		Url:           d.Url,
-		ContentLength: d.ContentLength,
-		Bar:           d.Bar.Clone(),
-	}
+	}, nil
 }
 
 type Download struct {
@@ -62,23 +73,9 @@ type Download struct {
 	Bar           *Bar
 }
 
-func (p *Path) Clone() *Path {
-	return &Path{
-		Zip:        p.Zip,
-		Executable: p.Executable,
-	}
-}
-
 type Path struct {
 	Zip        string
 	Executable string
-}
-
-func (b *Bar) Clone() *Bar {
-	return &Bar{
-		Downloading: b.Downloading,
-		Extracting:  b.Extracting,
-	}
 }
 
 type Bar struct {
