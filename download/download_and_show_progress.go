@@ -1,51 +1,77 @@
 package download
 
 import (
-	"sync"
-
 	"github.com/samber/oops"
 	"github.com/vbauerster/mpb/v8"
 )
 
+type IDownloadUrlAndPath interface {
+	IUrlGetter
+	IPathGetter
+}
+
 func DownloadAndShowProgressWith(
 	bar *mpb.Bar,
-	download IDownload,
-	utilsUrlDownload func(url string, absPath string, downloadedBytesChan chan<- int) error,
-) {
+	utilsUrlDownload func(download IDownloadUrlAndPath, downloadedBytesChan chan<- int) error,
+) DownloadAndShowProgress {
 	oopsBuilder := oops.
-		Code("DownloadAndShowProgressWith").
-		With("download", download)
+		Code("DownloadAndShowProgressWith")
 
-	var wg sync.WaitGroup
-	mpb.New(mpb.WithWaitGroup(&wg), mpb.WithAutoRefresh(), mpb.WithWidth(64))
-
-	downloadClone := download.Clone()
+	// var wg sync.WaitGroup
+	// mpb.New(mpb.WithWaitGroup(&wg), mpb.WithAutoRefresh(), mpb.WithWidth(64))
 	downloadedBytesChan := make(chan int, 1024)
 	errChan := make(chan error, 1)
 	doneChan := make(chan bool, 1)
 
-	go func() {
-		defer close(downloadedBytesChan)
-		defer close(errChan)
-		defer close(doneChan)
+	downloadAndShowProgress := func(download IDownload) (Download, error) {
+		downloadClone := download.Clone()
 
-		downloadClone.Bar().SetDownloading(bar)
+		go func() {
+			defer close(downloadedBytesChan)
+			defer close(errChan)
+			defer close(doneChan)
 
+			downloadClone.Bar().SetDownloading(bar)
 
+			err := utilsUrlDownload(downloadClone, downloadedBytesChan)
+			if err != nil {
+				err = oopsBuilder.
+					With("path", downloadClone.Path()).
+					With("downloadedBytesChan", downloadedBytesChan).
+					Wrapf(err, "failed to download: %v", downloadClone.Url())
+				errChan <- err
+				return
+			}
 
-		if err = urlDownload(dae.Download.Url, dae.Download.AbsPath, downloadedBytesChan); err != nil {
-			err = oopsBuilder.
-				With("url", dae.Download.Url).
-				With("absPath", dae.Download.AbsPath).
-				With("downloadedBytesChan", downloadedBytesChan).
-				Wrapf(err, "failed to download: %v", dae.Download.Url)
-			errChan <- err
-			return
+			doneChan <- true
+		}()
+
+	OuterLoop:
+		for {
+			select {
+			case downloadedBytes := <-downloadedBytesChan:
+				if downloadedBytes > 0 {
+					downloadClone.Bar().Downloading().IncrBy(downloadedBytes)
+				}
+
+			case err := <-errChan:
+				if err != nil {
+					err := oopsBuilder.
+						Wrapf(err, "Error occurred while downloading %s", downloadClone.Name())
+					return downloadClone, err
+				}
+
+			case done := <-doneChan:
+				if done {
+					break OuterLoop
+				}
+			}
 		}
 
-		doneChan <- true
-	}()
+		return downloadClone, nil
+	}
 
+	return downloadAndShowProgress
 }
 
-type DownloadAndShowProgress func()
+type DownloadAndShowProgress func(IDownload) (Download, error)
