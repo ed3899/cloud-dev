@@ -5,7 +5,6 @@ import (
 	"path/filepath"
 
 	"github.com/ed3899/kumo/common/constants"
-	"github.com/ed3899/kumo/common/interfaces"
 	"github.com/ed3899/kumo/common/iota"
 	"github.com/samber/oops"
 )
@@ -76,35 +75,35 @@ func NewManagerWith(
 		}
 
 		return &Manager{
-			cloud: cloud.Iota(),
-			tool:  tool.Iota(),
-			path: Path{
-				executable: filepath.Join(
+			Cloud: cloud.Iota(),
+			Tool:  tool.Iota(),
+			Path: &Path{
+				Executable: filepath.Join(
 					osExecutableDir,
 					iota.Dependencies.Name(),
 					tool.Name(),
 					fmt.Sprintf("%s.exe", tool.Name()),
 				),
-				packerManifest: filepath.Join(
+				PackerManifest: filepath.Join(
 					osExecutableDir,
 					iota.Packer.Name(),
 					cloud.Name(),
 					constants.PACKER_MANIFEST,
 				),
-				template: Template{
-					cloud: templatePath(cloud.Template().Cloud()),
-					base:  templatePath(cloud.Template().Base()),
+				Template: &Template{
+					Cloud: templatePath(cloud.Template().Cloud()),
+					Base:  templatePath(cloud.Template().Base()),
 				},
-				vars: filepath.Join(
+				Vars: filepath.Join(
 					osExecutableDir,
 					tool.Name(),
 					cloud.Name(),
 					tool.VarsName(),
 				),
 			},
-			dir: Dir{
-				initial: osExecutableDir,
-				run: filepath.Join(
+			Dir: &Dir{
+				Initial: osExecutableDir,
+				Run: filepath.Join(
 					osExecutableDir,
 					tool.Name(),
 					cloud.Name(),
@@ -118,174 +117,58 @@ func NewManagerWith(
 
 type NewManager func(cloud ICloud, tool ITool) (*Manager, error)
 
-func (m *Manager) Cloud() iota.Cloud {
-	return m.cloud
-}
-
-type ICloudGetter[C any] interface {
-	Cloud() C
-}
-
-func (m *Manager) Tool() iota.Tool {
-	return m.tool
-}
-
-type IToolGetter interface {
-	Tool() iota.Tool
-}
-
-func (m *Manager) Path() Path {
-	return m.path
-}
-
-type IPathGetter interface {
-	Path() Path
-}
-
-func (m *Manager) Dir() Dir {
-	return m.dir
-}
-
-type IDirGetter interface {
-	Dir() Dir
-}
-
 func (m *Manager) Clone() *Manager {
 	return &Manager{
-		cloud: m.cloud,
-		tool:  m.tool,
-		path:  m.path.Clone(),
-		dir:   m.dir.Clone(),
+		Cloud: m.Cloud,
+		Tool:  m.Tool,
+		Path:  m.Path.Clone(),
+		Dir:   m.Dir.Clone(),
 	}
 }
 
-type IManager interface {
-	ICloudGetter[iota.Cloud]
-	IToolGetter
-	IPathGetter
-	IDirGetter
-	interfaces.IClone[Manager]
-}
-
 type Manager struct {
-	cloud iota.Cloud
-	tool  iota.Tool
-	path  *Path
-	dir   *Dir
-}
-
-func (p *Path) Executable() string {
-	return p.executable
-}
-
-type IExecutableGetter interface {
-	Executable() string
-}
-
-func (p *Path) PackerManifest() string {
-	return p.packerManifest
-}
-
-type IPackerManifestGetter interface {
-	PackerManifest() string
-}
-
-func (p *Path) Template() Template {
-	return p.template
-}
-
-func (p *Path) Vars() string {
-	return p.vars
-}
-
-type IVarsGetter interface {
-	Vars() string
+	Cloud iota.Cloud
+	Tool  iota.Tool
+	Path  *Path
+	Dir   *Dir
 }
 
 func (p *Path) Clone() *Path {
 	return &Path{
-		executable:     p.executable,
-		packerManifest: p.packerManifest,
-		vars:           p.vars,
-		template:       p.template.Clone(),
+		Executable:     p.Executable,
+		PackerManifest: p.PackerManifest,
+		Vars:           p.Vars,
+		Template:       p.Template.Clone(),
 	}
 }
 
-type IPath interface {
-	IExecutableGetter
-	IPackerManifestGetter
-	ITemplateGetter[Template]
-	IVarsGetter
-	interfaces.IClone[Path]
-}
-
 type Path struct {
-	executable     string
-	packerManifest string
-	vars           string
-	template       *Template
-}
-
-func (t *Template) Cloud() string {
-	return t.cloud
-}
-
-func (t *Template) Base() string {
-	return t.base
-}
-
-type IBaseGetter interface {
-	Base() string
+	Executable     string
+	PackerManifest string
+	Vars           string
+	Template       *Template
 }
 
 func (t *Template) Clone() *Template {
 	return &Template{
-		cloud: t.cloud,
-		base:  t.base,
+		Cloud: t.Cloud,
+		Base:  t.Base,
 	}
 }
 
-type ITemplate interface {
-	ICloudGetter[string]
-	IBaseGetter
-	interfaces.IClone[Template]
-}
-
 type Template struct {
-	cloud string
-	base  string
-}
-
-func (d *Dir) Initial() string {
-	return d.initial
-}
-
-type IInitialGetter interface {
-	Initial() string
-}
-
-func (d *Dir) Run() string {
-	return d.run
-}
-
-type IRunGetter interface {
-	Run() string
+	Cloud string
+	Base  string
 }
 
 func (d *Dir) Clone() *Dir {
 	return &Dir{
-		initial: d.initial,
-		run:     d.run,
+		Initial: d.Initial,
+		Run:     d.Run,
 	}
 }
 
-type IDir interface {
-	IInitialGetter
-	IRunGetter
-	interfaces.IClone[Dir]
-}
-
 type Dir struct {
-	initial string
-	run     string
+	Initial string
+	Run     string
 }
