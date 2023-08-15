@@ -5,7 +5,6 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/ed3899/kumo/common/interfaces"
 	"github.com/ed3899/kumo/common/iota"
 	_manager "github.com/ed3899/kumo/manager"
 	"github.com/ed3899/kumo/utils/url"
@@ -15,7 +14,7 @@ import (
 func NewDownload(
 	currentExecutableDir string,
 	urlContentLength int64,
-	manager interfaces.IClone[*_manager.Manager],
+	manager *_manager.Manager,
 ) *Download {
 	managerClone := manager.Clone()
 
