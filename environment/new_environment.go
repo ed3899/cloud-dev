@@ -5,25 +5,33 @@ import (
 	"github.com/samber/oops"
 )
 
-func NewEnvironment(
-	tool iota.Tool,
+func NewPackerEnvironment(
 	cloud iota.Cloud,
-) error {
+) (*PackerEnvironment, error) {
 	oopsBuilder := oops.
 		Code("NewEnvironment").
-		With("tool", tool).
 		With("cloud", cloud)
 
-	switch tool {
-	case iota.Terraform:
-	case iota.Packer:
-		general := NewPackerGeneralEnvironment()
+	general := NewPackerGeneralEnvironment()
+
+	switch cloud {
+	case iota.Aws:
+		aws := NewPackerAwsEnvironment()
+
+		return &PackerEnvironment{
+			Cloud:   aws,
+			General: general,
+		}, nil
+
 	default:
 		err := oopsBuilder.
-			Errorf("unknown tool: %s", tool)
+			Errorf("unknown cloud: %#v", cloud)
 
-		return err
+		return nil, err
 	}
+}
 
-	return nil
+type PackerEnvironment struct {
+	Cloud   any
+	General *PackerGeneralEnvironment
 }
