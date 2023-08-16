@@ -6,17 +6,15 @@ import (
 	"github.com/samber/oops"
 )
 
-func ChDirToManagerDirRun(
-	manager *Manager,
-) error {
+func (m *Manager) ChDirToManagerDirRun() error {
 	oopsBuilder := oops.
 		In("manager").
 		Tags("Manager").
 		Code("ManagerDirRunChdirWith")
 
-	if err := os.Chdir(manager.Dir.Run); err != nil {
+	if err := os.Chdir(m.Dir.Run); err != nil {
 		return oopsBuilder.
-			With("runDir", manager.Dir.Run).
+			With("runDir", m.Dir.Run).
 			Wrapf(err, "failed to change to run dir")
 	}
 

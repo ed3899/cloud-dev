@@ -4,12 +4,10 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"text/template"
 
 	"github.com/ed3899/kumo/common/constants"
 	"github.com/ed3899/kumo/common/iota"
 	"github.com/ed3899/kumo/manager/environment"
-	"github.com/ed3899/kumo/utils/file"
 	"github.com/samber/oops"
 )
 
@@ -129,76 +127,7 @@ type Template struct {
 	Base   string
 }
 
-func (t *Template) Create() error {
-	oopsBuilder := oops.
-		In("manager").
-		Code("Create")
-
-	err := file.MergeFilesTo(t.Merged, t.Cloud, t.Base)
-	if err != nil {
-		return oopsBuilder.Wrapf(err, "failed to merge files")
-	}
-
-	return nil
-}
-
-func (t *Template) Parse() (*template.Template, error) {
-	oopsBuilder := oops.
-		In("manager").
-		Code("Parse")
-
-	template, err := template.ParseFiles(t.Merged)
-	if err != nil {
-		return nil, oopsBuilder.Wrapf(err, "failed to parse template")
-	}
-
-	return template, nil
-}
-
-func (t *Template) Delete() error {
-	oopsBuilder := oops.
-		In("manager").
-		Code("Delete")
-
-	err := os.Remove(t.Merged)
-	if err != nil {
-		return oopsBuilder.Wrapf(err, "failed to delete merged template")
-	}
-
-	return nil
-}
-
 type Dir struct {
 	Initial string
 	Run     string
-}
-
-func (d *Dir) ChangeToDirInitial() error {
-	oopsBuilder := oops.
-		In("manager").
-		Tags("Manager").
-		Code("ChangeToDirInitial")
-
-	if err := os.Chdir(d.Initial); err != nil {
-		return oopsBuilder.
-			With("initialDir", d.Initial).
-			Wrapf(err, "failed to change to initial dir")
-	}
-
-	return nil
-}
-
-func (d *Dir) ChangeToDirRun() error {
-	oopsBuilder := oops.
-		In("manager").
-		Tags("Manager").
-		Code("ChangeToDirRun")
-
-	if err := os.Chdir(d.Run); err != nil {
-		return oopsBuilder.
-			With("runDir", d.Run).
-			Wrapf(err, "failed to change to run dir")
-	}
-
-	return nil
 }
