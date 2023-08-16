@@ -54,8 +54,8 @@ func NewManager(
 				constants.PACKER_MANIFEST,
 			),
 			Template: &Template{
-				Cloud: templatePath(cloud.Template().Cloud()),
-				Base:  templatePath(cloud.Template().Base()),
+				Cloud: templatePath(cloud.Template().Cloud),
+				Base:  templatePath(cloud.Template().Base),
 			},
 			Vars: filepath.Join(
 				currentExecutableDir,

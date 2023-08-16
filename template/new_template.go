@@ -24,6 +24,8 @@ func NewTemplate(
 	}
 
 	return &TemplateFile{
+		Tool:  tool,
+		Cloud: cloud,
 		Path: filepath.Join(
 			filepath.Dir(currentExecutablePath),
 			iota.Templates.Name(),
@@ -32,5 +34,7 @@ func NewTemplate(
 }
 
 type TemplateFile struct {
-	Path string
+	Tool  iota.Tool
+	Cloud iota.Cloud
+	Path  string
 }

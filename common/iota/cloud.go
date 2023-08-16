@@ -39,7 +39,7 @@ func (c Cloud) Name() string {
 	}
 }
 
-func (c Cloud) Template() Template {
+func (c Cloud) Template() *Template {
 	oopsBuilder := oops.
 		In("common").
 		In("iota").
@@ -55,9 +55,9 @@ func (c Cloud) Template() Template {
 
 	switch c {
 	case Aws:
-		return Template{
-			cloud: "aws.tmpl",
-			base:  "base.tmpl",
+		return &Template{
+			Cloud: "aws.tmpl",
+			Base:  "base.tmpl",
 		}
 
 	default:
@@ -66,14 +66,6 @@ func (c Cloud) Template() Template {
 }
 
 type Template struct {
-	cloud string
-	base  string
-}
-
-func (t Template) Cloud() string {
-	return t.cloud
-}
-
-func (t Template) Base() string {
-	return t.base
+	Cloud string
+	Base  string
 }
