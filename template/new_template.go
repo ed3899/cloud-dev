@@ -1,6 +1,9 @@
 package template
 
 import (
+	"os"
+	"path/filepath"
+
 	"github.com/ed3899/kumo/common/iota"
 	"github.com/samber/oops"
 )
@@ -14,37 +17,18 @@ func NewTemplate(
 		With("tool", tool).
 		With("cloud", cloud)
 
-	pathToTemplate := func ()  {
-		filepath.Join(
-			iota.Template.Name()
-		)
-	}
-
-	switch tool {
-	case iota.Terraform:
-
-		switch cloud {
-		case iota.Aws:
-			return &TemplateFile{
-				Path: pathToTemplate,
-			}, nil
-
-		default:
-			return nil, oopsBuilder.
-				Errorf("cloud %s not supported", cloud)
-		}
-
-	case iota.Packer:
-
-		switch cloud {
-		case iota.Aws:
-
-		}
-
-	default:
+	currentExecutablePath, err := os.Executable()
+	if err != nil {
 		return nil, oopsBuilder.
-			Errorf("tool %s not supported", tool)
+			Wrapf(err, "failed to get current executable path")
 	}
+
+	return &TemplateFile{
+		Path: filepath.Join(
+			filepath.Dir(currentExecutablePath),
+			iota.Templates.Name(),
+		),
+	}, nil
 }
 
 type TemplateFile struct {
