@@ -9,7 +9,7 @@ func NewPackerEnvironment(
 	cloud iota.Cloud,
 ) (*PackerEnvironment, error) {
 	oopsBuilder := oops.
-		Code("NewEnvironment").
+		Code("NewPackerEnvironment").
 		With("cloud", cloud)
 
 	general := NewPackerGeneralEnvironment()
