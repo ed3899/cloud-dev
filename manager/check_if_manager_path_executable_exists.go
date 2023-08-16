@@ -4,6 +4,6 @@ import (
 	"github.com/ed3899/kumo/utils/file"
 )
 
-func (m *Manager) CheckIfManagerPathExecutableExists() bool {
+func (m *Manager) ToolExecutableExists() bool {
 	return file.IsFilePresent(m.Path.Executable)
 }

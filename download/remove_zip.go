@@ -6,17 +6,13 @@ import (
 	"github.com/samber/oops"
 )
 
-func RemoveZip(
-	download *Download,
-) error {
+func (d *Download) RemoveZip() error {
 	oopsBuilder := oops.
-		Code("RemoveZip").
-		With("download", download)
-
-	err := os.Remove(download.Path.Zip)
+		Code("RemoveZip")
+	err := os.Remove(d.Path.Zip)
 	if err != nil {
 		err := oopsBuilder.
-			Wrapf(err, "Error occurred while removing %s", download.Path.Zip)
+			Wrapf(err, "Error occurred while removing %s", d.Path.Zip)
 
 		return err
 	}

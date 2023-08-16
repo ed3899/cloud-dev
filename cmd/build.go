@@ -2,11 +2,11 @@ package cmd
 
 import (
 	"log"
-	"os"
 
 	"github.com/ed3899/kumo/common/iota"
+	"github.com/ed3899/kumo/download"
 	_manager "github.com/ed3899/kumo/manager"
-	"github.com/ed3899/kumo/utils/file"
+
 	"github.com/samber/oops"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -29,25 +29,28 @@ func Build() *cobra.Command {
 					With("args", args)
 			)
 
-			newManager, err := _manager.NewManager(
-				os.Executable,
-			)
+			manager, err := _manager.NewManager(iota.CloudIota(viper.GetString("cloud")), iota.Packer)
 			if err != nil {
 				err := oopsBuilder.
 					Wrapf(err, "failed to create new manager")
 
-				log.Fatalf("%+v", err)
+				log.Fatalf(
+					"%+v",
+					err,
+				)
 			}
 
-			manager := newManager(iota.CloudIota(viper.GetString("cloud")), iota.Packer)
+			if !manager.ToolExecutableExists() {
+				_download, err := download.NewDownload(manager)
+				if err != nil {
+					err := oopsBuilder.
+						Wrapf(err, "failed to create new download")
 
-			managerPathExecutableIsPresent := _manager.CheckIfManagerPathExecutableExists(
-				file.IsFilePresentWith(os.Stat, os.IsNotExist),
-			)(
-				manager,
-			)
-
-			if !managerPathExecutableIsPresent {
+					log.Fatalf(
+						"%+v",
+						err,
+					)
+				}
 
 			}
 		},

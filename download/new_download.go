@@ -8,14 +8,14 @@ import (
 	"sync"
 
 	"github.com/ed3899/kumo/common/iota"
-	_manager "github.com/ed3899/kumo/manager"
+	"github.com/ed3899/kumo/manager"
 	"github.com/ed3899/kumo/utils/url"
 	"github.com/samber/oops"
 	"github.com/vbauerster/mpb/v8"
 )
 
 func NewDownload(
-	manager *_manager.Manager,
+	_manager *manager.Manager,
 ) (*Download, error) {
 	oopsBuilder := oops.
 		Code("NewDownload").
@@ -32,8 +32,8 @@ func NewDownload(
 	currentExecutableDir := filepath.Dir(currentExecutablePath)
 
 	hashicorpUrl := url.BuildHashicorpUrl(
-		manager.Tool.Name(),
-		manager.Tool.Version(),
+		_manager.Tool.Name(),
+		_manager.Tool.Version(),
 		runtime.GOOS,
 		runtime.GOARCH,
 	)
@@ -49,18 +49,18 @@ func NewDownload(
 	progress := mpb.New(mpb.WithWaitGroup(&sync.WaitGroup{}), mpb.WithAutoRefresh(), mpb.WithWidth(64))
 
 	return &Download{
-		Name: manager.Tool.Name(),
+		Name: _manager.Tool.Name(),
 		Path: &Path{
 			Zip: filepath.Join(
 				currentExecutableDir,
 				iota.Dependencies.Name(),
-				fmt.Sprintf("%s.zip", manager.Tool.Name()),
+				fmt.Sprintf("%s.zip", _manager.Tool.Name()),
 			),
 			Executable: filepath.Join(
 				currentExecutableDir,
 				iota.Dependencies.Name(),
-				manager.Tool.Name(),
-				fmt.Sprintf("%s.exe", manager.Tool.Name()),
+				_manager.Tool.Name(),
+				fmt.Sprintf("%s.exe", _manager.Tool.Name()),
 			),
 		},
 		Url:           hashicorpUrl,
@@ -85,12 +85,4 @@ type Path struct {
 
 type Bar struct {
 	Downloading, Extracting *mpb.Bar
-}
-
-type IIncrBy interface {
-	IncrBy(int)
-}
-
-type IAddBar interface {
-	AddBar(int64, ...any) *mpb.Bar
 }

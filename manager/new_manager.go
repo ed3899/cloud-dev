@@ -140,20 +140,3 @@ type Dir struct {
 	Initial string
 	Run     string
 }
-
-type Contents struct {
-	Host                   string
-	HostName               string
-	IdentityFile           string
-	User                   string
-	Port                   string
-	StrictHostKeyChecking  string
-	PasswordAuthentication string
-	IdentitiesOnly         string
-	LogLevel               string
-}
-
-type SshConfig struct {
-	path     string
-	contents *Contents
-}

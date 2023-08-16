@@ -1,7 +1,5 @@
 package download
 
-func ProgressShutdown(
-	download *Download,
-) {
-	download.Progress.Shutdown()
+func (d *Download) ProgressShutdown() {
+	d.Progress.Shutdown()
 }

@@ -7,21 +7,18 @@ import (
 	"github.com/vbauerster/mpb/v8/decor"
 )
 
-func ExtractAndShowProgress(
-	download *Download,
-) error {
+func (d *Download) ExtractAndShowProgress() error {
 	oopsBuilder := oops.
-		Code("ExtractAndShowProgress").
-		With("download", download)
+		Code("ExtractAndShowProgress")
 
 	extractedBytesChan := make(chan int, 1024)
 	errChan := make(chan error, 1)
 	doneChan := make(chan bool, 1)
 
-	zipSize, err := zip.GetZipSize(download.Path.Zip)
+	zipSize, err := zip.GetZipSize(d.Path.Zip)
 	if err != nil {
 		err := oopsBuilder.
-			Wrapf(err, "failed to get zip size for: %v", download.Path.Zip)
+			Wrapf(err, "failed to get zip size for: %v", d.Path.Zip)
 
 		return err
 	}
@@ -30,11 +27,11 @@ func ExtractAndShowProgress(
 		defer close(errChan)
 		defer close(doneChan)
 
-		download.Bar.Extracting = download.Progress.AddBar(zipSize,
-			mpb.BarQueueAfter(download.Bar.Downloading),
+		d.Bar.Extracting = d.Progress.AddBar(zipSize,
+			mpb.BarQueueAfter(d.Bar.Downloading),
 			mpb.BarFillerClearOnComplete(),
 			mpb.PrependDecorators(
-				decor.Name(download.Name),
+				decor.Name(d.Name),
 				decor.Counters(decor.SizeB1024(0), " % .2f / % .2f"),
 			),
 			mpb.AppendDecorators(
@@ -45,12 +42,12 @@ func ExtractAndShowProgress(
 			),
 		)
 
-		err = zip.Unzip(download.Path.Zip, download.Path.Executable, extractedBytesChan)
+		err = zip.Unzip(d.Path.Zip, d.Path.Executable, extractedBytesChan)
 		if err != nil {
 			err := oopsBuilder.
 				With("extractedBytesChan", extractedBytesChan).
-				With("download.Path.Executable", download.Path.Executable).
-				Wrapf(err, "failed to unzip: %v", download.Path.Zip)
+				With("download.Path.Executable", d.Path.Executable).
+				Wrapf(err, "failed to unzip: %v", d.Path.Zip)
 
 			errChan <- err
 
@@ -65,13 +62,13 @@ OuterLoop:
 		select {
 		case extractedBytes := <-extractedBytesChan:
 			if extractedBytes > 0 {
-				download.Bar.Extracting.IncrBy(extractedBytes)
+				d.Bar.Extracting.IncrBy(extractedBytes)
 			}
 
 		case err = <-errChan:
 			if err != nil {
 				err := oopsBuilder.
-					Wrapf(err, "Error occurred while extracting %s", download.Name)
+					Wrapf(err, "Error occurred while extracting %s", d.Name)
 
 				return err
 			}

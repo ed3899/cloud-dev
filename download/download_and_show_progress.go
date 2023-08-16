@@ -7,9 +7,9 @@ import (
 	"github.com/vbauerster/mpb/v8/decor"
 )
 
-func DownloadAndShowProgress(
-	download *Download,
-) (*Download, error) {
+func (d *Download) DownloadAndShowProgress() (
+	*Download, error,
+) {
 	oopsBuilder := oops.
 		Code("DownloadAndShowProgress")
 
@@ -22,11 +22,11 @@ func DownloadAndShowProgress(
 		defer close(errChan)
 		defer close(doneChan)
 
-		download.Bar.Downloading = download.Progress.AddBar(
-			download.ContentLength,
+		d.Bar.Downloading = d.Progress.AddBar(
+			d.ContentLength,
 			mpb.BarFillerClearOnComplete(),
 			mpb.PrependDecorators(
-				decor.Name(download.Name),
+				decor.Name(d.Name),
 				decor.Counters(decor.SizeB1024(0), " % .2f / % .2f"),
 			),
 			mpb.AppendDecorators(
@@ -37,12 +37,12 @@ func DownloadAndShowProgress(
 			),
 		)
 
-		err := url.Download(download.Url, download.Path.Zip, downloadedBytesChan)
+		err := url.Download(d.Url, d.Path.Zip, downloadedBytesChan)
 		if err != nil {
 			err = oopsBuilder.
-				With("path", download.Path).
+				With("path", d.Path).
 				With("downloadedBytesChan", downloadedBytesChan).
-				Wrapf(err, "failed to download: %v", download.Url)
+				Wrapf(err, "failed to download: %v", d.Url)
 			errChan <- err
 			return
 		}
@@ -55,14 +55,14 @@ OuterLoop:
 		select {
 		case downloadedBytes := <-downloadedBytesChan:
 			if downloadedBytes > 0 {
-				download.Bar.Downloading.IncrBy(downloadedBytes)
+				d.Bar.Downloading.IncrBy(downloadedBytes)
 			}
 
 		case err := <-errChan:
 			if err != nil {
 				err := oopsBuilder.
-					Wrapf(err, "Error occurred while downloading %s", download.Name)
-				return download, err
+					Wrapf(err, "Error occurred while downloading %s", d.Name)
+				return d, err
 			}
 
 		case done := <-doneChan:
@@ -72,5 +72,5 @@ OuterLoop:
 		}
 	}
 
-	return download, nil
+	return d, nil
 }
