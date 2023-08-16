@@ -6,7 +6,7 @@ import (
 	"github.com/samber/oops"
 )
 
-func ChdirToManagerDirInitial(manager *Manager) error {
+func (manager *Manager) ChdirToManagerDirInitial() error {
 	oopsBuilder := oops.
 		In("manager").
 		Tags("Manager").
