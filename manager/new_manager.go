@@ -83,6 +83,22 @@ func NewManager(
 				cloud.Name(),
 				tool.VarsName(),
 			),
+			IpFile: filepath.Join(
+				currentExecutableDir,
+				tool.Name(),
+				cloud.Name(),
+				constants.IP_FILE_NAME,
+			),
+			IdentityFile: filepath.Join(
+				currentExecutableDir,
+				tool.Name(),
+				cloud.Name(),
+				constants.KEY_NAME,
+			),
+			SshConfig: filepath.Join(
+				currentExecutableDir,
+				constants.CONFIG_NAME,
+			),
 		},
 		Dir: &Dir{
 			Initial: currentExecutableDir,
@@ -105,10 +121,13 @@ type Manager struct {
 }
 
 type Path struct {
-	Plugins    string
-	Executable string
-	Vars       string
-	Template   *Template
+	Plugins      string
+	Executable   string
+	Vars         string
+	SshConfig    string
+	IpFile       string
+	IdentityFile string
+	Template     *Template
 }
 
 type Template struct {
@@ -120,4 +139,21 @@ type Template struct {
 type Dir struct {
 	Initial string
 	Run     string
+}
+
+type Contents struct {
+	Host                   string
+	HostName               string
+	IdentityFile           string
+	User                   string
+	Port                   string
+	StrictHostKeyChecking  string
+	PasswordAuthentication string
+	IdentitiesOnly         string
+	LogLevel               string
+}
+
+type SshConfig struct {
+	path     string
+	contents *Contents
 }
