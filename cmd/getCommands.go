@@ -9,7 +9,7 @@ type CobraCommands = []*cobra.Command
 func GetCommands() CobraCommands {
 	return CobraCommands{
 		Build(),
-		UpCommand(),
+		Up(),
 		DestroyCommand(),
 	}
 }
