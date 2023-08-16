@@ -11,21 +11,14 @@ type ConfigFile struct {
 	Path string
 }
 
-func NewConfigFile(
-	options ...Option,
-) (
+func NewConfigFile() (
 	kc *ConfigFile,
 ) {
-	var (
-		option Option
-	)
+	return &ConfigFile{}
+}
 
-	kc = &ConfigFile{}
-	for _, option = range options {
-		option(kc)
-	}
-
-	return
+func (kc *ConfigFile) SetName(name string) {
+	
 }
 
 func WithName(

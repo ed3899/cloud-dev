@@ -6,8 +6,8 @@ import (
 
 type CobraCommands = []*cobra.Command
 
-func GetCommands() *CobraCommands {
-	return &CobraCommands{
+func GetCommands() CobraCommands {
+	return CobraCommands{
 		Build(),
 		UpCommand(),
 		DestroyCommand(),
