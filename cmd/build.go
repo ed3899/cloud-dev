@@ -52,6 +52,8 @@ func Build() *cobra.Command {
 					)
 				}
 
+				_download.DownloadAndShowProgress()
+
 			}
 		},
 	}

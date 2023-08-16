@@ -7,9 +7,7 @@ import (
 	"github.com/vbauerster/mpb/v8/decor"
 )
 
-func (d *Download) DownloadAndShowProgress() (
-	*Download, error,
-) {
+func (d *Download) DownloadAndShowProgress() error {
 	oopsBuilder := oops.
 		Code("DownloadAndShowProgress")
 
@@ -62,7 +60,8 @@ OuterLoop:
 			if err != nil {
 				err := oopsBuilder.
 					Wrapf(err, "Error occurred while downloading %s", d.Name)
-				return d, err
+
+				return err
 			}
 
 		case done := <-doneChan:
@@ -72,5 +71,5 @@ OuterLoop:
 		}
 	}
 
-	return d, nil
+	return nil
 }
