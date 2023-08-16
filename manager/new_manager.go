@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"text/template"
 
 	"github.com/ed3899/kumo/common/constants"
 	"github.com/ed3899/kumo/common/iota"
 	"github.com/ed3899/kumo/manager/environment"
+	"github.com/ed3899/kumo/utils/file"
 	"github.com/samber/oops"
 )
 
@@ -83,8 +85,9 @@ func NewManager(
 			),
 			PackerManifest: pathToPackerManifest,
 			Template: &Template{
-				Cloud: templatePath(cloud.Template().Cloud),
-				Base:  templatePath(cloud.Template().Base),
+				Merged: templatePath("merged"),
+				Cloud:  templatePath(cloud.Template().Cloud),
+				Base:   templatePath(cloud.Template().Base),
 			},
 			Vars: filepath.Join(
 				currentExecutableDir,
@@ -121,8 +124,48 @@ type Path struct {
 }
 
 type Template struct {
-	Cloud string
-	Base  string
+	Merged string
+	Cloud  string
+	Base   string
+}
+
+func (t *Template) Create() error {
+	oopsBuilder := oops.
+		In("manager").
+		Code("Create")
+
+	err := file.MergeFilesTo(t.Merged, t.Cloud, t.Base)
+	if err != nil {
+		return oopsBuilder.Wrapf(err, "failed to merge files")
+	}
+
+	return nil
+}
+
+func (t *Template) Parse() (*template.Template, error) {
+	oopsBuilder := oops.
+		In("manager").
+		Code("Parse")
+
+	template, err := template.ParseFiles(t.Merged)
+	if err != nil {
+		return nil, oopsBuilder.Wrapf(err, "failed to parse template")
+	}
+
+	return template, nil
+}
+
+func (t *Template) Delete() error {
+	oopsBuilder := oops.
+		In("manager").
+		Code("Delete")
+
+	err := os.Remove(t.Merged)
+	if err != nil {
+		return oopsBuilder.Wrapf(err, "failed to delete merged template")
+	}
+
+	return nil
 }
 
 type Dir struct {
