@@ -7,6 +7,7 @@ import (
 
 	"github.com/ed3899/kumo/common/constants"
 	"github.com/ed3899/kumo/common/iota"
+	"github.com/ed3899/kumo/manager/environment"
 	"github.com/samber/oops"
 )
 
@@ -37,6 +38,39 @@ func NewManager(
 		)
 	}
 
+	pathToPackerManifest := filepath.Join(
+		currentExecutableDir,
+		iota.Packer.Name(),
+		cloud.Name(),
+		constants.PACKER_MANIFEST,
+	)
+
+	var _environment any
+
+	switch tool {
+	case iota.Packer:
+		_environment, err = environment.NewPackerEnvironment(cloud)
+		if err != nil {
+			err := oopsBuilder.
+				Wrapf(err, "failed to create packer environment")
+			return nil, err
+		}
+
+	case iota.Terraform:
+		_environment, err = environment.NewTerraformEnvironment(pathToPackerManifest, cloud)
+		if err != nil {
+			err := oopsBuilder.
+				Wrapf(err, "failed to create terraform environment")
+			return nil, err
+		}
+
+	default:
+		err := oopsBuilder.
+			Wrapf(err, "invalid tool: %s", tool.Name())
+
+		return nil, err
+	}
+
 	return &Manager{
 		Cloud: cloud.Iota(),
 		Tool:  tool.Iota(),
@@ -47,12 +81,7 @@ func NewManager(
 				tool.Name(),
 				fmt.Sprintf("%s.exe", tool.Name()),
 			),
-			PackerManifest: filepath.Join(
-				currentExecutableDir,
-				iota.Packer.Name(),
-				cloud.Name(),
-				constants.PACKER_MANIFEST,
-			),
+			PackerManifest: pathToPackerManifest,
 			Template: &Template{
 				Cloud: templatePath(cloud.Template().Cloud),
 				Base:  templatePath(cloud.Template().Base),
@@ -72,14 +101,16 @@ func NewManager(
 				cloud.Name(),
 			),
 		},
+		Environment: _environment,
 	}, nil
 }
 
 type Manager struct {
-	Cloud iota.Cloud
-	Tool  iota.Tool
-	Path  *Path
-	Dir   *Dir
+	Cloud       iota.Cloud
+	Tool        iota.Tool
+	Path        *Path
+	Dir         *Dir
+	Environment any
 }
 
 type Path struct {

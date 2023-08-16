@@ -2,19 +2,20 @@ package environment
 
 import (
 	"github.com/ed3899/kumo/common/constants"
-	_manager "github.com/ed3899/kumo/manager"
+	"github.com/ed3899/kumo/common/iota"
 	"github.com/ed3899/kumo/utils/packer_manifest"
 	"github.com/samber/oops"
 	"github.com/spf13/viper"
 )
 
 func NewTerraformAwsEnvironment(
-	manager *_manager.Manager,
+	pathToPackerManifest string,
+	cloud iota.Cloud,
 ) (*TerraformAwsEnvironment, error) {
 	oopBuilder := oops.
 		Code("NewTerraformAwsEnvironment")
 
-	amiId, err := packer_manifest.GetLastBuiltAmiIdFromPackerManifest(manager.Path.PackerManifest)
+	amiId, err := packer_manifest.GetLastBuiltAmiIdFromPackerManifest(pathToPackerManifest)
 	if err != nil {
 		return nil, oopBuilder.
 			Wrapf(err, "failed to get last built ami id from packer manifest")

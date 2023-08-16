@@ -2,12 +2,11 @@ package environment
 
 import (
 	"github.com/ed3899/kumo/common/iota"
-	_manager "github.com/ed3899/kumo/manager"
 	"github.com/samber/oops"
 )
 
 func NewTerraformEnvironment(
-	manager *_manager.Manager,
+	pathToPackerManifest string,
 	cloud iota.Cloud,
 ) (*TerraformEnvironment, error) {
 	oopsBuilder := oops.
@@ -18,7 +17,7 @@ func NewTerraformEnvironment(
 
 	switch cloud {
 	case iota.Aws:
-		aws, err := NewTerraformAwsEnvironment(manager)
+		aws, err := NewTerraformAwsEnvironment(pathToPackerManifest, cloud)
 		if err != nil {
 			return nil, oopsBuilder.
 				Wrapf(err, "failed to create aws environment")

@@ -25,7 +25,7 @@ func NewPackerEnvironment(
 
 	default:
 		err := oopsBuilder.
-			Errorf("unknown cloud: %#v", cloud)
+			Errorf("unknown cloud: %#v", cloud.Name())
 
 		return nil, err
 	}
