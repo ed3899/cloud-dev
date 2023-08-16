@@ -3,6 +3,7 @@ package cmd
 import (
 	"log"
 
+	"github.com/ed3899/kumo/binaries"
 	"github.com/ed3899/kumo/common/iota"
 	"github.com/ed3899/kumo/download"
 	"github.com/ed3899/kumo/manager"
@@ -42,6 +43,24 @@ func Build() *cobra.Command {
 				panic(err)
 			}
 
+			err = _manager.SetManagerCloudCredentials()
+			if err != nil {
+				err := oopsBuilder.
+					Wrapf(err, "failed to set manager cloud credentials")
+
+				panic(err)
+			}
+			defer _manager.UnsetManagerCloudCredentials()
+
+			err = _manager.SetPluginsEnvironmentVars()
+			if err != nil {
+				err := oopsBuilder.
+					Wrapf(err, "failed to set plugins environment vars")
+
+				panic(err)
+			}
+			defer _manager.UnsetPluginsEnvironmentVars()
+
 			err = _manager.CreateTemplate()
 			if err != nil {
 				err := oopsBuilder.
@@ -57,7 +76,6 @@ func Build() *cobra.Command {
 
 				panic(err)
 			}
-
 			defer _manager.DeleteTemplate()
 
 			vars, err := _manager.CreateVars()
@@ -67,6 +85,8 @@ func Build() *cobra.Command {
 
 				panic(err)
 			}
+
+			template.Execute(vars, _manager.Environment)
 
 			if !_manager.ToolExecutableExists() {
 				_download, err := download.NewDownload(_manager)
@@ -78,6 +98,7 @@ func Build() *cobra.Command {
 				}
 
 				defer _download.RemoveZip()
+				defer _download.ProgressShutdown()
 
 				err = _download.DownloadAndShowProgress()
 				if err != nil {
@@ -96,6 +117,29 @@ func Build() *cobra.Command {
 				}
 			}
 
+			packer, err := binaries.NewPacker(_manager)
+			if err != nil {
+				err := oopsBuilder.
+					Wrapf(err, "failed to create new packer")
+
+				panic(err)
+			}
+
+			err = packer.Init()
+			if err != nil {
+				err := oopsBuilder.
+					Wrapf(err, "failed to init")
+
+				panic(err)
+			}
+
+			err = packer.Build()
+			if err != nil {
+				err := oopsBuilder.
+					Wrapf(err, "failed to build")
+
+				panic(err)
+			}
 		},
 	}
 }
