@@ -129,3 +129,33 @@ type Dir struct {
 	Initial string
 	Run     string
 }
+
+func (d *Dir) ChangeToDirInitial() error {
+	oopsBuilder := oops.
+		In("manager").
+		Tags("Manager").
+		Code("ChangeToDirInitial")
+
+	if err := os.Chdir(d.Initial); err != nil {
+		return oopsBuilder.
+			With("initialDir", d.Initial).
+			Wrapf(err, "failed to change to initial dir")
+	}
+
+	return nil
+}
+
+func (d *Dir) ChangeToDirRun() error {
+	oopsBuilder := oops.
+		In("manager").
+		Tags("Manager").
+		Code("ChangeToDirRun")
+
+	if err := os.Chdir(d.Run); err != nil {
+		return oopsBuilder.
+			With("runDir", d.Run).
+			Wrapf(err, "failed to change to run dir")
+	}
+
+	return nil
+}
