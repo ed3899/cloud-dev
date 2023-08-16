@@ -45,28 +45,14 @@ func NewManager(
 		constants.PACKER_MANIFEST,
 	)
 
-	var _environment any
-
-	switch tool {
-	case iota.Packer:
-		_environment, err = environment.NewPackerEnvironment(cloud)
-		if err != nil {
-			err := oopsBuilder.
-				Wrapf(err, "failed to create packer environment")
-			return nil, err
-		}
-
-	case iota.Terraform:
-		_environment, err = environment.NewTerraformEnvironment(pathToPackerManifest, cloud)
-		if err != nil {
-			err := oopsBuilder.
-				Wrapf(err, "failed to create terraform environment")
-			return nil, err
-		}
-
-	default:
+	_environment, err := environment.NewEnvironment(
+		tool,
+		cloud,
+		pathToPackerManifest,
+	)
+	if err != nil {
 		err := oopsBuilder.
-			Wrapf(err, "invalid tool: %s", tool.Name())
+			Wrapf(err, "failed to create environment")
 
 		return nil, err
 	}
@@ -75,13 +61,17 @@ func NewManager(
 		Cloud: cloud.Iota(),
 		Tool:  tool.Iota(),
 		Path: &Path{
+			Plugins: filepath.Join(
+				currentExecutableDir,
+				tool.Name(),
+				cloud.Name(),
+			),
 			Executable: filepath.Join(
 				currentExecutableDir,
 				iota.Dependencies.Name(),
 				tool.Name(),
 				fmt.Sprintf("%s.exe", tool.Name()),
 			),
-			PackerManifest: pathToPackerManifest,
 			Template: &Template{
 				Merged: templatePath("merged"),
 				Cloud:  templatePath(cloud.Template().Cloud),
@@ -115,10 +105,10 @@ type Manager struct {
 }
 
 type Path struct {
-	Executable     string
-	PackerManifest string
-	Vars           string
-	Template       *Template
+	Plugins    string
+	Executable string
+	Vars       string
+	Template   *Template
 }
 
 type Template struct {

@@ -7,7 +7,7 @@ import (
 
 func NewPackerEnvironment(
 	cloud iota.Cloud,
-) (*PackerEnvironment, error) {
+) (*Environment[*PackerGeneralEnvironment], error) {
 	oopsBuilder := oops.
 		Code("NewPackerEnvironment").
 		With("cloud", cloud)
@@ -18,7 +18,7 @@ func NewPackerEnvironment(
 	case iota.Aws:
 		aws := NewPackerAwsEnvironment()
 
-		return &PackerEnvironment{
+		return &Environment[*PackerGeneralEnvironment]{
 			Cloud:   aws,
 			General: general,
 		}, nil
@@ -29,9 +29,4 @@ func NewPackerEnvironment(
 
 		return nil, err
 	}
-}
-
-type PackerEnvironment struct {
-	Cloud   any
-	General *PackerGeneralEnvironment
 }
