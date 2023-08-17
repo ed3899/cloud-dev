@@ -29,6 +29,7 @@ bin/
 *manifest.json*
 
 packer.exe
+terraform.exe
 
 kumo.exe
 

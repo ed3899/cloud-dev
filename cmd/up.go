@@ -42,32 +42,6 @@ func Up() *cobra.Command {
 				panic(err)
 			}
 
-			err = _manager.SetManagerCloudCredentials()
-			if err != nil {
-				err := oopsBuilder.
-					Wrapf(err, "failed to set manager cloud credentials")
-
-				panic(err)
-			}
-			defer _manager.UnsetManagerCloudCredentials()
-
-			err = _manager.SetPluginsEnvironmentVars()
-			if err != nil {
-				err := oopsBuilder.
-					Wrapf(err, "failed to set plugins environment vars")
-
-				panic(err)
-			}
-			defer _manager.UnsetPluginsEnvironmentVars()
-
-			err = _manager.CreateTemplate()
-			if err != nil {
-				err := oopsBuilder.
-					Wrapf(err, "failed to create template")
-
-				panic(err)
-			}
-
 			template, err := _manager.ParseTemplate()
 			if err != nil {
 				err := oopsBuilder.
@@ -85,7 +59,13 @@ func Up() *cobra.Command {
 				panic(err)
 			}
 
-			template.Execute(vars, _manager.Environment)
+			err = template.Execute(vars, _manager.Environment)
+			if err != nil {
+				err := oopsBuilder.
+					Wrapf(err, "failed to execute template")
+
+				panic(err)
+			}
 
 			if !_manager.ToolExecutableExists() {
 				_download, err := download.NewDownload(_manager)
@@ -97,7 +77,6 @@ func Up() *cobra.Command {
 				}
 
 				defer _download.RemoveZip()
-				defer _download.ProgressShutdown()
 
 				err = _download.DownloadAndShowProgress()
 				if err != nil {
@@ -114,6 +93,8 @@ func Up() *cobra.Command {
 
 					panic(err)
 				}
+
+				_download.ProgressShutdown()
 			}
 
 			terraform, err := binaries.NewTerraform(_manager)
@@ -123,6 +104,15 @@ func Up() *cobra.Command {
 
 				panic(err)
 			}
+
+			err = _manager.ChDirToManagerDirRun()
+			if err != nil {
+				err := oopsBuilder.
+					Wrapf(err, "failed to chdir to manager dir")
+
+				panic(err)
+			}
+			defer _manager.ChdirToManagerDirInitial()
 
 			err = terraform.Init()
 			if err != nil {

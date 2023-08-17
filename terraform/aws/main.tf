@@ -1,4 +1,6 @@
 locals {
+  AWS_ACCESS_KEY_ID = trimspace(var.AWS_ACCESS_KEY_ID)
+  AWS_SECRET_ACCESS_KEY = trimspace(var.AWS_SECRET_ACCESS_KEY)
   AWS_REGION                   = trimspace(var.AWS_REGION)
   AMI_ID                       = trimspace(var.AMI_ID)
   AWS_INSTANCE_TYPE            = trimspace(var.AWS_INSTANCE_TYPE)
@@ -28,6 +30,8 @@ terraform {
 
 provider "aws" {
   region = local.AWS_REGION
+  access_key = local.AWS_ACCESS_KEY_ID
+  secret_key = local.AWS_SECRET_ACCESS_KEY
 }
 
 data "aws_availability_zones" "available" {
