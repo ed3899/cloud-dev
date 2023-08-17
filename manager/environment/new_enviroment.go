@@ -20,8 +20,8 @@ func NewEnvironment(tool iota.Tool, cloud iota.Cloud, pathToPackerManifest strin
 		}
 
 		return &Environment[any]{
-			General: packerEnvironment.General,
-			Cloud:   packerEnvironment.Cloud,
+			Base:  packerEnvironment.Base,
+			Cloud: packerEnvironment.Cloud,
 		}, nil
 
 	case iota.Terraform:
@@ -33,8 +33,8 @@ func NewEnvironment(tool iota.Tool, cloud iota.Cloud, pathToPackerManifest strin
 		}
 
 		return &Environment[any]{
-			General: terraformEnvironment.General,
-			Cloud:   terraformEnvironment.Cloud,
+			Base:  terraformEnvironment.Base,
+			Cloud: terraformEnvironment.Cloud,
 		}, nil
 
 	default:
@@ -44,6 +44,6 @@ func NewEnvironment(tool iota.Tool, cloud iota.Cloud, pathToPackerManifest strin
 }
 
 type Environment[T any] struct {
-	General T
-	Cloud   any
+	Base  T
+	Cloud any
 }

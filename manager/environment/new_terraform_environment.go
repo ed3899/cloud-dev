@@ -8,12 +8,12 @@ import (
 func NewTerraformEnvironment(
 	pathToPackerManifest string,
 	cloud iota.Cloud,
-) (*Environment[*TerraformGeneralEnvironment], error) {
+) (*Environment[*TerraformBaseEnvironment], error) {
 	oopsBuilder := oops.
 		Code("NewTerraformEnvironment").
 		With("cloud", cloud)
 
-	general := NewTerraformGeneralEnvironment()
+	base := NewTerraformBaseEnvironment()
 
 	switch cloud {
 	case iota.Aws:
@@ -23,9 +23,9 @@ func NewTerraformEnvironment(
 				Wrapf(err, "failed to create aws environment")
 		}
 
-		return &Environment[*TerraformGeneralEnvironment]{
-			General: general,
-			Cloud:   aws,
+		return &Environment[*TerraformBaseEnvironment]{
+			Base:  base,
+			Cloud: aws,
 		}, nil
 
 	default:

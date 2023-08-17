@@ -6,15 +6,15 @@ import (
 	"go.uber.org/zap"
 )
 
-type TerraformGeneralRequired struct {
+type TerraformBaseRequired struct {
 	ALLOWED_IP string
 }
 
-type TerraformGeneralEnvironment struct {
-	Required *TerraformGeneralRequired
+type TerraformBaseEnvironment struct {
+	Required *TerraformBaseRequired
 }
 
-func NewTerraformGeneralEnvironment() *TerraformGeneralEnvironment {
+func NewTerraformBaseEnvironment() *TerraformBaseEnvironment {
 	logger, _ := zap.NewProduction()
 	defer logger.Sync()
 
@@ -30,8 +30,8 @@ func NewTerraformGeneralEnvironment() *TerraformGeneralEnvironment {
 		pickedIp = publicIp
 	}
 
-	return &TerraformGeneralEnvironment{
-		Required: &TerraformGeneralRequired{
+	return &TerraformBaseEnvironment{
+		Required: &TerraformBaseRequired{
 			ALLOWED_IP: pickedIp,
 		},
 	}
