@@ -40,15 +40,6 @@ func Destroy() *cobra.Command {
 				panic(err)
 			}
 
-			err = _manager.SetManagerCloudCredentials()
-			if err != nil {
-				err := oopsBuilder.
-					Wrapf(err, "failed to set manager cloud credentials")
-
-				panic(err)
-			}
-			defer _manager.UnsetManagerCloudCredentials()
-
 			if !_manager.ToolExecutableExists() {
 				_download, err := download.NewDownload(_manager)
 				if err != nil {
@@ -85,6 +76,15 @@ func Destroy() *cobra.Command {
 
 				panic(err)
 			}
+
+			err = _manager.ChDirToManagerDirRun()
+			if err != nil {
+				err := oopsBuilder.
+					Wrapf(err, "failed to chdir to manager dir")
+
+				panic(err)
+			}
+			defer _manager.ChdirToManagerDirInitial()
 
 			err = terraform.Init()
 			if err != nil {
