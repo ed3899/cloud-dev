@@ -23,19 +23,17 @@ func (c Cloud) Name() string {
 		Tags("Cloud").
 		Code("Name")
 
-	defer func() {
-		if r := recover(); r != nil {
-			err := oopsBuilder.Errorf("%v", r)
-			log.Fatalf("panic: %+v", err)
-		}
-	}()
-
 	switch c {
 	case Aws:
 		return "aws"
 
 	default:
-		panic(c)
+		err := oopsBuilder.
+			Errorf("unknown cloud: %#v", c)
+
+		log.Fatalf("%+v", err)
+
+		return ""
 	}
 }
 
@@ -46,13 +44,6 @@ func (c Cloud) Template() *Template {
 		Tags("Cloud").
 		Code("Templates")
 
-	defer func() {
-		if r := recover(); r != nil {
-			err := oopsBuilder.Errorf("%v", r)
-			log.Fatalf("panic: %+v", err)
-		}
-	}()
-
 	switch c {
 	case Aws:
 		return &Template{
@@ -61,7 +52,12 @@ func (c Cloud) Template() *Template {
 		}
 
 	default:
-		panic(c)
+		err := oopsBuilder.
+			Errorf("unknown cloud: %#v", c)
+
+		log.Fatalf("%+v", err)
+
+		return nil
 	}
 }
 
