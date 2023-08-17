@@ -8,7 +8,7 @@ A cloud development environment you can customize with a wide range of tools.
   - [Table of contents](#table-of-contents)
   - [Requirements](#requirements)
   - [How-to](#how-to)
-    - [Post-Up Steps](#post-up-steps)
+    - [Connect](#connect)
   - [Tools](#tools)
     - [Cloud providers](#cloud-providers)
       - [AWS](#aws)
@@ -117,11 +117,13 @@ A cloud development environment you can customize with a wide range of tools.
 
 5. Boom! You've succesfully completed an entire workflow for building, deploying and destroying a development environment
 
-### Post-Up Steps
+### Connect
+
+Assumming you've already ran `kumo build` and `kumo up`.
 
 Once kumo completes, follow these steps:
 
-  1. Limit the permissions on your *SSH key* which should be located under `~/kumo/terraform/your-picked-cloud/kumokey`. Please refer to the [Q&A](#how-do-i-fix-the-broad-permissions-error-when-trying-to-ssh-to-my-instance-on-windows-from-powershell) section for guidance on how to fix the broad permissions error when trying to *SSH* to your instance from *PowerShell*.
+  1. If you are on Windows, please refer to the [Q&A](#how-do-i-fix-the-broad-permissions-error-when-trying-to-ssh-to-my-instance-on-windows-from-powershell) section for guidance on how to fix the broad permissions error when trying to *SSH* to your instance from *PowerShell*.
   2. SSH into your instance with `ssh -i kumossh kumo`
 
 If you want to remove your *AMI*, you can do so from your cloud management console. We follow the same philoshophy as *Packer*. You build it, you manage it.
@@ -138,7 +140,7 @@ Add them to your `kumo.config.yaml` file as follows:
 
 Please note that there are several tools listed below. Some of these tools may have specific requirements such as CPU, RAM, or disk space. Before building an AMI, it is recommended to consult their respective documentations for any specific requirements.
 
-If you require a specific level of customization, you can find all the playbooks located at `~/kumo/packer/ansible/playbooks.`
+If you require a specific level of customization, you can find all the playbooks located at `~/kumo/packer/ansible/playbooks`
 
 Make sure to add the appropriate tags to your environment file, and if needed, refer to the playbooks to customize your setup accordingly.
 
@@ -146,7 +148,7 @@ Make sure to add the appropriate tags to your environment file, and if needed, r
 
 #### AWS
 
-Add `aws` to tools.
+Add `aws`.
 
 Ensure the following are present at the environment file:
 
@@ -160,33 +162,33 @@ Ensure the following are present at the environment file:
 
 #### Docker
 
-Add `docker` to tools.
+Add `docker`.
 
 ### IaC
 
 #### Pulumi
 
-Add `pulumi` to tools.
+Add `pulumi`.
 
 ### Orchestration
 
 #### Helm
 
-Add `helm` to tools.
+Add `helm`.
 
 #### Kubectl
 
-Add `kubectl` to tools.
+Add `kubectl`.
 
 #### Minikube
 
-Add `docker` and `minikube` to tools. The order matters as `docker` is a dependency.
+Add `docker` and `minikube`. The order matters as `docker` is a dependency.
 
 ### Programming languages
 
 #### Dotnet
 
-Add `dotnet` to tools.
+Add `dotnet`.
 
 It installs `dotnet-sdk-7.0` under the hood. If you need to change this, go to `~/kumo/packer/ansible/playbooks/programming_languages/dotnet.yml` and change it on:
 
@@ -204,7 +206,7 @@ If you have made the necessary changes to the `dotnet.yml` file and specified th
 
 #### Go
 
-Add `go` to tools.
+Add `go`.
 
 Refer to the official [Go documentation](https://go.dev/doc/manage-install#installing-multiple) to learn how to manage multiple *Go* versions effectively. This guide provides detailed instructions on installing and managing multiple *Go* versions on your system.
 
@@ -212,7 +214,7 @@ Additionally, you can also check out this [Stack Overflow thread](https://stacko
 
 #### Node.js
 
-Add `node_js` to tools.
+Add `node_js`.
 
 It installs [nvm](https://github.com/nvm-sh/nvm), which is a popular tool for managing multiple versions of *Node.js*.
 
@@ -251,13 +253,13 @@ The reason we suggest using *miniconda* is to save storage space from the start.
 
 ### Ruby
 
-Add `ruby` to tools.
+Add `ruby`.
 
 Manage versions with [rbenv](https://github.com/rbenv/rbenv).
 
 #### Rust
 
-Add `rust` to tools.
+Add `rust`.
 
 Manage versions with [rustup-init](https://forge.rust-lang.org/infra/other-installation-methods.html).
 
@@ -265,7 +267,7 @@ Manage versions with [rustup-init](https://forge.rust-lang.org/infra/other-insta
 
 #### Starship
 
-Add `starship` to tools.
+Add `starship`.
 
 For more information, please consult its [official documentation](https://starship.rs/).
 
@@ -371,7 +373,7 @@ The approach we took to secure your credentials is based on architectural decisi
 ### Access Limitations at Runtime
 
 - To limit access to your instances, we control access based on your local IP and security groups.
-- By giving the account that holds the credentials the least amount of permissions, we facilitate the development process, as you work with plain values.
+- So it is recommended that you give the least amount of permissions to your cloud credentials.
 - This also simplifies our workflow, as we do not have to depend on third-party vaults.
 
 ### Mitigating Impact in Case of Breach
@@ -395,9 +397,9 @@ By avoiding these tools, we aim to simplify the setup and maintenance process, e
 
 ### Why not secrets?
 
-We prioritize a simple setup process for your convenience. Therefore, we suggest the following approach when it comes to secrets setup and permissions:
+We prioritize a simple setup process for your convenience. Therefore, we stuck to the following principles:
 
-- **Minimize External Dependencies:** Having to set up secrets on a 3rd party app right from the start can hinder the development experience. Hence, we avoid this additional complexity unless absolutely necessary.
+- **Minimize External Dependencies:** Having to set up secrets on a 3rd party app right from the start can hinder the development experience.
 - **Focus on Cloud Provider Credentials:** By limiting the permissions of your cloud provider credentials, you remain in control of ensuring they have the correct permissions. This puts the responsibility squarely on your own shoulders.
 
 Our aim is to strike a balance between simplicity and security, providing you with a streamlined and efficient development experience while maintaining control over the permissions granted to your cloud provider credentials.
@@ -462,3 +464,4 @@ In our project, we aim to achieve the following objectives:
 - **Security and Shared Responsibility**: We prioritize security and advocate for shared responsibility when it comes to managing cloud keys. It is crucial to maintain a secure and controlled environment.
 - **Preference for Essential Tools**: We prefer tools that are essential for productive development across all platforms, extending beyond the scope of simple installation commands. Additionally, we encourage leveraging Docker or related technologies for easy accessibility.
 - **Readable documentation**: Our project emphasizes the importance of clear and concise documentation. By providing well-documented resources, we aim to enhance understanding and assist users in utilizing our tools effectively.
+- **Go Zen**: Throughtout the initial prototying phase we notice that the more we try to go agaist the goish way of doing things, the more redesigning was needed. Things like immutability, functional oriented, monads, cloning, etc (which are not by default in go). Long story short, accept *Go* by what it is and don't try to make it behave like another language unless you want to shoot yourself in the foot.
