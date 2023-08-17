@@ -56,3 +56,6 @@ temp_file*
 instance_ip
 kumossh
 merged
+
+*.exe
+*darwin*
