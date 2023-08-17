@@ -21,7 +21,7 @@ func CloudIota(
 	default:
 		err := oopsBuilder.
 			Errorf("unknown cloud: %#v", rawCloudFromConfig)
-			
+
 		log.Fatalf("%+v", err)
 
 		return -1

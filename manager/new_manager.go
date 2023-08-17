@@ -65,6 +65,7 @@ func NewManager(
 				currentExecutableDir,
 				tool.Name(),
 				cloud.Name(),
+				iota.Plugins.Name(),
 			),
 			Executable: filepath.Join(
 				currentExecutableDir,

@@ -105,7 +105,6 @@ func Build() *cobra.Command {
 				}
 
 				defer _download.RemoveZip()
-				defer _download.ProgressShutdown()
 
 				err = _download.DownloadAndShowProgress()
 				if err != nil {
@@ -122,6 +121,8 @@ func Build() *cobra.Command {
 
 					panic(err)
 				}
+
+				_download.ProgressShutdown()
 			}
 
 			packer, err := binaries.NewPacker(_manager)
