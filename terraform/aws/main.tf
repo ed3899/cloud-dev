@@ -158,7 +158,7 @@ resource "aws_instance" "kumo-ec2-instance" {
     #!/bin/bash
     path=/home/${local.USERNAME}/.ssh/authorized_keys
     user=${local.USERNAME}
-    
+
     # Create the .ssh directory and authorized_keys file if they don't exist
     mkdir -p "/home/${local.USERNAME}/.ssh" && touch $path
 
@@ -182,5 +182,5 @@ resource "local_file" "kumo-ec2-public-ip" {
 
 output "public_ip" {
   description = "The public IP address of the EC2 instance you can connect to via SSH"
-  value       = "Deployment complete, now try 'ssh -F kumokey kumo' to connect to your instance"
+  value       = "Deployment complete, now try 'ssh -F kumossh kumo' to connect to your instance"
 }

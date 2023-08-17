@@ -37,9 +37,9 @@ A cloud development environment you can customize with a wide range of tools.
   - [Q\&A](#qa)
   - [What are the recommended Ubuntu images?](#what-are-the-recommended-ubuntu-images)
     - [Ubuntu Jammy 22.04 AMD64](#ubuntu-jammy-2204-amd64)
-  - [How to SSH into an *EC2* instance?](#how-to-ssh-into-an-ec2-instance)
+  - [How to SSH into an instance?](#how-to-ssh-into-an-instance)
   - [How do I fix the broad permissions error when trying to ssh to my instance on Windows from Powershell?](#how-do-i-fix-the-broad-permissions-error-when-trying-to-ssh-to-my-instance-on-windows-from-powershell)
-  - [How secure are my *AWS* credentials?](#how-secure-are-my-aws-credentials)
+  - [How secure are my cloud credentials?](#how-secure-are-my-cloud-credentials)
     - [Access Limitations at Runtime](#access-limitations-at-runtime)
     - [Mitigating Impact in Case of Breach](#mitigating-impact-in-case-of-breach)
     - [Configuration Details](#configuration-details)
@@ -188,7 +188,7 @@ Add `docker` and `minikube` to tools. The order matters as `docker` is a depende
 
 Add `dotnet` to tools.
 
-It installs `dotnet-sdk-7.0` under the hood. If you need to change this, go to `~kumo/packer/ansible/playbooks/programming_languages/dotnet.yml` and change it on:
+It installs `dotnet-sdk-7.0` under the hood. If you need to change this, go to `~/kumo/packer/ansible/playbooks/programming_languages/dotnet.yml` and change it on:
 
 ```yaml
     tasks:
@@ -316,41 +316,55 @@ For now, here is a list of recommended images:
 
 ### Ubuntu Jammy 22.04 AMD64
 
-```.env
-AWS_REGION = "us-west-2"
-AWS_EC2_AMI_NAME_FILTER = "ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-20230516"
-AWS_EC2_AMI_ROOT_DEVICE_TYPE = "ebs"
-AWS_EC2_AMI_VIRTUALIZATION_TYPE = "hvm"
-AWS_EC2_AMI_OWNERS = ["099720109477"]
-AWS_EC2_SSH_USERNAME = "ubuntu"
+```yaml
+    AMI:
+      Base:
+        Filter: ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-20230516
+        RootDeviceType: ebs
+        VirtualizationType: hvm
+        Owners:
+          - "099720109477"
+        User: ubuntu
 ```
 
 By selecting the appropriate image based on the provided details, you can ensure compatibility and meet your requirements when working on AWS.
 
-## How to SSH into an *EC2* instance?
+## How to SSH into an instance?
 
 1. Install the OpenSSH client on your local machine.
 2. Open the command prompt or terminal and run the following command:
 
     ```bash
-    ssh -i <path_to_your_private_key> <AWS_EC2_INSTANCE_USERNAME>@<your_ec2_instance_public_ip>
+    ssh -F kumokey kumo
     ```
 
 3. When prompted to add your instance URL to the list of known hosts, type `yes` and press enter.
 
-Please refer to the *aws docs* if you don't know where to get your *ec2* instance public ip.
-
 ## How do I fix the broad permissions error when trying to ssh to my instance on Windows from Powershell?
+
+In you `kumossh` generated after running `kumo up`. Look for the identity file path:
+
+```s
+  Host kumo
+    HostName 35.89.173.162
+    IdentityFile "some/path" # <-- This
+    User dev
+    Port 22
+    StrictHostKeyChecking no
+    PasswordAuthentication no
+    IdentitiesOnly yes
+    LogLevel error
+```
 
 Run the following command from a PowerShell admin shell. You only need to do this once unless you removed the SSH key file.
 
 Make sure the username is the same that will be sshing into the ec2 instance, otherwise change it to the appropiate one.
 
 ```powershell
-icacls <AWS_EC2_INSTANCE_SSH_KEY_NAME> /inheritance:r /grant:r "$($env:USERNAME):(R,W,D)"
+icacls "some/path" /inheritance:r /grant:r "$($env:USERNAME):(R,W,D)"
 ```
 
-## How secure are my *AWS* credentials?
+## How secure are my cloud credentials?
 
 The approach we took to secure your credentials is based on architectural decisions rather than heavy reliance on encryption and decryption.
 
@@ -362,13 +376,13 @@ The approach we took to secure your credentials is based on architectural decisi
 
 ### Mitigating Impact in Case of Breach
 
-- In the unlikely event that an attacker gains access to your AWS keys, you can restrict their impact by granting only the necessary permissions for a specific task.
+- In the unlikely event that an attacker gains access to your cloud keys, you can restrict their impact by granting only the necessary permissions for a specific task.
 - We encourage you to set up alerts or other monitoring mechanisms to provide early detection of any unauthorized activity.
-- Remember, it is important not to use AWS root credentials to further enhance security.
+- Remember, it is important not to use admin nor root level credentials to further enhance security.
 
 ### Configuration Details
 
-Please note that the information provided above specifically accounts for placing the values inside a cloud instance using *Ansible*. It does not cover how *Packer* utilizes these credentials for initial communication with *AWS*.
+Please note that the information provided above specifically accounts for placing the values inside a cloud instance using *Ansible*. It does not cover how *Packer* utilizes these credentials for initial communication with a cloud provider.
 
 ### Why not vaults?
 
@@ -383,7 +397,7 @@ By avoiding these tools, we aim to simplify the setup and maintenance process, e
 
 We prioritize a simple setup process for your convenience. Therefore, we suggest the following approach when it comes to secrets setup and permissions:
 
-- **Minimize External Dependencies:** Having to set up secrets on a 3rd party app right from the start can hinder the development experience. Hence, we recommend avoiding this additional complexity unless absolutely necessary.
+- **Minimize External Dependencies:** Having to set up secrets on a 3rd party app right from the start can hinder the development experience. Hence, we avoid this additional complexity unless absolutely necessary.
 - **Focus on Cloud Provider Credentials:** By limiting the permissions of your cloud provider credentials, you remain in control of ensuring they have the correct permissions. This puts the responsibility squarely on your own shoulders.
 
 Our aim is to strike a balance between simplicity and security, providing you with a streamlined and efficient development experience while maintaining control over the permissions granted to your cloud provider credentials.
@@ -393,13 +407,13 @@ Our aim is to strike a balance between simplicity and security, providing you wi
   1. Ensure that you have the [Remote - SSH extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-ssh) installed in your VS Code. You can find and install it from the Extensions view (`Ctrl+Shift+X` or View -> Extensions).
   2. Once the extension is installed, click on the Extensions view button and search for "Remote - SSH". Click on the "Install" button to install the extension.
   3. Next, open the Command Palette in VS Code by pressing `Ctrl+Shift+P` (or View -> Command Palette). Type "Remote-SSH: Open Configuration File" and select the option from the list. This will open the SSH config file in the editor.
-  4. In the SSH config file, you need to add the configuration for the remote SSH connection. The format of the entry in the config file should be as follows (these values are generated at runtime):
+  4. Copy and paste the fields from the `kumossh` file generated after running `kumo up`:
 
-      ```ssh_config
+      ```s
       Host cloud_dev
-        HostName 52.10.25.215
-        IdentityFile "D:\Documents\DevEnvironments\Cloud\Jammy64\ssh_key"
-        User dev
+        HostName ip-of-your-instance
+        IdentityFile "path/to/private-key"
+        User picked-user
         Port 22
         StrictHostKeyChecking no
         PasswordAuthentication no
@@ -408,7 +422,7 @@ Our aim is to strike a balance between simplicity and security, providing you wi
       ```
 
   5. Save the SSH config file after adding the configuration.
-  6. Go back to the Command Palette (`Ctrl+Shift+P`) and type "Remote-SSH: Connect to Host". You should see the list of configured SSH hosts from the SSH config file.
+  6. Go back to the Command Palette (`Ctrl+Shift+P`) and type "Remote-SSH: Connect to Host". You should see the list of configured SSH hosts from the SSH config file. Refresh if needed.
   7. Select the desired host from the list. It will attempt to establish an SSH connection to the remote machine using the provided configuration.
   8. If everything is set up correctly, a new window will open in VS Code connected to the remote machine via SSH.
 
@@ -423,7 +437,7 @@ To help you make a decision based on factors such as cost and development needs,
 ## How to send files from my host to my instance?
 
 ```bash
-scp -i /path/to/keypair.pem /path/to/local/file1 /file2 AWS_EC2_INSTANCE_USERNAME@ec2-instance-ip:/path/on/ec2
+scp -F kumossh /path/to/local/file1 /file2
 ```
 
 Works both on powershell and bash.
