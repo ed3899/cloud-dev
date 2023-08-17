@@ -8,9 +8,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-var rootCmd = &cobra.Command{
-	Long: `🌩️ Kumo: Your quick and easy cloud development environment.`,
-}
+var rootCmd = &cobra.Command{}
 
 func init() {
 	viper.SetConfigName("kumo.config")
@@ -29,7 +27,12 @@ func init() {
 	}
 
 	// Assemble commands
-	rootCmd.AddCommand(GetCommands()...)
+	kumo := &cobra.Command{
+		Use:  "kumo",
+		Long: `🌩️ Your quick and easy cloud development environment.`,
+	}
+	kumo.AddCommand(GetCommands()...)
+	rootCmd.AddCommand(kumo)
 }
 
 func Execute() {
