@@ -24,13 +24,6 @@ func (t Tool) Name() string {
 		Tags("Tool").
 		Code("Name")
 
-	defer func() {
-		if r := recover(); r != nil {
-			err := oopsBuilder.Errorf("%v", r)
-			log.Fatalf("panic: %+v", err)
-		}
-	}()
-
 	switch t {
 	case Packer:
 		return "packer"
@@ -39,7 +32,12 @@ func (t Tool) Name() string {
 		return "terraform"
 
 	default:
-		panic(t)
+		err := oopsBuilder.
+			Errorf("unknown tool: %#v", t)
+
+		log.Fatalf("%+v", err)
+
+		return ""
 	}
 }
 
@@ -50,13 +48,6 @@ func (t Tool) VarsName() string {
 		Tags("Tool").
 		Code("VarsName")
 
-	defer func() {
-		if r := recover(); r != nil {
-			err := oopsBuilder.Errorf("%v", r)
-			log.Fatalf("panic: %+v", err)
-		}
-	}()
-
 	switch t {
 	case Packer:
 		return ".auto.pkrvars.hcl"
@@ -65,7 +56,12 @@ func (t Tool) VarsName() string {
 		return ".auto.tfvars"
 
 	default:
-		panic(t)
+		err := oopsBuilder.
+			Errorf("unknown tool: %#v", t)
+
+		log.Fatalf("%+v", err)
+
+		return ""
 	}
 }
 
@@ -76,13 +72,6 @@ func (t Tool) Version() string {
 		Tags("Tool").
 		Code("Version")
 
-	defer func() {
-		if r := recover(); r != nil {
-			err := oopsBuilder.Errorf("%v", r)
-			log.Fatalf("panic: %+v", err)
-		}
-	}()
-
 	switch t {
 	case Packer:
 		return "1.9.2"
@@ -91,7 +80,12 @@ func (t Tool) Version() string {
 		return "1.5.5"
 
 	default:
-		panic(t)
+		err := oopsBuilder.
+			Errorf("unknown tool: %#v", t)
+
+		log.Fatalf("%+v", err)
+
+		return ""
 	}
 }
 
@@ -102,13 +96,6 @@ func (t Tool) PluginPathEnvironmentVariable() string {
 		Tags("Tool").
 		Code("PluginPathEnvironmentVariable")
 
-	defer func() {
-		if r := recover(); r != nil {
-			err := oopsBuilder.Errorf("%v", r)
-			log.Fatalf("panic: %+v", err)
-		}
-	}()
-
 	switch t {
 	case Packer:
 		return "PACKER_PLUGIN_PATH"
@@ -117,6 +104,11 @@ func (t Tool) PluginPathEnvironmentVariable() string {
 		return "TF_PLUGIN_CACHE_DIR"
 
 	default:
-		panic(t)
+		err := oopsBuilder.
+			Errorf("unknown tool: %#v", t)
+
+		log.Fatalf("%+v", err)
+
+		return ""
 	}
 }
