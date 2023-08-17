@@ -10,7 +10,7 @@ import (
 )
 
 func init() {
-	if host.HostIsNotCompatible() {
+	if !host.HostIsCompatible() {
 		oopsBuilder := oops.
 			Code("host_is_not_compatible")
 

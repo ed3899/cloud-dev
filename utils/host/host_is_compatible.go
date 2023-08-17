@@ -2,36 +2,35 @@ package host
 
 import "runtime"
 
-func HostIsCompatible() (compatible bool) {
+func HostIsCompatible() bool {
 	switch runtime.GOOS {
 	case "windows":
 
 		switch runtime.GOARCH {
 		case "386":
-			compatible = true
+			return true
 
 		case "amd64":
-			compatible = true
+			return true
 
 		default:
-			compatible = false
+			return false
 		}
 
 	case "darwin":
 
 		switch runtime.GOARCH {
 		case "amd64":
-			compatible = true
+			return true
 
 		case "arm64":
-			compatible = true
+			return true
 
 		default:
-			compatible = false
+			return false
 		}
 
 	default:
-		compatible = false
+		return false
 	}
-	return
 }

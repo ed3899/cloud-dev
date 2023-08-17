@@ -7,9 +7,13 @@ import (
 	"github.com/samber/oops"
 )
 
-func ReadIpFromFile(absPath string) (string, error) {
+func ReadIpFromFile(
+	absPath string,
+) (string, error) {
 	oopsBuilder := oops.
-		Code("read_ip_from_file_failed").
+		Code("ReadIpFromFile").
+		In("utils").
+		In("ip").
 		With("absPath", absPath)
 	// Define the regular expression pattern for matching an IP address
 	ipPattern := "\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b"

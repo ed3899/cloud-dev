@@ -9,7 +9,11 @@ import (
 	"github.com/samber/oops"
 )
 
-func Download(url, path string, bytesDownloadedChan chan<- int) error {
+func Download(
+	url,
+	path string,
+	bytesDownloadedChan chan<- int,
+	) error {
 	oopsBuilder := oops.
 		Code("Download").
 		In("utils").

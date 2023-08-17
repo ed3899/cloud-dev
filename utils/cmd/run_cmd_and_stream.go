@@ -26,71 +26,82 @@ import (
 //	`==> test.amazon-ebs.ubuntu: Prevalidating AMI Name: test`
 //	`==> test.amazon-ebs.ubuntu: Found Image ID: ami-03f65b8614a860c29`
 //	`==> test.amazon-ebs.ubuntu: Creating temporary keypair: packer_64b824bb-026f-af2c-184e-7097c138d520`
-func RunCmdAndStream(cmd *exec.Cmd) (err error) {
-	var (
-		oopsBuilder = oops.Code("run_cmd_and_stream_failed").
-				With("cmd", cmd.Path)
-		logger, _        = zap.NewProduction()
-		cmdWg            = new(sync.WaitGroup)
-		cmdStreamErrChan = make(chan error, 1)
-		cmdErrChan       = make(chan error, 1)
-		cmdDoneChan      = make(chan bool, 1)
+func RunCmdAndStream(
+	cmd *exec.Cmd,
+) error {
+	oopsBuilder := oops.
+		Code("RunCmdAndStream").
+		In("utils").
+		In("cmd").
+		With("cmd", *cmd)
 
-		aggregatorGroup = new(sync.WaitGroup)
-		mainErrChan     = make(chan error, 1)
-		signalChan      = make(chan os.Signal, 1)
-
-		cmdStdout io.ReadCloser
-		cmdStderr io.ReadCloser
-	)
-
-	// Zap logger setup
+	logger, _ := zap.NewProduction()
 	defer logger.Sync()
 
+	cmdWg := &sync.WaitGroup{}
+	cmdStreamErrChan := make(chan error, 1)
+	cmdErrChan := make(chan error, 1)
+	cmdDoneChan := make(chan bool, 1)
+
+	aggregatorGroup := &sync.WaitGroup{}
+	mainErrChan := make(chan error, 1)
+	signalChan := make(chan os.Signal, 1)
+
 	// Get StdoutPipe
-	if cmdStdout, err = cmd.StdoutPipe(); err != nil {
-		err = oopsBuilder.
+	cmdStdout, err := cmd.StdoutPipe()
+	if err != nil {
+		err := oopsBuilder.
 			Wrapf(err, "Error occurred while getting StdoutPipe for command '%s'", cmd.Path)
-		return
+
+		return err
 	}
 
 	// Get StderrPipe
-	if cmdStderr, err = cmd.StderrPipe(); err != nil {
-		err = oopsBuilder.
+	cmdStderr, err := cmd.StderrPipe()
+	if err != nil {
+		err := oopsBuilder.
 			Wrapf(err, "Error occurred while getting StderrPipe for command '%s'", cmd.Path)
-		return
+
+		return err
 	}
 
 	// Start command
-	if err = cmd.Start(); err != nil {
-		err = oopsBuilder.
+	err = cmd.Start()
+	if err != nil {
+		err := oopsBuilder.
 			Wrapf(err, "Error occurred while starting command '%s'", cmd.Path)
-		return
+
+		return err
 	}
 
 	// Stream command StdoutPipe to our Stdout
 	cmdWg.Add(1)
-	go func(src *io.ReadCloser, dest *os.File) {
+	go func() {
 		defer cmdWg.Done()
-		if _, err := io.Copy(dest, *src); err != nil {
-			err = oopsBuilder.
+		_, err := io.Copy(os.Stdout, cmdStdout)
+		if err != nil {
+			err := oopsBuilder.
 				Wrapf(err, "Error occurred while copying StdoutPipe to Stdout for command '%s'", cmd.Path)
+
 			cmdStreamErrChan <- err
+
 			return
 		}
-	}(&cmdStdout, os.Stdout)
+	}()
 
 	// Stream command StderrPipe to our Stderr
 	cmdWg.Add(1)
-	go func(src *io.ReadCloser, dest *os.File) {
+	go func() {
 		defer cmdWg.Done()
-		if _, err := io.Copy(dest, *src); err != nil {
+		if _, err := io.Copy(os.Stderr, cmdStderr); err != nil {
 			err = oopsBuilder.
 				Wrapf(err, "Error occurred while copying StderrPipe to Stderr for command '%s'", cmd.Path)
+
 			cmdStreamErrChan <- err
+
 			return
 		}
-	}(&cmdStderr, os.Stderr)
+	}()
 
 	// Start a go routine to wait for the command to finish
 	cmdWg.Add(1)
@@ -99,7 +110,9 @@ func RunCmdAndStream(cmd *exec.Cmd) (err error) {
 		if err := cmd.Wait(); err != nil {
 			err = oopsBuilder.
 				Wrapf(err, "Error occurred while waiting for command '%s' to finish", cmd.Path)
+
 			cmdErrChan <- err
+
 			return
 		}
 	}()
@@ -109,7 +122,9 @@ func RunCmdAndStream(cmd *exec.Cmd) (err error) {
 		defer close(cmdDoneChan)
 		defer close(cmdErrChan)
 		defer close(cmdStreamErrChan)
+
 		cmdWg.Wait()
+
 		cmdDoneChan <- true
 	}()
 
@@ -129,6 +144,7 @@ func RunCmdAndStream(cmd *exec.Cmd) (err error) {
 			case err := <-cmdStreamErrChan:
 				if err != nil {
 					logger.Info("Exiting because of error occurred while copying std...", zap.String("error", err.Error()))
+
 					TerminateCommand(cmd)
 				}
 
@@ -138,8 +154,9 @@ func RunCmdAndStream(cmd *exec.Cmd) (err error) {
 			// done channel once the cmd related goroutines finish.
 			case err := <-cmdErrChan:
 				if err != nil {
-					err = oopsBuilder.
+					err := oopsBuilder.
 						Wrapf(err, "Error encountered for %s", cmd.Path)
+
 					mainErrChan <- err
 				}
 
@@ -153,7 +170,9 @@ func RunCmdAndStream(cmd *exec.Cmd) (err error) {
 			case signalReceived := <-signalChan:
 				if signalReceived != nil {
 					logger.Info("Exiting because of signal received...", zap.String("signal", signalReceived.String()))
+
 					TerminateCommand(cmd)
+
 					return
 				}
 
@@ -166,13 +185,13 @@ func RunCmdAndStream(cmd *exec.Cmd) (err error) {
 	aggregatorGroup.Wait()
 
 	// Wait for all errors to be sent to the main error channel, if any.
-	for err = range mainErrChan {
+	for err := range mainErrChan {
 		if err != nil {
-			return
+			return err
 		}
 	}
 
-	return
+	return nil
 }
 
 // Terminates the specified command. This command should not return an error and
@@ -183,6 +202,7 @@ func TerminateCommand(cmd *exec.Cmd) {
 	if signalErr := cmd.Process.Signal(syscall.SIGTERM); signalErr != nil {
 		log.Printf("Sending interrupt signal failed with error: %v\n", signalErr)
 		log.Println("Sending kill signal instead")
+
 		if killErr := cmd.Process.Kill(); killErr != nil {
 			log.Printf("Sending kill signal failed with error: %v\n", killErr)
 			log.Fatal("Failed to terminate command")

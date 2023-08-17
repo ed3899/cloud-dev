@@ -25,7 +25,9 @@ type PackerManifest struct {
 // Example:
 //
 //	("packer/aws/manifest.json") -> ("ami-0c3fd0f5d33134a76", nil)
-func GetLastBuiltAmiIdFromPackerManifest(packerManifestAbsPath string) (string, error) {
+func GetLastBuiltAmiIdFromPackerManifest(
+	packerManifestAbsPath string,
+) (string, error) {
 	packerManifest := &PackerManifest{}
 	oopsBuilder := oops.
 		Code("get_last_built_ami_id_failed").

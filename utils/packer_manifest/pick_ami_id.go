@@ -7,7 +7,10 @@ import (
 // Return the AMI ID to be used for deployment. If the lastBuildAmiId is empty, it will return an error.
 // If the amiIdFromConfig is empty, it will return the lastBuildAmiId. Otherwise, it will return the
 // amiIdFromConfig.
-func PickAmiId(lastBuildAmiId, amiIdFromConfig string) (string, error) {
+func PickAmiId(
+	lastBuildAmiId,
+	amiIdFromConfig string,
+) (string, error) {
 	oopsBuilder := oops.
 		Code("PickAmiId").
 		In("utils").

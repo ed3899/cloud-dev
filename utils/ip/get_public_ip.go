@@ -7,8 +7,6 @@ import (
 	"github.com/samber/oops"
 )
 
-type GetPublicIpF func() (ip string, err error)
-
 // Returns the public IP of the machine running the program.
 // Returns an empty string and an error if the call fails.
 //
@@ -18,14 +16,16 @@ type GetPublicIpF func() (ip string, err error)
 //
 //	() -> ("123.456.789.012", nil)
 func GetPublicIp() (string, error) {
-	oopsBuilder := oops.Code("get_public_ip_failed")
-	URL := "https://api.ipify.org?format=text"
+	oopsBuilder := oops.
+		Code("GetPublicIp")
+
+	url := "https://api.ipify.org?format=text"
 
 	// Send GET request to retrieve public IP
-	response, err := http.Get(URL)
+	response, err := http.Get(url)
 	if err != nil {
 		err = oopsBuilder.
-			Wrapf(err, "Error occurred while sending GET request to '%s'", URL)
+			Wrapf(err, "Error occurred while sending GET request to '%s'", url)
 
 		return "", err
 	}
