@@ -10,6 +10,8 @@ func NewPackerEnvironment(
 ) (*Environment[*PackerBaseEnvironment], error) {
 	oopsBuilder := oops.
 		Code("NewPackerEnvironment").
+		In("manager").
+		In("environment").
 		With("cloud", cloud)
 
 	base := NewPackerBaseEnvironment()

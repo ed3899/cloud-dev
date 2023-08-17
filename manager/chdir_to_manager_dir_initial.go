@@ -10,7 +10,7 @@ func (manager *Manager) ChdirToManagerDirInitial() error {
 	oopsBuilder := oops.
 		In("manager").
 		Tags("Manager").
-		Code("ChangeToInitialDirWith")
+		Code("ChangeToInitialDir")
 
 	if err := os.Chdir(manager.Dir.Initial); err != nil {
 		return oopsBuilder.

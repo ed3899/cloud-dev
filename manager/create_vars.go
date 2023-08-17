@@ -8,6 +8,8 @@ import (
 
 func (m *Manager) CreateVars() (*os.File, error) {
 	oopsBuilder := oops.
+		In("manager").
+		Tags("Manager").
 		Code("CreateVars")
 
 	file, err := os.Create(m.Path.Vars)

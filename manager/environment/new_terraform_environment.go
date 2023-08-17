@@ -11,7 +11,11 @@ func NewTerraformEnvironment(
 ) (*Environment[*TerraformBaseEnvironment], error) {
 	oopsBuilder := oops.
 		Code("NewTerraformEnvironment").
-		With("cloud", cloud)
+		With("cloud", cloud).
+		With("pathToPackerManifest", pathToPackerManifest).
+		In("manager").
+		In("environment").
+		Tags("TerraformEnvironment")
 
 	base := NewTerraformBaseEnvironment()
 

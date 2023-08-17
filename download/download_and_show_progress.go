@@ -9,7 +9,9 @@ import (
 
 func (d *Download) DownloadAndShowProgress() error {
 	oopsBuilder := oops.
-		Code("DownloadAndShowProgress")
+		Code("DownloadAndShowProgress").
+		In("download").
+		Tags("Download")
 
 	downloadedBytesChan := make(chan int, 1024)
 	errChan := make(chan error, 1)

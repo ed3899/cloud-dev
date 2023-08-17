@@ -19,7 +19,9 @@ func NewDownload(
 ) (*Download, error) {
 	oopsBuilder := oops.
 		Code("NewDownload").
-		In("download")
+		In("download").
+		Tags("Download").
+		With("manager", _manager)
 
 	currentExecutablePath, err := os.Executable()
 	if err != nil {

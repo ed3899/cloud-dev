@@ -8,6 +8,8 @@ import (
 
 func (m *Manager) DeleteSshConfig() error {
 	oopsBuilder := oops.
+		In("manager").
+		Tags("Manager").
 		Code("DeleteSshConfig")
 
 	err := os.Remove(m.Path.SshConfig)

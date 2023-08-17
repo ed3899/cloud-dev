@@ -9,6 +9,7 @@ import (
 func (m *Manager) ParseTemplate() (*template.Template, error) {
 	oopsBuilder := oops.
 		In("manager").
+		Tags("Manager").
 		Code("ParseTemplate")
 
 	template, err := template.ParseFiles(m.Path.Template.Merged)

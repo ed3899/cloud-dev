@@ -12,6 +12,8 @@ import (
 func NewTerraform(_manager *manager.Manager) (*Terraform, error) {
 	oopsBuilder := oops.
 		Code("NewTerraform").
+		In("binaries").
+		Tags("Terraform").
 		With("manager", _manager)
 
 	if _manager.Tool.Iota() != iota.Terraform {
@@ -26,7 +28,6 @@ func NewTerraform(_manager *manager.Manager) (*Terraform, error) {
 }
 
 func (t *Terraform) Init() error {
-
 	oopsBuilder := oops.
 		Code("Init").
 		In("binaries").

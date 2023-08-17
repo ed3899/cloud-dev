@@ -5,10 +5,19 @@ import (
 	"github.com/samber/oops"
 )
 
-func NewEnvironment(tool iota.Tool, cloud iota.Cloud, pathToPackerManifest string) (*Environment[any], error) {
+func NewEnvironment(
+	tool iota.Tool,
+	cloud iota.Cloud,
+	pathToPackerManifest string,
+) (*Environment[any], error) {
 	oopsBuilder := oops.
 		Code("NewEnvironment").
-		With("tool", tool)
+		With("tool", tool).
+		With("cloud", cloud).
+		With("pathToPackerManifest", pathToPackerManifest).
+		In("manager").
+		In("environment").
+		Tags("Environment")
 
 	switch tool {
 	case iota.Packer:

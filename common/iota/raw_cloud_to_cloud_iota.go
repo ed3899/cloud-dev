@@ -10,8 +10,9 @@ func CloudIota(
 	rawCloudFromConfig string,
 ) Cloud {
 	oopsBuilder := oops.
+		In("common").
 		In("iota").
-		Code("RawCloudToCloudIotaWith").
+		Code("CloudIota").
 		With("rawCloud", rawCloudFromConfig)
 
 	switch rawCloudFromConfig {

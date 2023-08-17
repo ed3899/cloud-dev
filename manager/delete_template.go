@@ -9,7 +9,8 @@ import (
 func (m *Manager) DeleteTemplate() error {
 	oopsBuilder := oops.
 		In("manager").
-		Code("Delete")
+		Tags("Manager").
+		Code("DeleteTemplate")
 
 	err := os.Remove(m.Path.Template.Merged)
 	if err != nil {

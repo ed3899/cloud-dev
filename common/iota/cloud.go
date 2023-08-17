@@ -42,7 +42,7 @@ func (c Cloud) Template() *Template {
 		In("common").
 		In("iota").
 		Tags("Cloud").
-		Code("Templates")
+		Code("Template")
 
 	switch c {
 	case Aws:

@@ -12,6 +12,8 @@ import (
 
 func (m *Manager) GenerateSshConfig() error {
 	oopsBuilder := oops.
+		In("manager").
+		Tags("Manager").
 		Code("GenerateSshConfig")
 
 	ip, err := ip.ReadIpFromFile(m.Path.IpFile)

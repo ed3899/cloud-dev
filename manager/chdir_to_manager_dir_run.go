@@ -10,7 +10,7 @@ func (m *Manager) ChDirToManagerDirRun() error {
 	oopsBuilder := oops.
 		In("manager").
 		Tags("Manager").
-		Code("ManagerDirRunChdirWith")
+		Code("ManagerDirRunChdir")
 
 	if err := os.Chdir(m.Dir.Run); err != nil {
 		return oopsBuilder.

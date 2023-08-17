@@ -13,7 +13,12 @@ func NewTerraformAwsEnvironment(
 	cloud iota.Cloud,
 ) (*TerraformAwsEnvironment, error) {
 	oopBuilder := oops.
-		Code("NewTerraformAwsEnvironment")
+		Code("NewTerraformAwsEnvironment").
+		In("manager").
+		In("environment").
+		Tags("TerraformAwsEnvironment").
+		With("pathToPackerManifest", pathToPackerManifest).
+		With("cloud", cloud)
 
 	amiId, err := packer_manifest.GetLastBuiltAmiIdFromPackerManifest(pathToPackerManifest)
 	if err != nil {
@@ -50,6 +55,7 @@ type TerraformAwsEnvironment struct {
 	Required *TerraformAwsRequired
 	Optional *TerraformAwsOptional
 }
+
 type TerraformAwsRequired struct {
 	AWS_ACCESS_KEY_ID     string
 	AWS_SECRET_ACCESS_KEY string

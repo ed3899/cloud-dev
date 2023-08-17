@@ -8,7 +8,8 @@ import (
 func (m *Manager) CreateTemplate() error {
 	oopsBuilder := oops.
 		In("manager").
-		Code("Create")
+		Tags("Manager").
+		Code("CreateTemplate")
 
 	err := file.MergeFilesTo(m.Path.Template.Merged, m.Path.Template.Cloud, m.Path.Template.Base)
 	if err != nil {

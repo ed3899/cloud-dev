@@ -8,6 +8,8 @@ import (
 
 func (m *Manager) SetPluginsEnvironmentVars() error {
 	oopsBuilder := oops.
+		In("manager").
+		Tags("Manager").
 		Code("SetPluginsEnvironmentVars")
 
 	err := os.Setenv(m.Tool.PluginPathEnvironmentVariable(), m.Path.Plugins)

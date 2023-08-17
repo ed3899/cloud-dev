@@ -8,6 +8,8 @@ import (
 
 func (d *Download) RemoveZip() error {
 	oopsBuilder := oops.
+		In("download").
+		Tags("Download").
 		Code("RemoveZip")
 
 	err := os.Remove(d.Path.Zip)

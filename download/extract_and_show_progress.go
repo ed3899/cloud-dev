@@ -11,7 +11,9 @@ import (
 
 func (d *Download) ExtractAndShowProgress() error {
 	oopsBuilder := oops.
-		Code("ExtractAndShowProgress")
+		Code("ExtractAndShowProgress").
+		In("download").
+		Tags("Download")
 
 	extractedBytesChan := make(chan int, 1024)
 	errChan := make(chan error, 1)

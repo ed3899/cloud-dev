@@ -17,7 +17,10 @@ func NewManager(
 ) (*Manager, error) {
 	oopsBuilder := oops.
 		Code("NewManager").
-		In("manager")
+		In("manager").
+		Tags("Manager").
+		With("cloud", cloud).
+		With("tool", tool)
 
 	currentExecutablePath, err := os.Executable()
 	if err != nil {
