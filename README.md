@@ -38,7 +38,7 @@ A cloud development environment you can customize with a wide range of tools.
   - [What are the recommended Ubuntu images?](#what-are-the-recommended-ubuntu-images)
     - [Ubuntu Jammy 22.04 AMD64](#ubuntu-jammy-2204-amd64)
   - [How to SSH into an *EC2* instance?](#how-to-ssh-into-an-ec2-instance)
-  - [How do I fix the broad permissions error when trying to ssh to my instance from Powershell?](#how-do-i-fix-the-broad-permissions-error-when-trying-to-ssh-to-my-instance-from-powershell)
+  - [How do I fix the broad permissions error when trying to ssh to my instance on Windows from Powershell?](#how-do-i-fix-the-broad-permissions-error-when-trying-to-ssh-to-my-instance-on-windows-from-powershell)
   - [How secure are my *AWS* credentials?](#how-secure-are-my-aws-credentials)
     - [Access Limitations at Runtime](#access-limitations-at-runtime)
     - [Mitigating Impact in Case of Breach](#mitigating-impact-in-case-of-breach)
@@ -121,8 +121,8 @@ A cloud development environment you can customize with a wide range of tools.
 
 Once kumo completes, follow these steps:
 
-  1. Limit the permissions on your *SSH key* which should be located under `~/kumo/terraform/your-picked-cloud/kumokey`. Please refer to the [Q&A](#how-do-i-fix-the-broad-permissions-error-when-trying-to-ssh-to-my-instance-from-powershell) section for guidance on how to fix the broad permissions error when trying to *SSH* to your instance from *PowerShell*.
-  2. SSH into your instance with `ssh -i path-to-kumossh kumo`
+  1. Limit the permissions on your *SSH key* which should be located under `~/kumo/terraform/your-picked-cloud/kumokey`. Please refer to the [Q&A](#how-do-i-fix-the-broad-permissions-error-when-trying-to-ssh-to-my-instance-on-windows-from-powershell) section for guidance on how to fix the broad permissions error when trying to *SSH* to your instance from *PowerShell*.
+  2. SSH into your instance with `ssh -i kumossh kumo`
 
 If you want to remove your *AMI*, you can do so from your cloud management console. We follow the same philoshophy as *Packer*. You build it, you manage it.
 
@@ -340,7 +340,7 @@ By selecting the appropriate image based on the provided details, you can ensure
 
 Please refer to the *aws docs* if you don't know where to get your *ec2* instance public ip.
 
-## How do I fix the broad permissions error when trying to ssh to my instance from Powershell?
+## How do I fix the broad permissions error when trying to ssh to my instance on Windows from Powershell?
 
 Run the following command from a PowerShell admin shell. You only need to do this once unless you removed the SSH key file.
 

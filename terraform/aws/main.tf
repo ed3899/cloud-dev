@@ -135,6 +135,7 @@ resource "aws_key_pair" "kumo-ssh-key-pair" {
 
 resource "local_file" "kumo-ssh-private-key" {
   content  = tls_private_key.kumo-ssh-key.private_key_openssh
+  file_permission = "0600"
   filename = local.KEY_NAME
 }
 
@@ -157,6 +158,10 @@ resource "aws_instance" "kumo-ec2-instance" {
     #!/bin/bash
     path=/home/${local.USERNAME}/.ssh/authorized_keys
     user=${local.USERNAME}
+    
+    # Create the .ssh directory and authorized_keys file if they don't exist
+    mkdir -p "/home/${local.USERNAME}/.ssh" && touch $path
+
     # Add SSH key to the authorized_keys file of a user
     echo "${tls_private_key.kumo-ssh-key.public_key_openssh}" >> $path
 
@@ -177,5 +182,5 @@ resource "local_file" "kumo-ec2-public-ip" {
 
 output "public_ip" {
   description = "The public IP address of the EC2 instance you can connect to via SSH"
-  value       = "Deployment complete, now try 'ssh -i <path_to_your_private_key> <AMI.User>@${aws_instance.kumo-ec2-instance.public_ip}' to connect to your EC2 instance"
+  value       = "Deployment complete, now try 'ssh -F kumokey kumo' to connect to your instance"
 }
