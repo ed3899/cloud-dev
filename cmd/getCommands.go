@@ -10,6 +10,6 @@ func GetCommands() CobraCommands {
 	return CobraCommands{
 		Build(),
 		Up(),
-		DestroyCommand(),
+		Destroy(),
 	}
 }

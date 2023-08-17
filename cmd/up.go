@@ -119,7 +119,7 @@ func Up() *cobra.Command {
 			terraform, err := binaries.NewTerraform(_manager)
 			if err != nil {
 				err := oopsBuilder.
-					Wrapf(err, "failed to create new packer")
+					Wrapf(err, "failed to create new terraform")
 
 				panic(err)
 			}
@@ -135,7 +135,7 @@ func Up() *cobra.Command {
 			err = terraform.Apply()
 			if err != nil {
 				err := oopsBuilder.
-					Wrapf(err, "failed to build")
+					Wrapf(err, "failed to apply")
 
 				panic(err)
 			}
