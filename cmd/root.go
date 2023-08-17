@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"log"
+	"os"
 
 	"github.com/samber/oops"
 	"github.com/spf13/cobra"
@@ -11,11 +12,22 @@ import (
 var rootCmd = &cobra.Command{}
 
 func init() {
+	cwd, err := os.Getwd()
+	if err != nil {
+		log.Fatalf(
+			"%+v",
+			oops.
+				Code("cmd-root.go-init").
+				In("cmd").
+				Wrapf(err, "Error occurred while getting current working directory"),
+		)
+	}
+
 	viper.SetConfigName("kumo.config")
 	viper.SetConfigType("yaml")
-	viper.AddConfigPath(".")
+	viper.AddConfigPath(cwd)
 
-	err := viper.ReadInConfig()
+	err = viper.ReadInConfig()
 	if err != nil {
 		log.Fatalf(
 			"%+v",
