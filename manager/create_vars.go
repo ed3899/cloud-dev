@@ -15,7 +15,6 @@ func (m *Manager) CreateVars() (*os.File, error) {
 		return nil, oopsBuilder.
 			Wrapf(err, "failed to create vars file: %s", m.Path.Vars)
 	}
-	defer file.Close()
 
 	return file, nil
 }

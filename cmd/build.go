@@ -85,8 +85,15 @@ func Build() *cobra.Command {
 
 				panic(err)
 			}
+			defer vars.Close()
 
-			template.Execute(vars, _manager.Environment)
+			err = template.Execute(vars, _manager.Environment)
+			if err != nil {
+				err := oopsBuilder.
+					Wrapf(err, "failed to execute template")
+
+				panic(err)
+			}
 
 			if !_manager.ToolExecutableExists() {
 				_download, err := download.NewDownload(_manager)
