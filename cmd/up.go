@@ -18,7 +18,7 @@ func Up() *cobra.Command {
 		Short: "Deploy your AMI to the cloud",
 		Long: `Deploy you cloud development environment. If no AMI is specified in the config file, Kumo will
 		deploy the latest AMI built. It generates an SSH config file for you to easily SSH into your
-		instances from VSCode.`,
+		instances.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			oopsBuilder := oops.
 				Code("Up").
