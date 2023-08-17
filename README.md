@@ -4,161 +4,143 @@ A cloud development environment you can customize with a wide range of tools.
 
 ## Table of contents
 
-- [Requirements](#requirements)
-  - [Optionals](#optionals)
-- [How-to](#how-to)
-  - [Windows](#windows)
-- [Tags](#tags)
-  - [Cloud providers](#cloud-providers)
-    - [aws](#aws)
-  - [Containerization](#containerization)
-    - [docker](#docker)
-  - [IaC](#iac)
-    - [pulumi](#pulumi)
-  - [Orchestration](#orchestration)
-    - [helm](#helm)
-    - [kubectl](#kubectl)
-    - [minikube](#minikube)
-  - [Programming languages](#programming-languages)
-    - [dotnet](#dotnet)
-    - [go](#nodejs)
-    - [node.js](#nodejs)
-    - [python](#python)
-    - [ruby](#ruby)
-    - [rust](#rust)
-  - [Terminal](#terminal)
-    - [starship](#starship)
-  - [Version control](#version-control)
-    - [github](#github)
-- [Extras](#extras)
-  - [Unix aliases](#unix-aliases)
-  - [Git aliases](#git-aliases)
-- [Q&A](#qa)
-- [Contributions](#contributions)
+- [Overview](#overview)
+  - [Table of contents](#table-of-contents)
+  - [Requirements](#requirements)
+  - [How-to](#how-to)
+    - [Post-Build Steps](#post-build-steps)
+  - [Tools](#tools)
+    - [Cloud providers](#cloud-providers)
+      - [AWS](#aws)
+    - [Containerization](#containerization)
+      - [Docker](#docker)
+    - [IaC](#iac)
+      - [Pulumi](#pulumi)
+    - [Orchestration](#orchestration)
+      - [Helm](#helm)
+      - [Kubectl](#kubectl)
+      - [Minikube](#minikube)
+    - [Programming languages](#programming-languages)
+      - [Dotnet](#dotnet)
+      - [Go](#go)
+      - [Node.js](#nodejs)
+      - [Python](#python)
+    - [Ruby](#ruby)
+      - [Rust](#rust)
+    - [Terminal](#terminal)
+      - [Starship](#starship)
+    - [Version control](#version-control)
+      - [GitHub](#github)
+  - [Extras](#extras)
+    - [Unix aliases](#unix-aliases)
+    - [Git aliases](#git-aliases)
+  - [Q\&A](#qa)
+  - [What are the recommended Ubuntu images?](#what-are-the-recommended-ubuntu-images)
+    - [Ubuntu Jammy 22.04 AMD64](#ubuntu-jammy-2204-amd64)
+  - [How to SSH into an *EC2* instance?](#how-to-ssh-into-an-ec2-instance)
+  - [How do I fix the broad permissions error when trying to ssh to my instance from Powershell?](#how-do-i-fix-the-broad-permissions-error-when-trying-to-ssh-to-my-instance-from-powershell)
+  - [How secure are my *AWS* credentials?](#how-secure-are-my-aws-credentials)
+    - [Access Limitations at Runtime](#access-limitations-at-runtime)
+    - [Mitigating Impact in Case of Breach](#mitigating-impact-in-case-of-breach)
+    - [Configuration Details](#configuration-details)
+    - [Why not vaults?](#why-not-vaults)
+    - [Why not secrets?](#why-not-secrets)
+  - [How to remote ssh from VS Code?](#how-to-remote-ssh-from-vs-code)
+  - [How to pick the right EC2 instance (AWS)](#how-to-pick-the-right-ec2-instance-aws)
+  - [How to send files from my host to my instance?](#how-to-send-files-from-my-host-to-my-instance)
+  - [Contributions](#contributions)
+    - [Design Philosophy](#design-philosophy)
 
 ## Requirements
 
-- Windows 10 or a later version is required.
-- [Packer](https://developer.hashicorp.com/packer/downloads) version 1.2.0 to less than 2.0.0 is needed for building AMIs. Their management is done via the AWS console.
-- [Powershell](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.3) version 7.2.11 or higher is required as it's used for writing script utilities.
-- [OpenSSH](https://learn.microsoft.com/en-us/windows-server/administration/openssh/openssh_install_firstuse?tabs=powershell) is necessary for SSH access into the instance, specifically the client part.
-
-## Optionals
-
-- [Pulumi](https://www.pulumi.com/docs/install/): version 3.73.0 or greater (deploy and manage your instance from your CLI).
-- [Node](https://nodejs.org/en/download): version 18.16.1 or greater (required for the pulumi backend).
+- Windows or MacOs
+- OpenSSH is necessary for SSH access into the instance, specifically the client part.
 
 ## How-to
 
 Follow these steps to run.
 
-### Windows
+1. Download the binary according to your operative system and architecture.
+2. Add the `kumo.exe` binary to your PATH
+3. Create a new dir and a `kumo.config.yaml` file
 
-1. Create an `.env` file at the root of the project
-2. Make sure to fill in with the required values.
-3. Add your ansible [tags](#tags):
+    ```yaml
+      Cloud: aws
 
-    ```.env
-      AWS_ACCESS_KEY = "<CUSTOM_VALUE>"
-      AWS_SECRET_KEY = "<CUSTOM_VALUE>"
-      AWS_IAM_PROFILE = "<CUSTOM_VALUE>"
-      AWS_USER_IDS = ["<CUSTOM_VALUE>"]
-      AWS_AMI_NAME = "cloud_dev"
-      AWS_INSTANCE_TYPE = "t2.micro" # Must be compatible with your AMI
-      AWS_REGION = "us-west-2" # AMI must be available on this region
-      AWS_EC2_AMI_NAME_FILTER = "ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-20230516"
-      AWS_EC2_AMI_ROOT_DEVICE_TYPE = "ebs"
-      AWS_EC2_AMI_VIRTUALIZATION_TYPE = "hvm"
-      AWS_EC2_AMI_OWNERS = ["099720109477"]
-      AWS_EC2_SSH_USERNAME = "ubuntu"
-      AWS_EC2_INSTANCE_USERNAME = "dev"
-      AWS_EC2_INSTANCE_USERNAME_HOME = "home"
-      AWS_EC2_INSTANCE_USERNAME_PASSWORD = "test12345"
-      AWS_EC2_INSTANCE_SSH_KEY_NAME = "ssh_key"
-      GIT_USERNAME = "<CUSTOM_VALUE>"
-      GIT_EMAIL = "<CUSTOM_VALUE>
-      ANSIBLE_TAGS = ["<CUSTOM_VALUE>"]
-      # Optionals
-      AWS_EC2_INSTANCE_VOLUME_TYPE = "gp2" # default
-      AWS_EC2_INSTANCE_VOLUME_SIZE = "8" # default
-      PULUMI_PERSONAL_ACCESS_TOKEN = "<CUSTOM_VALUE>"
+      AWS:
+        AccessKeyId: CUSTOM_VALUE
+        SecretAccessKey: CUSTOM_VALUE
+        IamProfile: CUSTOM_VALUE
+        UserIds:
+          - "CUSTOM_VALUE" #Quotes here are important
+        Region: CUSTOM_VALUE
+        EC2:
+          Instance:
+            Type: CUSTOM_VALUE
+          Volume:
+            Type: CUSTOM_VALUE
+            Size: CUSTOM_VALUE
+
+      AMI:
+        Base:
+          Filter: ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-20230516
+          RootDeviceType: ebs
+          VirtualizationType: hvm
+          Owners:
+            - "099720109477"
+          User: ubuntu
+        Name: CUSTOM_VALUE
+        User: CUSTOM_VALUE
+        Home: CUSTOM_VALUE
+        Password: CUSTOM_VALUE
+        Tools:
+          - CUSTOM_VALUES
+          - CUSTOM_VALUE
+          - SEE REFERENCE BELOW
+
+      Git:
+        Username: CUSTOM_VALUE
+        Email: CUSTOM_VALUE
+
+      GitHub:
+        PersonalAccessTokenClassic: xxxxxxxxxxxxx #optional
+
+      Up:
+        AmiId: CUSTOM_VALUE #Optional, in case you want to deploy an ami other than the last built
     ```
 
 4. At the root of your project, run the following command:
 
-    ```powershell
-    ./scripts/build.ps1
+    ```.exe
+    kumo build
+    kumo up
+    kumo destroy
     ```
-
-*If you are unable to run the script, please refer to the [Q&A](#why-is-powershell-not-allowing-me-to-run-scripts) section for guidance on why PowerShell may not be allowing you to run scripts.*
 
 *If you want more information on how to pick the right EC2 instance, please go to [Q&A](#how-to-pick-the-right-ec2-instance).*
 
-#### Post-Build Steps
+### Post-Build Steps
 
-Once the script completes, follow these steps:
+Once the kumo completes, follow these steps:
 
-  1. Limit the permissions on your *SSH key*. Please refer to the [Q&A](#how-do-i-fix-the-broad-permissions-error-when-trying-to-ssh-to-my-instance-from-powershell) section for guidance on how to fix the broad permissions error when trying to *SSH* to your instance from *PowerShell*.
-  2. In your *AWS EC2 management console*, launch an instance using the recently created *AMI*. You do not need to add *SSH keys* during the launch process.
-  3. SSH into your *EC2* instance using the *SSH key* that *Packer* downloaded to the root of your project. For instructions on how to SSH into an *EC2* instance, please refer to the [Q&A](#how-to-ssh-into-an-ec2-instance) section.
+  1. Limit the permissions on your *SSH key* which should be located under `~/kumo/terraform/your-picked-cloud/kumokey`. Please refer to the [Q&A](#how-do-i-fix-the-broad-permissions-error-when-trying-to-ssh-to-my-instance-from-powershell) section for guidance on how to fix the broad permissions error when trying to *SSH* to your instance from *PowerShell*.
+  2. SSH into your instance with `ssh -i path-to-kumossh kumo`
 
-If you want to remove your *AMI*, you can do so from the *AWS EC2 management console*.
+If you want to remove your *AMI*, you can do so from your cloud management console. We follow the same philoshophy as *Packer*. You build it, you manage it.
 
-#### Manage resources from cli
+## Tools
 
-Make sure to add the following to your `.env` file:
+Add them to your `kumo.config.yaml` file as follows:
 
-```.env
-PULUMI_PERSONAL_ACCESS_TOKEN = "CUSTOM_VALUE"
-```
-
-To get a Pulumi personal access token, please refer to the [Pulumi documentation](https://www.pulumi.com/docs/pulumi-cloud/access-management/access-tokens/#personal-access-tokens).
-
-Follow the steps below in the given order:
-
-1. Create stack (this will install npm modules if not present):
-
-    ```powershell
-    ./scripts/init_stack.ps1
-    ```
-
-2. Deploy
-
-    ```powershell
-    ./scripts/up.ps1
-    ```
-
-    - Once deployed, an SSH config file will be generated at the root of the project. You can use it to [remote SSH from Visual Studio Code](#how-to-remote-ssh-from-vs-code).
-
-3. Destroy
-
-    ```powershell
-    ./scripts/down.ps1
-    ```
-
-4. Delete stack
-
-    ```powershell
-    ./scripts/remove_stack.ps1
-    ```
-
-Before removing a stack, always make sure that you have already destroyed the resources deployed.
-
-Make sure to follow these steps carefully to manage your resources effectively.
-
-## Tags
-
-In your root folder, you need to add tags to your environment file. Each tag represents a tool.
-
-For example, modify your `.env` file as follows:
-
-```.env
-ANSIBLE_TAGS = ["aws","node_js","docker"]
+```yaml
+    Tools:
+      - aws
+      - node_js
 ```
 
 Please note that there are several tools listed below. Some of these tools may have specific requirements such as CPU, RAM, or disk space. Before building an AMI, it is recommended to consult their respective documentations for any specific requirements.
 
-If you require a specific level of customization, you can find all the playbooks located at `packer\ansible\playbooks.`
+If you require a specific level of customization, you can find all the playbooks located at `~/kumo/packer/ansible/playbooks.`
 
 Make sure to add the appropriate tags to your environment file, and if needed, refer to the playbooks to customize your setup accordingly.
 
@@ -166,58 +148,66 @@ Make sure to add the appropriate tags to your environment file, and if needed, r
 
 #### AWS
 
-Add `aws` to tags.
+Add `aws` to tools.
 
 Ensure the following are present at the environment file:
 
-```.env
-AWS_ACCESS_KEY = "<FILL_WITH_CUSTOM_VALUE>"
-AWS_SECRET_KEY = "<FILL_WITH_CUSTOM_VALUE>"
-AWS_REGION = "<FILL_WITH_CUSTOM_VALUE>"
-AWS_EC2_INSTANCE_USERNAME = "<FILL_WITH_CUSTOM_VALUE>"
-AWS_EC2_INSTANCE_USERNAME_HOME = "<FILL_WITH_CUSTOM_VALUE>"
+```yaml
+    AWS:
+      AccessKeyId: CUSTOM_VALUE
+      SecretAccessKey: CUSTOM_VALUE
+      IamProfile: CUSTOM_VALUE
+      UserIds:
+        - "CUSTOM_VALUE" #Quotes here are important
+      Region: CUSTOM_VALUE
+      EC2:
+        Instance:
+          Type: CUSTOM_VALUE
+        Volume:
+          Type: CUSTOM_VALUE
+          Size: CUSTOM_VALUE
 ```
 
 ### Containerization
 
 #### Docker
 
-Add `docker` to tags.
+Add `docker` to tools.
 
 ### IaC
 
 #### Pulumi
 
-Add `pulumi` to tags.
+Add `pulumi` to tools.
 
 ### Orchestration
 
 #### Helm
 
-Add `helm` to tags.
+Add `helm` to tools.
 
 #### Kubectl
 
-Add `kubectl` to tags.
+Add `kubectl` to tools.
 
 #### Minikube
 
-Add `docker` and `minikube` to tags. The order matters as `docker` is a dependency.
+Add `docker` and `minikube` to tools. The order matters as `docker` is a dependency.
 
 ### Programming languages
 
 #### Dotnet
 
-Add `dotnet` to tags.
+Add `dotnet` to tools.
 
-It install `dotnet-sdk-7.0` under the hood. If you need to change this, go to `packer\ansible\playbooks\programming_languages\dotnet.yml` and change it on:
+It installs `dotnet-sdk-7.0` under the hood. If you need to change this, go to `~kumo/packer/ansible/playbooks/programming_languages/dotnet.yml` and change it on:
 
 ```yaml
-  tasks:
-    - name: Install dotnet sdk
-      ansible.builtin.apt:
-        name: <CHANGE_ME_HERE_TO_THE_RIGHT_VERSION>
-        update_cache: yes
+    tasks:
+      - name: Install dotnet sdk
+        ansible.builtin.apt:
+          name: <CHANGE_ME_HERE_TO_THE_RIGHT_VERSION>
+          update_cache: yes
 ```
 
 Please note that dotnet follows a different approach for version management. For more information on how to select the correct version, please read the [official documentation](https://learn.microsoft.com/en-us/dotnet/core/versions/selection).
@@ -226,7 +216,7 @@ If you have made the necessary changes to the `dotnet.yml` file and specified th
 
 #### Go
 
-Add `go` to tags.
+Add `go` to tools.
 
 Refer to the official [Go documentation](https://go.dev/doc/manage-install#installing-multiple) to learn how to manage multiple *Go* versions effectively. This guide provides detailed instructions on installing and managing multiple *Go* versions on your system.
 
@@ -234,7 +224,7 @@ Additionally, you can also check out this [Stack Overflow thread](https://stacko
 
 #### Node.js
 
-Add `node_js` to tags.
+Add `node_js` to tools.
 
 It installs [nvm](https://github.com/nvm-sh/nvm), which is a popular tool for managing multiple versions of *Node.js*.
 
@@ -242,11 +232,11 @@ Once *nvm* is installed, you can use it to install and manage multiple *Node.js*
 
 #### Python
 
-Add `python` to tags.
+Add `python` to tools.
 
 It installs [miniconda](https://docs.conda.io/en/latest/miniconda.html#linux-installers) which is a lightweight version of [anaconda](https://www.anaconda.com/). *Miniconda* allows you to manage multiple *Python* versions, virtual environments, and packages efficiently.
 
-If you prefer a different *miniconda* version, you can refer to the download page for alternative options. Once you have chosen the appropriate version, make the following changes in the `packer\ansible\playbooks\programming_languages\python.yml` file:
+If you prefer a different *miniconda* version, you can refer to the download page for alternative options. Once you have chosen the appropriate version, make the following changes in the `~/kumo/packer/ansible/playbooks/programming_languages/python.yml` file:
 
 ```yaml
   vars:
@@ -261,10 +251,10 @@ If you prefer a different *miniconda* version, you can refer to the download pag
 Additionally, modify the following section:
 
 ```yaml
-- name: Ensure needed python version for Anaconda3 is present
-  ansible.builtin.apt:
-    name: <ADEQUATE_PYTHON_VERSION>
-    update_cache: yes
+  - name: Ensure needed python version for Anaconda3 is present
+    ansible.builtin.apt:
+      name: <ADEQUATE_PYTHON_VERSION>
+      update_cache: yes
 ```
 
 Replace `<ADEQUATE_URL>`, `<ADEQUATE_SHA256>`, and `<ADEQUATE_PYTHON_VERSION>` with the appropriate values based on the *miniconda* version you choose.
@@ -273,13 +263,13 @@ The reason we suggest using *miniconda* is to save storage space from the start.
 
 ### Ruby
 
-Add `ruby` to your tags.
+Add `ruby` to tools.
 
 Manage versions with [rbenv](https://github.com/rbenv/rbenv).
 
 #### Rust
 
-Add `rust` to your tags.
+Add `rust` to tools.
 
 Manage versions with [rustup-init](https://forge.rust-lang.org/infra/other-installation-methods.html).
 
@@ -287,7 +277,7 @@ Manage versions with [rustup-init](https://forge.rust-lang.org/infra/other-insta
 
 #### Starship
 
-Add `starship` to your tags.
+Add `starship` to tools.
 
 For more information, please consult its [official documentation](https://starship.rs/).
 
@@ -295,12 +285,13 @@ For more information, please consult its [official documentation](https://starsh
 
 #### GitHub
 
-Add `github` to your tags and automate the process of adding *SSH* keys.
+Add `github` to tools and automate the process of adding *SSH* keys.
 
 1. Update your environment file `.env` by adding the following line:
 
-    ```.env
-    GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC = "<CUSTOM_VALUE>"
+    ```yaml
+      GitHub:
+        PersonalAccessTokenClassic: CUSTOM_VALUE
     ```
 
 2. Make sure to replace `<CUSTOM_VALUE>` with the appropriate value for your [personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token).
@@ -321,31 +312,17 @@ Add `github` to your tags and automate the process of adding *SSH* keys.
 
 ### Unix aliases
 
-If you're looking for some handy *Unix* aliases, you're in luck! We have included a collection of useful aliases that you can use. To costumize them, navigate to the `packer/ansible/playbooks/base/linux_aliases.yml file`
+If you're looking for some handy *Unix* aliases, you're in luck! We have included a collection of useful aliases that you can use. To costumize them, navigate to the `~/kumo/packer/ansible/playbooks/base/linux_aliases.yml file`
 
 ### Git aliases
 
-We haven't forgotten about *Git*! In fact, we have also included some helpful *Git* aliases for you to use. To costumize them, go to the `packer/ansible/playbooks/base/git.yml` file. These aliases will make your *Git* commands more efficient and easier to remember.
+We haven't forgotten about *Git*! In fact, we have also included some helpful *Git* aliases for you to use. To costumize them, go to the `~/kumo/packer/ansible/playbooks/base/git.yml` file. These aliases will make your *Git* commands more efficient and easier to remember.
 
 ## Q&A
 
-### Why is powershell not allowing me to run scripts?
-
-If you encounter issues running a script due to a non-admin shell or remote policy restrictions, follow these steps to resolve the problem:
-
-1. Open PowerShell with administrative privileges by doing the following:
-    - Press Windows key to open the Start menu.
-    - Type "PowerShell".
-    - Right-click on "Windows PowerShell" (or "PowerShell") and select "Run as administrator".
-2. Run the following command in the elevated PowerShell window:
-
-  ```powershell
-  Set-ExecutionPolicy RemoteSigned
-  ```
-
 ## What are the recommended Ubuntu images?
 
-When choosing an image on AWS (Amazon Web Services), it is important to consider various factors. While technically any available image can be picked, some may require additional considerations. If you have successfully tried a new image, we encourage you to open an issue or initiate a pull request.
+When choosing an image on any cloud, it is important to consider various factors. While technically any available image can be picked, some may require additional considerations. If you have successfully tried a new image, we encourage you to open an issue or initiate a pull request.
 
 For now, here is a list of recommended images:
 
@@ -361,14 +338,6 @@ AWS_EC2_SSH_USERNAME = "ubuntu"
 ```
 
 By selecting the appropriate image based on the provided details, you can ensure compatibility and meet your requirements when working on AWS.
-
-## How to change the location where Packer installs plugins on Windows?
-
-Please refer to the [official documentation](https://developer.hashicorp.com/packer/docs/plugins/install-plugins) for detailed instructions on installing plugins.
-
-Once you have identified the variables that need to be changed, you can use `setx` or `Set-Item` to modify them.
-
-**Note:** Make sure you have administrative privileges before attempting to modify system variables. After making changes, be sure to reload *VSCode* for the modifications to take effect.
 
 ## How to SSH into an *EC2* instance?
 
@@ -455,7 +424,7 @@ Our aim is to strike a balance between simplicity and security, providing you wi
   7. Select the desired host from the list. It will attempt to establish an SSH connection to the remote machine using the provided configuration.
   8. If everything is set up correctly, a new window will open in VS Code connected to the remote machine via SSH.
 
-## How to pick the right EC2 instance
+## How to pick the right EC2 instance (AWS)
 
 To help you make a decision based on factors such as cost and development needs, here are some tools that you can use:
 
