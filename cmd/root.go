@@ -36,7 +36,8 @@ func init() {
 }
 
 func Execute() {
-	if err := rootCmd.Execute(); err != nil {
+	err := rootCmd.Execute()
+	if err != nil {
 		log.Fatalf(
 			"%+v",
 			oops.Code("root_cmd_execute_failed").

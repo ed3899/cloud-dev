@@ -8,7 +8,7 @@ A cloud development environment you can customize with a wide range of tools.
   - [Table of contents](#table-of-contents)
   - [Requirements](#requirements)
   - [How-to](#how-to)
-    - [Post-Build Steps](#post-build-steps)
+    - [Post-Up Steps](#post-up-steps)
   - [Tools](#tools)
     - [Cloud providers](#cloud-providers)
       - [AWS](#aws)
@@ -57,8 +57,6 @@ A cloud development environment you can customize with a wide range of tools.
 - OpenSSH is necessary for SSH access into the instance, specifically the client part.
 
 ## How-to
-
-Follow these steps to run.
 
 1. Download the binary according to your operative system and architecture.
 2. Add the `kumo.exe` binary to your PATH
@@ -117,11 +115,11 @@ Follow these steps to run.
     kumo destroy
     ```
 
-*If you want more information on how to pick the right EC2 instance, please go to [Q&A](#how-to-pick-the-right-ec2-instance).*
+5. Boom! You've succesfully completed an entire workflow for building, deploying and destroying a development environment
 
-### Post-Build Steps
+### Post-Up Steps
 
-Once the kumo completes, follow these steps:
+Once kumo completes, follow these steps:
 
   1. Limit the permissions on your *SSH key* which should be located under `~/kumo/terraform/your-picked-cloud/kumokey`. Please refer to the [Q&A](#how-do-i-fix-the-broad-permissions-error-when-trying-to-ssh-to-my-instance-from-powershell) section for guidance on how to fix the broad permissions error when trying to *SSH* to your instance from *PowerShell*.
   2. SSH into your instance with `ssh -i path-to-kumossh kumo`
