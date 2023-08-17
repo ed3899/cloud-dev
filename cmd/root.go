@@ -12,13 +12,16 @@ import (
 var rootCmd = &cobra.Command{}
 
 func init() {
+	oopsBuilder := oops.
+		Code("Init").
+		In("cmd").
+		Tags("Cobra")
+
 	cwd, err := os.Getwd()
 	if err != nil {
 		log.Fatalf(
 			"%+v",
-			oops.
-				Code("cmd-root.go-init").
-				In("cmd").
+			oopsBuilder.
 				Wrapf(err, "Error occurred while getting current working directory"),
 		)
 	}
@@ -31,9 +34,7 @@ func init() {
 	if err != nil {
 		log.Fatalf(
 			"%+v",
-			oops.
-				Code("cmd-root.go-init").
-				In("cmd").
+			oopsBuilder.
 				Wrapf(err, "Error occurred while reading kumo config"),
 		)
 	}
