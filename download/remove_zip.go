@@ -9,6 +9,7 @@ import (
 func (d *Download) RemoveZip() error {
 	oopsBuilder := oops.
 		Code("RemoveZip")
+
 	err := os.Remove(d.Path.Zip)
 	if err != nil {
 		err := oopsBuilder.

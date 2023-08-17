@@ -1,7 +1,6 @@
 package url
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/samber/oops"
@@ -10,40 +9,20 @@ import (
 func GetContentLength(
 	url string,
 ) (
-	contentLength int64,
-	err error,
+	int64,
+	error,
 ) {
-	var (
-		oopsBuilder = oops.Code("get_content_length_failed").
-				With("url", url)
+	oopsBuilder :=
+		oops.Code("get_content_length_failed").
+			With("url", url)
 
-		response *http.Response
-	)
-
-	if response, err = http.Head(url); err != nil {
-		err = oopsBuilder.
+	response, err := http.Head(url)
+	if err != nil {
+		err := oopsBuilder.
 			Wrapf(err, "failed to get head response from: %s", url)
-		return
+		return 0, err
 	}
-	defer func(response *http.Response) {
-		if err := response.Body.Close(); err != nil {
-			log.Fatalf(
-				"%+v",
-				oopsBuilder.
-					With("responseStatus", response.Status).
-					Wrapf(err, "failed to close response body"),
-			)
-		}
-	}(response)
+	defer response.Body.Close()
 
-	contentLength = response.ContentLength
-
-	return
+	return response.ContentLength, nil
 }
-
-type GetContentLengthF func(
-	url string,
-) (
-	contentLength int64,
-	err error,
-)
