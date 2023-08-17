@@ -1,6 +1,8 @@
 package download
 
 import (
+	"path/filepath"
+
 	"github.com/ed3899/kumo/utils/zip"
 	"github.com/samber/oops"
 	"github.com/vbauerster/mpb/v8"
@@ -42,7 +44,7 @@ func (d *Download) ExtractAndShowProgress() error {
 			),
 		)
 
-		err = zip.Unzip(d.Path.Zip, d.Path.Executable, extractedBytesChan)
+		err = zip.Unzip(d.Path.Zip, filepath.Dir(d.Path.Executable), extractedBytesChan)
 		if err != nil {
 			err := oopsBuilder.
 				With("extractedBytesChan", extractedBytesChan).

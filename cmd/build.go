@@ -125,6 +125,15 @@ func Build() *cobra.Command {
 				panic(err)
 			}
 
+			err = _manager.ChDirToManagerDirRun()
+			if err != nil {
+				err := oopsBuilder.
+					Wrapf(err, "failed to chdir to manager dir")
+
+				panic(err)
+			}
+			defer _manager.ChdirToManagerDirInitial()
+
 			err = packer.Init()
 			if err != nil {
 				err := oopsBuilder.

@@ -17,7 +17,7 @@ func (t Tool) Iota() Tool {
 	return t
 }
 
-func (t Tool) Name() (string) {
+func (t Tool) Name() string {
 	oopsBuilder := oops.
 		In("common").
 		In("iota").
@@ -85,10 +85,10 @@ func (t Tool) Version() string {
 
 	switch t {
 	case Packer:
-		return "1.6.5"
+		return "1.9.2"
 
 	case Terraform:
-		return "1.5.3"
+		return "1.5.5"
 
 	default:
 		panic(t)
