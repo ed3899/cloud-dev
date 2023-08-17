@@ -13,7 +13,7 @@ func GetContentLength(
 	error,
 ) {
 	oopsBuilder :=
-		oops.Code("get_content_length_failed").
+		oops.Code("GetContentLength").
 			With("url", url)
 
 	response, err := http.Head(url)

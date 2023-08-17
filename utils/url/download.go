@@ -11,10 +11,12 @@ import (
 
 func Download(url, path string, bytesDownloadedChan chan<- int) error {
 	oopsBuilder := oops.
-		Code("DownloadWith").
+		Code("Download").
 		In("utils").
 		In("url").
-		Tags("Download")
+		With("url", url).
+		With("path", path).
+		With("bytesDownloadedChan", bytesDownloadedChan)
 
 	// Initiate download and defer closing the response body
 	response, err := http.Get(url)

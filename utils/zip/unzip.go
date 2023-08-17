@@ -16,7 +16,12 @@ func Unzip(
 	bytesUnzipped chan<- int,
 ) error {
 	oopsBuilder := oops.
-		Code("UnzipWith")
+		Code("Unzip").
+		In("utils").
+		In("zip").
+		With("pathToZip", pathToZip).
+		With("pathToUnzip", pathToUnzip).
+		With("bytesUnzipped", bytesUnzipped)
 
 	// Open the zip file and defer closing it
 	reader, err := zip.OpenReader(pathToZip)
@@ -27,7 +32,7 @@ func Unzip(
 	}
 	defer reader.Close()
 
-	unzipGroup := new(sync.WaitGroup)
+	unzipGroup := &sync.WaitGroup{}
 	errChan := make(chan error, len(reader.File))
 
 	// Unzip each file concurrently
@@ -76,9 +81,11 @@ func unzipFile(
 	extractToPath string,
 ) (int64, error) {
 	oopsBuilder := oops.
-		Code("unzipFileWith").
+		Code("unzipFile").
 		In("utils").
-		In("zip")
+		In("zip").
+		With("zf", zf).
+		With("extractToPath", extractToPath)
 
 	// Check if file path is not vulnerable to Zip Slip
 	filePath := filepath.Join(extractToPath, zf.Name)

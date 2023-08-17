@@ -13,7 +13,8 @@ func GetZipSize(
 	oopsBuilder := oops.
 		Code("GetZipSizeWith").
 		In("utils").
-		In("zip")
+		In("zip").
+		With("absPathToZip", absPathToZip)
 
 	if !filepath.IsAbs(absPathToZip) {
 		err := oopsBuilder.
