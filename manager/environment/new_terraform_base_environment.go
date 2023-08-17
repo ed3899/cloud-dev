@@ -32,8 +32,7 @@ func NewTerraformBaseEnvironment() *TerraformBaseEnvironment {
 
 	return &TerraformBaseEnvironment{
 		Required: &TerraformBaseRequired{
-		
-			ALLOWED_IP: pickedIp,
+			ALLOWED_IP: ip.MaskIp(pickedIp, 32),
 		},
 	}
 }
