@@ -2,7 +2,6 @@ package packer_manifest
 
 import (
 	"encoding/json"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -26,64 +25,52 @@ type PackerManifest struct {
 // Example:
 //
 //	("packer/aws/manifest.json") -> ("ami-0c3fd0f5d33134a76", nil)
-func GetLastBuiltAmiIdFromPackerManifest(packerManifestAbsPath string) (amiId string, err error) {
-	var (
-		packerManifest = new(PackerManifest)
-		oopsBuilder    = oops.Code("get_last_built_ami_id_failed").
-				With("packerManifestAbsPath", packerManifestAbsPath)
-
-		lastBuildArtifact  []*PackerBuild
-		packerManifestFile *os.File
-		jsonDecoder        *json.Decoder
-	)
+func GetLastBuiltAmiIdFromPackerManifest(packerManifestAbsPath string) (string, error) {
+	packerManifest := &PackerManifest{}
+	oopsBuilder := oops.
+		Code("get_last_built_ami_id_failed").
+		With("packerManifestAbsPath", packerManifestAbsPath)
 
 	// Check if packer manifest path is absolute
 	if !filepath.IsAbs(packerManifestAbsPath) {
-		err = oopsBuilder.
-			Wrapf(err, "The packer manifest path is not absolute: '%s'", packerManifestAbsPath)
-		return
+		err := oopsBuilder.
+			Errorf("The packer manifest path is not absolute: '%s'", packerManifestAbsPath)
+
+		return "", err
 	}
 
 	// Open packer manifest file
-	if packerManifestFile, err = os.Open(packerManifestAbsPath); err != nil {
-		err = oopsBuilder.
+	packerManifestFile, err := os.Open(packerManifestAbsPath)
+	if err != nil {
+		err := oopsBuilder.
 			Wrapf(err, "Error occurred while opening packer manifest file '%s'", packerManifestAbsPath)
-		return
+
+		return "", err
 	}
-	defer func(packerManifestFile *os.File) {
-		if err := packerManifestFile.Close(); err != nil {
-			log.Fatalf(
-				"%+v",
-				oopsBuilder.
-					Wrapf(err, "Error occurred while closing packer manifest file: '%s'", packerManifestFile.Name()),
-			)
-		}
-	}(packerManifestFile)
+	defer packerManifestFile.Close()
 
 	// Decode packer manifest
-	jsonDecoder = json.NewDecoder(packerManifestFile)
-	if err = jsonDecoder.Decode(packerManifest); err != nil {
-		err = oopsBuilder.
+	jsonDecoder := json.NewDecoder(packerManifestFile)
+	err = jsonDecoder.Decode(packerManifest)
+	if err != nil {
+		err := oopsBuilder.
 			Wrapf(err, "Error occurred while decoding packer manifest file '%s'", packerManifestAbsPath)
-		return
+
+		return "", err
 	}
 
 	// Get last built artifact id for last Packer build
-	lastBuildArtifact = lo.Filter(packerManifest.Builds, func(pb *PackerBuild, index int) bool {
+	lastBuildArtifact := lo.Filter(packerManifest.Builds, func(pb *PackerBuild, index int) bool {
 		return pb.PackerRunUUID == packerManifest.LastRunUUID
 	})
 
 	if len(lastBuildArtifact) == 0 {
-		err = oopsBuilder.
+		err := oopsBuilder.
 			With("lastBuildArtifact", lastBuildArtifact).
 			Wrapf(err, "No AMI ID found for last Packer build")
-		return
+		return "", err
 	}
 
 	// Extract only the AMI ID
-	amiId = strings.Split(lastBuildArtifact[0].ArtifactId, ":")[1]
-
-	return
+	return strings.Split(lastBuildArtifact[0].ArtifactId, ":")[1], nil
 }
-
-type GetLastBuiltAmiIdFromPackerManifestF func(packerManifestAbsPath string) (amiId string, err error)
