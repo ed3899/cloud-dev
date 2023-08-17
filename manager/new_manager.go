@@ -26,8 +26,15 @@ func NewManager(
 
 		return nil, err
 	}
-
 	currentExecutableDir := filepath.Dir(currentExecutablePath)
+
+	currentWorkingDir, err := os.Getwd()
+	if err != nil {
+		err := oopsBuilder.
+			Wrapf(err, "failed to get current working directory")
+
+		return nil, err
+	}
 
 	templatePath := func(templateName string) string {
 		return filepath.Join(
@@ -97,7 +104,7 @@ func NewManager(
 				constants.KEY_NAME,
 			),
 			SshConfig: filepath.Join(
-				currentExecutableDir,
+				currentWorkingDir,
 				constants.CONFIG_NAME,
 			),
 		},

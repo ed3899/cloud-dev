@@ -17,9 +17,7 @@ func Build() *cobra.Command {
 	return &cobra.Command{
 		Use:   "build",
 		Short: "Build an AMI with ready to use tools",
-		Long: `Build an AMI with ready to use tools. Any AMI you build with Kumo will have a set of SSH keys downloaded
-		to your root directory. Please keep these keys safe. If you lose them, you will not be able
-		to SSH into your instance.`,
+		Long: `Build an AMI with ready to use tools. Please refer to the readme for more information.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			oopsBuilder := oops.
 				Code("Build").
