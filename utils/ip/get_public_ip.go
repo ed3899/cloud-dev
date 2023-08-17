@@ -2,7 +2,6 @@ package ip
 
 import (
 	"io"
-	"log"
 	"net/http"
 
 	"github.com/samber/oops"
@@ -18,42 +17,30 @@ type GetPublicIpF func() (ip string, err error)
 // Example:
 //
 //	() -> ("123.456.789.012", nil)
-func GetPublicIp() (ip string, err error) {
-	var (
-		oopsBuilder = oops.Code("get_public_ip_failed")
-		URL         = "https://api.ipify.org?format=text"
-
-		response      *http.Response
-		bytesResponse []byte
-	)
+func GetPublicIp() (string, error) {
+	oopsBuilder := oops.Code("get_public_ip_failed")
+	URL := "https://api.ipify.org?format=text"
 
 	// Send GET request to retrieve public IP
-	if response, err = http.Get(URL); err != nil {
+	response, err := http.Get(URL)
+	if err != nil {
 		err = oopsBuilder.
 			Wrapf(err, "Error occurred while sending GET request to '%s'", URL)
-		return
+
+		return "", err
 	}
-	defer func(response *http.Response) {
-		if err := response.Body.Close(); err != nil {
-			log.Fatalf(
-				"%+v",
-				oopsBuilder.
-					With("responseStatusCode", response.StatusCode).
-					Wrapf(err, "Error occurred while closing response body"),
-			)
-		}
-	}(response)
+	defer response.Body.Close()
 
 	// Read the response body
-	if bytesResponse, err = io.ReadAll(response.Body); err != nil {
+	bytesResponse, err := io.ReadAll(response.Body)
+	if err != nil {
 		err = oopsBuilder.
 			With("responseStatusCode", response.StatusCode).
 			Wrapf(err, "Error occurred while reading response body")
-		return
+
+		return "", err
 	}
 
 	// Convert the response body to a string
-	ip = string(bytesResponse)
-
-	return
+	return string(bytesResponse), nil
 }

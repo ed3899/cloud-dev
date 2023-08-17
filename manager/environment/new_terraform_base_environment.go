@@ -32,6 +32,7 @@ func NewTerraformBaseEnvironment() *TerraformBaseEnvironment {
 
 	return &TerraformBaseEnvironment{
 		Required: &TerraformBaseRequired{
+		
 			ALLOWED_IP: pickedIp,
 		},
 	}

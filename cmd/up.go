@@ -42,6 +42,14 @@ func Up() *cobra.Command {
 				panic(err)
 			}
 
+			err = _manager.CreateTemplate()
+			if err != nil {
+				err := oopsBuilder.
+					Wrapf(err, "failed to create template")
+
+				panic(err)
+			}
+
 			template, err := _manager.ParseTemplate()
 			if err != nil {
 				err := oopsBuilder.
