@@ -28,8 +28,9 @@ func init() {
 
 	// Assemble commands
 	kumo := &cobra.Command{
-		Use:  "kumo",
-		Long: `🌩️ Your quick and easy cloud development environment.`,
+		Use:   "kumo",
+		Short: "🌩️ Your quick and easy cloud development environment.",
+		Long:  `🌩️ Your quick and easy cloud development environment.`,
 	}
 	kumo.AddCommand(GetCommands()...)
 	rootCmd.AddCommand(kumo)
@@ -40,7 +41,10 @@ func Execute() {
 	if err != nil {
 		log.Fatalf(
 			"%+v",
-			oops.Code("root_cmd_execute_failed").
+			oops.
+				Code("Execute").
+				In("cmd").
+				Tags("Cobra").
 				Wrapf(err, "Error occurred while running kumo"),
 		)
 	}

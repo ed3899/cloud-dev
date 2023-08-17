@@ -15,7 +15,7 @@ import (
 func Up() *cobra.Command {
 	return &cobra.Command{
 		Use:   "up",
-		Short: "Deploy your AMI to the cloud",
+		Short: "Deploy your cloud environment",
 		Long: `Deploy you cloud development environment. If no AMI is specified in the config file, Kumo will
 		deploy the latest AMI built. It generates an SSH config file for you to easily SSH into your
 		instances.`,

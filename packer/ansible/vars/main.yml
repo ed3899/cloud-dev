@@ -4,9 +4,6 @@ instance:
     home: "{{ AWS_EC2_INSTANCE_USERNAME_HOME }}"
     password: "{{ AWS_EC2_INSTANCE_USERNAME_PASSWORD }}"
 
-  ssh:
-    key_name: "{{ AWS_EC2_INSTANCE_SSH_KEY_NAME }}"
-
   ansible:
     staging_directory: "{{ AWS_EC2_ANSIBLE_STAGING_DIRECTORY_INTERNAL }}"
 

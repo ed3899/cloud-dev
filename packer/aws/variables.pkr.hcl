@@ -203,7 +203,7 @@ variable "AWS_EC2_ANSIBLE_STAGING_DIRECTORY_INTERNAL" {
 variable "AWS_EC2_PUBLIC_DIRECTORY_INTERNAL" {
   type        = string
   default     = "/public"
-  description = "The directory where the ssh keys are placed to be downloaded from the local machine. This directory is removed after provisioning"
+  description = "The directory where temporary tools are downloaded"
 
   validation {
     condition     = substr(var.AWS_EC2_PUBLIC_DIRECTORY_INTERNAL, 0, 1) == "/"

@@ -60,7 +60,7 @@ A cloud development environment you can customize with a wide range of tools.
 
 1. Download the binary according to your operative system and architecture.
 2. Add the `kumo.exe` binary to your PATH
-3. Create a new dir and a `kumo.config.yaml` file
+3. Create a new dir and a `kumo.config.yaml` file (For now we are only compatible with AWS)
 
     ```yaml
       Cloud: aws
@@ -154,16 +154,6 @@ Ensure the following are present at the environment file:
     AWS:
       AccessKeyId: CUSTOM_VALUE
       SecretAccessKey: CUSTOM_VALUE
-      IamProfile: CUSTOM_VALUE
-      UserIds:
-        - "CUSTOM_VALUE" #Quotes here are important
-      Region: CUSTOM_VALUE
-      EC2:
-        Instance:
-          Type: CUSTOM_VALUE
-        Volume:
-          Type: CUSTOM_VALUE
-          Size: CUSTOM_VALUE
 ```
 
 ### Containerization
