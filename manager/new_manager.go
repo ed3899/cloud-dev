@@ -71,11 +71,12 @@ func NewManager(
 		Cloud: cloud.Iota(),
 		Tool:  tool.Iota(),
 		Path: &Path{
+			PackerManifest: pathToPackerManifest,
 			Plugins: filepath.Join(
 				currentExecutableDir,
 				tool.Name(),
 				cloud.Name(),
-				iota.Plugins.Name(),
+				tool.PluginDirs(),
 			),
 			Executable: filepath.Join(
 				currentExecutableDir,
@@ -96,13 +97,13 @@ func NewManager(
 			),
 			IpFile: filepath.Join(
 				currentExecutableDir,
-				tool.Name(),
+				iota.Terraform.Name(),
 				cloud.Name(),
 				constants.IP_FILE_NAME,
 			),
 			IdentityFile: filepath.Join(
 				currentExecutableDir,
-				tool.Name(),
+				iota.Terraform.Name(),
 				cloud.Name(),
 				constants.KEY_NAME,
 			),
@@ -110,14 +111,34 @@ func NewManager(
 				currentWorkingDir,
 				constants.CONFIG_NAME,
 			),
-		},
-		Dir: &Dir{
-			Initial: currentExecutableDir,
-			Run: filepath.Join(
-				currentExecutableDir,
-				tool.Name(),
-				cloud.Name(),
-			),
+			Terraform: &Terraform{
+				Lock: filepath.Join(
+					currentExecutableDir,
+					iota.Terraform.Name(),
+					cloud.Name(),
+					constants.TERRAFORM_LOCK,
+				),
+				State: filepath.Join(
+					currentExecutableDir,
+					iota.Terraform.Name(),
+					cloud.Name(),
+					constants.TERRAFORM_STATE,
+				),
+				Backup: filepath.Join(
+					currentExecutableDir,
+					iota.Terraform.Name(),
+					cloud.Name(),
+					constants.TERRAFORM_BACKUP,
+				),
+			},
+			Dir: &Dir{
+				Initial: currentExecutableDir,
+				Run: filepath.Join(
+					currentExecutableDir,
+					tool.Name(),
+					cloud.Name(),
+				),
+			},
 		},
 		Environment: _environment,
 	}, nil
@@ -127,18 +148,26 @@ type Manager struct {
 	Cloud       iota.Cloud
 	Tool        iota.Tool
 	Path        *Path
-	Dir         *Dir
 	Environment any
 }
 
 type Path struct {
-	Plugins      string
-	Executable   string
-	Vars         string
-	SshConfig    string
-	IpFile       string
-	IdentityFile string
-	Template     *Template
+	PackerManifest string
+	Plugins        string
+	Executable     string
+	Vars           string
+	SshConfig      string
+	IpFile         string
+	IdentityFile   string
+	Terraform      *Terraform
+	Template       *Template
+	Dir            *Dir
+}
+
+type Terraform struct {
+	Lock   string
+	State  string
+	Backup string
 }
 
 type Template struct {

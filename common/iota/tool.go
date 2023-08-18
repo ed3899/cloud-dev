@@ -112,3 +112,27 @@ func (t Tool) PluginPathEnvironmentVariable() string {
 		return ""
 	}
 }
+
+func (t Tool) PluginDirs() string {
+	oopsBuilder := oops.
+		In("common").
+		In("iota").
+		Tags("Tool").
+		Code("PluginDirs")
+
+	switch t {
+	case Packer:
+		return "plugins"
+
+	case Terraform:
+		return ".terraform"
+
+	default:
+		err := oopsBuilder.
+			Errorf("unknown tool: %#v", t)
+
+		log.Fatalf("%+v", err)
+
+		return ""
+	}
+}

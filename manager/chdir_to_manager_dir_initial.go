@@ -6,15 +6,15 @@ import (
 	"github.com/samber/oops"
 )
 
-func (manager *Manager) ChdirToManagerDirInitial() error {
+func (m *Manager) ChdirToManagerDirInitial() error {
 	oopsBuilder := oops.
 		In("manager").
 		Tags("Manager").
 		Code("ChangeToInitialDir")
 
-	if err := os.Chdir(manager.Dir.Initial); err != nil {
+	if err := os.Chdir(m.Path.Dir.Initial); err != nil {
 		return oopsBuilder.
-			With("initialDir", manager.Dir.Initial).
+			With("initialDir", m.Path.Dir.Initial).
 			Wrapf(err, "failed to change to initial dir")
 	}
 

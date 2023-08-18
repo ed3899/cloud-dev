@@ -1,17 +1,26 @@
 package manager
 
-func (* Manager) Clean() error {
-	// Files
-	// 	- manifest.json
-	// 	- .auto.pkrvars.hcl
-	// 	- .auto.tfvars
-	// 	- .terraform.lock.hcl
-	// 	- terraform.tfstate
-	// 	- terraform.tfstate.backup
+import (
+	"os"
 
-	// Dirs
-	// 	- plugins
-	// 	- .terraform
-	
+	"github.com/samber/oops"
+)
+
+func (m *Manager) Clean() error {
+	oopsBuilder := oops.
+		Code("Clean").
+		In("manager").
+		Tags("Manager")
+
+	err := os.Remove(m.Path.PackerManifest)
+	if err != nil {
+		err := oopsBuilder.
+			Wrapf(err, "failed to remove packer manifest file")
+
+		return err
+	}
+
+	err = os.Remove(m.Path.Executable)
+
 	return nil
 }

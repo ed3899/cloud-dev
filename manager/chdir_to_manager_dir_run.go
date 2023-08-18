@@ -12,9 +12,9 @@ func (m *Manager) ChDirToManagerDirRun() error {
 		Tags("Manager").
 		Code("ManagerDirRunChdir")
 
-	if err := os.Chdir(m.Dir.Run); err != nil {
+	if err := os.Chdir(m.Path.Dir.Run); err != nil {
 		return oopsBuilder.
-			With("runDir", m.Dir.Run).
+			With("runDir", m.Path.Dir.Run).
 			Wrapf(err, "failed to change to run dir")
 	}
 
