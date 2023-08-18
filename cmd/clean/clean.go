@@ -13,6 +13,7 @@ func Clean() *cobra.Command {
 
 	clean.AddCommand(
 		Packer(),
+		Terraform(),
 	)
 
 	return clean

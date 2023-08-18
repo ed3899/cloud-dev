@@ -22,7 +22,7 @@ func (m *Manager) GenerateSshConfig() error {
 		Tags("Manager").
 		Code("GenerateSshConfig")
 
-	ip, err := ip.ReadIpFromFile(m.Path.IpFile)
+	ip, err := ip.ReadIpFromFile(m.Path.Terraform.IpFile)
 	if err != nil {
 		return oopsBuilder.Wrapf(err, "failed to read ip from file")
 	}
@@ -38,7 +38,7 @@ func (m *Manager) GenerateSshConfig() error {
 	LogLevel %s`,
 		constants.HOST,
 		ip,
-		m.Path.IdentityFile,
+		m.Path.Terraform.IdentityFile,
 		viper.GetString("AMI.User"),
 		constants.SSH_PORT,
 		"no",
@@ -47,10 +47,10 @@ func (m *Manager) GenerateSshConfig() error {
 		"error",
 	)
 
-	file, err := os.Create(m.Path.SshConfig)
+	file, err := os.Create(m.Path.Terraform.SshConfig)
 	if err != nil {
 		err := oopsBuilder.
-			Wrapf(err, "Error occurred while creating file %s", m.Path.SshConfig)
+			Wrapf(err, "Error occurred while creating file %s", m.Path.Terraform.SshConfig)
 		return err
 	}
 	defer file.Close()
@@ -58,12 +58,12 @@ func (m *Manager) GenerateSshConfig() error {
 	_, err = file.WriteString(content)
 	if err != nil {
 		err := oopsBuilder.
-			Wrapf(err, "Error occurred while writing to file %s", m.Path.SshConfig)
+			Wrapf(err, "Error occurred while writing to file %s", m.Path.Terraform.SshConfig)
 		return err
 	}
 
 	logger.Info("Successfully generated ssh config file",
-		zap.String("path", m.Path.SshConfig),
+		zap.String("path", m.Path.Terraform.SshConfig),
 	)
 	logger.Info("Run `ssh -F ./kumossh kumo` to SSH into your instances")
 

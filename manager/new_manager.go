@@ -72,12 +72,6 @@ func NewManager(
 		Tool:  tool.Iota(),
 		Path: &Path{
 			PackerManifest: pathToPackerManifest,
-			Plugins: filepath.Join(
-				currentExecutableDir,
-				tool.Name(),
-				cloud.Name(),
-				tool.PluginDirs(),
-			),
 			Executable: filepath.Join(
 				currentExecutableDir,
 				iota.Dependencies.Name(),
@@ -85,7 +79,7 @@ func NewManager(
 				fmt.Sprintf("%s.exe", tool.Name()),
 			),
 			Template: &Template{
-				Merged: templatePath("merged"),
+				Merged: templatePath(constants.MERGED_TEMPLATE_NAME),
 				Cloud:  templatePath(cloud.Template().Cloud),
 				Base:   templatePath(cloud.Template().Base),
 			},
@@ -94,22 +88,6 @@ func NewManager(
 				tool.Name(),
 				cloud.Name(),
 				tool.VarsName(),
-			),
-			IpFile: filepath.Join(
-				currentExecutableDir,
-				iota.Terraform.Name(),
-				cloud.Name(),
-				constants.IP_FILE_NAME,
-			),
-			IdentityFile: filepath.Join(
-				currentExecutableDir,
-				iota.Terraform.Name(),
-				cloud.Name(),
-				constants.KEY_NAME,
-			),
-			SshConfig: filepath.Join(
-				currentWorkingDir,
-				constants.CONFIG_NAME,
 			),
 			Terraform: &Terraform{
 				Lock: filepath.Join(
@@ -130,8 +108,30 @@ func NewManager(
 					cloud.Name(),
 					constants.TERRAFORM_BACKUP,
 				),
+				IpFile: filepath.Join(
+					currentExecutableDir,
+					iota.Terraform.Name(),
+					cloud.Name(),
+					constants.IP_FILE_NAME,
+				),
+				IdentityFile: filepath.Join(
+					currentExecutableDir,
+					iota.Terraform.Name(),
+					cloud.Name(),
+					constants.KEY_NAME,
+				),
+				SshConfig: filepath.Join(
+					currentWorkingDir,
+					constants.CONFIG_NAME,
+				),
 			},
 			Dir: &Dir{
+				Plugins: filepath.Join(
+					currentExecutableDir,
+					tool.Name(),
+					cloud.Name(),
+					tool.PluginDirs(),
+				),
 				Initial: currentExecutableDir,
 				Run: filepath.Join(
 					currentExecutableDir,
@@ -153,21 +153,20 @@ type Manager struct {
 
 type Path struct {
 	PackerManifest string
-	Plugins        string
 	Executable     string
 	Vars           string
-	SshConfig      string
-	IpFile         string
-	IdentityFile   string
 	Terraform      *Terraform
 	Template       *Template
 	Dir            *Dir
 }
 
 type Terraform struct {
-	Lock   string
-	State  string
-	Backup string
+	Lock         string
+	State        string
+	Backup       string
+	SshConfig    string
+	IpFile       string
+	IdentityFile string
 }
 
 type Template struct {
@@ -177,6 +176,7 @@ type Template struct {
 }
 
 type Dir struct {
+	Plugins string
 	Initial string
 	Run     string
 }

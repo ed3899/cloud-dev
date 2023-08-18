@@ -12,10 +12,14 @@ func (m *Manager) SetPluginsEnvironmentVars() error {
 		Tags("Manager").
 		Code("SetPluginsEnvironmentVars")
 
-	err := os.Setenv(m.Tool.PluginPathEnvironmentVariable(), m.Path.Plugins)
+	err := os.Setenv(m.Tool.PluginPathEnvironmentVariable(), m.Path.Dir.Plugins)
 	if err != nil {
 		return oopsBuilder.
-			Errorf("failed to set %s environment variable to %s", m.Tool.PluginPathEnvironmentVariable(), m.Path.Plugins)
+			Errorf(
+				"failed to set %s environment variable to %s",
+				m.Tool.PluginPathEnvironmentVariable(),
+				m.Path.Dir.Plugins,
+			)
 	}
 
 	return nil
