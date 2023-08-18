@@ -8,9 +8,15 @@ import (
 	"github.com/ed3899/kumo/utils/ip"
 	"github.com/samber/oops"
 	"github.com/spf13/viper"
+	"go.uber.org/zap"
 )
 
 func (m *Manager) GenerateSshConfig() error {
+	logger, _ := zap.NewProduction(
+		zap.AddCaller(),
+	)
+	defer logger.Sync()
+
 	oopsBuilder := oops.
 		In("manager").
 		Tags("Manager").
@@ -55,6 +61,11 @@ func (m *Manager) GenerateSshConfig() error {
 			Wrapf(err, "Error occurred while writing to file %s", m.Path.SshConfig)
 		return err
 	}
+
+	logger.Info("Successfully generated ssh config file",
+		zap.String("path", m.Path.SshConfig),
+	)
+	logger.Info("Run `ssh -F ./kumossh kumo` to SSH into your instances")
 
 	return nil
 }

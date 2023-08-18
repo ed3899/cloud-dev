@@ -179,8 +179,3 @@ resource "local_file" "kumo-ec2-public-ip" {
   content  = aws_instance.kumo-ec2-instance.public_ip
   filename = local.IP_FILE_NAME
 }
-
-output "connection_cmd" {
-  description = "How to connect to your instance"
-  value       = "Deployment complete, now try 'ssh -F kumossh kumo' to connect to your instance"
-}

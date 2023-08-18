@@ -439,7 +439,7 @@ To help you make a decision based on factors such as cost and development needs,
 ## How to send files from my host to my instance?
 
 ```bash
-scp -F kumossh /path/to/local/file1 /file2
+scp -F ./kumossh /path/to/local/file1 /file2
 ```
 
 Works both on powershell and bash.
