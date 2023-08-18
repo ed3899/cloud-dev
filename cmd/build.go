@@ -17,7 +17,7 @@ func Build() *cobra.Command {
 	return &cobra.Command{
 		Use:   "build",
 		Short: "Build an AMI with ready to use tools",
-		Long: `Build an AMI with ready to use tools.`,
+		Long:  `Build an AMI with ready to use tools.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			oopsBuilder := oops.
 				Code("Build").

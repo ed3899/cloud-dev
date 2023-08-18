@@ -9,13 +9,13 @@ import (
 	"github.com/spf13/viper"
 )
 
-var rootCmd = &cobra.Command{}
+var root = &cobra.Command{}
 
 func init() {
 	oopsBuilder := oops.
-		Code("Init").
+		Code("Kumo").
 		In("cmd").
-		Tags("Cobra")
+		Tags("Cobra", "PreRun")
 
 	cwd, err := os.Getwd()
 	if err != nil {
@@ -35,29 +35,22 @@ func init() {
 		log.Fatalf(
 			"%+v",
 			oopsBuilder.
-				Wrapf(err, "Error occurred while reading kumo config"),
+				Wrapf(err, "Error occurred while reading config file. Make sure a kumo.config.yaml file exists in the current working directory"),
 		)
 	}
 
-	// Assemble commands
-	kumo := &cobra.Command{
-		Use:   "kumo",
-		Short: "🌩️ Your quick and easy cloud development environment.",
-		Long:  `🌩️ Your quick and easy cloud development environment.`,
-	}
-	kumo.AddCommand(GetCommands()...)
-	rootCmd.AddCommand(kumo)
+	root.AddCommand(Kumo())
 }
 
 func Execute() {
-	err := rootCmd.Execute()
+	err := root.Execute()
 	if err != nil {
 		log.Fatalf(
 			"%+v",
 			oops.
 				Code("Execute").
 				In("cmd").
-				Tags("Cobra").
+				Tags("Cobra", "root").
 				Wrapf(err, "Error occurred while running kumo"),
 		)
 	}
