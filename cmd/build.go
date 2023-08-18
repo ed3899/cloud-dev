@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"log"
+	"os"
 
 	"github.com/ed3899/kumo/binaries"
 	"github.com/ed3899/kumo/common/iota"
@@ -18,6 +19,34 @@ func Build() *cobra.Command {
 		Use:   "build",
 		Short: "Build an AMI with ready to use tools",
 		Long:  `Build an AMI with ready to use tools.`,
+		PreRun: func(cmd *cobra.Command, args []string) {
+			oopsBuilder := oops.
+				Code("Build").
+				In("cmd").
+				Tags("Cobra", "PreRun")
+
+			cwd, err := os.Getwd()
+			if err != nil {
+				log.Fatalf(
+					"%+v",
+					oopsBuilder.
+						Wrapf(err, "Error occurred while getting current working directory"),
+				)
+			}
+
+			viper.SetConfigName("kumo.config")
+			viper.SetConfigType("yaml")
+			viper.AddConfigPath(cwd)
+
+			err = viper.ReadInConfig()
+			if err != nil {
+				log.Fatalf(
+					"%+v",
+					oopsBuilder.
+						Wrapf(err, "Error occurred while reading config file. Make sure a kumo.config.yaml file exists in the current working directory"),
+				)
+			}
+		},
 		Run: func(cmd *cobra.Command, args []string) {
 			oopsBuilder := oops.
 				Code("Build").

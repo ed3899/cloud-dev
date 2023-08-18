@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"log"
+	"os"
 
 	"github.com/ed3899/kumo/binaries"
 	"github.com/ed3899/kumo/common/iota"
@@ -10,7 +11,6 @@ import (
 	"github.com/samber/oops"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"go.uber.org/zap"
 )
 
 func Up() *cobra.Command {
@@ -22,20 +22,31 @@ func Up() *cobra.Command {
 		instances.`,
 		Args: cobra.NoArgs,
 		PreRun: func(cmd *cobra.Command, args []string) {
-			logger, _ := zap.NewProduction()
-			defer logger.Sync()
+			oopsBuilder := oops.
+				Code("Up").
+				In("cmd").
+				Tags("Cobra", "PreRun")
 
-			// oopsBuilder := oops.
-			// 	Code("Up").
-			// 	In("cmd").
-			// 	Tags("Cobra").
-			// 	Tags("PreRun").
-			// 	With("command", *cmd).
-			// 	With("args", args)
-
-			err := viper.ReadInConfig()
+			cwd, err := os.Getwd()
 			if err != nil {
-				logger.Fatal("failed to read config file", zap.Error(err))
+				log.Fatalf(
+					"%+v",
+					oopsBuilder.
+						Wrapf(err, "Error occurred while getting current working directory"),
+				)
+			}
+
+			viper.SetConfigName("kumo.config")
+			viper.SetConfigType("yaml")
+			viper.AddConfigPath(cwd)
+
+			err = viper.ReadInConfig()
+			if err != nil {
+				log.Fatalf(
+					"%+v",
+					oopsBuilder.
+						Wrapf(err, "Error occurred while reading config file. Make sure a kumo.config.yaml file exists in the current working directory"),
+				)
 			}
 		},
 		Run: func(cmd *cobra.Command, args []string) {

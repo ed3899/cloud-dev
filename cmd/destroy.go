@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"log"
+	"os"
 
 	"github.com/ed3899/kumo/binaries"
 	"github.com/ed3899/kumo/common/iota"
@@ -17,6 +18,34 @@ func Destroy() *cobra.Command {
 		Use:   "destroy",
 		Short: "Destroy your cloud environment",
 		Long:  `Destroy your last deployed cloud environment. Doesn't destroy the AMI. It will also remove the SSH config file.`,
+		PreRun: func(cmd *cobra.Command, args []string) {
+			oopsBuilder := oops.
+				Code("Build").
+				In("cmd").
+				Tags("Cobra", "PreRun")
+
+			cwd, err := os.Getwd()
+			if err != nil {
+				log.Fatalf(
+					"%+v",
+					oopsBuilder.
+						Wrapf(err, "Error occurred while getting current working directory"),
+				)
+			}
+
+			viper.SetConfigName("kumo.config")
+			viper.SetConfigType("yaml")
+			viper.AddConfigPath(cwd)
+
+			err = viper.ReadInConfig()
+			if err != nil {
+				log.Fatalf(
+					"%+v",
+					oopsBuilder.
+						Wrapf(err, "Error occurred while reading config file. Make sure a kumo.config.yaml file exists in the current working directory"),
+				)
+			}
+		},
 		Run: func(cmd *cobra.Command, args []string) {
 			oopsBuilder := oops.
 				Code("Destroy").
