@@ -17,48 +17,28 @@ func (m *Manager) Clean() error {
 
 	logger, _ := zap.NewProduction(
 		zap.AddCaller(),
-		zap.AddStacktrace(
-			zap.ErrorLevel,
-		),
 	)
 	defer logger.Sync()
 
+	commonItems := []string{
+		m.Path.Executable,
+		m.Path.Vars,
+		m.Path.Dir.Plugins,
+	}
 	removedItems := []string{}
 
-	if file.IsFilePresent(m.Path.Executable) {
-		err := os.Remove(m.Path.Executable)
-		if err != nil {
-			err = oopsBuilder.
-				Wrapf(err, "failed to remove %s", m.Path.Executable)
+	for _, i := range commonItems {
+		if file.IsFilePresent(i) {
+			err := os.Remove(i)
+			if err != nil {
+				err = oopsBuilder.
+					Wrapf(err, "failed to remove %s", i)
 
-			return err
+				return err
+			}
+
+			removedItems = append(removedItems, i)
 		}
-
-		removedItems = append(removedItems, m.Path.Executable)
-	}
-
-	if file.IsFilePresent(m.Path.Vars) {
-		err := os.Remove(m.Path.Vars)
-		if err != nil {
-			err = oopsBuilder.
-				Wrapf(err, "failed to remove %s", m.Path.Vars)
-
-			return err
-		}
-
-		removedItems = append(removedItems, m.Path.Vars)
-	}
-
-	if file.IsFilePresent(m.Path.Dir.Plugins) {
-		err := os.RemoveAll(m.Path.Dir.Plugins)
-		if err != nil {
-			err = oopsBuilder.
-				Wrapf(err, "failed to remove %s", m.Path.Dir.Plugins)
-
-			return err
-		}
-
-		removedItems = append(removedItems, m.Path.Dir.Plugins)
 	}
 
 	switch m.Tool.Iota() {
@@ -76,40 +56,24 @@ func (m *Manager) Clean() error {
 		}
 
 	case iota.Terraform:
-		if file.IsFilePresent(m.Path.Terraform.Lock) {
-			err := os.Remove(m.Path.Terraform.Lock)
-			if err != nil {
-				err = oopsBuilder.
-					Wrapf(err, "failed to remove %s", m.Path.Terraform.Lock)
-
-				return err
-			}
-
-			removedItems = append(removedItems, m.Path.Terraform.Lock)
+		terraformItems := []string{
+			m.Path.Terraform.Lock,
+			m.Path.Terraform.State,
+			m.Path.Terraform.Backup,
 		}
 
-		if file.IsFilePresent(m.Path.Terraform.State) {
-			err := os.Remove(m.Path.Terraform.State)
-			if err != nil {
-				err = oopsBuilder.
-					Wrapf(err, "failed to remove %s", m.Path.Terraform.State)
+		for _, t := range terraformItems {
+			if file.IsFilePresent(t) {
+				err := os.Remove(t)
+				if err != nil {
+					err = oopsBuilder.
+						Wrapf(err, "failed to remove %s", t)
 
-				return err
+					return err
+				}
+
+				removedItems = append(removedItems, t)
 			}
-
-			removedItems = append(removedItems, m.Path.Terraform.State)
-		}
-
-		if file.IsFilePresent(m.Path.Terraform.Backup) {
-			err := os.Remove(m.Path.Terraform.Backup)
-			if err != nil {
-				err = oopsBuilder.
-					Wrapf(err, "failed to remove %s", m.Path.Terraform.Backup)
-
-				return err
-			}
-
-			removedItems = append(removedItems, m.Path.Terraform.Backup)
 		}
 
 	default:
