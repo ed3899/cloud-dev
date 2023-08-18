@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/ed3899/kumo/common/iota"
+	"github.com/ed3899/kumo/utils/file"
 	"github.com/samber/oops"
 	"go.uber.org/zap"
 )
@@ -22,57 +23,107 @@ func (m *Manager) Clean() error {
 	)
 	defer logger.Sync()
 
-	err := os.Remove(m.Path.Executable)
-	if err != nil {
-		logger.Error("failed to remove executable", zap.Error(err))
-	}
-	logger.Info("removed executable", zap.String("path", m.Path.Executable))
+	removedItems := []string{}
 
-	err = os.Remove(m.Path.Vars)
-	if err != nil {
-		logger.Error("failed to remove vars file", zap.Error(err))
-	}
-	logger.Info("removed vars file", zap.String("path", m.Path.Vars))
+	if file.IsFilePresent(m.Path.Executable) {
+		err := os.Remove(m.Path.Executable)
+		if err != nil {
+			err = oopsBuilder.
+				Wrapf(err, "failed to remove %s", m.Path.Executable)
 
-	err = os.RemoveAll(m.Path.Dir.Plugins)
-	if err != nil {
-		logger.Error("failed to remove plugins directory", zap.Error(err))
+			return err
+		}
+
+		removedItems = append(removedItems, m.Path.Executable)
 	}
-	logger.Info("removed plugins directory", zap.String("path", m.Path.Dir.Plugins))
+
+	if file.IsFilePresent(m.Path.Vars) {
+		err := os.Remove(m.Path.Vars)
+		if err != nil {
+			err = oopsBuilder.
+				Wrapf(err, "failed to remove %s", m.Path.Vars)
+
+			return err
+		}
+
+		removedItems = append(removedItems, m.Path.Vars)
+	}
+
+	if file.IsFilePresent(m.Path.Dir.Plugins) {
+		err := os.RemoveAll(m.Path.Dir.Plugins)
+		if err != nil {
+			err = oopsBuilder.
+				Wrapf(err, "failed to remove %s", m.Path.Dir.Plugins)
+
+			return err
+		}
+
+		removedItems = append(removedItems, m.Path.Dir.Plugins)
+	}
 
 	switch m.Tool.Iota() {
 	case iota.Packer:
-		err = os.Remove(m.Path.PackerManifest)
-		if err != nil {
-			logger.Error("failed to remove packer manifest file", zap.Error(err))
+		if file.IsFilePresent(m.Path.PackerManifest) {
+			err := os.Remove(m.Path.PackerManifest)
+			if err != nil {
+				err = oopsBuilder.
+					Wrapf(err, "failed to remove %s", m.Path.PackerManifest)
+
+				return err
+			}
+
+			removedItems = append(removedItems, m.Path.PackerManifest)
 		}
-		logger.Info("removed packer manifest file", zap.String("path", m.Path.PackerManifest))
 
 	case iota.Terraform:
-		err = os.Remove(m.Path.Terraform.Lock)
-		if err != nil {
-			logger.Error("failed to remove terraform lock file", zap.Error(err))
-		}
-		logger.Info("removed terraform lock file", zap.String("path", m.Path.Terraform.Lock))
+		if file.IsFilePresent(m.Path.Terraform.Lock) {
+			err := os.Remove(m.Path.Terraform.Lock)
+			if err != nil {
+				err = oopsBuilder.
+					Wrapf(err, "failed to remove %s", m.Path.Terraform.Lock)
 
-		err = os.Remove(m.Path.Terraform.State)
-		if err != nil {
-			logger.Error("failed to remove terraform state file", zap.Error(err))
-		}
-		logger.Info("removed terraform state file", zap.String("path", m.Path.Terraform.State))
+				return err
+			}
 
-		err = os.Remove(m.Path.Terraform.Backup)
-		if err != nil {
-			logger.Error("failed to remove terraform backup file", zap.Error(err))
+			removedItems = append(removedItems, m.Path.Terraform.Lock)
 		}
-		logger.Info("removed terraform backup file", zap.String("path", m.Path.Terraform.Backup))
+
+		if file.IsFilePresent(m.Path.Terraform.State) {
+			err := os.Remove(m.Path.Terraform.State)
+			if err != nil {
+				err = oopsBuilder.
+					Wrapf(err, "failed to remove %s", m.Path.Terraform.State)
+
+				return err
+			}
+
+			removedItems = append(removedItems, m.Path.Terraform.State)
+		}
+
+		if file.IsFilePresent(m.Path.Terraform.Backup) {
+			err := os.Remove(m.Path.Terraform.Backup)
+			if err != nil {
+				err = oopsBuilder.
+					Wrapf(err, "failed to remove %s", m.Path.Terraform.Backup)
+
+				return err
+			}
+
+			removedItems = append(removedItems, m.Path.Terraform.Backup)
+		}
 
 	default:
-		err = oopsBuilder.
+		err := oopsBuilder.
 			Errorf("unknown tool: %#v", m.Tool)
 
 		return err
 	}
+
+	logger.Info("cleaned up!",
+		zap.String("cloud", m.Cloud.Name()),
+		zap.String("tool", m.Tool.Name()),
+		zap.Strings("removed items", removedItems),
+	)
 
 	return nil
 }
