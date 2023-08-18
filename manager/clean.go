@@ -1,9 +1,10 @@
 package manager
 
 import (
+	"fmt"
 	"os"
+	"sync"
 
-	"github.com/ed3899/kumo/common/iota"
 	"github.com/ed3899/kumo/utils/file"
 	"github.com/samber/oops"
 	"go.uber.org/zap"
@@ -20,74 +21,72 @@ func (m *Manager) Clean() error {
 	)
 	defer logger.Sync()
 
-	commonItems := []string{
-		m.Path.Executable,
+	unsuccesfulItems := make(chan *UnsuccesfulItem, 5)
+	removedItems := make(chan string, 5)
+	itemsGroup := &sync.WaitGroup{}
+
+	items := []string{
 		m.Path.Vars,
 		m.Path.Dir.Plugins,
-	}
-	removedItems := []string{}
-
-	for _, i := range commonItems {
-		if file.IsFilePresent(i) {
-			err := os.Remove(i)
-			if err != nil {
-				err = oopsBuilder.
-					Wrapf(err, "failed to remove %s", i)
-
-				return err
-			}
-
-			removedItems = append(removedItems, i)
-		}
+		m.Path.PackerManifest,
+		m.Path.Terraform.Lock,
+		m.Path.Terraform.State,
+		m.Path.Terraform.Backup,
 	}
 
-	switch m.Tool.Iota() {
-	case iota.Packer:
-		if file.IsFilePresent(m.Path.PackerManifest) {
-			err := os.Remove(m.Path.PackerManifest)
-			if err != nil {
-				err = oopsBuilder.
-					Wrapf(err, "failed to remove %s", m.Path.PackerManifest)
-
-				return err
-			}
-
-			removedItems = append(removedItems, m.Path.PackerManifest)
-		}
-
-	case iota.Terraform:
-		terraformItems := []string{
-			m.Path.Terraform.Lock,
-			m.Path.Terraform.State,
-			m.Path.Terraform.Backup,
-		}
-
-		for _, t := range terraformItems {
-			if file.IsFilePresent(t) {
-				err := os.Remove(t)
+	for _, c := range items {
+		itemsGroup.Add(1)
+		go func(item string) {
+			defer itemsGroup.Done()
+			if file.IsFilePresent(item) {
+				err := os.Remove(item)
 				if err != nil {
-					err = oopsBuilder.
-						Wrapf(err, "failed to remove %s", t)
+					err = fmt.Errorf("failed to remove %s", item)
 
-					return err
+					unsuccesfulItems <- &UnsuccesfulItem{
+						Item: item,
+						Err:  err,
+					}
+
+					return
 				}
 
-				removedItems = append(removedItems, t)
+				removedItems <- item
 			}
-		}
-
-	default:
-		err := oopsBuilder.
-			Errorf("unknown tool: %#v", m.Tool)
-
-		return err
+		}(c)
 	}
 
-	logger.Info("cleaned up!",
-		zap.String("cloud", m.Cloud.Name()),
-		zap.String("tool", m.Tool.Name()),
-		zap.Strings("removed items", removedItems),
-	)
+	go func() {
+		defer close(unsuccesfulItems)
+		defer close(removedItems)
+		itemsGroup.Wait()
+	}()
+
+	for u := range unsuccesfulItems {
+		if u != nil {
+			logger.Error("failed to remove item",
+				zap.String("tool", m.Tool.Name()),
+				zap.String("cloud", m.Cloud.Name()),
+				zap.String("item", u.Item),
+				zap.Error(u.Err),
+			)
+		}
+	}
+
+	for r := range removedItems {
+		if r != "" {
+			logger.Info("removed item",
+				zap.String("tool", m.Tool.Name()),
+				zap.String("cloud", m.Cloud.Name()),
+				zap.String("item", r),
+			)
+		}
+	}
 
 	return nil
+}
+
+type UnsuccesfulItem struct {
+	Item string
+	Err  error
 }
