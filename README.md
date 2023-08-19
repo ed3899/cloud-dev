@@ -126,8 +126,8 @@ Once kumo completes, follow these steps:
 
   1. SSH into your instance with `ssh -i kumossh kumo`
      - If you are on Windows, please refer to the [Q&A](#how-do-i-fix-the-broad-permissions-error-when-trying-to-ssh-to-my-instance-on-windows-from-powershell) section for guidance on how to fix the broad permissions error when trying to *SSH* to your instance from *PowerShell*.
-
-If you want to remove your *AMI*, you can do so from your cloud management console. We follow the same philoshophy as *Packer*. You build it, you manage it.
+     - If you want a remote ssh session on VSCode please refer to [Q&A](#how-to-remote-ssh-from-vs-code)
+     - If you want to remove your *AMI*, you can do so from your cloud management console. We follow the same philoshophy as *Packer*. You build it, you manage it.
 
 ## Tools
 
