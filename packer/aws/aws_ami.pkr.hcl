@@ -14,7 +14,6 @@ locals {
   AWS_EC2_INSTANCE_USERNAME          = lower(trimspace(regex_replace(var.AWS_EC2_INSTANCE_USERNAME, "\\s+", "-")))
   AWS_EC2_INSTANCE_USERNAME_PASSWORD = trimspace(var.AWS_EC2_INSTANCE_USERNAME_PASSWORD)
   AWS_EC2_INSTANCE_USERNAME_HOME     = trimspace(var.AWS_EC2_INSTANCE_USERNAME_HOME)
-  AWS_EC2_INSTANCE_SSH_KEY_NAME      = format("kumokey-%s-%s-%s", local.AWS_AMI_NAME, local.AWS_EC2_INSTANCE_USERNAME, formatdate("DD-MMM-YY-hh-mm-ss-ZZZ", timestamp()))
 
   AWS_EC2_ANSIBLE_STAGING_DIRECTORY_INTERNAL = trimspace(var.AWS_EC2_ANSIBLE_STAGING_DIRECTORY_INTERNAL)
   AWS_EC2_PUBLIC_DIRECTORY_INTERNAL          = trimspace(var.AWS_EC2_PUBLIC_DIRECTORY_INTERNAL)
@@ -68,7 +67,6 @@ source "amazon-ebs" "ubuntu" {
     Base_AMI_OwnerName = "{{ .SourceAMIOwnerName }}"
     ToolsInstalled     = local.ANSIBLE_TAGS
     AMI_User           = local.AWS_EC2_INSTANCE_USERNAME
-    SSH_Key_Name       = local.AWS_EC2_INSTANCE_SSH_KEY_NAME
   }
 }
 
@@ -109,8 +107,6 @@ build {
       "--extra-vars",
       "AWS_EC2_INSTANCE_USERNAME_HOME=${local.AWS_EC2_INSTANCE_USERNAME_HOME}",
       "--extra-vars",
-      "AWS_EC2_INSTANCE_SSH_KEY_NAME=${local.AWS_EC2_INSTANCE_SSH_KEY_NAME}",
-      "--extra-vars",
       "AWS_EC2_SSH_USERNAME=${local.AWS_EC2_SSH_USERNAME}",
       "--extra-vars",
       "GIT_USERNAME=${local.GIT_USERNAME}",
@@ -127,12 +123,6 @@ build {
       "--extra-vars",
       "AWS_EC2_INSTANCE_USERNAME_PASSWORD=${local.AWS_EC2_INSTANCE_USERNAME_PASSWORD}"
     ]
-  }
-
-  provisioner "file" {
-    source      = "${local.AWS_EC2_PUBLIC_DIRECTORY_INTERNAL}/${local.AWS_EC2_INSTANCE_SSH_KEY_NAME}"
-    destination = "../../"
-    direction   = "download"
   }
 
   provisioner "shell" {
