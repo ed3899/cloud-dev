@@ -36,7 +36,8 @@ A cloud development environment you can customize with a wide range of tools.
     - [Git aliases](#git-aliases)
   - [Q\&A](#qa)
   - [What are the recommended Ubuntu images?](#what-are-the-recommended-ubuntu-images)
-    - [Ubuntu Jammy 22.04 AMD64](#ubuntu-jammy-2204-amd64)
+    - [Amazon](#amazon)
+      - [Ubuntu Jammy 22.04 AMD64](#ubuntu-jammy-2204-amd64)
   - [How to SSH into an instance?](#how-to-ssh-into-an-instance)
   - [How do I fix the broad permissions error when trying to ssh to my instance on Windows from Powershell?](#how-do-i-fix-the-broad-permissions-error-when-trying-to-ssh-to-my-instance-on-windows-from-powershell)
   - [How secure are my cloud credentials?](#how-secure-are-my-cloud-credentials)
@@ -107,9 +108,9 @@ A cloud development environment you can customize with a wide range of tools.
         AmiId: CUSTOM_VALUE #Optional, in case you want to deploy an ami other than the last built
     ```
 
-4. At the root of your project, run the following command:
+4. At the root of your project, run the following commands:
 
-    ```.exe
+    ```bash
     kumo build
     kumo up
     kumo destroy
@@ -123,8 +124,8 @@ Assumming you've already ran `kumo build` and `kumo up`.
 
 Once kumo completes, follow these steps:
 
-  1. If you are on Windows, please refer to the [Q&A](#how-do-i-fix-the-broad-permissions-error-when-trying-to-ssh-to-my-instance-on-windows-from-powershell) section for guidance on how to fix the broad permissions error when trying to *SSH* to your instance from *PowerShell*.
-  2. SSH into your instance with `ssh -i kumossh kumo`
+  1. SSH into your instance with `ssh -i kumossh kumo`
+     - If you are on Windows, please refer to the [Q&A](#how-do-i-fix-the-broad-permissions-error-when-trying-to-ssh-to-my-instance-on-windows-from-powershell) section for guidance on how to fix the broad permissions error when trying to *SSH* to your instance from *PowerShell*.
 
 If you want to remove your *AMI*, you can do so from your cloud management console. We follow the same philoshophy as *Packer*. You build it, you manage it.
 
@@ -312,11 +313,13 @@ We haven't forgotten about *Git*! In fact, we have also included some helpful *G
 
 ## What are the recommended Ubuntu images?
 
-When choosing an image on any cloud, it is important to consider various factors. While technically any available image can be picked, some may require additional considerations. If you have successfully tried a new image, we encourage you to open an issue or initiate a pull request.
+When choosing an image on any cloud, it is important to consider various factors. While technically any available image can be picked, some may require additional considerations. If you have successfully tried a new image, we encourage you to open an issue or initiate a pull request to add it to the list.
 
 For now, here is a list of recommended images:
 
-### Ubuntu Jammy 22.04 AMD64
+### Amazon
+
+#### Ubuntu Jammy 22.04 AMD64
 
 ```yaml
     AMI:
@@ -328,8 +331,6 @@ For now, here is a list of recommended images:
           - "099720109477"
         User: ubuntu
 ```
-
-By selecting the appropriate image based on the provided details, you can ensure compatibility and meet your requirements when working on AWS.
 
 ## How to SSH into an instance?
 
@@ -464,4 +465,4 @@ In our project, we aim to achieve the following objectives:
 - **Security and Shared Responsibility**: We prioritize security and advocate for shared responsibility when it comes to managing cloud keys. It is crucial to maintain a secure and controlled environment.
 - **Preference for Essential Tools**: We prefer tools that are essential for productive development across all platforms, extending beyond the scope of simple installation commands. Additionally, we encourage leveraging Docker or related technologies for easy accessibility.
 - **Readable documentation**: Our project emphasizes the importance of clear and concise documentation. By providing well-documented resources, we aim to enhance understanding and assist users in utilizing our tools effectively.
-- **Go Zen**: Throughtout the initial prototying phase we notice that the more we try to go agaist the goish way of doing things, the more redesigning was needed. Things like immutability, functional oriented, monads, cloning, etc (which are not by default in go). Long story short, accept *Go* by what it is and don't try to make it behave like another language unless you want to shoot yourself in the foot.
+- **Go Zen**: Throughtout the initial prototying phase we noticed that the more we tried to go agaist the goish way of doing things, the more redesigning was needed. Aiming for immutability, functional oriented, monads, cloning, etc although amazing for robust and declarative code they are not by default in *Go* and go against the language nature. Long story short, accept *Go* by what it is and don't try to make it behave like another language unless you want to shoot yourself in the foot.
