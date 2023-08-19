@@ -17,8 +17,8 @@ import (
 func Reset() *cobra.Command {
 	return &cobra.Command{
 		Use:   "reset",
-		Short: "Resets kumo state. Doesn't delete AMIs or deployments",
-		Long:  `Deletes all the files created by kumo under all available clouds found in the kumo.config.yaml file. This command should be used only if you wish to start from scratch, without any state. Usually this shouldn't be necessary as the size of the files created by kumo is very small. Can be run any amount of time, only deletes the files or directories if they exist.`,
+		Short: "Resets kumo state. Doesn't delete AMIs or deployments. Be cautious!",
+		Long:  `Deletes all the files created by kumo under all available clouds found in the kumo.config.yaml file. This command should be used only if you wish to start from scratch, without any state. Usually this shouldn't be necessary as the size of the files created by kumo is very small.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			oopsBuilder := oops.
 				Code("Reset").
