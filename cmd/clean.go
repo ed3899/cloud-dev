@@ -49,7 +49,8 @@ func Clean() *cobra.Command {
 
 			unsuccesfulItems := make(chan *UnsuccesfulItem, 5)
 			removedItems := make(chan string, 5)
-			_ = &sync.WaitGroup{}
+			errChan := make(chan error, 5)
+			wg := &sync.WaitGroup{}
 
 			clouds := []iota.Cloud{
 				iota.Aws,
@@ -76,11 +77,13 @@ func Clean() *cobra.Command {
 
 			// Append packer manifests and terraform files to the list of items to be removed.
 			for _, c := range clouds {
-				additionalItems = append(additionalItems, filepath.Join(
-					currentExecutablePath,
-					iota.Packer.Name(),
-					c.Name(),
-				))
+				additionalItems = append(
+					additionalItems,
+					filepath.Join(
+						currentExecutablePath,
+						iota.Packer.Name(),
+						c.Name(),
+					))
 
 				additionalItems = append(additionalItems, terraformFilePath(c, constants.TERRAFORM_LOCK))
 				additionalItems = append(additionalItems, terraformFilePath(c, constants.TERRAFORM_STATE))
@@ -88,7 +91,10 @@ func Clean() *cobra.Command {
 			}
 
 			for _, a := range additionalItems {
+				wg.Add(1)
+
 				go func(item string) {
+					defer wg.Done()
 					err := os.RemoveAll(item)
 					if err != nil {
 						unsuccesfulItems <- &UnsuccesfulItem{
@@ -102,25 +108,99 @@ func Clean() *cobra.Command {
 			}
 
 			for _, c := range clouds {
+				wg.Add(1)
+
 				go func(cloud iota.Cloud) {
+					defer wg.Done()
 					_manager, err := manager.NewManager(cloud, iota.Packer)
 					if err != nil {
 						err = oopsBuilder.
-							Wrapf(err, "failed to create manager for cloud %s", cloud.Name())
+							Wrapf(err, "failed to create manager for cloud %s and tool %s", cloud.Name(), iota.Packer.Name())
 
 						errChan <- err
 					}
 
-					err = _manager.Clean()
+					err = _manager.DeletePluginsDir()
 					if err != nil {
 						err = oopsBuilder.
-							Wrapf(err, "failed to clean up cloud %s", cloud.Name())
+							Wrapf(err, "failed to delete %s", _manager.Path.Dir.Plugins)
+
+						unsuccesfulItems <- &UnsuccesfulItem{
+							Item: _manager.Path.Dir.Plugins,
+							Err:  err,
+						}
+					}
+
+					removedItems <- _manager.Path.Dir.Plugins
+
+					err = _manager.DeleteVars()
+					if err != nil {
+						err = oopsBuilder.
+							Wrapf(err, "failed to delete %s", _manager.Path.Vars)
+
+						unsuccesfulItems <- &UnsuccesfulItem{
+							Item: _manager.Path.Vars,
+							Err:  err,
+						}
+					}
+
+					removedItems <- _manager.Path.Vars
+				}(c)
+
+				go func(cloud iota.Cloud) {
+					defer wg.Done()
+					_manager, err := manager.NewManager(cloud, iota.Terraform)
+					if err != nil {
+						err = oopsBuilder.
+							Wrapf(err, "failed to create manager for cloud %s and tool %s", cloud.Name(), iota.Terraform.Name())
 
 						errChan <- err
 					}
+
+					err = _manager.DeletePluginsDir()
+					if err != nil {
+						err = oopsBuilder.
+							Wrapf(err, "failed to delete %s", _manager.Path.Dir.Plugins)
+
+						unsuccesfulItems <- &UnsuccesfulItem{
+							Item: _manager.Path.Dir.Plugins,
+							Err:  err,
+						}
+					}
+
+					removedItems <- _manager.Path.Dir.Plugins
+
+					err = _manager.DeleteVars()
+					if err != nil {
+						err = oopsBuilder.
+							Wrapf(err, "failed to delete %s", _manager.Path.Vars)
+
+						unsuccesfulItems <- &UnsuccesfulItem{
+							Item: _manager.Path.Vars,
+							Err:  err,
+						}
+					}
+
+					removedItems <- _manager.Path.Vars
 				}(c)
 			}
 
+			wg.Wait()
+			close(unsuccesfulItems)
+			close(removedItems)
+			close(errChan)
+
+			for err := range errChan {
+				logger.Error("failure", zap.Error(err))
+			}
+
+			for u := range unsuccesfulItems {
+				logger.Error("failed to remove item", zap.String("item", u.Item), zap.Error(u.Err))
+			}
+
+			for r := range removedItems {
+				logger.Info("removed item", zap.String("item", r))
+			}
 		},
 	}
 
