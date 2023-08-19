@@ -137,6 +137,18 @@ func Reset() *cobra.Command {
 				),
 			}
 
+			packerManifestPath := func(
+				cloud iota.Cloud,
+				filename string,
+			) string {
+				return filepath.Join(
+					currentExecutableDir,
+					iota.Packer.Name(),
+					cloud.Name(),
+					filename,
+				)
+			}
+
 			terraformFilePath := func(
 				cloud iota.Cloud,
 				filename string,
@@ -153,16 +165,12 @@ func Reset() *cobra.Command {
 			for _, c := range clouds {
 				additionalItems = append(
 					additionalItems,
-					filepath.Join(
-						currentExecutableDir,
-						iota.Packer.Name(),
-						c.Name(),
-						constants.PACKER_MANIFEST,
-					))
-
-				additionalItems = append(additionalItems, terraformFilePath(c, constants.TERRAFORM_LOCK))
-				additionalItems = append(additionalItems, terraformFilePath(c, constants.TERRAFORM_STATE))
-				additionalItems = append(additionalItems, terraformFilePath(c, constants.TERRAFORM_BACKUP))
+					packerManifestPath(c, constants.PACKER_MANIFEST),
+					packerManifestPath(c, constants.PACKER_MANIFEST_LOCK),
+					terraformFilePath(c, constants.TERRAFORM_LOCK),
+					terraformFilePath(c, constants.TERRAFORM_STATE),
+					terraformFilePath(c, constants.TERRAFORM_BACKUP),
+				)
 			}
 
 			for _, a := range additionalItems {
