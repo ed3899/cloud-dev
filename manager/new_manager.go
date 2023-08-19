@@ -71,7 +71,6 @@ func NewManager(
 		Cloud: cloud.Iota(),
 		Tool:  tool.Iota(),
 		Path: &Path{
-			PackerManifest: pathToPackerManifest,
 			Executable: filepath.Join(
 				currentExecutableDir,
 				iota.Dependencies.Name(),
@@ -80,8 +79,8 @@ func NewManager(
 			),
 			Template: &Template{
 				Merged: templatePath(constants.MERGED_TEMPLATE_NAME),
-				Cloud:  templatePath(cloud.Template().Cloud),
-				Base:   templatePath(cloud.Template().Base),
+				Cloud:  templatePath(cloud.TemplateFiles().Cloud),
+				Base:   templatePath(cloud.TemplateFiles().Base),
 			},
 			Vars: filepath.Join(
 				currentExecutableDir,
@@ -152,7 +151,6 @@ type Manager struct {
 }
 
 type Path struct {
-	PackerManifest string
 	Executable     string
 	Vars           string
 	Terraform      *Terraform

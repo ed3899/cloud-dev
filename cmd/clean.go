@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"sync"
 
 	"github.com/ed3899/kumo/common/iota"
 	"github.com/ed3899/kumo/manager"
@@ -37,29 +38,51 @@ func Clean() *cobra.Command {
 				}
 			}()
 
-			currentExecutable, err := os.Executable()
+			currentExecutablePath, err := os.Executable()
 			if err != nil {
-				err = oopsBuilder.
+				err := oopsBuilder.
 					Wrapf(err, "failed to get current executable path")
 
 				panic(err)
 			}
 
-			err = os.RemoveAll(
-				filepath.Join(
-					filepath.Dir(currentExecutable),
-					iota.Dependencies.Name(),
-				),
-			)
-			if err != nil {
-				logger.Error("failed to remove dependencies directory", zap.Error(err))
-			}
+			unsuccesfulItems := make(chan *UnsuccesfulItem, 5)
+			removedItems := make(chan string, 5)
+			_ = &sync.WaitGroup{}
 
 			clouds := []iota.Cloud{
 				iota.Aws,
 			}
 
-			errChan := make(chan error, len(clouds))
+			commonItems := []string{
+				filepath.Join(
+					currentExecutablePath,
+					iota.Dependencies.Name(),
+				),
+			}
+
+			// Append packer manifests
+			for _, c := range clouds {
+				commonItems = append(commonItems, filepath.Join(
+					currentExecutablePath,
+					iota.Packer.Name(),
+					c.Name(),
+				))
+			}
+
+			for _, c := range commonItems {
+				go func(item string) {
+					err := os.RemoveAll(item)
+					if err != nil {
+						unsuccesfulItems <- &UnsuccesfulItem{
+							Item: item,
+							Err:  err,
+						}
+					}
+
+					removedItems <- item
+				}(c)
+			}
 
 			for _, c := range clouds {
 				go func(cloud iota.Cloud) {
@@ -85,4 +108,9 @@ func Clean() *cobra.Command {
 	}
 
 	return clean
+}
+
+type UnsuccesfulItem struct {
+	Item string
+	Err  error
 }

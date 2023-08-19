@@ -6,16 +6,16 @@ import (
 	"github.com/samber/oops"
 )
 
-func (m *Manager) DeleteExecutable() error {
+func (m *Manager) DeletePluginsDir() error {
 	oopsBuilder := oops.
-		Code("DeleteExecutable").
+		Code("DeletePluginsDir").
 		In("manager").
 		Tags("Manager")
 
-	err := os.Remove(m.Path.Executable)
+	err := os.RemoveAll(m.Path.Dir.Plugins)
 	if err != nil {
 		err := oopsBuilder.
-			Wrapf(err, "failed to remove executable %s", m.Path.Executable)
+			Wrapf(err, "failed to remove plugins directory")
 
 		return err
 	}
