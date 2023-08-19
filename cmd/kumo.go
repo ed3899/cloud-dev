@@ -17,14 +17,15 @@ var kumo = &cobra.Command{
 	Long:  `🌩️ Your quick and easy cloud development environment.`,
 }
 
-
 func Commands() *CobraCmds {
 	return &CobraCmds{
 		Build(),
 		Up(),
 		Destroy(),
+		Reset(),
 	}
 }
+
 type CobraCmds []*cobra.Command
 
 func Execute() {
