@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"sync"
 
+	"github.com/ed3899/kumo/common/constants"
 	"github.com/ed3899/kumo/common/iota"
 	"github.com/ed3899/kumo/manager"
 	"github.com/samber/oops"
@@ -54,23 +55,39 @@ func Clean() *cobra.Command {
 				iota.Aws,
 			}
 
-			commonItems := []string{
+			additionalItems := []string{
 				filepath.Join(
 					currentExecutablePath,
 					iota.Dependencies.Name(),
 				),
 			}
 
-			// Append packer manifests
+			terraformFilePath := func(
+				cloud iota.Cloud,
+				filename string,
+			) string {
+				return filepath.Join(
+					currentExecutablePath,
+					iota.Terraform.Name(),
+					cloud.Name(),
+					filename,
+				)
+			}
+
+			// Append packer manifests and terraform files to the list of items to be removed.
 			for _, c := range clouds {
-				commonItems = append(commonItems, filepath.Join(
+				additionalItems = append(additionalItems, filepath.Join(
 					currentExecutablePath,
 					iota.Packer.Name(),
 					c.Name(),
 				))
+
+				additionalItems = append(additionalItems, terraformFilePath(c, constants.TERRAFORM_LOCK))
+				additionalItems = append(additionalItems, terraformFilePath(c, constants.TERRAFORM_STATE))
+				additionalItems = append(additionalItems, terraformFilePath(c, constants.TERRAFORM_BACKUP))
 			}
 
-			for _, c := range commonItems {
+			for _, a := range additionalItems {
 				go func(item string) {
 					err := os.RemoveAll(item)
 					if err != nil {
@@ -81,7 +98,7 @@ func Clean() *cobra.Command {
 					}
 
 					removedItems <- item
-				}(c)
+				}(a)
 			}
 
 			for _, c := range clouds {
