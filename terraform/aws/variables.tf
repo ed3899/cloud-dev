@@ -1,3 +1,23 @@
+variable "AWS_ACCESS_KEY_ID" {
+  description = "The AWS access key ID to use"
+  type        = string
+
+  validation {
+    condition     = length(var.AWS_ACCESS_KEY_ID) > 0
+    error_message = "AWS_ACCESS_KEY_ID must be present"
+  }
+}
+
+variable "AWS_SECRET_ACCESS_KEY" {
+  description = "The AWS secret access key to use"
+  type        = string
+
+  validation {
+    condition     = length(var.AWS_SECRET_ACCESS_KEY) > 0
+    error_message = "AWS_SECRET_ACCESS_KEY must be present"
+  }
+}
+
 variable "AWS_REGION" {
   description = "The AWS region to use"
   type        = string

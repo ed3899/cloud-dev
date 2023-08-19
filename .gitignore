@@ -29,6 +29,7 @@ bin/
 *manifest.json*
 
 packer.exe
+terraform.exe
 
 kumo.exe
 
@@ -54,3 +55,7 @@ ginkgo.report
 temp_file*
 instance_ip
 kumossh
+merged
+
+*.exe
+*darwin*
