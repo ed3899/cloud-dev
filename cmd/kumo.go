@@ -12,9 +12,10 @@ func init() {
 }
 
 var kumo = &cobra.Command{
-	Use:   "kumo",
-	Short: "🌩️ Your quick and easy cloud development environment.",
-	Long:  `🌩️ Your quick and easy cloud development environment.`,
+	Use:     "kumo",
+	Short:   "🌩️ Your quick and easy cloud development environment.",
+	Long:    `🌩️ Your quick and easy cloud development environment.`,
+	Version: "0.0.0",
 }
 
 func Commands() *CobraCmds {
