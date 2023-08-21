@@ -59,7 +59,7 @@ A cloud development environment you can customize with a wide range of tools.
 
 ## How-to
 
-1. Download the binary according to your operative system and architecture.
+1. [Download the latest binary](https://github.com/ed3899/kumo/tags) according to your operative system and architecture.
 2. Add the `kumo.exe` binary to your PATH
 3. Create a new dir and a `kumo.config.yaml` file (For now we are only compatible with AWS)
 
