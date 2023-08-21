@@ -25,7 +25,7 @@ A cloud development environment you can customize with a wide range of tools.
       - [Go](#go)
       - [Node.js](#nodejs)
       - [Python](#python)
-    - [Ruby](#ruby)
+      - [Ruby](#ruby)
       - [Rust](#rust)
     - [Terminal](#terminal)
       - [Starship](#starship)
@@ -252,7 +252,7 @@ Replace `<ADEQUATE_URL>`, `<ADEQUATE_SHA256>`, and `<ADEQUATE_PYTHON_VERSION>` w
 
 The reason we suggest using *miniconda* is to save storage space from the start. Installing *anaconda* requires at least 3GB of storage, which would require deploying an *AMI* with a larger volume. The decision to use additional storage is up to you.
 
-### Ruby
+#### Ruby
 
 Add `ruby`.
 
