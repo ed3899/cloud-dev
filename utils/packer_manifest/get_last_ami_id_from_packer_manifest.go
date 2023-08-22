@@ -30,7 +30,7 @@ func GetLastBuiltAmiIdFromPackerManifest(
 ) (string, error) {
 	packerManifest := &PackerManifest{}
 	oopsBuilder := oops.
-		Code("get_last_built_ami_id_failed").
+		Code("GetLastBuiltAmiIdFromPackerManifest").
 		With("packerManifestAbsPath", packerManifestAbsPath)
 
 	// Check if packer manifest path is absolute
