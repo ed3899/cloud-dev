@@ -8,7 +8,7 @@ import (
 )
 
 var _ = Describe("BuildHashicorpUrl", func() {
-	It("should build the correct URL", func() {
+	It("should build the correct URL", Label("unit"), func() {
 		name := "terraform"
 		version := "0.12.0"
 		os := "linux"

@@ -40,7 +40,7 @@ var _ = Describe("Download", func() {
 		_ = os.Remove(path)
 	})
 
-	Context("when the URL is valid", func() {
+	Context("when the URL is valid", Label("unit"), func() {
 		It("should download content from URL and save it to the file", func() {
 			bytesDownloaded := 0
 			bytesDownloadedChan := make(chan int, 1024)
@@ -70,7 +70,7 @@ var _ = Describe("Download", func() {
 		})
 	})
 
-	Context("when the URL is invalid", func() {
+	Context("when the URL is invalid", Label("unit"), func() {
 		It("should return an error", func() {
 			err := Download("invalid-url", path, nil)
 			Expect(err).To(HaveOccurred())

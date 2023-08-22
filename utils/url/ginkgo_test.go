@@ -9,5 +9,5 @@ import (
 
 func TestUrl(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Url Suite")
+	RunSpecs(t, "Url Suite", Label("utils", "url"))
 }

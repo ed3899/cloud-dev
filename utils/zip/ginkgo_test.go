@@ -9,5 +9,5 @@ import (
 
 func TestZip(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Zip Suite")
+	RunSpecs(t, "Zip Suite", Label("utils", "zip"))
 }

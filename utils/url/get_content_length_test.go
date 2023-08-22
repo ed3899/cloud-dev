@@ -9,7 +9,7 @@ import (
 )
 
 var _ = Describe("GetContentLength", func() {
-	Context("when the url is valid", func() {
+	Context("when the url is valid", Label("unit"), func() {
 		It("should return content length and no error for successful request", func() {
 			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.Header().Set("Content-Length", "12345")
@@ -23,7 +23,7 @@ var _ = Describe("GetContentLength", func() {
 		})
 	})
 
-	Context("when the url is not valid", func() {
+	Context("when the url is not valid", Label("unit"), func() {
 		It("should return error for unsuccessful request", func() {
 			_, err := GetContentLength("non-existent-url")
 			Expect(err).To(HaveOccurred())
