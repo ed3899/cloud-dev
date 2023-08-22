@@ -12,16 +12,16 @@ import (
 
 var _ = Describe("unzipFile", func() {
 	var (
+		filename      = "test_file.txt"
 		content       = "test content"
 		mockZipReader *zip.Reader
 		mockDestDir   string
 	)
 
 	BeforeEach(func() {
+		// Temporary directory for testing
 		cwd, err := os.Getwd()
 		Expect(err).ToNot(HaveOccurred())
-
-		// Temporary directory for testing
 		mockDestDir = filepath.Join(cwd, "mock_dest")
 	})
 
@@ -38,7 +38,7 @@ var _ = Describe("unzipFile", func() {
 			mockZipWriter := zip.NewWriter(mockZipFile)
 
 			// Create a mock file
-			mockDestFile, err := mockZipWriter.Create("test_file.txt")
+			mockDestFile, err := mockZipWriter.Create(filename)
 			Expect(err).NotTo(HaveOccurred())
 
 			// Write content to the mock file
@@ -59,14 +59,14 @@ var _ = Describe("unzipFile", func() {
 		})
 	})
 
-	Context("with an invalid zip file", func() {
+	Context("with an invalid directory", func() {
 		It("should return an error", func() {
 			// Create a mock zip file in memory
 			mockZipFile := &bytes.Buffer{}
 			mockZipWriter := zip.NewWriter(mockZipFile)
 
 			// Create a mock file
-			mockDestFile, err := mockZipWriter.Create("test_file.txt")
+			mockDestFile, err := mockZipWriter.Create(filename)
 			Expect(err).NotTo(HaveOccurred())
 
 			// Write content to the mock file
