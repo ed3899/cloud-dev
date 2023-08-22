@@ -1,10 +1,12 @@
 package url
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"sync"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -12,20 +14,25 @@ import (
 
 var _ = Describe("Download", func() {
 	var (
+		content = "test data"
+
 		server *httptest.Server
-		url    string
 		path   string
 	)
 
 	BeforeEach(func() {
+		// Create a test server that returns the content
 		server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Content-Length", "9")
+			w.Header().Set("Content-Length", fmt.Sprintf("%d", len(content)))
 			w.WriteHeader(http.StatusOK)
-			w.Write([]byte("test data"))
+			w.Write([]byte(content))
 		}))
 
-		url = server.URL
-		path = filepath.Join(os.TempDir(), "test_download_file.txt")
+		// Create a temporary file to download to
+		cwd, err := os.Getwd()
+		Expect(err).NotTo(HaveOccurred())
+
+		path = filepath.Join(cwd, "test_download_file.txt")
 	})
 
 	AfterEach(func() {
@@ -33,22 +40,40 @@ var _ = Describe("Download", func() {
 		_ = os.Remove(path)
 	})
 
-	It("should download content from URL and save it to the file", func() {
-		var bytesDownloaded int
-		bytesDownloadedChan := make(chan int, 1024)
+	Context("when the URL is valid", func() {
+		It("should download content from URL and save it to the file", func() {
+			bytesDownloaded := 0
+			bytesDownloadedChan := make(chan int, 1024)
 
-		err := Download(url, path, bytesDownloadedChan)
-		close(bytesDownloadedChan)
-		for b := range bytesDownloadedChan {
-			bytesDownloaded += b
-		}
+			wg := &sync.WaitGroup{}
+			wg.Add(1)
 
-		Expect(err).NotTo(HaveOccurred())
-		Expect(bytesDownloaded).To(Equal(9)) // Length of "test data"
-		Expect(path).To(BeAnExistingFile())
+			go func() {
+				defer wg.Done()
 
-		content, err := os.ReadFile(path)
-		Expect(err).NotTo(HaveOccurred())
-		Expect(string(content)).To(Equal("test data"))
+				for b := range bytesDownloadedChan {
+					bytesDownloaded += b
+				}
+			}()
+
+			err := Download(server.URL, path, bytesDownloadedChan)
+			close(bytesDownloadedChan)
+			wg.Wait()
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(bytesDownloaded).To(Equal(len(content))) // Length of "test data"
+			Expect(path).To(BeAnExistingFile())
+
+			fileContent, err := os.ReadFile(path)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(string(fileContent)).To(Equal(content))
+		})
+	})
+
+	Context("when the URL is invalid", func() {
+		It("should return an error", func() {
+			err := Download("invalid-url", path, nil)
+			Expect(err).To(HaveOccurred())
+		})
 	})
 })
