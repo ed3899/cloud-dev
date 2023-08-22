@@ -4,9 +4,7 @@ import (
 	"github.com/samber/oops"
 )
 
-// Return the AMI ID to be used for deployment. If the lastBuildAmiId is empty, it will return an error.
-// If the amiIdFromConfig is empty, it will return the lastBuildAmiId. Otherwise, it will return the
-// amiIdFromConfig.
+// Returns the AMI ID to be used for deployment. The lastBuildAmiId can't be empty.
 func PickAmiId(
 	lastBuildAmiId,
 	amiIdFromConfig string,
