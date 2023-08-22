@@ -58,4 +58,31 @@ var _ = Describe("unzipFile", func() {
 			Expect(bytesUnzipped).To(Equal(int64(len(content))))
 		})
 	})
+
+	Context("with an invalid zip file", func() {
+		It("should return an error", func() {
+			// Create a mock zip file in memory
+			mockZipFile := &bytes.Buffer{}
+			mockZipWriter := zip.NewWriter(mockZipFile)
+
+			// Create a mock file
+			mockDestFile, err := mockZipWriter.Create("test_file.txt")
+			Expect(err).NotTo(HaveOccurred())
+
+			// Write content to the mock file
+			_, err = mockDestFile.Write([]byte(content))
+			Expect(err).NotTo(HaveOccurred())
+
+			err = mockZipWriter.Close()
+			Expect(err).NotTo(HaveOccurred())
+
+			// Create a mock zip reader
+			mockZipReader, err = zip.NewReader(bytes.NewReader(mockZipFile.Bytes()), int64(mockZipFile.Len()))
+			Expect(err).NotTo(HaveOccurred())
+
+			// Unzip the mock file
+			_, err = unzipFile(mockZipReader.File[0], ":invalid_dir")
+			Expect(err).To(HaveOccurred())
+		})
+	})
 })
