@@ -76,6 +76,8 @@ func Unzip(
 	return nil
 }
 
+// Unzips a file from a zip file to a destination path. The destination path is created if it doesn't exist.
+// Returns the number of bytes copied.
 func unzipFile(
 	zf *zip.File,
 	extractToPath string,
@@ -132,10 +134,7 @@ func unzipFile(
 	bytesCopied, err := io.Copy(destinationFile, zippedFile)
 	if err != nil {
 		err := oopsBuilder.
-			With("bytesCopied", bytesCopied).
-			With("zippedFile", zippedFile).
-			With("destinationFile", destinationFile).
-			Wrapf(err, "failed to copy zipped file to destination file: %s", zf.Name)
+			Wrapf(err, "failed to copy zipped file %#v to destination file: %s", zippedFile, destinationFile.Name())
 		return -1, err
 	}
 

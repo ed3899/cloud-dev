@@ -7,25 +7,27 @@ import (
 	"github.com/samber/oops"
 )
 
+// Returns the size of the zip file at the given path.
+// The path must be absolute.
 func GetZipSize(
-	absPathToZip string,
+	pathToZip string,
 ) (int64, error) {
 	oopsBuilder := oops.
-		Code("GetZipSizeWith").
+		Code("GetZipSize").
 		In("utils").
 		In("zip").
-		With("absPathToZip", absPathToZip)
+		With("pathToZip", pathToZip)
 
-	if !filepath.IsAbs(absPathToZip) {
+	if !filepath.IsAbs(pathToZip) {
 		err := oopsBuilder.
-			Errorf("path to zip is not absolute: %s", absPathToZip)
+			Errorf("path to zip is not absolute: %s", pathToZip)
 		return -1, err
 	}
 
-	zipFile, err := os.Open(absPathToZip)
+	zipFile, err := os.Open(pathToZip)
 	if err != nil {
 		err := oopsBuilder.
-			Wrapf(err, "failed to open zip file: %s", absPathToZip)
+			Wrapf(err, "failed to open zip file: %s", pathToZip)
 		return -1, err
 	}
 	defer zipFile.Close()
@@ -33,7 +35,7 @@ func GetZipSize(
 	zipInfo, err := zipFile.Stat()
 	if err != nil {
 		err := oopsBuilder.
-			Wrapf(err, "failed to get zip file info: %v", absPathToZip)
+			Wrapf(err, "failed to get zip file info: %v", pathToZip)
 		return -1, err
 	}
 
