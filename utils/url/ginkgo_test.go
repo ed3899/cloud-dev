@@ -1,4 +1,4 @@
-package zip
+package url
 
 import (
 	"testing"
@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestZip(t *testing.T) {
+func TestUrl(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Zip Suite", Label("utils", "zip"))
+	RunSpecs(t, "Url Suite", Label("utils", "url"))
 }

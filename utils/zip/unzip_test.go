@@ -31,7 +31,7 @@ var _ = Describe("unzipFile", func() {
 		Expect(err).NotTo(HaveOccurred())
 	})
 
-	Context("with a valid zip file", func() {
+	Context("with a valid zip file", Label("unit"), func() {
 		It("should unzip the file", func() {
 			// Create a mock zip file in memory
 			mockZipFile := &bytes.Buffer{}
@@ -59,7 +59,7 @@ var _ = Describe("unzipFile", func() {
 		})
 	})
 
-	Context("with an invalid directory", func() {
+	Context("with an invalid directory", Label("unit"), func() {
 		It("should return an error", func() {
 			// Create a mock zip file in memory
 			mockZipFile := &bytes.Buffer{}

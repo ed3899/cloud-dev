@@ -34,7 +34,7 @@ var _ = Describe("GetZipSize", func() {
 		Expect(err).ToNot(HaveOccurred())
 	})
 
-	Context("with a valid zip path", func() {
+	Context("with a valid zip path", Label("unit"), func() {
 		It("should return the size of the zip file", func() {
 			zipSize, err := GetZipSize(testZipFile.Name())
 			Expect(err).ToNot(HaveOccurred())
@@ -42,7 +42,7 @@ var _ = Describe("GetZipSize", func() {
 		})
 	})
 
-	Context("with an invalid zip path", func() {
+	Context("with an invalid zip path", Label("unit"), func() {
 		It("should return an error", func() {
 			_, err := GetZipSize("/invalid/path/to/zip")
 			Expect(err).To(HaveOccurred())
