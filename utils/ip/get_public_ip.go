@@ -8,7 +8,6 @@ import (
 )
 
 // Returns the public IP of the machine running the program.
-// Returns an empty string and an error if the call fails.
 //
 // Makes an external call.
 //
