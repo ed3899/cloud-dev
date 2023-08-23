@@ -1,12 +1,10 @@
 package host
 
-import "runtime"
-
-func HostIsCompatible() bool {
-	switch runtime.GOOS {
+func HostIsCompatible(os, arch string) bool {
+	switch os {
 	case "windows":
 
-		switch runtime.GOARCH {
+		switch arch {
 		case "386":
 			return true
 
@@ -19,7 +17,7 @@ func HostIsCompatible() bool {
 
 	case "darwin":
 
-		switch runtime.GOARCH {
+		switch arch {
 		case "amd64":
 			return true
 
