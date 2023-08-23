@@ -4,12 +4,12 @@ import (
 	"os"
 )
 
-// Returns true if the file at the given os.File exists, false otherwise.
+// Returns true if the file at the given path exists, false otherwise.
 func IsFilePresent(
-	absolutePath string,
+	path string,
 ) bool {
 	// Check if the file at the given absolute path exists
-	_, err := os.Stat(absolutePath)
+	_, err := os.Stat(path)
 	// If there is no error, it means the file exists
 	if err == nil {
 		return true

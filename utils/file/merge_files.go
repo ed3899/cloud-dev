@@ -8,6 +8,8 @@ import (
 	"github.com/samber/oops"
 )
 
+// Merges the content of the inputAbsFilePaths into a single file.
+// The merged file is created at outputFileAbsPath.
 func MergeFilesTo(
 	outputFileAbsPath string,
 	inputAbsFilePaths ...string,
