@@ -8,8 +8,10 @@ import (
 )
 
 // Reads the first IP address from a file.
-//	Example:
+//
+// Example:
 //	("path/to/file_with_an_ip_address.txt") -> "192.168.1.1"
+//
 // Assuming the file contains a valid IP address.
 func ReadIpFromFile(
 	path string,

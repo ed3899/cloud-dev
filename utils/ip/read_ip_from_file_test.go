@@ -36,7 +36,7 @@ var _ = Describe("ReadIpFromFile", func() {
 			Expect(err).NotTo(HaveOccurred())
 		})
 
-		It("should read the IP address from a file", func() {
+		It("should read the IP address from a file", Label("unit"), func() {
 			ip, err := ReadIpFromFile(testFileWithIp)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(ip).To(MatchRegexp("\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b"))
@@ -68,7 +68,7 @@ var _ = Describe("ReadIpFromFile", func() {
 			Expect(err).NotTo(HaveOccurred())
 		})
 
-		It("should return an error", func() {
+		It("should return an error", Label("unit"), func() {
 			ip, err := ReadIpFromFile(testFileWithoutIp)
 			Expect(err).To(HaveOccurred())
 			Expect(ip).To(BeEmpty())
