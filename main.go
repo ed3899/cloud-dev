@@ -10,15 +10,15 @@ import (
 )
 
 func init() {
-	if !host.HostIsCompatible() {
+	if !host.HostIsCompatible(runtime.GOOS, runtime.GOARCH) {
 		oopsBuilder := oops.
-			Code("host_is_not_compatible")
+			Code("HostIsCompatible").
+			With("os", runtime.GOOS).
+			With("arch", runtime.GOARCH)
 
 		log.Fatalf(
 			"%+v",
 			oopsBuilder.
-				With("os", runtime.GOOS).
-				With("arch", runtime.GOARCH).
 				Errorf("Host is not compatible with kumo :/"),
 		)
 	}
