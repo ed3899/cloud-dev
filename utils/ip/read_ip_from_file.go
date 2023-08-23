@@ -7,21 +7,25 @@ import (
 	"github.com/samber/oops"
 )
 
+// Reads the first IP address from a file.
+//	Example:
+//	("path/to/file_with_an_ip_address.txt") -> "192.168.1.1"
+// Assuming the file contains a valid IP address.
 func ReadIpFromFile(
-	absPath string,
+	path string,
 ) (string, error) {
 	oopsBuilder := oops.
 		Code("ReadIpFromFile").
 		In("utils").
 		In("ip").
-		With("absPath", absPath)
+		With("path", path)
 	// Define the regular expression pattern for matching an IP address
 	ipPattern := "\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b"
 	// Compile the regular expression
 	ipRegex := regexp.MustCompile(ipPattern)
 
 	// Read the contents of the file
-	content, err := os.ReadFile(absPath)
+	content, err := os.ReadFile(path)
 	if err != nil {
 		err = oopsBuilder.
 			Wrapf(err, "error reading file")
