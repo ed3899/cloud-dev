@@ -49,7 +49,7 @@ var _ = Describe("GetLastAmiIdFromPackerManifest", func() {
 
 	Context("when the manifest file is absolute", func() {
 		Context("when the manifest file exists", func() {
-			It("should return the last built AMI ID from the manifest file", func() {
+			It("should return the last built AMI ID from the manifest file", Label("unit"), func() {
 				amiId, err := GetLastBuiltAmiIdFromPackerManifest(tempManifestFilePath)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(amiId).To(Equal(amiId))
@@ -57,7 +57,7 @@ var _ = Describe("GetLastAmiIdFromPackerManifest", func() {
 		})
 
 		Context("when the manifest file doesn't exists", func() {
-			It("should return an error for non-existent manifest file", func() {
+			It("should return an error for non-existent manifest file", Label("unit"), func() {
 				amiId, err := GetLastBuiltAmiIdFromPackerManifest(fakeManifestFilePath)
 				Expect(err).To(HaveOccurred())
 				Expect(amiId).To(BeEmpty())
@@ -68,7 +68,7 @@ var _ = Describe("GetLastAmiIdFromPackerManifest", func() {
 
 	Context("when the manifest file is not absolute", func() {
 		Context("when the manifest file exists", func() {
-			It("should return an error for invalid manifest path", func() {
+			It("should return an error for invalid manifest path", Label("unit"), func() {
 				amiId, err := GetLastBuiltAmiIdFromPackerManifest("./packer_manifest.json")
 				Expect(err).To(HaveOccurred())
 				Expect(amiId).To(BeEmpty())
@@ -77,7 +77,7 @@ var _ = Describe("GetLastAmiIdFromPackerManifest", func() {
 		})
 
 		Context("when the manifest file doesn't exists", func() {
-			It("should return an error for invalid manifest path", func() {
+			It("should return an error for invalid manifest path", Label("unit"), func() {
 				amiId, err := GetLastBuiltAmiIdFromPackerManifest("invalid_manifest_path.json")
 				Expect(err).To(HaveOccurred())
 				Expect(amiId).To(BeEmpty())

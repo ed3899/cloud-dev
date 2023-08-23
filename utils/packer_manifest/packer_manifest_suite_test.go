@@ -9,5 +9,5 @@ import (
 
 func TestPackerManifest(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "PackerManifest Suite")
+	RunSpecs(t, "PackerManifest Suite", Label("utils", "packer_manifest"))
 }
