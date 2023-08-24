@@ -26,7 +26,7 @@ var _ = Describe("PluginsEnvironmentVars", Ordered, func() {
 		}
 	})
 
-	It("should set the plugin path environment variable", func() {
+	It("should set the plugin path environment variable", Label("unit"), func() {
 		err := manager.SetPluginsEnvironmentVars()
 		Expect(err).ToNot(HaveOccurred())
 
@@ -35,7 +35,7 @@ var _ = Describe("PluginsEnvironmentVars", Ordered, func() {
 		Expect(value).To(Equal(envValue))
 	})
 
-	It("should unset the plugin path environment variable", func() {
+	It("should unset the plugin path environment variable", Label("unit"), func() {
 		err := manager.UnsetPluginsEnvironmentVars()
 		Expect(err).ToNot(HaveOccurred())
 
