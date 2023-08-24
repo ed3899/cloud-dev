@@ -7,7 +7,7 @@ import (
 	"github.com/samber/oops"
 )
 
-func (m *Manager) UnsetManagerCloudCredentials() error {
+func (m *Manager) UnsetCloudCredentials() error {
 	oopsBuilder := oops.
 		In("manager").
 		Tags("Manager").
