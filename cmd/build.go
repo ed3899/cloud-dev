@@ -70,14 +70,14 @@ func Build() *cobra.Command {
 				panic(err)
 			}
 
-			err = _manager.SetManagerCloudCredentials()
+			err = _manager.SetCloudCredentials()
 			if err != nil {
 				err := oopsBuilder.
 					Wrapf(err, "failed to set manager cloud credentials")
 
 				panic(err)
 			}
-			defer _manager.UnsetManagerCloudCredentials()
+			defer _manager.UnsetCloudCredentials()
 
 			err = _manager.SetPluginsEnvironmentVars()
 			if err != nil {
