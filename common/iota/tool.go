@@ -113,7 +113,7 @@ func (t Tool) PluginPathEnvironmentVariable() string {
 	}
 }
 
-func (t Tool) PluginDirs() string {
+func (t Tool) PluginDir() string {
 	oopsBuilder := oops.
 		In("common").
 		In("iota").

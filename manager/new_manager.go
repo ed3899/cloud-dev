@@ -11,6 +11,7 @@ import (
 	"github.com/samber/oops"
 )
 
+// Creates a new manager. Used for cmd workflows
 func NewManager(
 	cloud iota.Cloud,
 	tool iota.Tool,
@@ -67,6 +68,15 @@ func NewManager(
 		return nil, err
 	}
 
+	terraformPath := func(fileName string) string {
+		return filepath.Join(
+			currentExecutableDir,
+			iota.Terraform.Name(),
+			cloud.Name(),
+			fileName,
+		)
+	}
+
 	return &Manager{
 		Cloud: cloud.Iota(),
 		Tool:  tool.Iota(),
@@ -89,36 +99,11 @@ func NewManager(
 				tool.VarsName(),
 			),
 			Terraform: &Terraform{
-				Lock: filepath.Join(
-					currentExecutableDir,
-					iota.Terraform.Name(),
-					cloud.Name(),
-					constants.TERRAFORM_LOCK,
-				),
-				State: filepath.Join(
-					currentExecutableDir,
-					iota.Terraform.Name(),
-					cloud.Name(),
-					constants.TERRAFORM_STATE,
-				),
-				Backup: filepath.Join(
-					currentExecutableDir,
-					iota.Terraform.Name(),
-					cloud.Name(),
-					constants.TERRAFORM_BACKUP,
-				),
-				IpFile: filepath.Join(
-					currentExecutableDir,
-					iota.Terraform.Name(),
-					cloud.Name(),
-					constants.IP_FILE_NAME,
-				),
-				IdentityFile: filepath.Join(
-					currentExecutableDir,
-					iota.Terraform.Name(),
-					cloud.Name(),
-					constants.KEY_NAME,
-				),
+				Lock:         terraformPath(constants.TERRAFORM_LOCK),
+				State:        terraformPath(constants.TERRAFORM_STATE),
+				Backup:       terraformPath(constants.TERRAFORM_BACKUP),
+				IpFile:       terraformPath(constants.IP_FILE_NAME),
+				IdentityFile: terraformPath(constants.KEY_NAME),
 				SshConfig: filepath.Join(
 					currentWorkingDir,
 					constants.CONFIG_NAME,
@@ -129,7 +114,7 @@ func NewManager(
 					currentExecutableDir,
 					tool.Name(),
 					cloud.Name(),
-					tool.PluginDirs(),
+					tool.PluginDir(),
 				),
 				Initial: currentExecutableDir,
 				Run: filepath.Join(
@@ -151,11 +136,11 @@ type Manager struct {
 }
 
 type Path struct {
-	Executable     string
-	Vars           string
-	Terraform      *Terraform
-	Template       *Template
-	Dir            *Dir
+	Executable string
+	Vars       string
+	Terraform  *Terraform
+	Template   *Template
+	Dir        *Dir
 }
 
 type Terraform struct {
