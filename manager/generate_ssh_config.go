@@ -11,6 +11,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// Generates a ssh config file at the current working directory
 func (m *Manager) GenerateSshConfig() error {
 	logger, _ := zap.NewProduction(
 		zap.AddCaller(),
