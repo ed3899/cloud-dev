@@ -8,8 +8,8 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("GoToDirRunAndInitial", func() {
-	Context("with a valid dir path", func() {
+var _ = Describe("GoToDirRunAndInitial", Ordered, func() {
+	Context("with a valid dir path", Label("unit"), func() {
 		var (
 			initialDirPath string
 			tempDirPath    string
@@ -51,7 +51,7 @@ var _ = Describe("GoToDirRunAndInitial", func() {
 		})
 	})
 
-	Context("with an invalid dir path", func() {
+	Context("with an invalid dir path", Label("unit"), func() {
 		var (
 			_manager *manager.Manager
 		)
