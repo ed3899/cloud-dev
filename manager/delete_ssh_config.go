@@ -7,7 +7,7 @@ import (
 	"go.uber.org/zap"
 )
 
-// Deletes the ssh config file at the current working directory
+// Deletes the ssh config file.
 func (m *Manager) DeleteSshConfig() error {
 	logger, _ := zap.NewProduction(
 		zap.AddCaller(),

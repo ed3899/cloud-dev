@@ -9,7 +9,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("GenerateAndDeleteSSHConfig", Label("integration"), Ordered, func() {
+var _ = Describe("CreateAndDeleteSSHConfig", Ordered, func() {
 	Context("with a valid ip file", func() {
 		var (
 			ipFilePath string
@@ -30,9 +30,9 @@ var _ = Describe("GenerateAndDeleteSSHConfig", Label("integration"), Ordered, fu
 			Expect(err).ToNot(HaveOccurred())
 		})
 
-		Context("with a valid ssh config path", func() {
+		Context("with a valid ssh config path", Label("unit"), func() {
 			var (
-				_manager       *manager.Manager
+				_manager      *manager.Manager
 				sshConfigPath string
 			)
 
@@ -53,7 +53,7 @@ var _ = Describe("GenerateAndDeleteSSHConfig", Label("integration"), Ordered, fu
 			})
 
 			It("should generate a ssh config file", func() {
-				err := _manager.GenerateSshConfig()
+				err := _manager.CreateSshConfig()
 				Expect(err).ToNot(HaveOccurred())
 
 				_, err = os.Stat(sshConfigPath)
@@ -69,7 +69,7 @@ var _ = Describe("GenerateAndDeleteSSHConfig", Label("integration"), Ordered, fu
 			})
 		})
 
-		Context("with an invalid ssh config path", func() {
+		Context("with an invalid ssh config path", Label("unit"), func() {
 			var (
 				_manager *manager.Manager
 			)
@@ -86,16 +86,16 @@ var _ = Describe("GenerateAndDeleteSSHConfig", Label("integration"), Ordered, fu
 			})
 
 			It("should return an error", func() {
-				err := _manager.GenerateSshConfig()
+				err := _manager.CreateSshConfig()
 				Expect(err).To(HaveOccurred())
 			})
 		})
 	})
 
 	Context("with an invalid ip file", func() {
-		Context("with a valid ssh config path", func() {
+		Context("with a valid ssh config path", Label("unit"), func() {
 			var (
-				_manager       *manager.Manager
+				_manager      *manager.Manager
 				sshConfigPath string
 			)
 
@@ -116,12 +116,12 @@ var _ = Describe("GenerateAndDeleteSSHConfig", Label("integration"), Ordered, fu
 			})
 
 			It("should return an error when generating a sshconfig", func() {
-				err := _manager.GenerateSshConfig()
+				err := _manager.CreateSshConfig()
 				Expect(err).To(HaveOccurred())
 			})
 		})
 
-		Context("with an invalid ssh config path", func() {
+		Context("with an invalid ssh config path", Label("unit"), func() {
 			var (
 				_manager *manager.Manager
 			)
@@ -138,7 +138,7 @@ var _ = Describe("GenerateAndDeleteSSHConfig", Label("integration"), Ordered, fu
 			})
 
 			It("should return an error when generating a sshconfig", func() {
-				err := _manager.GenerateSshConfig()
+				err := _manager.CreateSshConfig()
 				Expect(err).To(HaveOccurred())
 			})
 		})

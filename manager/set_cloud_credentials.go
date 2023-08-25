@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/viper"
 )
 
+// Sets the cloud credentials environment variables.
 func (m *Manager) SetCloudCredentials() error {
 	oopsBuilder := oops.
 		In("manager").

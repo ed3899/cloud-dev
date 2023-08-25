@@ -5,6 +5,7 @@ import (
 	"github.com/samber/oops"
 )
 
+// Creates a template file by merging the cloud and base files.
 func (m *Manager) CreateTemplate() error {
 	oopsBuilder := oops.
 		In("manager").

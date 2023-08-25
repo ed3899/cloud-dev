@@ -6,6 +6,7 @@ import (
 	"github.com/samber/oops"
 )
 
+// Deletes the plugins directory.
 func (m *Manager) DeletePluginsDir() error {
 	oopsBuilder := oops.
 		Code("DeletePluginsDir").

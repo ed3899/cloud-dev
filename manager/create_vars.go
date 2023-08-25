@@ -6,6 +6,7 @@ import (
 	"github.com/samber/oops"
 )
 
+// Creates a vars file.
 func (m *Manager) CreateVars() (*os.File, error) {
 	oopsBuilder := oops.
 		In("manager").

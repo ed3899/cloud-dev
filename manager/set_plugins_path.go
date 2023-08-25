@@ -6,7 +6,8 @@ import (
 	"github.com/samber/oops"
 )
 
-func (m *Manager) SetPluginsEnvironmentVars() error {
+// Sets the plugins path environment variable.
+func (m *Manager) SetPluginsPath() error {
 	oopsBuilder := oops.
 		In("manager").
 		Tags("Manager").

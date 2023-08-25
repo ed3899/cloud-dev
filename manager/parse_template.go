@@ -6,6 +6,7 @@ import (
 	"github.com/samber/oops"
 )
 
+// Parses the merged template.
 func (m *Manager) ParseTemplate() (*template.Template, error) {
 	oopsBuilder := oops.
 		In("manager").

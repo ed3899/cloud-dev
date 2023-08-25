@@ -12,7 +12,7 @@ import (
 )
 
 // Generates a ssh config file at the current working directory
-func (m *Manager) GenerateSshConfig() error {
+func (m *Manager) CreateSshConfig() error {
 	logger, _ := zap.NewProduction(
 		zap.AddCaller(),
 	)
