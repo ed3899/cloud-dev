@@ -5,6 +5,8 @@ import (
 	"github.com/samber/oops"
 )
 
+// Returns a new environment for the given tool and cloud. pathToPackerManifest is only used for terraform,
+// use "" for packer.
 func NewEnvironment(
 	tool iota.Tool,
 	cloud iota.Cloud,
