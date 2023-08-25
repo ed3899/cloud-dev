@@ -1,9 +1,10 @@
-package manager
+package tests
 
 import (
 	"fmt"
 	"path/filepath"
 
+	"github.com/ed3899/kumo/manager"
 	"github.com/ed3899/kumo/common/constants"
 	"github.com/ed3899/kumo/common/iota"
 	. "github.com/onsi/ginkgo/v2"
@@ -12,7 +13,7 @@ import (
 
 var _ = Describe("Manager", func() {
 	var (
-		manager                      *Manager
+		_manager                      *manager.Manager
 		err                          error
 		pathExeSubstring             string
 		pathTemplateMergedSubstring  string
@@ -30,9 +31,9 @@ var _ = Describe("Manager", func() {
 	)
 
 	BeforeEach(func() {
-		manager, err = NewManager(iota.Aws, iota.Packer)
+		_manager, err = manager.NewManager(iota.Aws, iota.Packer)
 		Expect(err).ToNot(HaveOccurred())
-		Expect(manager).ToNot(BeNil())
+		Expect(_manager).ToNot(BeNil())
 
 		pathExeSubstring = filepath.Join(
 			iota.Dependencies.Name(),
@@ -84,22 +85,22 @@ var _ = Describe("Manager", func() {
 	})
 
 	It("should create a new manager instance", Label("unit"), func() {
-		Expect(manager.Cloud).To(Equal(iota.Aws))
-		Expect(manager.Tool).To(Equal(iota.Packer))
-		Expect(manager.Path.Executable).To(ContainSubstring(pathExeSubstring))
-		Expect(manager.Path.Template.Merged).To(ContainSubstring(pathTemplateMergedSubstring))
-		Expect(manager.Path.Template.Cloud).To(ContainSubstring(pathTemplateCloudSubstring))
-		Expect(manager.Path.Template.Base).To(ContainSubstring(pathTemplateBaseSubstring))
-		Expect(manager.Path.Vars).To(ContainSubstring(pathVarsSubtring))
-		Expect(manager.Path.Terraform.Lock).To(ContainSubstring(pathTerraformLockSubstring))
-		Expect(manager.Path.Terraform.State).To(ContainSubstring(pathTerraformStateSubstring))
-		Expect(manager.Path.Terraform.Backup).To(ContainSubstring(pathTerraformBackupSubstring))
-		Expect(manager.Path.Terraform.IpFile).To(ContainSubstring(pathTerraformIpFile))
-		Expect(manager.Path.Terraform.IdentityFile).To(ContainSubstring(pathTerraformIdentityFile))
-		Expect(manager.Path.Terraform.SshConfig).To(ContainSubstring(pathSshConfigSubstring))
-		Expect(manager.Path.Dir.Plugins).To(ContainSubstring(pathDirPlugins))
-		Expect(manager.Path.Dir.Initial).ToNot(BeNil())
-		Expect(manager.Path.Dir.Run).To(ContainSubstring(pathDirRun))
-		Expect(manager.Environment).ToNot(BeNil())
+		Expect(_manager.Cloud).To(Equal(iota.Aws))
+		Expect(_manager.Tool).To(Equal(iota.Packer))
+		Expect(_manager.Path.Executable).To(ContainSubstring(pathExeSubstring))
+		Expect(_manager.Path.Template.Merged).To(ContainSubstring(pathTemplateMergedSubstring))
+		Expect(_manager.Path.Template.Cloud).To(ContainSubstring(pathTemplateCloudSubstring))
+		Expect(_manager.Path.Template.Base).To(ContainSubstring(pathTemplateBaseSubstring))
+		Expect(_manager.Path.Vars).To(ContainSubstring(pathVarsSubtring))
+		Expect(_manager.Path.Terraform.Lock).To(ContainSubstring(pathTerraformLockSubstring))
+		Expect(_manager.Path.Terraform.State).To(ContainSubstring(pathTerraformStateSubstring))
+		Expect(_manager.Path.Terraform.Backup).To(ContainSubstring(pathTerraformBackupSubstring))
+		Expect(_manager.Path.Terraform.IpFile).To(ContainSubstring(pathTerraformIpFile))
+		Expect(_manager.Path.Terraform.IdentityFile).To(ContainSubstring(pathTerraformIdentityFile))
+		Expect(_manager.Path.Terraform.SshConfig).To(ContainSubstring(pathSshConfigSubstring))
+		Expect(_manager.Path.Dir.Plugins).To(ContainSubstring(pathDirPlugins))
+		Expect(_manager.Path.Dir.Initial).ToNot(BeNil())
+		Expect(_manager.Path.Dir.Run).To(ContainSubstring(pathDirRun))
+		Expect(_manager.Environment).ToNot(BeNil())
 	})
 })

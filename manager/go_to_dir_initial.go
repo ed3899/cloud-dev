@@ -6,11 +6,12 @@ import (
 	"github.com/samber/oops"
 )
 
-func (m *Manager) ChdirToManagerDirInitial() error {
+// Changes the current working directory to the initial dir
+func (m *Manager) GoToDirInitial() error {
 	oopsBuilder := oops.
 		In("manager").
 		Tags("Manager").
-		Code("ChangeToInitialDir")
+		Code("GoToDirInitial")
 
 	if err := os.Chdir(m.Path.Dir.Initial); err != nil {
 		return oopsBuilder.

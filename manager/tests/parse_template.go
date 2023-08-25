@@ -1,9 +1,10 @@
-package manager
+package tests
 
 import (
 	"os"
 	"path/filepath"
 
+	"github.com/ed3899/kumo/manager"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -17,7 +18,7 @@ var _ = Describe("ParseTemplate", func() {
 			GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC = "{{.Base.Optional.GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC}}"`
 
 			filePath string
-			manager  *Manager
+			_manager  *manager.Manager
 		)
 
 		BeforeEach(func() {
@@ -29,9 +30,9 @@ var _ = Describe("ParseTemplate", func() {
 			err = os.WriteFile(filePath, []byte(content), 0644)
 			Expect(err).ToNot(HaveOccurred())
 
-			manager = &Manager{
-				Path: &Path{
-					Template: &Template{
+			_manager = &manager.Manager{
+				Path: &manager.Path{
+					Template: &manager.Template{
 						Merged: filePath,
 					},
 				},
@@ -44,7 +45,7 @@ var _ = Describe("ParseTemplate", func() {
 		})
 
 		It("should parse the template successfully", Label("unit"), func() {
-			template, err := manager.ParseTemplate()
+			template, err := _manager.ParseTemplate()
 			Expect(err).ToNot(HaveOccurred())
 			Expect(template).ToNot(BeNil())
 		})
@@ -52,13 +53,13 @@ var _ = Describe("ParseTemplate", func() {
 
 	Context("with an invalid template", func() {
 		var (
-			manager *Manager
+			_manager *manager.Manager
 		)
 
 		BeforeEach(func() {
-			manager = &Manager{
-				Path: &Path{
-					Template: &Template{
+			_manager = &manager.Manager{
+				Path: &manager.Path{
+					Template: &manager.Template{
 						Merged: "invalid/path/to/template/file",
 					},
 				},
@@ -66,7 +67,7 @@ var _ = Describe("ParseTemplate", func() {
 		})
 
 		It("should return an error", Label("unit"), func() {
-			_, err := manager.ParseTemplate()
+			_, err := _manager.ParseTemplate()
 			Expect(err).To(HaveOccurred())
 		})
 	})

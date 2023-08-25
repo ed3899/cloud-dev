@@ -1,8 +1,9 @@
-package manager
+package tests
 
 import (
 	"os"
 
+	"github.com/ed3899/kumo/manager"
 	"github.com/ed3899/kumo/common/iota"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -12,14 +13,14 @@ var _ = Describe("PluginsEnvironmentVars", Ordered, func() {
 	var (
 		envValue = "some-value"
 
-		manager *Manager
+		_manager *manager.Manager
 	)
 
 	BeforeEach(func() {
-		manager = &Manager{
+		_manager = &manager.Manager{
 			Tool: iota.Packer,
-			Path: &Path{
-				Dir: &Dir{
+			Path: &manager.Path{
+				Dir: &manager.Dir{
 					Plugins: envValue,
 				},
 			},
@@ -27,19 +28,19 @@ var _ = Describe("PluginsEnvironmentVars", Ordered, func() {
 	})
 
 	It("should set the plugin path environment variable", Label("unit"), func() {
-		err := manager.SetPluginsEnvironmentVars()
+		err := _manager.SetPluginsEnvironmentVars()
 		Expect(err).ToNot(HaveOccurred())
 
-		value, ok := os.LookupEnv(manager.Tool.PluginPathEnvironmentVariable())
+		value, ok := os.LookupEnv(_manager.Tool.PluginPathEnvironmentVariable())
 		Expect(ok).To(BeTrue())
 		Expect(value).To(Equal(envValue))
 	})
 
 	It("should unset the plugin path environment variable", Label("unit"), func() {
-		err := manager.UnsetPluginsEnvironmentVars()
+		err := _manager.UnsetPluginsEnvironmentVars()
 		Expect(err).ToNot(HaveOccurred())
 
-		_, ok := os.LookupEnv(manager.Tool.PluginPathEnvironmentVariable())
+		_, ok := os.LookupEnv(_manager.Tool.PluginPathEnvironmentVariable())
 		Expect(ok).To(BeFalse())
 	})
 })

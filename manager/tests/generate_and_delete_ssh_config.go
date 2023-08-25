@@ -1,9 +1,10 @@
-package manager
+package tests
 
 import (
 	"os"
 	"path/filepath"
 
+	"github.com/ed3899/kumo/manager"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -31,7 +32,7 @@ var _ = Describe("GenerateAndDeleteSSHConfig", Label("integration"), Ordered, fu
 
 		Context("with a valid ssh config path", func() {
 			var (
-				manager       *Manager
+				_manager       *manager.Manager
 				sshConfigPath string
 			)
 
@@ -41,9 +42,9 @@ var _ = Describe("GenerateAndDeleteSSHConfig", Label("integration"), Ordered, fu
 
 				sshConfigPath = filepath.Join(cwd, "sshconfig")
 
-				manager = &Manager{
-					Path: &Path{
-						Terraform: &Terraform{
+				_manager = &manager.Manager{
+					Path: &manager.Path{
+						Terraform: &manager.Terraform{
 							IpFile:    ipFilePath,
 							SshConfig: sshConfigPath,
 						},
@@ -52,7 +53,7 @@ var _ = Describe("GenerateAndDeleteSSHConfig", Label("integration"), Ordered, fu
 			})
 
 			It("should generate a ssh config file", func() {
-				err := manager.GenerateSshConfig()
+				err := _manager.GenerateSshConfig()
 				Expect(err).ToNot(HaveOccurred())
 
 				_, err = os.Stat(sshConfigPath)
@@ -60,7 +61,7 @@ var _ = Describe("GenerateAndDeleteSSHConfig", Label("integration"), Ordered, fu
 			})
 
 			It("should delete the ssh config file", func() {
-				err := manager.DeleteSshConfig()
+				err := _manager.DeleteSshConfig()
 				Expect(err).ToNot(HaveOccurred())
 
 				_, err = os.Stat(sshConfigPath)
@@ -70,13 +71,13 @@ var _ = Describe("GenerateAndDeleteSSHConfig", Label("integration"), Ordered, fu
 
 		Context("with an invalid ssh config path", func() {
 			var (
-				manager *Manager
+				_manager *manager.Manager
 			)
 
 			BeforeEach(func() {
-				manager = &Manager{
-					Path: &Path{
-						Terraform: &Terraform{
+				_manager = &manager.Manager{
+					Path: &manager.Path{
+						Terraform: &manager.Terraform{
 							IpFile:    ipFilePath,
 							SshConfig: "",
 						},
@@ -85,7 +86,7 @@ var _ = Describe("GenerateAndDeleteSSHConfig", Label("integration"), Ordered, fu
 			})
 
 			It("should return an error", func() {
-				err := manager.GenerateSshConfig()
+				err := _manager.GenerateSshConfig()
 				Expect(err).To(HaveOccurred())
 			})
 		})
@@ -94,7 +95,7 @@ var _ = Describe("GenerateAndDeleteSSHConfig", Label("integration"), Ordered, fu
 	Context("with an invalid ip file", func() {
 		Context("with a valid ssh config path", func() {
 			var (
-				manager       *Manager
+				_manager       *manager.Manager
 				sshConfigPath string
 			)
 
@@ -104,9 +105,9 @@ var _ = Describe("GenerateAndDeleteSSHConfig", Label("integration"), Ordered, fu
 
 				sshConfigPath = filepath.Join(cwd, "sshconfig")
 
-				manager = &Manager{
-					Path: &Path{
-						Terraform: &Terraform{
+				_manager = &manager.Manager{
+					Path: &manager.Path{
+						Terraform: &manager.Terraform{
 							IpFile:    "invalid-ip-file",
 							SshConfig: sshConfigPath,
 						},
@@ -115,20 +116,20 @@ var _ = Describe("GenerateAndDeleteSSHConfig", Label("integration"), Ordered, fu
 			})
 
 			It("should return an error when generating a sshconfig", func() {
-				err := manager.GenerateSshConfig()
+				err := _manager.GenerateSshConfig()
 				Expect(err).To(HaveOccurred())
 			})
 		})
 
 		Context("with an invalid ssh config path", func() {
 			var (
-				manager *Manager
+				_manager *manager.Manager
 			)
 
 			BeforeEach(func() {
-				manager = &Manager{
-					Path: &Path{
-						Terraform: &Terraform{
+				_manager = &manager.Manager{
+					Path: &manager.Path{
+						Terraform: &manager.Terraform{
 							IpFile:    "invalid-ip-file",
 							SshConfig: "",
 						},
@@ -137,7 +138,7 @@ var _ = Describe("GenerateAndDeleteSSHConfig", Label("integration"), Ordered, fu
 			})
 
 			It("should return an error when generating a sshconfig", func() {
-				err := manager.GenerateSshConfig()
+				err := _manager.GenerateSshConfig()
 				Expect(err).To(HaveOccurred())
 			})
 		})

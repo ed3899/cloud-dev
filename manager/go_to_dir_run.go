@@ -6,11 +6,12 @@ import (
 	"github.com/samber/oops"
 )
 
-func (m *Manager) ChDirToManagerDirRun() error {
+// Changes the current working directory to the run dir
+func (m *Manager) GoToDirRun() error {
 	oopsBuilder := oops.
 		In("manager").
 		Tags("Manager").
-		Code("ManagerDirRunChdir")
+		Code("GoToDirRun")
 
 	if err := os.Chdir(m.Path.Dir.Run); err != nil {
 		return oopsBuilder.
