@@ -8,7 +8,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = FDescribe("ParseTemplate", func() {
+var _ = Describe("ParseTemplate", func() {
 	Context("with a valid template", func() {
 		var (
 			content = `GIT_USERNAME = "{{.Base.Required.GIT_USERNAME}}"
@@ -43,7 +43,7 @@ var _ = FDescribe("ParseTemplate", func() {
 			Expect(err).ToNot(HaveOccurred())
 		})
 
-		It("should parse the template successfully", func() {
+		It("should parse the template successfully", Label("unit"), func() {
 			template, err := manager.ParseTemplate()
 			Expect(err).ToNot(HaveOccurred())
 			Expect(template).ToNot(BeNil())
@@ -65,7 +65,7 @@ var _ = FDescribe("ParseTemplate", func() {
 			}
 		})
 
-		It("should return an error", func() {
+		It("should return an error", Label("unit"), func() {
 			_, err := manager.ParseTemplate()
 			Expect(err).To(HaveOccurred())
 		})
