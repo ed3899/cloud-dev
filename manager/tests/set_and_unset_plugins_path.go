@@ -3,8 +3,8 @@ package tests
 import (
 	"os"
 
-	"github.com/ed3899/kumo/manager"
 	"github.com/ed3899/kumo/common/iota"
+	"github.com/ed3899/kumo/manager"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -28,7 +28,7 @@ var _ = Describe("PluginsEnvironmentVars", Ordered, func() {
 	})
 
 	It("should set the plugin path environment variable", Label("unit"), func() {
-		err := _manager.SetPluginsEnvironmentVars()
+		err := _manager.SetPluginsPath()
 		Expect(err).ToNot(HaveOccurred())
 
 		value, ok := os.LookupEnv(_manager.Tool.PluginPathEnvironmentVariable())

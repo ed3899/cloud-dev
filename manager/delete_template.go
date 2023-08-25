@@ -6,6 +6,7 @@ import (
 	"github.com/samber/oops"
 )
 
+// Deletes the merged template file.
 func (m *Manager) DeleteTemplate() error {
 	oopsBuilder := oops.
 		In("manager").

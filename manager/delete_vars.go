@@ -6,6 +6,7 @@ import (
 	"github.com/samber/oops"
 )
 
+// Deletes the vars file.
 func (m *Manager) DeleteVars() error {
 	oopsBuilder := oops.
 		Code("DeleteVars").

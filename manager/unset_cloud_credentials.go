@@ -7,6 +7,7 @@ import (
 	"github.com/samber/oops"
 )
 
+// Unsets the cloud credentials environment variables.
 func (m *Manager) UnsetCloudCredentials() error {
 	oopsBuilder := oops.
 		In("manager").
