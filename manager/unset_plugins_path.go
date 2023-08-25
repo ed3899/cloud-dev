@@ -6,6 +6,7 @@ import (
 	"github.com/samber/oops"
 )
 
+// Unsets the plugins path environment variable.
 func (m *Manager) UnsetPluginsEnvironmentVars() error {
 	oopsBuilder := oops.
 		In("manager").

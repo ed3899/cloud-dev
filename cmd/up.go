@@ -169,7 +169,7 @@ func Up() *cobra.Command {
 				panic(err)
 			}
 
-			err = _manager.GenerateSshConfig()
+			err = _manager.CreateSshConfig()
 			if err != nil {
 				err := oopsBuilder.
 					Wrapf(err, "failed to generate ssh config")

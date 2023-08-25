@@ -79,7 +79,7 @@ func Build() *cobra.Command {
 			}
 			defer _manager.UnsetCloudCredentials()
 
-			err = _manager.SetPluginsEnvironmentVars()
+			err = _manager.SetPluginsPath()
 			if err != nil {
 				err := oopsBuilder.
 					Wrapf(err, "failed to set plugins environment vars")
