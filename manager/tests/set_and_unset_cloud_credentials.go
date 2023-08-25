@@ -1,8 +1,9 @@
-package manager
+package tests
 
 import (
 	"os"
 
+	"github.com/ed3899/kumo/manager"
 	"github.com/ed3899/kumo/common/iota"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -14,12 +15,12 @@ var _ = Describe("SetAndUnsetCloudCredentials", Ordered, func() {
 		mockAccessKeyId     = "some-access-key-id"
 		mockSecretAccessKey = "some-secret-access-key"
 
-		manager *Manager
+		_manager *manager.Manager
 	)
 
 	Context("when the cloud is AWS", func() {
 		BeforeEach(func() {
-			manager = &Manager{
+			_manager = &manager.Manager{
 				Cloud: iota.Aws,
 			}
 
@@ -32,7 +33,7 @@ var _ = Describe("SetAndUnsetCloudCredentials", Ordered, func() {
 		})
 
 		It("sets the the right environment variables", func() {
-			err := manager.SetCloudCredentials()
+			err := _manager.SetCloudCredentials()
 			Expect(err).NotTo(HaveOccurred())
 
 			value1, ok := os.LookupEnv("AWS_ACCESS_KEY_ID")
@@ -45,7 +46,7 @@ var _ = Describe("SetAndUnsetCloudCredentials", Ordered, func() {
 		})
 
 		It("unsets the right environment variables", func() {
-			err := manager.UnsetCloudCredentials()
+			err := _manager.UnsetCloudCredentials()
 			Expect(err).NotTo(HaveOccurred())
 
 			_, ok := os.LookupEnv("AWS_ACCESS_KEY_ID")
