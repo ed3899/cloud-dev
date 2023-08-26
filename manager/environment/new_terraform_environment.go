@@ -5,6 +5,7 @@ import (
 	"github.com/samber/oops"
 )
 
+// Creates a new Terraform environment for the given cloud.
 func NewTerraformEnvironment(
 	pathToPackerManifest string,
 	cloud iota.Cloud,
@@ -14,8 +15,7 @@ func NewTerraformEnvironment(
 		With("cloud", cloud).
 		With("pathToPackerManifest", pathToPackerManifest).
 		In("manager").
-		In("environment").
-		Tags("TerraformEnvironment")
+		In("environment")
 
 	base := NewTerraformBaseEnvironment()
 
