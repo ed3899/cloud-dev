@@ -5,6 +5,7 @@ import (
 	"github.com/samber/oops"
 )
 
+// Creates a new Packer environment for the given cloud.
 func NewPackerEnvironment(
 	cloud iota.Cloud,
 ) (*Environment[*PackerBaseEnvironment], error) {
