@@ -25,7 +25,7 @@ func NewPackerBaseEnvironment() *PackerBaseEnvironment {
 			ANSIBLE_TAGS: viper.GetStringSlice("AMI.Tools"),
 		},
 		Optional: &PackerBaseOptional{
-			GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC: viper.GetString("Git.Hub.PersonalAccessTokenClassic"),
+			GIT_HUB_PERSONAL_ACCESS_TOKEN_CLASSIC: viper.GetString("GitHub.PersonalAccessTokenClassic"),
 		},
 	}
 }
