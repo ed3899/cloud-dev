@@ -2,7 +2,6 @@ package environment
 
 import (
 	"github.com/ed3899/kumo/common/constants"
-	"github.com/ed3899/kumo/common/iota"
 	"github.com/ed3899/kumo/utils/packer_manifest"
 	"github.com/samber/oops"
 	"github.com/spf13/viper"
@@ -10,15 +9,13 @@ import (
 
 func NewTerraformAwsEnvironment(
 	pathToPackerManifest string,
-	cloud iota.Cloud,
 ) (*TerraformAwsEnvironment, error) {
 	oopBuilder := oops.
 		Code("NewTerraformAwsEnvironment").
 		In("manager").
 		In("environment").
 		Tags("TerraformAwsEnvironment").
-		With("pathToPackerManifest", pathToPackerManifest).
-		With("cloud", cloud)
+		With("pathToPackerManifest", pathToPackerManifest)
 
 	amiId, err := packer_manifest.GetLastBuiltAmiIdFromPackerManifest(pathToPackerManifest)
 	if err != nil {
