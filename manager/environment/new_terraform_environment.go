@@ -21,7 +21,7 @@ func NewTerraformEnvironment(
 
 	switch cloud {
 	case iota.Aws:
-		aws, err := NewTerraformAwsEnvironment(pathToPackerManifest, cloud)
+		aws, err := NewTerraformAwsEnvironment(pathToPackerManifest)
 		if err != nil {
 			return nil, oopsBuilder.
 				Wrapf(err, "failed to create aws environment")
