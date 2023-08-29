@@ -3,6 +3,7 @@ package zip
 import (
 	"os"
 
+	"github.com/ed3899/kumo/utils/zip"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -36,7 +37,7 @@ var _ = Describe("GetZipSize", func() {
 
 	Context("with a valid zip path", Label("unit"), func() {
 		It("should return the size of the zip file", func() {
-			zipSize, err := GetZipSize(testZipFile.Name())
+			zipSize, err := zip.GetZipSize(testZipFile.Name())
 			Expect(err).ToNot(HaveOccurred())
 			Expect(zipSize).To(Equal(int64(len(content))))
 		})
@@ -44,7 +45,7 @@ var _ = Describe("GetZipSize", func() {
 
 	Context("with an invalid zip path", Label("unit"), func() {
 		It("should return an error", func() {
-			_, err := GetZipSize("/invalid/path/to/zip")
+			_, err := zip.GetZipSize("/invalid/path/to/zip")
 			Expect(err).To(HaveOccurred())
 		})
 	})

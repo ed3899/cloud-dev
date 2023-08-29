@@ -45,7 +45,7 @@ func Unzip(
 				bytesCopied int64
 			)
 
-			if bytesCopied, err = unzipFile(zf, pathToUnzip); err != nil {
+			if bytesCopied, err = UnzipFile(zf, pathToUnzip); err != nil {
 				err = oopsBuilder.
 					With("bytesCopied", bytesCopied).
 					With("zipFile", zf.Name).
@@ -78,12 +78,12 @@ func Unzip(
 
 // Unzips a file from a zip file to a destination path. The destination path is created if it doesn't exist.
 // Returns the number of bytes copied.
-func unzipFile(
+func UnzipFile(
 	zf *zip.File,
 	extractToPath string,
 ) (int64, error) {
 	oopsBuilder := oops.
-		Code("unzipFile").
+		Code("UnzipFile").
 		In("utils").
 		In("zip").
 		With("zf", zf).

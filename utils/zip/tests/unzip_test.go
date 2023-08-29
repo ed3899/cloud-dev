@@ -6,11 +6,12 @@ import (
 	"os"
 	"path/filepath"
 
+	utils_zip "github.com/ed3899/kumo/utils/zip"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("unzipFile", func() {
+var _ = Describe("UnzipFile", func() {
 	var (
 		filename      = "test_file.txt"
 		content       = "test content"
@@ -53,7 +54,7 @@ var _ = Describe("unzipFile", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			// Unzip the mock file
-			bytesUnzipped, err := unzipFile(mockZipReader.File[0], mockDestDir)
+			bytesUnzipped, err := utils_zip.UnzipFile(mockZipReader.File[0], mockDestDir)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(bytesUnzipped).To(Equal(int64(len(content))))
 		})
@@ -81,7 +82,7 @@ var _ = Describe("unzipFile", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			// Unzip the mock file
-			_, err = unzipFile(mockZipReader.File[0], ":invalid_dir")
+			_, err = utils_zip.UnzipFile(mockZipReader.File[0], ":invalid_dir")
 			Expect(err).To(HaveOccurred())
 		})
 	})
