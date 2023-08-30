@@ -9,6 +9,7 @@ import (
 	"github.com/samber/oops"
 )
 
+// Returns a Terraform instance. The Terraform instance is used to run terraform commands.
 func NewTerraform(_manager *manager.Manager) (*Terraform, error) {
 	oopsBuilder := oops.
 		Code("NewTerraform").

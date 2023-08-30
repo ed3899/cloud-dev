@@ -13,6 +13,7 @@ import (
 	"github.com/spf13/viper"
 )
 
+// Returns a cobra command. The destroy command is used to destroy a deployed cloud environment.
 func Destroy() *cobra.Command {
 	return &cobra.Command{
 		Use:   "destroy",

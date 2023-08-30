@@ -14,6 +14,7 @@ import (
 	"github.com/spf13/viper"
 )
 
+// Returns a cobra command. The build command is used to build an AMI with ready to use tools.
 func Build() *cobra.Command {
 	return &cobra.Command{
 		Use:   "build",

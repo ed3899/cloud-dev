@@ -9,6 +9,7 @@ import (
 	"github.com/samber/oops"
 )
 
+// Returns a Packer instance. The Packer instance is used to run packer commands.
 func NewPacker(_manager *manager.Manager) (*Packer, error) {
 	oopsBuilder := oops.
 		Code("NewPacker").

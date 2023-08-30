@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/viper"
 )
 
+// Returns a TerraformAwsEnvironment instance. The pathToPackerManifest is used to get the last built ami id from the packer manifest.
 func NewTerraformAwsEnvironment(
 	pathToPackerManifest string,
 ) (*TerraformAwsEnvironment, error) {

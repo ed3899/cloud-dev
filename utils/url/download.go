@@ -9,6 +9,11 @@ import (
 	"github.com/samber/oops"
 )
 
+// Downloads the associated file from the given URL to the given path.
+// Sends the number of bytes downloaded to the given channel.
+//
+// Example:
+//	("https://releases.hashicorp.com/packer/1.7.4/packer_1.7.4_windows_amd64.zip", "/home/dev/download", bytesDownloadedChan) -> nil
 func Download(
 	url,
 	path string,

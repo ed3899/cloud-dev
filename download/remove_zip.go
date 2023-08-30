@@ -6,7 +6,7 @@ import (
 	"github.com/samber/oops"
 )
 
-// Removes the zip file from the filesystem.
+// Removes the associated zip file from the filesystem.
 func (d *Download) RemoveZip() error {
 	oopsBuilder := oops.
 		In("download").

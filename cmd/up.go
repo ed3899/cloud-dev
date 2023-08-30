@@ -13,6 +13,7 @@ import (
 	"github.com/spf13/viper"
 )
 
+// Returns a cobra command. The up command is used to deploy a cloud environment.
 func Up() *cobra.Command {
 	return &cobra.Command{
 		Use:   "up",
