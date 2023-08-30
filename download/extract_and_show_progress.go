@@ -9,6 +9,7 @@ import (
 	"github.com/vbauerster/mpb/v8/decor"
 )
 
+// Extracts the zip file associated and shows progress.
 func (d *Download) ExtractAndShowProgress() error {
 	oopsBuilder := oops.
 		Code("ExtractAndShowProgress").

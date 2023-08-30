@@ -14,6 +14,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// Returns a cobra command. The reset command is used to reset kumo state.
 func Reset() *cobra.Command {
 	return &cobra.Command{
 		Use:   "reset",

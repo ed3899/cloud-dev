@@ -9,6 +9,9 @@ import (
 
 // Returns the size of the zip file at the given path.
 // The path must be absolute.
+//
+// Example:
+//	("/home/dev/packer_1.7.4_windows_amd64.zip") -> 123456789, nil
 func GetZipSize(
 	pathToZip string,
 ) (int64, error) {

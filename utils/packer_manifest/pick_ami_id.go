@@ -4,7 +4,11 @@ import (
 	"github.com/samber/oops"
 )
 
-// Returns the AMI ID to be used for deployment. The lastBuildAmiId can't be empty.
+// Returns the AMI ID to be used for deployment.
+// The lastBuildAmiId can't be empty.
+//
+// Example:
+// 	("ami-1234567890abcdef0", "") -> "ami-1234567890abcdef0", nil
 func PickAmiId(
 	lastBuildAmiId,
 	amiIdFromConfig string,

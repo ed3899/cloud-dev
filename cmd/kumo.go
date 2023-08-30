@@ -18,6 +18,7 @@ var kumo = &cobra.Command{
 	Version: "0.0.0",
 }
 
+// Assembles all the commands and returns them as a slice.
 func Commands() *CobraCmds {
 	return &CobraCmds{
 		Build(),
@@ -29,6 +30,7 @@ func Commands() *CobraCmds {
 
 type CobraCmds []*cobra.Command
 
+// Executes the root command.
 func Execute() {
 	err := kumo.Execute()
 	if err != nil {
