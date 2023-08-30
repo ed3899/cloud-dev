@@ -1,8 +1,9 @@
-package cmd
+package tests
 
 import (
 	"os/exec"
 
+	"github.com/ed3899/kumo/utils/cmd"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -21,7 +22,7 @@ var _ = Describe("RunCmdAndStream", func() {
 	})
 
 	It("should run a command and stream its output", Label("integration"), func() {
-		err := RunCmdAndStream(testCmd)
+		err := cmd.RunCmdAndStream(testCmd)
 		Expect(err).To(BeNil())
 	})
 })
@@ -45,7 +46,7 @@ var _ = Describe("TerminateCommand", func() {
 		Expect(err).To(BeNil())
 
 		// Terminate the command
-		TerminateCommand(testCmd)
+		cmd.TerminateCommand(testCmd)
 
 		// Wait for the command to finish
 		err = testCmd.Wait()

@@ -1,4 +1,4 @@
-package packer_manifest_test
+package tests
 
 import (
 	"testing"

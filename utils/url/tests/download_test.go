@@ -1,4 +1,4 @@
-package url
+package tests
 
 import (
 	"fmt"
@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"sync"
 
+	"github.com/ed3899/kumo/utils/url"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -56,7 +57,7 @@ var _ = Describe("Download", func() {
 				}
 			}()
 
-			err := Download(server.URL, path, bytesDownloadedChan)
+			err := url.Download(server.URL, path, bytesDownloadedChan)
 			close(bytesDownloadedChan)
 			wg.Wait()
 
@@ -72,7 +73,7 @@ var _ = Describe("Download", func() {
 
 	Context("when the URL is invalid", Label("unit"), func() {
 		It("should return an error", func() {
-			err := Download("invalid-url", path, nil)
+			err := url.Download("invalid-url", path, nil)
 			Expect(err).To(HaveOccurred())
 		})
 	})

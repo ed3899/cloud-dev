@@ -1,9 +1,10 @@
-package url
+package tests
 
 import (
 	"net/http"
 	"net/http/httptest"
 
+	"github.com/ed3899/kumo/utils/url"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -17,7 +18,7 @@ var _ = Describe("GetContentLength", func() {
 			}))
 			defer server.Close()
 
-			contentLength, err := GetContentLength(server.URL)
+			contentLength, err := url.GetContentLength(server.URL)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(contentLength).To(Equal(int64(12345)))
 		})
@@ -25,7 +26,7 @@ var _ = Describe("GetContentLength", func() {
 
 	Context("when the url is not valid", Label("unit"), func() {
 		It("should return error for unsuccessful request", func() {
-			_, err := GetContentLength("non-existent-url")
+			_, err := url.GetContentLength("non-existent-url")
 			Expect(err).To(HaveOccurred())
 		})
 	})

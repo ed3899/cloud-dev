@@ -1,9 +1,10 @@
-package file
+package tests
 
 import (
 	"os"
 	"path/filepath"
 
+	"github.com/ed3899/kumo/utils/file"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -56,7 +57,7 @@ var _ = Describe("MergeFilesTo", func() {
 			file2.Name(),
 		}
 
-		err := MergeFilesTo(mergedFilePath, inputFilePaths...)
+		err := file.MergeFilesTo(mergedFilePath, inputFilePaths...)
 		Expect(err).NotTo(HaveOccurred())
 
 		// Check if the merged file was created correctly

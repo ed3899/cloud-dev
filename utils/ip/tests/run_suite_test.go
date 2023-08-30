@@ -1,4 +1,4 @@
-package host_test
+package tests
 
 import (
 	"testing"
@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestHost(t *testing.T) {
+func TestIp(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Host Suite", Label("utils", "host"))
+	RunSpecs(t, "Ip Suite", Label("utils", "ip"))
 }

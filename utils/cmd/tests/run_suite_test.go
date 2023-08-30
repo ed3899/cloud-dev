@@ -1,4 +1,4 @@
-package download
+package tests
 
 import (
 	"testing"
@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestDownload(t *testing.T) {
+func TestCmd(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Download Suite", Label("download"))
+	RunSpecs(t, "Cmd Suite", Label("utils", "cmd"))
 }

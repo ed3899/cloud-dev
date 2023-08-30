@@ -1,4 +1,4 @@
-package cmd
+package tests
 
 import (
 	"testing"
@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestCmd(t *testing.T) {
+func TestHost(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Cmd Suite", Label("utils", "cmd"))
+	RunSpecs(t, "Host Suite", Label("utils", "host"))
 }

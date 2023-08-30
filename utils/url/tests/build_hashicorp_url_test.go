@@ -1,8 +1,9 @@
-package url
+package tests
 
 import (
 	"fmt"
 
+	"github.com/ed3899/kumo/utils/url"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -16,7 +17,7 @@ var _ = Describe("BuildHashicorpUrl", func() {
 
 		expectedURL := fmt.Sprintf("https://releases.hashicorp.com/%s/%s/%s_%s_%s_%s.zip", name, version, name, version, os, arch)
 
-		url := BuildHashicorpUrl(name, version, os, arch)
-		Expect(url).To(Equal(expectedURL))
+		_url := url.BuildHashicorpUrl(name, version, os, arch)
+		Expect(_url).To(Equal(expectedURL))
 	})
 })

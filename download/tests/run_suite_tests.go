@@ -1,4 +1,4 @@
-package url
+package tests
 
 import (
 	"testing"
@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestUrl(t *testing.T) {
+func TestDownload(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Url Suite", Label("utils", "url"))
+	RunSpecs(t, "Download Suite", Label("download"))
 }

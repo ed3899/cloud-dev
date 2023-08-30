@@ -1,8 +1,9 @@
-package ip
+package tests
 
 import (
 	"os"
 
+	"github.com/ed3899/kumo/utils/ip"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -37,7 +38,7 @@ var _ = Describe("ReadIpFromFile", func() {
 		})
 
 		It("should read the IP address from a file", Label("unit"), func() {
-			ip, err := ReadIpFromFile(testFileWithIp)
+			ip, err := ip.ReadIpFromFile(testFileWithIp)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(ip).To(MatchRegexp("\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b"))
 		})
@@ -69,7 +70,7 @@ var _ = Describe("ReadIpFromFile", func() {
 		})
 
 		It("should return an error", Label("unit"), func() {
-			ip, err := ReadIpFromFile(testFileWithoutIp)
+			ip, err := ip.ReadIpFromFile(testFileWithoutIp)
 			Expect(err).To(HaveOccurred())
 			Expect(ip).To(BeEmpty())
 		})

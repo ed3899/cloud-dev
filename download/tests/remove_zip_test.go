@@ -1,4 +1,4 @@
-package download
+package tests
 
 import (
 	"errors"
@@ -6,11 +6,13 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"github.com/ed3899/kumo/download"
 )
 
 var _ = Describe("Download", func() {
 	var (
-		mockDownload *Download
+		mockDownload *download.Download
 	)
 
 	Context("when the zip file exists", func() {
@@ -22,8 +24,8 @@ var _ = Describe("Download", func() {
 			Expect(err).To(BeNil())
 			defer file.Close()
 
-			mockDownload = &Download{
-				Path: &Path{
+			mockDownload = &download.Download{
+				Path: &download.Path{
 					Zip: file.Name(),
 				},
 			}
@@ -44,8 +46,8 @@ var _ = Describe("Download", func() {
 
 	Context("when the zip file does not exist", func() {
 		BeforeEach(func() {
-			mockDownload = &Download{
-				Path: &Path{
+			mockDownload = &download.Download{
+				Path: &download.Path{
 					Zip: "non_existent_file.zip",
 				},
 			}

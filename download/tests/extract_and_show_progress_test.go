@@ -1,4 +1,4 @@
-package download
+package tests
 
 import (
 	"archive/zip"
@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"sync"
 
+	"github.com/ed3899/kumo/download"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/vbauerster/mpb/v8"
@@ -14,7 +15,7 @@ import (
 var _ = Describe("ExtractAndShowProgress", func() {
 	Context("with a valid zip", func() {
 		var (
-			download *Download
+			_download *download.Download
 			ziPath   string
 			zipFile  *os.File
 			exePath  string
@@ -48,13 +49,13 @@ var _ = Describe("ExtractAndShowProgress", func() {
 
 			exePath = filepath.Join(cwd, exeName)
 
-			download = &Download{
-				Path: &Path{
+			_download = &download.Download{
+				Path: &download.Path{
 					Zip:        zipFile.Name(),
 					Executable: exePath,
 				},
 				Progress: mpb.New(mpb.WithWaitGroup(&sync.WaitGroup{}), mpb.WithAutoRefresh(), mpb.WithWidth(0)),
-				Bar:      &Bar{},
+				Bar:      &download.Bar{},
 			}
 		})
 
@@ -67,28 +68,28 @@ var _ = Describe("ExtractAndShowProgress", func() {
 		})
 
 		It("should successfully extract and show progress", func() {
-			err := download.ExtractAndShowProgress()
+			err := _download.ExtractAndShowProgress()
 			Expect(err).ToNot(HaveOccurred())
 		})
 	})
 
 	Context("with an invalid zip", func() {
 		var (
-			download *Download
+			_download *download.Download
 		)
 
 		BeforeEach(func() {
-			download = &Download{
-				Path: &Path{
+			_download = &download.Download{
+				Path: &download.Path{
 					Zip: "invalid_zip",
 				},
 				Progress: mpb.New(mpb.WithWaitGroup(&sync.WaitGroup{}), mpb.WithAutoRefresh(), mpb.WithWidth(0)),
-				Bar:      &Bar{},
+				Bar:      &download.Bar{},
 			}
 		})
 
 		It("should handle extract error", func() {
-			err := download.ExtractAndShowProgress()
+			err := _download.ExtractAndShowProgress()
 			Expect(err).To(HaveOccurred())
 		})
 	})

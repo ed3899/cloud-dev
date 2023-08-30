@@ -1,4 +1,4 @@
-package ip_test
+package tests
 
 import (
 	"testing"
@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestIp(t *testing.T) {
+func TestFile(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Ip Suite", Label("utils", "ip"))
+	RunSpecs(t, "File Suite", Label("utils", "file"))
 }
