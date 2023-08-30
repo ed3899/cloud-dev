@@ -14,6 +14,7 @@ import (
 	"github.com/vbauerster/mpb/v8"
 )
 
+// Returns a Download instance. The Download instance is used to download and extract the associated file.
 func NewDownload(
 	_manager *manager.Manager,
 ) (*Download, error) {

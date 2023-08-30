@@ -2,6 +2,7 @@ package environment
 
 import "github.com/spf13/viper"
 
+// Returns a new PackerAwsEnvironment.
 func NewPackerAwsEnvironment() *PackerAwsEnvironment {
 	return &PackerAwsEnvironment{
 		Required: &PackerAwsRequired{

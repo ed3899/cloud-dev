@@ -14,6 +14,7 @@ type TerraformBaseEnvironment struct {
 	Required *TerraformBaseRequired
 }
 
+// Returns a new TerraformBaseEnvironment.
 func NewTerraformBaseEnvironment() *TerraformBaseEnvironment {
 	logger, _ := zap.NewProduction()
 	defer logger.Sync()

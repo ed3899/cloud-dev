@@ -17,6 +17,7 @@ type PackerBaseEnvironment struct {
 	Optional *PackerBaseOptional
 }
 
+// Returns a new PackerBaseEnvironment.
 func NewPackerBaseEnvironment() *PackerBaseEnvironment {
 	return &PackerBaseEnvironment{
 		Required: &PackerBaseRequired{

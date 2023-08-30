@@ -1,5 +1,6 @@
 package host
 
+// Returns true if the host is compatible with the given OS and architecture.
 func HostIsCompatible(os, arch string) bool {
 	switch os {
 	case "windows":

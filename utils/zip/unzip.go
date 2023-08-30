@@ -11,6 +11,11 @@ import (
 	"github.com/samber/oops"
 )
 
+// Unzips the zip file at the given path to the given destination path.
+// Sends the number of bytes unzipped to the given channel.
+//
+// Example:
+//	("/home/dev/packer_1.7.4_windows_amd64.zip", "/home/dev/unzip", bytesUnzippedChan) -> nil
 func Unzip(
 	pathToZip, pathToUnzip string,
 	bytesUnzipped chan<- int,
@@ -45,7 +50,7 @@ func Unzip(
 				bytesCopied int64
 			)
 
-			if bytesCopied, err = unzipFile(zf, pathToUnzip); err != nil {
+			if bytesCopied, err = UnzipFile(zf, pathToUnzip); err != nil {
 				err = oopsBuilder.
 					With("bytesCopied", bytesCopied).
 					With("zipFile", zf.Name).
@@ -76,14 +81,18 @@ func Unzip(
 	return nil
 }
 
-// Unzips a file from a zip file to a destination path. The destination path is created if it doesn't exist.
+// Unzips a file from a zip file to a destination path.
+// The destination path is created if it doesn't exist.
 // Returns the number of bytes copied.
-func unzipFile(
+//
+// Example:
+//	(zipFile, "/home/dev/unzip") -> 1234, nil
+func UnzipFile(
 	zf *zip.File,
 	extractToPath string,
 ) (int64, error) {
 	oopsBuilder := oops.
-		Code("unzipFile").
+		Code("UnzipFile").
 		In("utils").
 		In("zip").
 		With("zf", zf).

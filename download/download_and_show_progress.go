@@ -7,6 +7,7 @@ import (
 	"github.com/vbauerster/mpb/v8/decor"
 )
 
+// Downloads the associated file to the URL and shows progress.
 func (d *Download) DownloadAndShowProgress() error {
 	oopsBuilder := oops.
 		Code("DownloadAndShowProgress").
