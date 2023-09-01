@@ -16,6 +16,13 @@
         name: openssh-client
         update_cache: true
 
+    - name: Create ssh key directory
+      ansible.builtin.file:
+        path: "{{ ssh_keys_dir }}"
+        state: directory
+        mode: '0700'
+        recurse: true
+
     - name: Generate key pair
       community.crypto.openssh_keypair:
         path: "{{ ssh_keys_dir }}/github"

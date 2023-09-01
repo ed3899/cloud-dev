@@ -6,11 +6,11 @@
     - ../../vars/main.yml
   vars:
     x86_64:
-      anaconda_url: https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-      anaconda_sha256: aef279d6baea7f67940f16aad17ebe5f6aac97487c7c03466ff01f4819e5a651
+      anaconda_url: https://repo.anaconda.com/miniconda/Miniconda3-py39_23.5.2-0-Linux-x86_64.sh
+      anaconda_sha256: 9829d95f639bd0053b2ed06d1204e60644617bf37dd5cc57523732e0e8d64516
     aarch64:
-      anaconda_url: https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-aarch64.sh
-      anaconda_sha256: 6950c7b1f4f65ce9b87ee1a2d684837771ae7b2e6044e0da9e915d1dee6c924c
+      anaconda_url: https://repo.anaconda.com/miniconda/Miniconda3-py39_23.5.2-0-Linux-aarch64.sh
+      anaconda_sha256: ecc06a39bdf786ebb8325a2754690a808f873154719c97d10087ef0883b69e84
     user: "{{ instance.user.name }}"
     home: "/{{ instance.user.home }}/{{ user }}"
     public_directory: "{{ instance.public_directory }}"
@@ -24,14 +24,14 @@
   # https://www.digitalocean.com/community/tutorials/how-to-install-the-anaconda-python-distribution-on-ubuntu-20-04
     - name: Set anaconda installer url and checksum depending on architecture
       # https://docs.conda.io/en/latest/miniconda.html#linux-installers
-      ansible.builtin.set_fact: 
+      ansible.builtin.set_fact:
         anaconda_linux_installer_url: "{{ (ansible_architecture == 'x86_64') | ternary(x86_64.anaconda_url, aarch64.anaconda_url) }}"
         anaconda_linux_sha256: "{{ (ansible_architecture == 'x86_64') | ternary(x86_64.anaconda_sha256, aarch64.anaconda_sha256) }}"
-    
+
     - name: Show anaconda installer url
       ansible.builtin.debug:
         msg: "{{ anaconda_linux_installer_url }}"
-    
+
     - name: Show anaconda installer checksum
       ansible.builtin.debug:
         msg: "{{ anaconda_linux_sha256 }}"
@@ -51,7 +51,7 @@
 
     - name: Ensure needed python version for Anaconda3 is present
       ansible.builtin.apt:
-        name: python3.10
+        name: python3.7
         update_cache: yes
 
     - name: Download anaconda installer
